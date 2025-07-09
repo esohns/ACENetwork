@@ -75,8 +75,7 @@
 //  return true;
 //}
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 BitTorrent_Client_GUI_Session_t*
 BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State_t& UIState_in,
                                      const BitTorrent_Client_GUI_Sessions_t& sessions_in)
@@ -140,5 +139,4 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State_t& UIState_in,
 
   return result_p;
 }
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT

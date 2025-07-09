@@ -24,29 +24,25 @@
 #include <list>
 #include <string>
 
+#if defined (GTK_SUPPORT)
+#include "gtk/gtk.h"
+#endif // GTK_SUPPORT
+
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Singleton.h"
 #include "ace/Time_Value.h"
-
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-#include "gtk/gtk.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
 
 #include "common.h"
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -68,11 +64,9 @@
 
 #include "test_u_common.h"
 #include "test_u_stream_common.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_gtk_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "test_u_connection_common.h"
 #include "test_u_defines.h"
@@ -231,26 +225,18 @@ struct DHCPClient_SignalHandlerConfiguration
 //////////////////////////////////////////
 
 struct DHCPClient_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_U_GTK_Configuration
 #else
  : Test_U_Configuration
 #endif // GTK_USE
-#else
- : Test_U_Configuration
-#endif // GUI_SUPPORT
 {
   DHCPClient_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_U_GTK_Configuration ()
 #else
    : Test_U_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_U_Configuration ()
-#endif // GUI_SUPPORT
    , allocatorConfiguration ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
@@ -290,7 +276,6 @@ struct DHCPClient_Configuration
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct DHCPClient_UI_ProgressData
 #if defined (GTK_USE)
  : Test_U_GTK_ProgressData
@@ -340,6 +325,5 @@ struct DHCPClient_ThreadData
 
   struct DHCPClient_UI_CBData* CBData;
 };
-#endif // GUI_SUPPORT
 
 #endif

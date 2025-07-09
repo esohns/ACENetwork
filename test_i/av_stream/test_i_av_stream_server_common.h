@@ -38,11 +38,9 @@
 #include "strmif.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "ace/INET_Addr.h"
 #include "ace/os_include/sys/os_socket.h"
@@ -50,14 +48,12 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
 #include "common_ui_gtk_manager_common.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "stream_control_message.h"
 #include "stream_isessionnotify.h"
@@ -296,18 +292,14 @@ struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration
 {
   Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration ()
    : Test_I_AVStream_ModuleHandlerConfiguration ()
-#if defined (GUI_SUPPORT)
    , area ()
-#endif // GUI_SUPPORT
    , builder (NULL)
    , connection (NULL)
    , connectionConfigurations (NULL)
    , connectionManager (NULL)
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , contextId (0)
 #endif // GTK_USE
-#endif // GUI_SUPPORT
    , crunch (true)
    , filterConfiguration (NULL)
    , filterCLSID (GUID_NULL)
@@ -317,11 +309,9 @@ struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-#if defined (GUI_SUPPORT)
    , window (NULL)
    , windowController (NULL)
    , windowController2 (NULL)
-#endif // GUI_SUPPORT
   {
     inbound = true;
 
@@ -331,18 +321,14 @@ struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration
     //        : CLSID_ACEStream_MediaFramework_Asynch_Source_Filter);
   }
 
-#if defined (GUI_SUPPORT)
   struct tagRECT                                       area;              // display module
-#endif // GUI_SUPPORT
   IGraphBuilder*                                       builder;           // display module
   Net_IINETConnection_t*                               connection;        // Net source/IO module
   Net_ConnectionConfigurations_t*                      connectionConfigurations;
   Test_I_AVStream_Server_DirectShow_TCPConnectionManager_t* connectionManager; // Net IO module
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   guint                                                contextId; // status bar-
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   bool                                                 crunch;            // splitter module
   struct Test_I_AVStream_Server_DirectShow_FilterConfiguration* filterConfiguration;
   CLSID                                                filterCLSID;
@@ -352,11 +338,9 @@ struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration
   Test_I_AVStream_Server_DirectShow_StreamConfiguration_t* streamConfiguration;
   Test_I_AVStream_Server_DirectShow_ISessionNotify_t*           subscriber;        // event handler module
   Test_I_AVStream_Server_DirectShow_Subscribers_t*              subscribers;       // event handler module
-#if defined (GUI_SUPPORT)
   HWND                                                 window;            // display module
   IVideoWindow*                                        windowController;  // display module
   IMFVideoDisplayControl*                              windowController2; // display module: EVR
-#endif // GUI_SUPPORT
 };
 
 typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Server_MediaFoundation_StreamSessionData,
@@ -370,23 +354,17 @@ struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration
 {
   Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration ()
    : Test_I_AVStream_ModuleHandlerConfiguration ()
-#if defined (GUI_SUPPORT)
    , area ()
-#endif // GUI_SUPPORT
    , connection (NULL)
    , connectionConfigurations (NULL)
    , connectionManager (NULL)
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , contextId (0)
 #endif // GTK_USE
-#endif // GUI_SUPPORT
    , crunch (true)
    , deviceIdentifier ()
-#if defined (GUI_SUPPORT)
    , direct3DDevice (NULL)
    , direct3DManagerResetToken (0)
-#endif // GUI_SUPPORT
    , mediaSource (NULL)
    , outputFormat (NULL)
    , queue (NULL)
@@ -397,10 +375,8 @@ struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-#if defined (GUI_SUPPORT)
    , window (NULL)
    , windowController (NULL)
-#endif // GUI_SUPPORT
   {
     inbound = true;
 
@@ -411,17 +387,13 @@ struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration
                   ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
   }
 
-#if defined (GUI_SUPPORT)
   struct tagRECT                                        area;                      // display module
-#endif // GUI_SUPPORT
   Net_IINETConnection_t*                                connection;                // net source/IO module
   Net_ConnectionConfigurations_t*                       connectionConfigurations;
   Test_I_AVStream_Server_MediaFoundation_TCPConnectionManager_t* connectionManager;         // net IO module
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   guint                                                 contextId; // status bar-
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   bool                                                  crunch;                    // splitter module
   std::string                                           deviceIdentifier;
   IDirect3DDevice9Ex*                                   direct3DDevice;            // display module
@@ -436,10 +408,8 @@ struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration
   Test_I_AVStream_Server_MediaFoundation_StreamConfiguration_t*  streamConfiguration;
   Test_I_AVStream_Server_MediaFoundation_ISessionNotify_t*       subscriber;                // event handler module
   Test_I_AVStream_Server_MediaFoundation_Subscribers_t*          subscribers;               // event handler module
-#if defined (GUI_SUPPORT)
   HWND                                                  window;                    // display module
   IMFVideoDisplayControl*                               windowController;          // display module
-#endif // GUI_SUPPORT
 };
 #else
 typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Server_StreamSessionData,
@@ -457,11 +427,9 @@ struct Test_I_AVStream_Server_ModuleHandlerConfiguration
    , ALSAConfiguration (NULL)
    , connectionConfigurations (NULL)
    , connectionManager (NULL)
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , contextId (0)
 #endif // GTK_USE
-#endif // GUI_SUPPORT
    , outputFormat ()
    , queue (NULL)
    , streamConfiguration (NULL)
@@ -475,11 +443,9 @@ struct Test_I_AVStream_Server_ModuleHandlerConfiguration
   struct Stream_MediaFramework_ALSA_Configuration*   ALSAConfiguration;
   Net_ConnectionConfigurations_t*                    connectionConfigurations;
   Test_I_AVStream_Server_TCPConnectionManager_t*     connectionManager; // net IO module
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   guint                                              contextId;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat; // gtk pixbuf module
   ACE_Message_Queue_Base*                            queue;  // (inbound) buffer queue handle
   // *TODO*: remove this ASAP
@@ -630,19 +596,15 @@ struct Test_I_AVStream_Server_StreamConfiguration
   Test_I_AVStream_Server_StreamConfiguration ()
    : Stream_Configuration ()
    , format ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , window (NULL)
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   {}
 
   struct Stream_MediaFramework_ALSA_V4L_Format format;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GdkWindow*                                   window;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 };
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -796,7 +758,6 @@ typedef Common_ISubscribe_T<Test_I_AVStream_Server_ISessionNotify_t> Test_I_AVSt
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct Test_I_AVStream_Server_DirectShow_UI_CBData
  : Test_I_AVStream_UI_CBData
@@ -837,7 +798,6 @@ struct Test_I_AVStream_Server_UI_CBData
   Test_I_AVStream_Server_Subscribers_t         subscribers;
 };
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // GUI_SUPPORT
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_MediaFramework_MediaFoundation_MediaSource_T<Common_TimePolicy_t,

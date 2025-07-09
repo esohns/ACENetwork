@@ -31,9 +31,7 @@
 
 #include "common_parser_common.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_common.h"
-#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 #include "stream_configuration.h"
@@ -98,9 +96,7 @@ struct Test_I_Configuration
    , timerConfiguration ()
    , signalHandlerConfiguration ()
    , allocatorConfiguration ()
-#if defined (GUI_SUPPORT)
    , GUIFramework (COMMON_UI_FRAMEWORK_INVALID)
-#endif // GUI_SUPPORT
    , userData ()
   {}
 
@@ -116,9 +112,7 @@ struct Test_I_Configuration
   struct Stream_AllocatorConfiguration       allocatorConfiguration;
 
   ////////////////////////////////////////
-#if defined (GUI_SUPPORT)
   enum Common_UI_FrameworkType               GUIFramework;
-#endif // GUI_SUPPORT
 
   struct Test_I_UserData                     userData;
 };

@@ -55,14 +55,12 @@
 #define IRC_CLIENT_SESSION_DEFAULT_LOG                  false // log to file ? : stdout
 
 // UI/output
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #define IRC_CLIENT_CURSES_COLOR_CHANNEL                 1
 #define IRC_CLIENT_CURSES_COLOR_LOG                     2
 #define IRC_CLIENT_CURSES_COLOR_STATUS                  3
 #define IRC_CLIENT_CURSES_CURSOR_MODE                   2 // highlighted
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 #define IRC_CLIENT_DEFAULT_PRINT_PINGDOT                false
 
 #define IRC_CLIENT_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST

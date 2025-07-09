@@ -1238,7 +1238,6 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
 
   ++index_i;
   module_p = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Defragment_Module (this,
@@ -1258,7 +1257,6 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, branch_p, index_i);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   module_p = NULL;
 
   delete_out = true;
@@ -1389,7 +1387,6 @@ Test_I_AVStream_Server_UDPStream::load (Stream_ILayout* layout_in,
 //                  false);
 //  layout_in->append (module_p, NULL, 0);
 //  module_p = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Display_Module (this,
@@ -1397,7 +1394,6 @@ Test_I_AVStream_Server_UDPStream::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, NULL, 0);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   module_p = NULL;
 
   delete_out = true;

@@ -30,9 +30,7 @@
 
 #include "common_parser_common.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_common.h"
-#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 #include "stream_configuration.h"
@@ -42,7 +40,6 @@
 #include "net_configuration.h"
 #include "net_defines.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
 #endif // GTK_SUPPORT
@@ -52,7 +49,6 @@
 #if defined (WXWIDGETS_SUPPORT)
 #include "test_i_wxwidgets_common.h"
 #endif // WXWIDGETS_SUPPORT
-#endif // GUI_SUPPORT
 
 struct Test_I_ProgressData
 {
@@ -99,7 +95,6 @@ struct Test_I_ThreadData
 #endif // ACE_WIN32 || ACE_WIN64
 };
 
-#if defined (GUI_SUPPORT)
 struct Test_I_UI_ProgressData
 #if defined (GTK_USE)
  : Test_I_GTK_ProgressData
@@ -198,6 +193,5 @@ struct Test_I_UI_ThreadData
   enum Stream_MediaFramework_Type mediaFramework;
 #endif // ACE_WIN32 || ACE_WIN64
 };
-#endif // GUI_SUPPORT
 
 #endif

@@ -48,11 +48,9 @@
 #include "test_u_connection_common.h"
 #include "net_client_stream_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_gtk_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 // forward declarations
 struct Test_U_ConnectionConfiguration;
@@ -111,26 +109,18 @@ struct ClientServer_ModuleHandlerConfiguration
 };
 
 struct ClientServer_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_U_GTK_Configuration
 #else
  : Test_U_Configuration
 #endif // GTK_USE
-#else
- : Test_U_Configuration
-#endif // GUI_SUPPORT
 {
   ClientServer_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_U_GTK_Configuration ()
 #else
    : Test_U_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_U_Configuration ()
-#endif // GUI_SUPPORT
    , allocatorConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
@@ -148,7 +138,6 @@ struct ClientServer_Configuration
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct ClientServer_ProgressData
 #if defined (GTK_USE)
   : Test_U_GTK_ProgressData
@@ -191,6 +180,5 @@ struct ClientServer_UI_CBData
   struct ClientServer_ProgressData   progressData;
   Test_U_Subscribers_t               subscribers;
 };
-#endif // GUI_SUPPORT
 
 #endif

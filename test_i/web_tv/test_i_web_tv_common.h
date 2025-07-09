@@ -34,14 +34,12 @@
 #include "http_common.h"
 
 #include "test_i_common.h"
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
 #endif // GTK_SUPPORT
 #if defined (WXWIDGETS_SUPPORT)
 #include "test_i_wxwidgets_common.h"
 #endif // WXWIDGETS_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "test_i_timeouthandler.h"
 
@@ -138,26 +136,18 @@ typedef Test_I_WebTV_ChannelConfigurations_t::iterator Test_I_WebTV_ChannelConfi
 typedef Test_I_WebTV_ChannelConfigurations_t::const_iterator Test_I_WebTV_ChannelConfigurationsConstIterator_t;
 
 struct Test_I_WebTV_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_I_GTK_Configuration
 #else
  : Test_I_Configuration
 #endif // GTK_USE
-#else
- : Test_I_Configuration
-#endif // GUI_SUPPORT
 {
   Test_I_WebTV_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_I_GTK_Configuration ()
 #else
    : Test_I_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_I_Configuration ()
-#endif // GUI_SUPPORT
    , connectionConfigurations ()
    // , parserConfiguration ()
    , streamConfiguration ()
@@ -198,7 +188,6 @@ typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct Test_I_WebTV_UI_ProgressData
 #if defined (GTK_USE)
  : Test_I_GTK_ProgressData
@@ -249,7 +238,9 @@ struct Test_I_WebTV_UI_CBData
    , subscribers ()
    , audioTimeoutHandler (NULL)
    , videoTimeoutHandler (NULL)
+#if defined (GTK_USE)
    , videoUpdateEventSourceId (0)
+#endif // GTK_USE
   {}
 
   struct Test_I_WebTV_Configuration*    configuration;
@@ -268,8 +259,9 @@ struct Test_I_WebTV_UI_CBData
   Test_I_Subscribers_t                  subscribers;
   Test_I_TimeoutHandler*                audioTimeoutHandler;
   Test_I_TimeoutHandler*                videoTimeoutHandler;
+#if defined (GTK_USE)
   guint                                 videoUpdateEventSourceId;
+#endif // GTK_USE
 };
-#endif // GUI_SUPPORT
 
 #endif

@@ -112,14 +112,12 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_url_stream_load_defines.h
      test_i_url_stream_load_stream_common.h)
 #  test_i_template_instantiations.cpp
-if (GUI_SUPPORT)
- if (GTK_USE)
-  set (${EXECUTABLE}_EXE_SRCS
-       ${${EXECUTABLE}_EXE_SRCS}
-       test_i_callbacks.cpp
-       test_i_callbacks.h)
- endif (GTK_USE)
-endif (GUI_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      test_i_callbacks.cpp
+      test_i_callbacks.h)
+endif (GTK_SUPPORT)
 set (${EXECUTABLE}_EXE_CFG
      etc/test_i.gtk2
      etc/test_i.gtk3)
@@ -258,14 +256,12 @@ if (UNIX)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
-  endif (GTK_SUPPORT)
-  if (WXWIDGETS_SUPPORT)
-   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
-  endif (WXWIDGETS_SUPPORT)
- endif (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
+ endif (WXWIDGETS_SUPPORT)
  if (SSL_SUPPORT)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)

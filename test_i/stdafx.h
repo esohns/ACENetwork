@@ -51,7 +51,6 @@
 #include "net_macros.h"
 
 #include "test_i_common.h"
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
 #endif // GTK_SUPPORT
@@ -61,4 +60,3 @@
 #if defined (WXWIDGETS_SUPPORT)
 #include "test_i_wxwidgets_common.h"
 #endif // WXWIDGETS_SUPPORT
-#endif // GUI_SUPPORT

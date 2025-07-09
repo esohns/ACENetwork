@@ -34,27 +34,15 @@
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
                                       UserDataType,
-                                      SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                      ,CBDataType>::BitTorrent_Client_PeerStreamHandler_T (SessionInterfaceType* interfaceHandle_in,
-                                                                                           CBDataType* CBData_in)
-#else
-                                      >::BitTorrent_Client_PeerStreamHandler_T (SessionInterfaceType* interfaceHandle_in)
-#endif // GUI_SUPPORT
-#if defined (GUI_SUPPORT)
+                                      SessionInterfaceType,
+                                      CBDataType>::BitTorrent_Client_PeerStreamHandler_T (SessionInterfaceType* interfaceHandle_in,
+                                                                                          CBDataType* CBData_in)
  : inherited (interfaceHandle_in,
               CBData_in)
-#else
- : inherited (interfaceHandle_in)
-#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStreamHandler_T::BitTorrent_Client_PeerStreamHandler_T"));
 
@@ -62,29 +50,20 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
                                       UserDataType,
-                                      SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                      ,CBDataType>::start (Stream_SessionId_t sessionId_in,
-#else
-                                      >::start (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                           const SessionDataType& sessionData_in)
+                                      SessionInterfaceType,
+                                      CBDataType>::start (Stream_SessionId_t sessionId_in,
+                                                          const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStreamHandler_T::start"));
 
   inherited::start (sessionId_in,
                     sessionData_in);
 
-#if defined (GUI_SUPPORT)
   if (inherited::CBData_)
   {
 #if defined (GTK_USE)
@@ -109,27 +88,18 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
 //    inherited::CBData_->eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
                                       UserDataType,
-                                      SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                      ,CBDataType>::notify (Stream_SessionId_t sessionId_in,
-#else
-                                      >::notify (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                            const enum Stream_SessionMessageType& sessionEvent_in)
+                                      SessionInterfaceType,
+                                      CBDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                           const enum Stream_SessionMessageType& sessionEvent_in)
 {
   STREAM_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStreamHandler_T::notify"));
 
@@ -139,27 +109,18 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
                                       UserDataType,
-                                      SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                      ,CBDataType>::end (Stream_SessionId_t sessionId_in)
-#else
-                                      >::end (Stream_SessionId_t sessionId_in)
-#endif // GUI_SUPPORT
+                                      SessionInterfaceType,
+                                      CBDataType>::end (Stream_SessionId_t sessionId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStreamHandler_T::end"));
 
   inherited::end (sessionId_in);
 
-#if defined (GUI_SUPPORT)
   if (inherited::CBData_)
   {
 #if defined (GTK_USE)
@@ -183,35 +144,25 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
 //    inherited::CBData_->eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
                                       UserDataType,
-                                      SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                      ,CBDataType>::notify (Stream_SessionId_t sessionId_in,
-#else
-                                      >::notify (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                            const BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
-                                                                                       UserDataType>& message_in)
+                                      SessionInterfaceType,
+                                      CBDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                           const BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
+                                                                                      UserDataType>& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStreamHandler_T::notify"));
 
   inherited::notify (sessionId_in,
                      message_in);
 
-#if defined (GUI_SUPPORT)
   if (inherited::CBData_)
   {
 #if defined (GTK_USE)
@@ -226,28 +177,19 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
 #endif // GTK_USE
     inherited::CBData_->progressData.transferred += message_in.total_length ();
   } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
                                       UserDataType,
-                                      SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                      ,CBDataType>::notify (Stream_SessionId_t sessionId_in,
-#else
-                                      >::notify (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                            const BitTorrent_SessionMessage_T<SessionDataType,
-                                                                                              UserDataType>& sessionMessage_in)
+                                      SessionInterfaceType,
+                                      CBDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                           const BitTorrent_SessionMessage_T<SessionDataType,
+                                                                                             UserDataType>& sessionMessage_in)
 {
   NETWORK_TRACE(ACE_TEXT("BitTorrent_Client_PeerStreamHandler_T::notify"));
 
@@ -259,7 +201,6 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
   // sanity check(s)
   ACE_ASSERT(iterator != inherited::sessionData_.end());
 
-#if defined (GUI_SUPPORT)
   int result = -1;
 
   if (inherited::CBData_)
@@ -317,34 +258,21 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
     } // end lock scope
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 }
 
 //////////////////////////////////////////
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType>::BitTorrent_Client_TrackerStreamHandler_T (SessionInterfaceType* interfaceHandle_in,
-                                                                                                 CBDataType* CBData_in)
-#else
-                                         >::BitTorrent_Client_TrackerStreamHandler_T (SessionInterfaceType* interfaceHandle_in)
-#endif // GUI_SUPPORT
-#if defined (GUI_SUPPORT)
+                                         SessionInterfaceType,
+                                         CBDataType>::BitTorrent_Client_TrackerStreamHandler_T (SessionInterfaceType* interfaceHandle_in,
+                                                                                                CBDataType* CBData_in)
  : inherited (interfaceHandle_in,
               CBData_in)
-#else
- : inherited (interfaceHandle_in)
-#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStreamHandler_T::BitTorrent_Client_TrackerStreamHandler_T"));
 
@@ -352,29 +280,20 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType>::start (Stream_SessionId_t sessionId_in,
-#else
-                                         >::start (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                              const SessionDataType& sessionData_in)
+                                         SessionInterfaceType,
+                                         CBDataType>::start (Stream_SessionId_t sessionId_in,
+                                                             const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStreamHandler_T::start"));
 
   inherited::start (sessionId_in,
                     sessionData_in);
 
-#if defined (GUI_SUPPORT)
   if (inherited::CBData_)
   {
 #if defined (GTK_USE)
@@ -399,27 +318,18 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
 //    inherited::CBData_->eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType>::notify (Stream_SessionId_t sessionId_in,
-#else
-                                         >::notify (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                               const enum Stream_SessionMessageType& sessionEvent_in)
+                                         SessionInterfaceType,
+                                         CBDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                              const enum Stream_SessionMessageType& sessionEvent_in)
 {
   STREAM_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStreamHandler_T::notify"));
 
@@ -429,27 +339,18 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType>::end (Stream_SessionId_t sessionId_in)
-#else
-                                         >::end (Stream_SessionId_t sessionId_in)
-#endif // GUI_SUPPORT
+                                         SessionInterfaceType,
+                                         CBDataType>::end (Stream_SessionId_t sessionId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStreamHandler_T::end"));
 
   inherited::end (sessionId_in);
 
-#if defined (GUI_SUPPORT)
   if (inherited::CBData_)
   {
 #if defined (GTK_USE)
@@ -473,35 +374,25 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
 //    inherited::CBData_->eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType>::notify (Stream_SessionId_t sessionId_in,
-#else
-                                         >::notify (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                               const BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
-                                                                                                 UserDataType>& message_in)
+                                         SessionInterfaceType,
+                                         CBDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                              const BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
+                                                                                                UserDataType>& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStreamHandler_T::notify"));
 
   inherited::notify (sessionId_in,
                      message_in);
 
-#if defined (GUI_SUPPORT)
   if (inherited::CBData_)
   {
 #if defined (GTK_USE)
@@ -516,28 +407,19 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
 #endif // GTK_USE
     inherited::CBData_->progressData.transferred += message_in.total_length ();
   } // end IF
-#endif // GUI_SUPPORT
 }
 
 template <typename SessionDataType,
           typename UserDataType,
-          typename SessionInterfaceType
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>
-#else
-          >
-#endif // GUI_SUPPORT
+          typename SessionInterfaceType,
+          typename CBDataType>
 void
 BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType>::notify (Stream_SessionId_t sessionId_in,
-#else
-                                         >::notify (Stream_SessionId_t sessionId_in,
-#endif // GUI_SUPPORT
-                                                               const BitTorrent_SessionMessage_T<SessionDataType,
-                                                                                                 UserDataType>& sessionMessage_in)
+                                         SessionInterfaceType,
+                                         CBDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                              const BitTorrent_SessionMessage_T<SessionDataType,
+                                                                                                UserDataType>& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStreamHandler_T::notify"));
 
@@ -550,7 +432,6 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
   // sanity check(s)
   ACE_ASSERT (iterator != inherited::sessionData_.end ());
 
-#if defined (GUI_SUPPORT)
   int result = -1;
 
   if (inherited::CBData_)
@@ -608,5 +489,4 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
     } // end lock scope
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 }

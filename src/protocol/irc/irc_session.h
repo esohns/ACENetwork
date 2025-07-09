@@ -49,9 +49,7 @@ template <typename ConnectionType,
           typename ModuleHandlerConfigurationIteratorType,
           ///////////////////////////////
           // *TODO*: remove these ASAP
-#if defined (GUI_SUPPORT)
-          typename StateType, // ui state (inherits struct Common_UI_State)
-#endif // GUI_SUPPORT
+          typename UIStateType, // ui state (inherits struct Common_UI_State)
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -67,9 +65,7 @@ class IRC_Session_T
                                           MessageType,
                                           SessionMessageType,
                                           ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-                                          StateType,
-#endif // GUI_SUPPORT
+                                          UIStateType,
                                           ConnectionConfigurationType,
                                           ConnectionManagerType,
                                           InputHandlerType,
@@ -82,9 +78,7 @@ class IRC_Session_T
                                                  MessageType,
                                                  SessionMessageType,
                                                  ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-                                                 StateType,
-#endif // GUI_SUPPORT
+                                                 UIStateType,
                                                  ConnectionConfigurationType,
                                                  ConnectionManagerType,
                                                  InputHandlerType,
@@ -126,9 +120,7 @@ class IRC_Session_T
   InputHandlerType* inputHandler_;
   bool              logToFile_;
   bool              shutDownOnEnd_;
-#if defined (GUI_SUPPORT)
-  StateType*        UIState_;
-#endif // GUI_SUPPORT
+  UIStateType*      UIState_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Session_T (const IRC_Session_T&))

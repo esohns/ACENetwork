@@ -58,14 +58,13 @@ set (${EXECUTABLE}_EXE_SRCS
 #     test_u_stream.h
 #     test_u_stream.inl)
 #  test_u_template_instantiations.cpp
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE}_EXE_SRCS
-       ${${EXECUTABLE}_EXE_SRCS}
-       test_u_callbacks.cpp
-       test_u_callbacks.h)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      test_u_callbacks.cpp
+      test_u_callbacks.h)
+endif (GTK_SUPPORT)
+if (WXWIDGETS_SUPPORT)
 #  set (${EXECUTABLE}_EXE_SRCS
 #       ${${EXECUTABLE}_EXE_SRCS}
 #       test_u_wxwidgets_ui.cpp
@@ -73,8 +72,7 @@ if (GUI_SUPPORT)
 #       test_u_wxwidgets_ui.inl
 #       test_u_wxwidgets_ui_base.cpp
 #       test_u_wxwidgets_ui_base.h)
- endif (WXWIDGETS_SUPPORT)
-endif (GUI_SUPPORT)
+endif (WXWIDGETS_SUPPORT)
 
 set (${PROJECT_NAME}_DHCPClient_EXE_CFG
      etc/test_u.gtk2
@@ -140,17 +138,15 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_U)
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
 
-if (GUI_SUPPORT)
- if (GTK_USE)
-  if (GTK2_USE)
-   set (UI_FILE "test_u.gtk2")
-  elseif (GTK3_USE)
-   set (UI_FILE "test_u.gtk3")
-  endif ()
- elseif (WXWIDGETS_USE)
-   set (UI_FILE "test_u.xrc")
+if (GTK_USE)
+ if (GTK2_USE)
+  set (UI_FILE "test_u.gtk2")
+ elseif (GTK3_USE)
+  set (UI_FILE "test_u.gtk3")
  endif ()
-endif (GUI_SUPPORT)
+elseif (WXWIDGETS_USE)
+ set (UI_FILE "test_u.xrc")
+endif ()
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -195,14 +191,12 @@ elseif (WIN32)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
-  endif (GTK_SUPPORT)
-  if (WXWIDGETS_SUPPORT)
-   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
-  endif (WXWIDGETS_SUPPORT)
- endif (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
+ endif (WXWIDGETS_SUPPORT)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}
                            ${GTK_LIB_PATH}

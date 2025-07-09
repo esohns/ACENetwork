@@ -50,23 +50,19 @@
 #include "common_event_tools.h"
 
 #include "common_log_tools.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_logger_queue.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "common_signal_tools.h"
 
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_defines.h"
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -89,11 +85,9 @@
 
 #include "dhcp_defines.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "test_u_common.h"
 #include "test_u_defines.h"
@@ -142,7 +136,6 @@ do_printUsage (const std::string& programName_in)
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -152,7 +145,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   std::string output_file = path;
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
@@ -160,7 +152,6 @@ do_printUsage (const std::string& programName_in)
             << output_file
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-#if defined (GUI_SUPPORT)
   std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
@@ -168,7 +159,6 @@ do_printUsage (const std::string& programName_in)
             << UI_file
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
-#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l          : log to a file [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -211,15 +201,11 @@ do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      bool& requestBroadcastReplies_out,
                      bool& debugParser_out,
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                      std::string& GtkRcFileName_out,
 #endif // GTK_USE
-#endif // GUI_SUPPORT
                      std::string& fileName_out,
-#if defined (GUI_SUPPORT)
                      std::string& UIDefinitonFileName_out,
-#endif // GUI_SUPPORT
                      bool& logToFile_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -249,21 +235,17 @@ do_processArguments (int argc_in,
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GtkRcFileName_out = configuration_path;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GTK_RC_FILE);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   fileName_out = path;
   fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   fileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
-#if defined (GUI_SUPPORT)
   UIDefinitonFileName_out = configuration_path;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
-#endif // GUI_SUPPORT
   logToFile_out = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   interfaceIdentifier_out =
@@ -289,25 +271,17 @@ do_processArguments (int argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                               ACE_TEXT ("bde:f::g::lqrs:tvx:"),
 #else
                               ACE_TEXT ("bdf::g::lqrs:tvx:"),
 #endif // GTK_USE
 #else
-                              ACE_TEXT ("bdf::lqrs:tvx:"),
-#endif // GUI_SUPPORT
-#else
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                               ACE_TEXT ("bde:f::g::ln::qrs:tvx:"),
 #else
                               ACE_TEXT ("bdf::g::ln::qrs:tvx:"),
 #endif // GTK_USE
-#else
-                              ACE_TEXT ("bdf::ln::qrs:tvx:"),
-#endif // GUI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                               1,                         // skip command name
                               1,                         // report parsing errors
@@ -330,7 +304,6 @@ do_processArguments (int argc_in,
         debugParser_out = true;
         break;
       }
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
       case 'e':
       {
@@ -338,7 +311,6 @@ do_processArguments (int argc_in,
         break;
       }
 #endif // GTK_USE
-#endif // GUI_SUPPORT
       case 'f':
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
@@ -348,7 +320,6 @@ do_processArguments (int argc_in,
           fileName_out.clear ();
         break;
       }
-#if defined (GUI_SUPPORT)
       case 'g':
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
@@ -357,7 +328,6 @@ do_processArguments (int argc_in,
         else
           UIDefinitonFileName_out.clear ();
         break;
-#endif // GUI_SUPPORT
       }
       case 'l':
       {
@@ -512,15 +482,13 @@ void
 do_work (bool requestBroadcastReplies_in,
          bool debugParser_in,
          const std::string& fileName_in,
-#if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFileName_in,
-#endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
          REFGUID interfaceIdentifier_in,
 #else
          const std::string& interfaceIdentifier_in,
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
          const std::string& interfaceIdentifier_in,
 #endif // ACE_WIN32 || ACE_WIN64
@@ -529,9 +497,7 @@ do_work (bool requestBroadcastReplies_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          struct DHCPClient_Configuration& configuration_in,
-#if defined (GUI_SUPPORT)
          struct DHCPClient_UI_CBData& CBData_in,
-#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -599,12 +565,7 @@ do_work (bool requestBroadcastReplies_in,
                                                    &heap_allocator,     // heap allocator handle
                                                    true);               // block ?
 
-  Test_U_EventHandler ui_event_handler (
-#if defined (GUI_SUPPORT)
-                                        &CBData_in);
-#else
-                                        NULL);
-#endif // GUI_SUPPORT
+  Test_U_EventHandler ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
@@ -612,7 +573,6 @@ do_work (bool requestBroadcastReplies_in,
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -621,7 +581,6 @@ do_work (bool requestBroadcastReplies_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   CBData_in.progressData.state = &state_r;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // *********************** parser configuration data *************************
 #if defined (_DEBUG)
@@ -702,13 +661,11 @@ do_work (bool requestBroadcastReplies_in,
                                    : ACE_Time_Value::zero);
   modulehandler_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
-#if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
 #if defined (GTK_USE)
   modulehandler_configuration.lock = &state_r.subscribersLock;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   modulehandler_configuration.targetFileName = fileName_in;
 
   stream_configuration.allocatorConfiguration =
@@ -732,18 +689,18 @@ do_work (bool requestBroadcastReplies_in,
   connection_configuration_2.socketConfiguration.connect = false;
   connection_configuration_2.socketConfiguration.writeOnly = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #else
   if (!interfaceIdentifier_in.empty ())
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
   if (!interfaceIdentifier_in.empty ())
 #endif // ACE_WIN32 || ACE_WIN64
   {
     ACE_INET_Addr gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     if (!Net_Common_Tools::interfaceToIPAddress_2 (interfaceIdentifier_in,
 #else
     if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
@@ -755,7 +712,7 @@ do_work (bool requestBroadcastReplies_in,
                                                  gateway_address))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress_2(\"%s\"), continuing\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
@@ -763,7 +720,7 @@ do_work (bool requestBroadcastReplies_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), continuing\n"),
@@ -1108,7 +1065,7 @@ allocate:
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
     struct ether_addr ether_addrs_s =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
       Net_Common_Tools::interfaceToLinkLayerAddress_2 (connection_configuration.socketConfiguration.interfaceIdentifier);
 #else
       Net_Common_Tools::interfaceToLinkLayerAddress (connection_configuration.socketConfiguration.interfaceIdentifier);
@@ -1163,7 +1120,6 @@ allocate:
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-#if defined (GUI_SUPPORT)
   // step1a: start UI event loop ?
   if (!UIDefinitionFileName_in.empty ())
   {
@@ -1212,7 +1168,6 @@ allocate:
 #endif // GTK_USE
   } // end IF
   else
-#endif // GUI_SUPPORT
     Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
 
   ACE_DEBUG ((LM_DEBUG,
@@ -1282,12 +1237,12 @@ do_printVersion (const std::string& programName_in)
 
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
             << ACE_TEXT (ACENetwork_PACKAGE_NAME)
             << ACE_TEXT (": ")
             << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
             << std::endl
-#endif
+#endif // HAVE_CONFIG_H
             ;
 
   converter.str ("");
@@ -1351,28 +1306,24 @@ ACE_TMAIN (int argc_in,
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GTK_RC_FILE);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   std::string output_file = path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
-#if defined (GUI_SUPPORT)
   std::string ui_definition_file = configuration_path;
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   ui_definition_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
-#endif // GUI_SUPPORT
   bool log_to_file = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier = GUID_NULL;
 #else
   std::string interface_identifier;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
   std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1392,22 +1343,18 @@ ACE_TMAIN (int argc_in,
                             argv_in,
                             request_broadcast_replies,
                             debug_parser,
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                             gtk_rc_file,
 #endif // GTK_USE
-#endif // GUI_SUPPORT
                             output_file,
-#if defined (GUI_SUPPORT)
                             ui_definition_file,
-#endif // GUI_SUPPORT
                             log_to_file,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
                             interface_identifier,
 #else
                             interface_identifier,
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
                             interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1441,26 +1388,23 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("limiting the number of message buffers could (!) lead to deadlocks --> make sure you know what you are doing...\n")));
   if (
-#if defined (GUI_SUPPORT)
       (ui_definition_file.empty () ||
        !Common_File_Tools::isReadable (ui_definition_file)) ||
 #if defined (GTK_USE)
       (!gtk_rc_file.empty () &&
        !Common_File_Tools::isReadable (gtk_rc_file))        ||
 #endif // GTK_USE
-#else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
       InlineIsEqualGUID (interface_identifier, GUID_NULL)   ||
 #else
       interface_identifier.empty ()                         ||
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
       interface_identifier.empty ()                         ||
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // GUI_SUPPORT
       //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool)
-     false)
+      false)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
@@ -1481,7 +1425,6 @@ ACE_TMAIN (int argc_in,
     number_of_dispatch_threads = 1;
 
   // step1d: initialize logging and/or tracing
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -1489,15 +1432,12 @@ ACE_TMAIN (int argc_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_Logger_Queue_t logger;
   logger.initialize (&state_r.logQueue,
                      &state_r.logQueueLock);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   std::string log_file_name;
   if (log_to_file)
   {
@@ -1525,7 +1465,6 @@ ACE_TMAIN (int argc_in,
                                      false,                                    // log to syslog ?
                                      false,                                    // trace messages ?
                                      trace_information,                        // debug messages ?
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                                      (ui_definition_file.empty () ? NULL
                                                                   : &logger))) // (ui) logger ?
@@ -1534,9 +1473,6 @@ ACE_TMAIN (int argc_in,
 #else
                                      NULL))                                    // (ui) logger ?
 #endif // XXX_USE
-#else
-                                     NULL))                                    // (ui) logger ?
-#endif // GUI_SUPPORT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initialize(), aborting\n")));
@@ -1600,11 +1536,9 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 //  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   Test_U_SignalHandler signal_handler;
 
   // step1g: set process resource limits
@@ -1633,7 +1567,6 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   struct DHCPClient_Configuration configuration_s;
-#if defined (GUI_SUPPORT)
   // step1h: initialize GLIB / G(D|T)K[+] / GNOME
   struct DHCPClient_UI_CBData ui_cb_data;
   ui_cb_data.configuration = &configuration_s;
@@ -1673,7 +1606,6 @@ ACE_TMAIN (int argc_in,
       return EXIT_FAILURE;
     } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   ACE_High_Res_Timer timer;
   timer.start ();
@@ -1681,15 +1613,13 @@ ACE_TMAIN (int argc_in,
   do_work (request_broadcast_replies,
            debug_parser,
            output_file,
-#if defined (GUI_SUPPORT)
            ui_definition_file,
-#endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
            interface_identifier,
 #else
            interface_identifier,
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
            interface_identifier,
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1698,16 +1628,13 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            number_of_dispatch_threads,
            configuration_s,
-#if defined (GUI_SUPPORT)
            ui_cb_data,
-#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
            signal_handler);
   timer.stop ();
 
-  // debug info
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
@@ -1755,7 +1682,6 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
-  // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),

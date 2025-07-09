@@ -58,13 +58,11 @@
 
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -85,11 +83,9 @@
 
 #include "net_server_common_tools.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 #include "test_u_common.h"
 #include "test_u_defines.h"
 #include "test_u_connection_manager_common.h"
@@ -482,9 +478,7 @@ do_work (
          unsigned int statisticReportingInterval_in,
          bool useUDP_in,
          unsigned int numberOfDispatchThreads_in,
-#if defined (GUI_SUPPORT)
          struct FileServer_UI_CBData& CBData_in,
-#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -497,7 +491,6 @@ do_work (
   struct Common_EventDispatchState event_dispatch_state_s;
   struct Common_TimerConfiguration timer_configuration;
   struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -507,7 +500,6 @@ do_work (
       const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   CBData_in.UIState = &state_r;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
   BOOL was_visible_b = true;
@@ -518,9 +510,7 @@ do_work (
 
   // step0a: initialize configuration
   struct FileServer_Configuration configuration;
-#if defined (GUI_SUPPORT)
   CBData_in.configuration = &configuration;
-#endif // GUI_SUPPORT
 
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
@@ -535,11 +525,7 @@ do_work (
   Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                   connection_manager_p,
                                                   false);
-  Test_U_EventHandler ui_event_handler (
-#if defined (GUI_SUPPORT)
-                                        &CBData_in
-#endif // GUI_SUPPORT
-                                       );
+  Test_U_EventHandler ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_U_Module_EventHandler* event_handler_p =
@@ -591,14 +577,12 @@ do_work (
   if (!UIDefinitionFile_in.empty ())
   {
     modulehandler_configuration.subscriber = &ui_event_handler;
-#if defined (GUI_SUPPORT)
     modulehandler_configuration.subscribers = &CBData_in.subscribers;
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
     ACE_ASSERT (CBData_in.UIState);
     modulehandler_configuration.lock =
       &CBData_in.UIState->subscribersLock;
 #endif // GTK_USE || WXWIDGETS_USE
-#endif // GUI_SUPPORT
   } // end IF
 
   stream_configuration.cloneModule =
@@ -807,7 +791,6 @@ do_work (
   // [GTK events:]
   // - dispatch UI events (if any)
 
-#if defined (GUI_SUPPORT)
   // step1a: start UI event loop ?
   if (!UIDefinitionFile_in.empty ())
   {
@@ -859,7 +842,6 @@ do_work (
       was_visible_b = ShowWindow (window_p, SW_HIDE);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
-#endif // GUI_SUPPORT
 
   // step4b: initialize worker(s)
   if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
@@ -871,10 +853,8 @@ do_work (
   stop_event_dispatch = true;
 
   // step4c: start listening ?
-#if defined (GUI_SUPPORT)
   if (UIDefinitionFile_in.empty ())
   {
-#endif // GUI_SUPPORT
     if (!configuration.listener->initialize (*static_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second)))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -985,7 +965,6 @@ do_work (
       //  goto error;
       //} // end IF
     } // end ELSE
-#if defined (GUI_SUPPORT)
   } // end IF
   else
 #if defined (GTK_USE)
@@ -993,7 +972,6 @@ do_work (
 #else
     ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // *NOTE*: from this point on, clean up any remote connections !
 
@@ -1028,14 +1006,12 @@ error:
 //					 iterator++)
 //				g_source_remove(*iterator);
 //		} // end lock scope
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
     gtk_manager_p->stop (true, true);
 #else
     ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   if (stop_event_dispatch)
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true); // wait ?
@@ -1067,12 +1043,12 @@ do_printVersion (const std::string& programName_in)
 
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
             << ACE_TEXT (ACENetwork_PACKAGE_NAME)
             << ACE_TEXT (": ")
             << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
             << std::endl
-#endif
+#endif // HAVE_CONFIG_H
   ;
 
   converter.str ("");
@@ -1220,7 +1196,6 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1d: initialize logging and/or tracing
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -1228,15 +1203,12 @@ ACE_TMAIN (int argc_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_Logger_Queue_t logger;
   logger.initialize (&state_r.logQueue,
                      &state_r.logQueueLock);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
@@ -1247,7 +1219,6 @@ ACE_TMAIN (int argc_in,
                                      true,                          // log to syslog ?
                                      false,                         // trace messages ?
                                      trace_information,             // debug messages ?
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                                      (UI_file_path.empty () ? NULL
                                                             : &logger))) // (ui) logger ?
@@ -1256,9 +1227,6 @@ ACE_TMAIN (int argc_in,
 #else
                                      NULL))                              // (ui) logger ?
 #endif // XXX_USE
-#else
-                                     NULL))                              // (ui) logger ?
-#endif // GUI_SUPPORT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initialize(), aborting\n")));
@@ -1289,14 +1257,12 @@ ACE_TMAIN (int argc_in,
     return EXIT_SUCCESS;
   } // end IF
 
-#if defined (GUI_SUPPORT)
   // step1h: initialize UI framework
   struct FileServer_UI_CBData ui_cb_data;
   ui_cb_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
-#endif // GUI_SUPPORT
 
   // step1e: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (false);
@@ -1331,11 +1297,9 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 //  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   FileServer_SignalHandler signal_handler;
 
   // step1g: set process resource limits
@@ -1395,7 +1359,6 @@ ACE_TMAIN (int argc_in,
            signal_handler);
   timer.stop ();
 
-  // debug info
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
@@ -1441,7 +1404,6 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
-  // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),

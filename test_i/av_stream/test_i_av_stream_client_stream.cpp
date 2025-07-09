@@ -57,7 +57,6 @@ Test_I_AVStream_Client_DirectShow_Audio_Stream::load (Stream_ILayout* layout_ino
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
 
-//#if defined (GUI_SUPPORT)
 //  if ((*iterator).second.second->window)
 //  {
 //    ACE_NEW_RETURN (module_p,
@@ -93,7 +92,6 @@ Test_I_AVStream_Client_DirectShow_Audio_Stream::load (Stream_ILayout* layout_ino
 //    layout_inout->append (module_p, branch_p, index_i);
 //    module_p = NULL;
 //#endif // GTK_USE
-//#endif // GUI_SUPPORT
 //  } // end IF
 
   delete_out = true;
@@ -195,7 +193,6 @@ Test_I_AVStream_Client_ALSA_Stream::load (Stream_ILayout* layout_inout,
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
 
-//#if defined (GUI_SUPPORT)
 //  if ((*iterator).second.second->window)
 //  {
 //    ACE_NEW_RETURN (module_p,
@@ -231,7 +228,6 @@ Test_I_AVStream_Client_ALSA_Stream::load (Stream_ILayout* layout_inout,
 //    layout_inout->append (module_p, branch_p, index_i);
 //    module_p = NULL;
 //#endif // GTK_USE
-//#endif // GUI_SUPPORT
 //  } // end IF
 
   delete_out = true;

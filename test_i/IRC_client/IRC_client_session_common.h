@@ -29,19 +29,16 @@
 
 #include "IRC_client_common.h"
 #include "IRC_client_configuration.h"
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #include "IRC_client_curses.h"
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 #include "IRC_client_inputhandler.h"
 #include "IRC_client_network.h"
 #include "IRC_client_session.h"
 //#include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
 typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,
                              struct IRC_Client_CursesState> IRC_Client_Session_t;
 typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t,
@@ -51,13 +48,7 @@ typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,
                              void> IRC_Client_Session_t;
 typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t,
                              void> IRC_Client_AsynchSession_t;
-#endif // CURSES_SUPPORT
-#else
-typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,
-                             void> IRC_Client_Session_t;
-typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t,
-                             void> IRC_Client_AsynchSession_t;
-#endif // GUI_SUPPORT
+#endif // CURSES_USE
 
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                IRC_Client_Session_t,

@@ -28,12 +28,9 @@
 
 #include "common_timer_manager_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_manager_common.h"
-//#include "common_ui_gtk_manager.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "net_common_tools.h"
 #include "net_macros.h"

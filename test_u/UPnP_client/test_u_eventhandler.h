@@ -31,19 +31,13 @@
 #include "test_u_session_message.h"
 
 // forward declarations
-#if defined (GUI_SUPPORT)
 struct UPnP_Client_UI_CBData;
-#endif // GUI_SUPPORT
 
 class Test_U_EventHandler
  : public UPnP_Client_ISessionNotify_t
 {
  public:
-#if defined (GUI_SUPPORT)
   Test_U_EventHandler (struct UPnP_Client_UI_CBData*); // UI callback data handle
-#else
-  Test_U_EventHandler ();
-#endif // GUI_SUPPORT
   inline virtual ~Test_U_EventHandler () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -63,9 +57,7 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator= (const Test_U_EventHandler&))
 
-#if defined (GUI_SUPPORT)
   struct UPnP_Client_UI_CBData*   CBData_;
-#endif // GUI_SUPPORT
   struct UPnP_Client_SessionData* sessionData_;
 };
 
@@ -86,11 +78,7 @@ class Test_U_EventHandler_2
  : public UPnP_Client_ISessionNotify_t
 {
  public:
-#if defined (GUI_SUPPORT)
   Test_U_EventHandler_2 (struct UPnP_Client_UI_CBData*); // UI callback data handle
-#else
-  Test_U_EventHandler_2 ();
-#endif // GUI_SUPPORT
   inline virtual ~Test_U_EventHandler_2 () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -115,9 +103,7 @@ class Test_U_EventHandler_2
   // helper methods
   std::string retrievePresentationURL (xmlDocPtr);
 
-#if defined (GUI_SUPPORT)
   struct UPnP_Client_UI_CBData*   CBData_;
-#endif // GUI_SUPPORT
   struct UPnP_Client_SessionData* sessionData_;
 };
 

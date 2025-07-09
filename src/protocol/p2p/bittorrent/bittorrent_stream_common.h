@@ -330,19 +330,11 @@ DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_TrackerSessionData,           
 
 //typedef BitTorrent_PeerStreamHandler_T<struct BitTorrent_PeerSessionData,
 //                                       struct Stream_UserData,
-//                                       BitTorrent_ISession_t
-//#if defined (GUI_SUPPORT)
-//                                       ,void> BitTorrent_PeerStreamHandler_t;
-//#else
-//                                       > BitTorrent_PeerStreamHandler_t;
-//#endif // GUI_SUPPORT
+//                                       BitTorrent_ISession_t,
+//                                       void> BitTorrent_PeerStreamHandler_t;
 //typedef BitTorrent_TrackerStreamHandler_T<struct BitTorrent_TrackerSessionData,
 //                                          struct Stream_UserData,
-//                                          BitTorrent_ISession_t
-//#if defined (GUI_SUPPORT)
-//                                          ,void> BitTorrent_TrackerStreamHandler_t;
-//#else
-//                                          > BitTorrent_TrackerStreamHandler_t;
-//#endif // GUI_SUPPORT
+//                                          BitTorrent_ISession_t,
+//                                          void> BitTorrent_TrackerStreamHandler_t;
 
 #endif

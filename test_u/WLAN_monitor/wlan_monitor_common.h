@@ -22,24 +22,21 @@
 #define WLAN_MONITOR_COMMON_H
 
 #include "ace/Containers_T.h"
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "common_ui_wxwidgets_common.h"
-#endif
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
 
 #include "net_common.h"
 
@@ -48,13 +45,12 @@
 #include "net_wlan_imonitor.h"
 
 #include "test_u_common.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_gtk_common.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "test_u_wxwidgets_common.h"
-#endif
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
 
 #include "wlan_monitor_configuration.h"
 
@@ -81,11 +77,7 @@ class Net_WLAN_IMonitorCB;
 
 enum WLANMMMonitor_EventType
 {
-#if defined (GUI_SUPPORT)
   WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG = COMMON_UI_EVENT_OTHER_USER_BASE,
-#else
-  WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG = 0,
-#endif // GUI_SUPPORT
   WLAN_MONITOR_EVENT_INTERFACE_REMOVE,
   WLAN_MONITOR_EVENT_SCAN_START,
   WLAN_MONITOR_EVENT_SCAN_COMPLETE,
@@ -103,8 +95,7 @@ typedef ACE_Unbounded_Stack<enum WLANMMMonitor_EventType>::ITERATOR WLANMMMonito
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 struct WLANMonitor_UI_GTK_State
  : Common_UI_GTK_State_t
 {
@@ -126,7 +117,8 @@ struct WLANMonitor_GTK_ProgressData
 
   struct WLANMonitor_UI_GTK_State* state;
 };
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 struct WLANMonitor_UI_WxWidgets_State
  : Common_UI_wxWidgets_State
 {
@@ -137,7 +129,7 @@ struct WLANMonitor_UI_WxWidgets_State
 
   WLANMMMonitor_Events_t eventStack;
 };
-#endif // GTK_USE
+#endif // WXWIDGETS_SUPPORT
 
 struct WLANMonitor_UI_CBData
 #if defined (GTK_USE)
@@ -192,7 +184,6 @@ typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
 typedef ACE_Singleton<WLANMonitor_UI_GTK_Manager_t,
                       ACE_MT_SYNCH::MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
 //////////////////////////////////////////
 

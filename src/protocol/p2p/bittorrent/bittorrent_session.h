@@ -72,13 +72,9 @@ template <typename PeerConnectionConfigurationType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
           ////////////////////////////////
-          typename ControllerInterfaceType // derived from BitTorrent_IControl_T
+          typename ControllerInterfaceType, // derived from BitTorrent_IControl_T
           ////////////////////////////////
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType> // ui feedback data type
-#else
-          >
-#endif // GUI_SUPPORT
+          typename CBDataType> // ui feedback data type
 class BitTorrent_Session_T
  : public Net_SessionBase_T<ACE_INET_Addr,
                             PeerConnectionConfigurationType,

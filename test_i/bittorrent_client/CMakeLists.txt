@@ -129,14 +129,12 @@ set (bittorrent_client_SRCS
      bittorrent_client_streamhandler.inl
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
-if (GUI_SUPPORT)
- if (CURSES_SUPPORT)
-  set (bittorrent_client_SRCS
-       ${bittorrent_client_SRCS}
-       bittorrent_client_curses.cpp
-       bittorrent_client_curses.h)
- endif (CURSES_SUPPORT)
-endif (GUI_SUPPORT)
+if (CURSES_SUPPORT)
+ set (bittorrent_client_SRCS
+      ${bittorrent_client_SRCS}
+      bittorrent_client_curses.cpp
+      bittorrent_client_curses.h)
+endif (CURSES_SUPPORT)
 
 set (EXECUTABLE bittorrent_client)
 add_executable (${EXECUTABLE}
@@ -249,14 +247,12 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      bittorrent_client_streamhandler.inl
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
-if (GUI_SUPPORT)
- if (GTK_USE)
-  set (${EXECUTABLE_GUI}_EXE_SRCS
-       ${${EXECUTABLE_GUI}_EXE_SRCS}
-       bittorrent_client_gui_callbacks.cpp
-       bittorrent_client_gui_callbacks.h)
- endif (GTK_USE)
-endif (GUI_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE_GUI}_EXE_SRCS
+      ${${EXECUTABLE_GUI}_EXE_SRCS}
+      bittorrent_client_gui_callbacks.cpp
+      bittorrent_client_gui_callbacks.h)
+endif (GTK_SUPPORT)
 
 #set_source_files_properties (${bittorrent_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
@@ -365,14 +361,12 @@ elseif (WIN32)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_GUI}.exe" COMMAND_2)
  string (REPLACE "\\" "\\\\" COMMAND_2 ${COMMAND_2})
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
-  endif (GTK_SUPPORT)
-  if (WXWIDGETS_SUPPORT)
-   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
-  endif (WXWIDGETS_SUPPORT)
- endif (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
+ endif (WXWIDGETS_SUPPORT)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl OPENSSL_LIB_PATH)
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(

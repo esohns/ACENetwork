@@ -115,10 +115,8 @@ IRC_Client_Session_T<ConnectionType,
     inherited::CONNECTION_BASE_T::configuration_->protocolConfiguration->loginOptions.nickname;
 
   // step1: initialize output
-#if defined (GUI_SUPPORT)
   inherited::UIState_ =
     static_cast<UIStateType*> (inherited::CONNECTION_BASE_T::configuration_->UIState);
-#endif // GUI_SUPPORT
   inherited::logToFile_ = inherited::CONNECTION_BASE_T::configuration_->logToFile;
   if (inherited::logToFile_)
   {
@@ -594,18 +592,16 @@ IRC_Client_Session_T<ConnectionType,
             inherited::state_.channels.push_back (channel);
             inherited::state_.channelModes.insert (std::make_pair (channel, 0));
             inherited::state_.activeChannel = channel;
-#if defined (GUI_SUPPORT)
             if (inherited::UIState_)
             {
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
               if (!curses_join (channel,
                                 *inherited::UIState_))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_join(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
             } // end IF
-#endif // GUI_SUPPORT
 
             break;
           } // end IF
@@ -647,18 +643,16 @@ IRC_Client_Session_T<ConnectionType,
               inherited::state_.channelModes.find (channel);
             ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
             inherited::state_.channelModes.erase (iterator_2);
-#if defined (GUI_SUPPORT)
             if (inherited::UIState_)
             {
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
               if (!curses_part (channel,
                                 *inherited::UIState_))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_part(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
             } // end IF
-#endif // GUI_SUPPORT
             break;
           } // end IF
 
@@ -696,18 +690,16 @@ IRC_Client_Session_T<ConnectionType,
             IRC_Tools::merge (*iterator,
                               (*iterator_2).second);
           } // end ELSE
-#if defined (GUI_SUPPORT)
           if (inherited::UIState_)
           {
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
             if (!curses_mode (channel_string,
                               *inherited::UIState_))
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to curses_mode(\"%s\"), continuing\n"),
                           ACE_TEXT (channel_string.c_str ())));
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
           } // end IF
-#endif // GUI_SUPPORT
           break;
         }
         case IRC_Record::TOPIC:
@@ -821,19 +813,17 @@ IRC_Client_Session_T<ConnectionType,
 
 //  int result = -1;
 
-#if defined (GUI_SUPPORT)
   if (inherited::UIState_)
   {
 //    if (logToFile_)
 //      output_ << messageText_in;
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
     curses_log (channel_in,           // channel
                 messageText_in,       // text
                 *inherited::UIState_, // state
                 true);                // locked access
-#endif // CURSES_SUPPORT
+#endif // CURSES_USE
   } // end IF
-#endif // GUI_SUPPORT
 //  else
 //    output_ << messageText_in;
 //  result = output_.sync ();

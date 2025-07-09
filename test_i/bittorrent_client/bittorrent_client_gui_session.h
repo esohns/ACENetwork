@@ -23,11 +23,9 @@
 
 #include <string>
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
@@ -48,15 +46,11 @@ class BitTorrent_Client_GUI_Session_T
 {
  public:
   BitTorrent_Client_GUI_Session_T (struct BitTorrent_Client_UI_CBData&, // in/out: UI callback data
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                                    guint,                               // (statusbar) context id
 #endif // GTK_USE
-#endif // GUI_SUPPORT
                                    const std::string&,                  // (session log tab) label
-#if defined (GUI_SUPPORT)
                                    const std::string&,                  // UI (glade) file directory
-#endif // GUI_SUPPORT
                                    ///////
                                    BitTorrent_Client_IControl_t*,       // controller handle
                                    const std::string&);                 // metainfo (aka '.torrent') file name
@@ -87,13 +81,11 @@ class BitTorrent_Client_GUI_Session_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T& operator= (const BitTorrent_Client_GUI_Session_T&))
 
   ConnectionCBDataType CBData_;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   guint                contextId_;
 #endif // GTK_USE
 //  struct BitTorrent_Client_SessionState*     sessionState_;
   std::string          UIFileDirectory_;
-#endif // GUI_SUPPORT
 };
 
 // include template definition

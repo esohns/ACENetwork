@@ -32,20 +32,14 @@
 #include "net_client_common.h"
 
 // forward declarations
-#if defined (GUI_SUPPORT)
 struct Test_U_UI_CBData;
-#endif // GUI_SUPPORT
 
 template <typename CallbackDataType>
 class Test_U_EventHandler_T
  : public Test_U_ISessionNotify_t
 {
  public:
-#if defined (GUI_SUPPORT)
    Test_U_EventHandler_T (CallbackDataType*); // UI callback data
-#else
-   Test_U_EventHandler_T ();
-#endif // GUI_SUPPORT
   inline virtual ~Test_U_EventHandler_T () {}
 
   // implement Common_INotify_T
@@ -61,25 +55,17 @@ class Test_U_EventHandler_T
                        const Test_U_SessionMessage&);
 
  private:
-#if defined (GUI_SUPPORT)
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_T ())
-#endif // GUI_SUPPORT
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_T (const Test_U_EventHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler_T& operator=(const Test_U_EventHandler_T&))
 
-#if defined (GUI_SUPPORT)
   CallbackDataType* CBData_;
-#endif // GUI_SUPPORT
 };
 
 #include "test_u_eventhandler.inl"
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 typedef Test_U_EventHandler_T<struct ClientServer_UI_CBData> Test_U_EventHandler_t;
-#else
-typedef Test_U_EventHandler_T<void> Test_U_EventHandler_t;
-#endif // GUI_SUPPORT
 
 #endif

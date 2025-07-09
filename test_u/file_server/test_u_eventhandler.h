@@ -31,19 +31,13 @@
 #include "file_server_common.h"
 
 // forward declarations
-#if defined (GUI_SUPPORT)
 struct FileServer_UI_CBData;
-#endif // GUI_SUPPORT
 
 class Test_U_EventHandler
  : public FileServer_ISessionNotify_t
 {
  public:
-  Test_U_EventHandler (
-#if defined (GUI_SUPPORT)
-                       struct FileServer_UI_CBData* // UI callback data
-#endif // GUI_SUPPORT
-                      );
+  Test_U_EventHandler (struct FileServer_UI_CBData*); // UI callback data
   inline virtual ~Test_U_EventHandler () {}
 
   // implement Common_INotify_T
@@ -59,15 +53,11 @@ class Test_U_EventHandler
                        const Test_U_SessionMessage&);
 
  private:
-#if defined (GUI_SUPPORT)
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler ())
-#endif // GUI_SUPPORT
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
 
-#if defined (GUI_SUPPORT)
   struct FileServer_UI_CBData*   CBData_;
-#endif // GUI_SUPPORT
   struct FileServer_SessionData* sessionData_;
 };
 

@@ -38,11 +38,9 @@
 #include "bittorrent_client_stream_common.h"
 #include "bittorrent_client_tools.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "bittorrent_client_gui_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 #include "bittorrent_client_gui_defines.h"
 
 template <typename SessionInterfaceType,
@@ -51,25 +49,19 @@ template <typename SessionInterfaceType,
 BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                                 ConnectionType,
                                 ConnectionCBDataType>::BitTorrent_Client_GUI_Session_T (struct BitTorrent_Client_UI_CBData& CBData_inout,
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                                                                                         guint contextId_in,
 #endif // GTK_USE
-#endif // GUI_SUPPORT
                                                                                         const std::string& label_in,
-#if defined (GUI_SUPPORT)
                                                                                         const std::string& UIFileDirectory_in,
-#endif // GUI_SUPPORT
                                                                                         BitTorrent_Client_IControl_t* controller_in,
                                                                                         const std::string& metaInfoFileName_in)
  : closing_ (false)
  , CBData_ ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  , contextId_ (contextId_in)
 #endif // GTK_USE
  , UIFileDirectory_ (UIFileDirectory_in)
-#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::BitTorrent_Client_GUI_Session_T"));
 

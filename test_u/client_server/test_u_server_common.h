@@ -29,12 +29,10 @@
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -47,13 +45,12 @@
 #include "net_iconnector.h"
 #include "net_ilistener.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_gtk_common.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "test_u_wxwidgets_common.h"
-#endif
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
 
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
@@ -129,7 +126,6 @@ typedef Stream_ISessionDataNotify_T<struct Test_U_StreamSessionData,
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
 typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
-#if defined (GUI_SUPPORT)
 struct Server_UI_CBData
  : ClientServer_UI_CBData
 {
@@ -138,6 +134,5 @@ struct Server_UI_CBData
   {}
 
 };
-#endif // GUI_SUPPORT
 
 #endif

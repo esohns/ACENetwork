@@ -29,15 +29,14 @@
 
 #include "common_isubscribe.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "common_ui_wxwidgets_common.h"
-#endif
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -47,13 +46,13 @@
 #include "net_iconnector.h"
 
 #include "test_u_common.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_gtk_common.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "test_u_wxwidgets_common.h"
-#endif
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
+
 #include "net_client_stream_common.h"
 
 #include "test_u_common.h"
@@ -125,7 +124,6 @@ struct Client_Configuration
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct Client_UI_CBData
  : ClientServer_UI_CBData
 {
@@ -136,6 +134,5 @@ struct Client_UI_CBData
 
   //struct Client_Configuration* configuration;
 };
-#endif // GUI_SUPPORT
 
 #endif

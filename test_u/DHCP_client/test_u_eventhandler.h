@@ -33,19 +33,13 @@
 #include "test_u_session_message.h"
 
 // forward declarations
-#if defined (GUI_SUPPORT)
 struct DHCPClient_UI_CBData;
-#endif // GUI_SUPPORT
 
 class Test_U_EventHandler
  : public DHCPClient_ISessionNotify_t
 {
  public:
-#if defined (GUI_SUPPORT)
   Test_U_EventHandler (struct DHCPClient_UI_CBData*); // UI callback data handle
-#else
-  Test_U_EventHandler ();
-#endif // GUI_SUPPORT
   inline virtual ~Test_U_EventHandler () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -68,9 +62,7 @@ class Test_U_EventHandler
   typedef std::map<unsigned int, struct DHCPClient_SessionData*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
-#if defined (GUI_SUPPORT)
   struct DHCPClient_UI_CBData* CBData_;
-#endif // GUI_SUPPORT
   SESSION_DATA_MAP_T           sessionDataMap_;
 };
 

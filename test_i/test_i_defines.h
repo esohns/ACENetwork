@@ -58,7 +58,6 @@
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 // UI
 #define TEST_I_UI_THREAD_NAME                            "stream processor"
 
@@ -80,6 +79,5 @@
 #define TEST_I_UI_GTK_STATUSBAR_CONTEXT_DATA             "data"
 #define TEST_I_UI_GTK_STATUSBAR_CONTEXT_INFORMATION      "information"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #endif

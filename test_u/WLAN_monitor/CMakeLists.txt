@@ -109,14 +109,13 @@ set (${EXECUTABLE}_EXE_SRCS
      wlan_monitor_common.h
      wlan_monitor_configuration.h
      wlan_monitor_defines.h)
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE}_EXE_SRCS
-       ${${EXECUTABLE}_EXE_SRCS}
-       test_u_ui_callbacks.cpp
-       test_u_ui_callbacks.h)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      test_u_ui_callbacks.cpp
+      test_u_ui_callbacks.h)
+endif (GTK_SUPPORT)
+if (WXWIDGETS_SUPPORT)
 #  set (${EXECUTABLE}_EXE_SRCS
 #       ${${EXECUTABLE}_EXE_SRCS}
 #       test_u_wxwidgets_ui.cpp
@@ -124,25 +123,22 @@ if (GUI_SUPPORT)
 #       test_u_wxwidgets_ui.inl
 #       test_u_wxwidgets_ui_base.cpp
 #       test_u_wxwidgets_ui_base.h)
- endif (WXWIDGETS_SUPPORT)
-endif (GUI_SUPPORT)
+endif (WXWIDGETS_SUPPORT)
 
 set (ui_definition_file "")
-if (GUI_SUPPORT)
- if (GTK_USE)
-  if (GTK3_USE)
+if (GTK_USE)
+ if (GTK3_USE)
 #   set (ui_definition_file ${EXECUTABLE}.gtk3)
-  elseif (GTK2_USE)
+ elseif (GTK2_USE)
 #   set (ui_definition_file ${EXECUTABLE}.gtk2)
-  endif ()
-  set (ui_definition_file ${EXECUTABLE}.glade)
- elseif (WXWIDGETS_USE)
-  if (WIN32)
-   add_definitions(-DUNICODE -D_UNICODE)
-  endif (WIN32)
-#  set (ui_definition_file ${EXECUTABLE}.xrc)
  endif ()
-endif (GUI_SUPPORT)
+ set (ui_definition_file ${EXECUTABLE}.glade)
+elseif (WXWIDGETS_USE)
+ if (WIN32)
+  add_definitions(-DUNICODE -D_UNICODE)
+ endif (WIN32)
+#  set (ui_definition_file ${EXECUTABLE}.xrc)
+endif ()
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE}_EXE_SRCS}
@@ -293,37 +289,41 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 endif (CMAKE_BUILD_TYPE STREQUAL Debug)
 if (UNIX)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}" COMMAND)
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   set (ARGS "-g./etc/${ui_definition_file} ${ARGS}")
-  endif (GTK_SUPPORT)
+ if (GTK_SUPPORT)
+  set (ARGS "-g./etc/${ui_definition_file} ${ARGS}")
+ endif (GTK_SUPPORT)
+
+ if (GTK_SUPPORT)
  else ()
   set (ARGS "-g ${ARGS}")
- endif (GUI_SUPPORT)
+ endif (GTK_SUPPORT)
 
  set (RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib)
 # set (ENVIRONMENT "GDK_BACKEND=x11")
 elseif (WIN32)
- if (GUI_SUPPORT)
+ if (GTK_USE OR WXWIDGETS_USE)
   set (ARGS "-g.\\\\etc\\\\${ui_definition_file} ${ARGS}")
+ endif (GTK_USE OR WXWIDGETS_USE)
 
-  if (GTK3_SUPPORT)
-   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                             G:/software/Development/dll
-                             ${PROJECT_SOURCE_DIR}/../gtk3/bin)
-  elseif (GTK2_SUPPORT)
-   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                             G:/software/Development/dll
-                             ${PROJECT_SOURCE_DIR}/../gtk2/bin)
-  endif ()
-  if (WXWIDGETS_SUPPORT)
+ if (GTK3_SUPPORT)
+  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                            G:/software/Development/dll
+                            ${PROJECT_SOURCE_DIR}/../gtk3/bin)
+ elseif (GTK2_SUPPORT)
+  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                            G:/software/Development/dll
+                            ${PROJECT_SOURCE_DIR}/../gtk2/bin)
+ endif ()
+ if (WXWIDGETS_SUPPORT)
   string (REPLACE "\\" "\\\\" wxWidgets_LIB_DIR wxWidgets_LIB_DIR) 
   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                             ${wxWidgets_LIB_DIR})
-  endif (WXWIDGETS_SUPPORT)
+ endif (WXWIDGETS_SUPPORT)
+ 
+ if (GTK_USE OR WXWIDGETS_USE)
  else ()
   set (ARGS "-g ${ARGS}")
- endif (GUI_SUPPORT)
+ endif (GTK_USE OR WXWIDGETS_USE)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)

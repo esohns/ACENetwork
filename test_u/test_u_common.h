@@ -27,9 +27,7 @@
 
 #include "common_signal_common.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_common.h"
-#endif // GUI_SUPPORT
 
 #include "net_common.h"
 
@@ -61,7 +59,6 @@ struct Test_U_Configuration
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct Test_U_UI_ProgressData
 {
   Test_U_UI_ProgressData ()
@@ -98,6 +95,5 @@ struct Test_U_UI_ThreadData
   struct Test_U_UI_CBData* CBData;
   size_t                   sessionId;
 };
-#endif // GUI_SUPPORT
 
 #endif

@@ -52,9 +52,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -67,9 +65,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -80,9 +76,7 @@ IRC_Session_T<ConnectionType,
  , logToFile_ (IRC_SESSION_DEF_LOG)
 // , output_ (ACE_STREAMBUF_SIZE)
  , shutDownOnEnd_ (true) // *TODO*: allow more sessions
-#if defined (GUI_SUPPORT)
  , UIState_ (NULL)
-#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::IRC_Session_T"));
 
@@ -95,9 +89,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -109,9 +101,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -161,9 +151,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -176,9 +164,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -245,9 +231,7 @@ IRC_Session_T<ConnectionType,
       configuration_p->protocolConfiguration->loginOptions.nickname;
 
   // step1: initialize output
-#if defined (GUI_SUPPORT)
-  UIState_ = static_cast<StateType*> (configuration_p->UIState);
-#endif // GUI_SUPPORT
+  UIState_ = static_cast<UIStateType*> (configuration_p->UIState);
   logToFile_ = configuration_p->logToFile;
   if (logToFile_)
   {
@@ -334,9 +318,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -349,9 +331,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -376,9 +356,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -391,9 +369,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -427,9 +403,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -442,9 +416,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -781,11 +753,9 @@ IRC_Session_T<ConnectionType,
             inherited::state_.channels.push_back (channel);
             inherited::state_.channelModes.insert (std::make_pair (channel, 0));
             inherited::state_.activeChannel = channel;
-#if defined (GUI_SUPPORT)
             if (UIState_)
             {
             } // end IF
-#endif // GUI_SUPPORT
             break;
           } // end IF
 
@@ -820,11 +790,9 @@ IRC_Session_T<ConnectionType,
               inherited::state_.channelModes.find (channel);
             ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
             inherited::state_.channelModes.erase (iterator_2);
-#if defined (GUI_SUPPORT)
             if (UIState_)
             {
             } // end IF
-#endif // GUI_SUPPORT
             break;
           } // end IF
 
@@ -860,11 +828,9 @@ IRC_Session_T<ConnectionType,
             IRC_Tools::merge (*iterator,
                               (*iterator_2).second);
           } // end ELSE
-#if defined (GUI_SUPPORT)
           if (UIState_)
           {
           } // end IF
-#endif // GUI_SUPPORT
           break;
         }
         case IRC_Record::TOPIC:
@@ -961,9 +927,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -976,9 +940,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -998,9 +960,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -1013,9 +973,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -1113,9 +1071,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -1128,9 +1084,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -1168,9 +1122,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -1183,9 +1135,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -1206,9 +1156,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -1221,9 +1169,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
@@ -1234,13 +1180,11 @@ IRC_Session_T<ConnectionType,
 
 //  int result = -1;
 
-#if defined (GUI_SUPPORT)
   if (UIState_)
   {
 //    if (logToFile_)
 //      output_ << messageText_in;
   } // end IF
-#endif // GUI_SUPPORT
 //  else
 //    output_ << messageText_in;
 //  result = output_.sync ();
@@ -1256,9 +1200,7 @@ template <typename ConnectionType,
           typename MessageType,
           typename SessionMessageType,
           typename ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-          typename StateType,
-#endif // GUI_SUPPORT
+          typename UIStateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
@@ -1271,9 +1213,7 @@ IRC_Session_T<ConnectionType,
               MessageType,
               SessionMessageType,
               ModuleHandlerConfigurationIteratorType,
-#if defined (GUI_SUPPORT)
-              StateType,
-#endif // GUI_SUPPORT
+              UIStateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,

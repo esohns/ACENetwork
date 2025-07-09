@@ -27,11 +27,9 @@
 #include "libxml/tree.h"
 #include "libxml/xpath.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
@@ -43,13 +41,11 @@
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -75,11 +71,9 @@
 
 #include "test_u_common.h"
 #include "test_u_stream_common.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_gtk_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
@@ -243,26 +237,18 @@ struct UPnP_Client_SignalHandlerConfiguration
 //////////////////////////////////////////
 
 struct UPnP_Client_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_U_GTK_Configuration
 #else
  : Test_U_Configuration
 #endif // GTK_USE
-#else
- : Test_U_Configuration
-#endif // GUI_SUPPORT
 {
   UPnP_Client_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_U_GTK_Configuration ()
 #else
    : Test_U_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_U_Configuration ()
-#endif // GUI_SUPPORT
    , allocatorConfiguration ()
    , allocatorConfiguration_2 ()
    , signalHandlerConfiguration ()
@@ -301,7 +287,6 @@ struct UPnP_Client_Configuration
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct UPnP_Client_UI_ProgressData
 #if defined (GTK_USE)
  : Test_U_GTK_ProgressData
@@ -359,6 +344,5 @@ struct UPnP_Client_ThreadData
 
   struct UPnP_Client_UI_CBData* CBData;
 };
-#endif // GUI_SUPPORT
 
 #endif

@@ -91,20 +91,18 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_tcpconnection.h
      test_u_udpconnection.cpp
      test_u_udpconnection.h)
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE_SOURCE}_SRCS
-       ${${EXECUTABLE_SOURCE}_SRCS}
-       test_u_callbacks.cpp
-       test_u_callbacks.h)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
-  set (${EXECUTABLE_SOURCE}_SRCS
-       ${${EXECUTABLE_SOURCE}_SRCS}
-       net_server_wxui_base.cpp
-       net_server_wxui_base.h)
- endif (WXWIDGETS_SUPPORT)
-endif (GUI_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE_SOURCE}_SRCS
+      ${${EXECUTABLE_SOURCE}_SRCS}
+      test_u_callbacks.cpp
+      test_u_callbacks.h)
+endif (GTK_SUPPORT)
+if (WXWIDGETS_SUPPORT)
+ set (${EXECUTABLE_SOURCE}_SRCS
+      ${${EXECUTABLE_SOURCE}_SRCS}
+      net_server_wxui_base.cpp
+      net_server_wxui_base.h)
+endif (WXWIDGETS_SUPPORT)
 
 add_executable (${EXECUTABLE_SOURCE}
                 EXCLUDE_FROM_ALL
@@ -197,29 +195,27 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_tcpconnection.h
      test_u_udpconnection.cpp
      test_u_udpconnection.h)
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE_TARGET}_SRCS
-       ${${EXECUTABLE_TARGET}_SRCS}
-       test_u_callbacks.cpp
-       test_u_callbacks.h)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
-  set (${EXECUTABLE_TARGET}_SRCS
-       ${${EXECUTABLE_TARGET}_SRCS}
+if (GTK_SUPPORT)
+ set (${EXECUTABLE_TARGET}_SRCS
+      ${${EXECUTABLE_TARGET}_SRCS}
+      test_u_callbacks.cpp
+      test_u_callbacks.h)
+endif (GTK_SUPPORT)
+if (WXWIDGETS_SUPPORT)
+ set (${EXECUTABLE_TARGET}_SRCS
+      ${${EXECUTABLE_TARGET}_SRCS}
 #       net_server_wxui.cpp
 #       net_server_wxui.h
 #       net_server_wxui_callbacks.cpp
-       net_server_wxui_base.cpp
-       net_server_wxui_base.h)
- endif (WXWIDGETS_SUPPORT)
- if (WXWIDGETS_USE)
-  list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui.cpp)
-  list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui.h)
-  list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui_callbacks.cpp)
-  list (REMOVE_ITEM ${EXECUTABLE_TARGET}_SRCS net_server.cpp)
- endif (WXWIDGETS_USE)
-endif (GUI_SUPPORT)
+      net_server_wxui_base.cpp
+      net_server_wxui_base.h)
+endif (WXWIDGETS_SUPPORT)
+if (WXWIDGETS_USE)
+ list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui.cpp)
+ list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui.h)
+ list (ADD_ITEM ${EXECUTABLE_TARGET}_SRCS net_server_wxui_callbacks.cpp)
+ list (REMOVE_ITEM ${EXECUTABLE_TARGET}_SRCS net_server.cpp)
+endif (WXWIDGETS_USE)
 
 add_executable (${EXECUTABLE_TARGET}
                 EXCLUDE_FROM_ALL
@@ -288,32 +284,31 @@ if (SSL_USE)
                            ${SSL_LIB_PATH})
 endif (SSL_USE)
 
-if (GUI_SUPPORT)
- file (TO_NATIVE_PATH "${ui_definition_file}" ui_definition_file)
-# message (STATUS "ui_definition_file: ${ui_definition_file}")
- string (REGEX REPLACE "\\\\" "/" ui_definition_file "${ui_definition_file}")
-# message (STATUS "ui_definition_file: ${ui_definition_file}")
+file (TO_NATIVE_PATH "${ui_definition_file}" ui_definition_file)
+string (REGEX REPLACE "\\\\" "/" ui_definition_file "${ui_definition_file}")
+if (GTK_USE OR WXWIDGETS_USE)
  set (ARGS "-g.\\\\${ui_definition_file} ${ARGS}")
-
- if (GTK_USE)
-  if (GTK3_USE)
-   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk3/bin GTK_LIB_PATH)
-   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                             G:/software/Development/dll
-                             ${GTK_LIB_PATH})
-  elseif (GTK2_USE)
-   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
-   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                             G:/software/Development/dll
-                             ${GTK_LIB_PATH})
-  endif ()
- elseif (WXWIDGETS_USE)
+endif (GTK_USE OR WXWIDGETS_USE)
+if (GTK_USE)
+ if (GTK3_USE)
+  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk3/bin GTK_LIB_PATH)
   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                            ${wxWidgets_LIB_DIR})
+                            G:/software/Development/dll
+                            ${GTK_LIB_PATH})
+ elseif (GTK2_USE)
+  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
+  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                            G:/software/Development/dll
+                            ${GTK_LIB_PATH})
  endif ()
+elseif (WXWIDGETS_USE)
+ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${wxWidgets_LIB_DIR})
+endif ()
+if (GTK_USE OR WXWIDGETS_USE)
 else ()
  set (ARGS "-g ${ARGS}")
-endif (GUI_SUPPORT)
+endif (GTK_USE OR WXWIDGETS_USE)
 #file (TO_CMAKE_PATH $ENV{LIB_ROOT}/libpng/cmake/${CMAKE_BUILD_TYPE} LIBPNG_PATH)
 #file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_PATH)
 set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
@@ -350,14 +345,12 @@ if (UNIX)
 elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
-  endif (GTK_SUPPORT)
-  if (WXWIDGETS_SUPPORT)
-   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
-  endif (WXWIDGETS_SUPPORT)
- endif (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
+ endif (WXWIDGETS_SUPPORT)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${ACE_LIB_PATH}
                            ${SSL_LIB_PATH}

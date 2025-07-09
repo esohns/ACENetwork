@@ -37,12 +37,7 @@ class Test_I_EventHandler
  , public Test_I_ISessionNotify_2_t
 {
  public:
-  Test_I_EventHandler (
-#if defined (GUI_SUPPORT)
-                       struct Test_I_URLStreamLoad_UI_CBData*); // UI state
-#else
-                      );
-#endif // GUI_SUPPORT
+  Test_I_EventHandler (struct Test_I_URLStreamLoad_UI_CBData*); // UI state
   inline virtual ~Test_I_EventHandler () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -64,9 +59,7 @@ class Test_I_EventHandler
                        const Test_I_SessionMessage_2&);   // session message
 
  private:
-#if defined (GUI_SUPPORT)
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler ())
-#endif // GUI_SUPPORT
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler (const Test_I_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler& operator= (const Test_I_EventHandler&))
 
@@ -76,9 +69,7 @@ class Test_I_EventHandler
   typedef std::map<unsigned int, struct Test_I_URLStreamLoad_SessionData_2*> SESSION_DATA_MAP_2_T;
   typedef SESSION_DATA_MAP_2_T::iterator SESSION_DATA_MAP_ITERATOR_2_T;
 
-#if defined (GUI_SUPPORT)
   struct Test_I_URLStreamLoad_UI_CBData* CBData_;
-#endif // GUI_SUPPORT
   SESSION_DATA_MAP_T                     sessionDataMap_;
   SESSION_DATA_MAP_2_T                   sessionDataMap2_;
 };

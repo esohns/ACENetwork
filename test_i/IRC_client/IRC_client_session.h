@@ -56,9 +56,7 @@ class IRC_Client_Session_T
                         IRC_Message,
                         IRC_Client_SessionMessage,
                         IRC_Client_StreamConfiguration_t::ITERATOR_T,
-#if defined (GUI_SUPPORT)
                         UIStateType,
-#endif // GUI_SUPPORT
                         IRC_Client_ConnectionConfiguration,
                         IRC_Client_Connection_Manager_t,
                         IRC_Client_InputHandler,
@@ -77,9 +75,7 @@ class IRC_Client_Session_T
                        IRC_Message,
                        IRC_Client_SessionMessage,
                        IRC_Client_StreamConfiguration_t::ITERATOR_T,
-#if defined (GUI_SUPPORT)
                        UIStateType,
-#endif // GUI_SUPPORT
                        IRC_Client_ConnectionConfiguration,
                        IRC_Client_Connection_Manager_t,
                        IRC_Client_InputHandler,

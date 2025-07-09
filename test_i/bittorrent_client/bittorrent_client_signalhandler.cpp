@@ -28,11 +28,9 @@
 
 #include "net_macros.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #include "bittorrent_client_curses.h"
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 #include "bittorrent_client_network.h"
 
 BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler ()
@@ -145,7 +143,6 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     inherited::configuration_->controller->stop (false, // wait for completion ?
                                                  true); // high priority ?
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
     // step2: notify curses dispatch ?
     ACE_ASSERT (inherited::configuration_->cursesState);
@@ -153,6 +150,5 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       inherited::configuration_->cursesState->finished = true;
     } // end IF
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
   } // end IF
 }

@@ -21,13 +21,11 @@
 
 #include "test_i_eventhandler.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-#include "gtk/gtk.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-
 #include <regex>
+
+#if defined (GTK_SUPPORT)
+#include "gtk/gtk.h"
+#endif // GTK_SUPPORT
 
 #include "ace/FILE_Addr.h"
 #include "ace/FILE_Connector.h"
@@ -37,37 +35,25 @@
 #include "common_file_tools.h"
 #include "common_string_tools.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "net_macros.h"
 
 #include "ftp_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 #include "test_i_defines.h"
 
 #include "test_i_ftp_client_defines.h"
 
-#if defined (GUI_SUPPORT)
 Test_I_EventHandler::Test_I_EventHandler (struct FTP_Client_UI_CBData* CBData_in,
                                           FTP_IControl* control_in)
-#else
-Test_I_EventHandler::Test_I_EventHandler (FTP_IControl* control_in)
-#endif // GUI_SUPPORT
-#if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
  , control_ (control_in)
-#else
- : control_(control_in)
-#endif // GUI_SUPPORT
  , sessionData_(NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::Test_I_EventHandler"));
@@ -83,17 +69,14 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::start"));
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   sessionData_ = &const_cast<struct FTP_Client_SessionData&> (sessionData_in);
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -102,7 +85,6 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 }
 
 void
@@ -128,15 +110,12 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::end"));
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -144,7 +123,6 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STOPPED);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   sessionData_ = NULL;
 }
@@ -158,13 +136,11 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   ACE_UNUSED_ARG (sessionId_in);
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   FTP_Client_MessageData_t& data_r =
     const_cast<FTP_Client_MessageData_t&> (message_in.getR ());
@@ -173,7 +149,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   control_->responseCB (record_r);
 
-#if defined (GUI_SUPPORT)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->records.push_back (record_r);
   } // end lock scope
@@ -201,14 +176,11 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     state_r.eventSourceIds.insert (event_source_id);
   } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->progressData.statistic.bytes += message_in.total_length ();
     state_r.eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
-#endif // GUI_SUPPORT
 }
 
 void
@@ -220,15 +192,12 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   int result = -1;
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
   switch (sessionMessage_in.type ())
@@ -282,22 +251,13 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     }
   } // end SWITCH
   state_r.eventStack.push (event_e);
-#endif // GUI_SUPPORT
 }
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 Test_I_EventHandler_2::Test_I_EventHandler_2 (struct FTP_Client_UI_CBData* CBData_in)
-#else
-Test_I_EventHandler_2::Test_I_EventHandler_2 ()
-#endif // GUI_SUPPORT
-#if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
  , stream_ ()
-#else
- : stream_ ()
-#endif // GUI_SUPPORT
  , sessionData_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::Test_I_EventHandler_2"));
@@ -311,17 +271,14 @@ Test_I_EventHandler_2::start (Stream_SessionId_t sessionId_in,
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::start"));
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   sessionData_ = &const_cast<struct FTP_Client_SessionData&> (sessionData_in);
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -330,7 +287,6 @@ Test_I_EventHandler_2::start (Stream_SessionId_t sessionId_in,
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 }
 
 void
@@ -356,15 +312,12 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::end"));
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -372,7 +325,6 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_STOPPED);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   sessionData_ = NULL;
 
@@ -386,7 +338,6 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("closed file...\n")));
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
     guint event_source_id = g_idle_add (idle_data_received_cb,
                                         CBData_);
@@ -398,7 +349,6 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
     } // end IF
     state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   } // end IF
 }
 
@@ -411,14 +361,12 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   ACE_UNUSED_ARG (sessionId_in);
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
   CBData_->entries.clear ();
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   FTP_Client_MessageData_t& data_container_r =
     const_cast<FTP_Client_MessageData_t&> (message_in.getR ());
@@ -435,9 +383,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       char buffer_a[BUFSIZ];
       struct Common_File_Entry file_entry_s;
 
-#if defined (GUI_SUPPORT)
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GUI_SUPPORT
 
       do
       {
@@ -449,12 +395,9 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
         file_entry_s = Common_File_Tools::parseFileEntry (buffer_string_2);
         if (unlikely (file_entry_s.type == Common_File_Entry::INVALID))
           continue;
-#if defined (GUI_SUPPORT)
         CBData_->entries.push_back (file_entry_s);
-#endif // GUI_SUPPORT
       } while (!converter.fail ());
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
       guint event_source_id = g_idle_add (idle_list_received_cb,
                                           CBData_);
@@ -466,7 +409,6 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       } // end IF
       state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
       break;
     }
@@ -478,9 +420,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       char buffer_a[BUFSIZ];
       struct Common_File_Entry file_entry_s;
 
-#if defined (GUI_SUPPORT)
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GUI_SUPPORT
 
       do
       {
@@ -492,9 +432,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
         file_entry_s = Common_File_Tools::parseFileEntry (buffer_string_2);
         if (unlikely (file_entry_s.type == Common_File_Entry::INVALID))
           continue;
-#if defined (GUI_SUPPORT)
         CBData_->entries.push_back (file_entry_s);
-#endif // GUI_SUPPORT
       } while (!converter.fail ());
 
       break;
@@ -506,9 +444,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       {
         std::string filename_string = Common_File_Tools::getWorkingDirectory ();
         filename_string += ACE_TEXT_ALWAYS_CHAR (ACE_DIRECTORY_SEPARATOR_STR);
-#if defined (GUI_SUPPORT)
         filename_string += CBData_->fileName;
-#endif // GUI_SUPPORT
         ACE_FILE_Addr file_address (ACE_TEXT (filename_string.c_str ()));
 
         ACE_FILE_Connector file_connector;
@@ -552,11 +488,9 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
         message_block_p = message_block_p->cont ();
       } // end WHILE
 
-#if defined (GUI_SUPPORT)
       { ACE_GUARD(ACE_SYNCH_MUTEX, aGuard, state_r.lock);
         CBData_->progressData.transferred += message_in.total_length ();
       } // end lock scope
-#endif // GUI_SUPPORT
 
       break;
     }
@@ -569,7 +503,6 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     }
   } // end SWITCH
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -577,7 +510,6 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 }
 
 void
@@ -589,15 +521,12 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   int result = -1;
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
   switch (sessionMessage_in.type ())
@@ -650,5 +579,4 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     }
   } // end SWITCH
   state_r.eventStack.push (event_e);
-#endif // GUI_SUPPORT
 }

@@ -24,11 +24,9 @@
 
 #include "common_timer_manager_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "stream_macros.h"
 
@@ -153,12 +151,10 @@ Test_I_AVStream_Server_SignalHandler_T<ConfigurationType,
     // step1: stop GTK event processing
     // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
     //         compared to doing it here
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
-                                                          true); // high priority ?
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
+                                                        true); // high priority ?
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
     // step2: invoke controller (if any)
     if (inherited::configuration_->listener)

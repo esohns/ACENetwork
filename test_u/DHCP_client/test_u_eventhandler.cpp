@@ -21,43 +21,29 @@
 
 #include "test_u_eventhandler.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "stream_session_message_base.h"
 
 #include "net_macros.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 #include "test_u_defines.h"
 
-#if defined (GUI_SUPPORT)
 Test_U_EventHandler::Test_U_EventHandler (struct DHCPClient_UI_CBData* CBData_in)
-#else
-Test_U_EventHandler::Test_U_EventHandler ()
-#endif // GUI_SUPPORT
-#if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
  , sessionDataMap_ ()
-#else
- : sessionDataMap_ ()
-#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::Test_U_EventHandler"));
 
@@ -70,13 +56,11 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 #if defined (_DEBUG)
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   ACE_ASSERT (iterator == sessionDataMap_.end ());
@@ -85,7 +69,6 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
   sessionDataMap_.insert (std::make_pair (sessionId_in,
                                           &const_cast<struct DHCPClient_SessionData&> (sessionData_in)));
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -104,7 +87,6 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
   } // end IF
   state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 }
 
 void
@@ -130,17 +112,14 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   ACE_ASSERT (iterator != sessionDataMap_.end ());
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -158,7 +137,6 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
   } // end IF
   state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   sessionDataMap_.erase (iterator);
 }
@@ -172,15 +150,12 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   ACE_UNUSED_ARG (sessionId_in);
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -191,8 +166,8 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 }
+
 void
 Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                              const Test_U_SessionMessage& sessionMessage_in)
@@ -202,17 +177,14 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   int result = -1;
 
   // sanity check(s)
-#if defined (GUI_SUPPORT)
   ACE_ASSERT (CBData_);
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   ACE_ASSERT (iterator != sessionDataMap_.end ());
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
@@ -274,5 +246,4 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #if defined (GTK_USE)
   state_r.eventStack.push (event_e);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 }

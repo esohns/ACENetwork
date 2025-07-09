@@ -19,8 +19,12 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
+#include <iostream>
+#include <list>
+#include <sstream>
+#include <string>
+
+#if defined (CURSES_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
 #else
@@ -30,13 +34,7 @@
 //         to undefine...
 #undef timeout
 #endif // ACE_WIN32 || ACE_WIN32
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
-
-#include <iostream>
-#include <list>
-#include <sstream>
-#include <string>
+#endif // CURSES_SUPPORT
 
 //// *WORKAROUND*
 //using namespace std;
@@ -97,12 +95,10 @@
 #include "bittorrent_client_signalhandler.h"
 #include "bittorrent_client_stream_common.h"
 
-#if defined (GUI_SUPPORT)
 #include "bittorrent_client_gui_common.h"
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
 #include "bittorrent_client_curses.h"
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
+#endif // CURSES_SUPPORT
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("BitTorrentStream");
 
@@ -414,7 +410,6 @@ do_initializeSignals (bool useReactor_in,
 #endif // VALGRIND_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   // *NOTE*: let (n)curses install it's own signal handler and process events in
   //         (w)getch()
@@ -424,7 +419,6 @@ do_initializeSignals (bool useReactor_in,
   signals_out.sig_del (SIGWINCH);
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 
 //// *NOTE*: gdb sends some signals (when running in an IDE ?)
 ////         --> remove signals (and let IDE handle them)
@@ -435,7 +429,6 @@ do_initializeSignals (bool useReactor_in,
 //#endif // __GNUC__ && DEBUG_DEBUGGER
 }
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
 ACE_THR_FUNC_RETURN
 session_setup_curses_function (void* arg_in)
@@ -517,7 +510,6 @@ error:
   return return_value;
 }
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 
 void
 do_work (struct BitTorrent_Client_Configuration& configuration_in,
@@ -547,7 +539,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   ACE_ASSERT (timer_manager_p);
   long timer_id = -1;
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   int result = -1;
   // *TODO*: clean this up
@@ -562,7 +553,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   int group_id_2 = (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = NULL;
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 #if defined (SSL_SUPPORT)
   BitTorrent_Client_SSLControl_t bittorrent_control (&configuration_in.sessionConfiguration);
 #else
@@ -599,11 +589,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                                                                          true);
 
   // step1: initialize configuration
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   configuration_in.cursesState = &curses_state;
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 
 #if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
@@ -747,11 +735,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     sendBitfieldAfterHandshake_in;
 
   configuration_in.signalHandlerConfiguration.controller = &bittorrent_control;
-#if defined(GUI_SUPPORT)
 #if defined (CURSES_USE)
   configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 
   // step4: initialize signal handling
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
@@ -815,7 +801,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step6b: (try to) connect to the torrent tracker
   bittorrent_control.start (NULL);
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
@@ -871,15 +856,13 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     goto clean;
   } // end IF
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 
   // step6c: dispatch connection attempt, wait for the session to finish
   bittorrent_control.request (metaInfoFileName_in);
   // wait for the download to complete
   try {
     bittorrent_control.wait (true);
-  }
-  catch (...) {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in BitTorrent_IControl_T::wait(), returning\n")));
     goto clean;
@@ -904,7 +887,6 @@ clean:
   tracker_connection_manager_p->stop (true, false);
   tracker_connection_manager_p->abort (true);
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   result = thread_manager_p->wait_grp (group_id_2);
   if (result == -1)
@@ -912,7 +894,6 @@ clean:
                 ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
                 group_id_2));
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 
   Common_Timer_Tools::finalize ();
 }
@@ -963,13 +944,11 @@ do_printVersion (const std::string& programName_in)
             << converter.str ()
             << std::endl;
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   std::cout << ACE_TEXT ("curses: ")
             << curses_version ()
             << std::endl;
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
 }
 
 int

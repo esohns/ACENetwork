@@ -1116,7 +1116,6 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
 
-#if defined (GUI_SUPPORT)
   if ((*iterator).second.second->window)
   {
     ACE_NEW_RETURN (module_p,
@@ -1153,7 +1152,6 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
     module_p = NULL;
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 
   delete_out = true;
 

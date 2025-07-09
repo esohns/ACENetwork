@@ -36,11 +36,9 @@ extern "C"
 #endif // __cplusplus
 #endif // FFMPEG_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
@@ -54,13 +52,11 @@ extern "C"
 
 #include "common_parser_m3u_iparser.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -169,11 +165,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , window (NULL)
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
     inbound = true;
@@ -183,11 +177,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Test_I_ISessionNotify_t*        subscriber;
   Test_I_Subscribers_t*           subscribers;
   std::string                     targetFileName; // dump module
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GdkWindow*                      window;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration
@@ -299,11 +291,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
    , subscribers (NULL)
    , targetFileName ()
    , outputFormat ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    , window (NULL)
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
     inbound = true;
@@ -326,11 +316,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
   struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat;
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GdkWindow*                      window;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration_2

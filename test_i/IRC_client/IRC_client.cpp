@@ -19,7 +19,11 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#if defined (GUI_SUPPORT)
+#include <iostream>
+#include <list>
+#include <sstream>
+#include <string>
+
 #if defined (CURSES_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
@@ -31,12 +35,6 @@
 #undef timeout
 #endif // ACE_WIN32 || ACE_WIN32
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
-
-#include <iostream>
-#include <list>
-#include <sstream>
-#include <string>
 
 // *WORKAROUND*
 using namespace std;
@@ -104,11 +102,9 @@ using namespace std;
 #include "IRC_client_signalhandler.h"
 #include "IRC_client_tools.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #include "IRC_client_curses.h"
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IRCClientStream");
 
@@ -151,7 +147,6 @@ do_printUsage (const std::string& programName_in)
             << IRC_CLIENT_SESSION_DEFAULT_LOG
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n         : use (PD|n)curses library {")
 #if defined (CURSES_USE)
@@ -162,7 +157,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-N [STRING]: nickname {\"")
             << ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME)
             << ACE_TEXT_ALWAYS_CHAR ("\"}")
@@ -192,11 +186,9 @@ do_processArguments (int argc_in,
                      std::string& configurationFile_out,
                      bool& debugParser_out,
                      bool& logToFile_out,
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
                      bool& useCursesLibrary_out,
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                      std::string& nickName_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
@@ -234,7 +226,6 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   debugParser_out                = false;
   logToFile_out                  = IRC_CLIENT_SESSION_DEFAULT_LOG;
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #if defined (CURSES_USE)
   useCursesLibrary_out           = true;
@@ -242,7 +233,6 @@ do_processArguments (int argc_in,
   useCursesLibrary_out           = false;
 #endif // CURSES_USE
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   nickName_out                   = ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
   useReactor_out                 =
     (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -251,11 +241,9 @@ do_processArguments (int argc_in,
   printVersionAndExit_out        = false;
 
   std::string options_string = ACE_TEXT_ALWAYS_CHAR ("a:c:dlN:rs:tv");
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   options_string += ACE_TEXT_ALWAYS_CHAR ("n");
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
                               ACE_TEXT (options_string.c_str ()),
@@ -303,7 +291,6 @@ do_processArguments (int argc_in,
         logToFile_out = true;
         break;
       }
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
       case 'n':
       {
@@ -311,7 +298,6 @@ do_processArguments (int argc_in,
         break;
       }
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
       case 'N':
       {
         nickName_out = argumentParser.opt_arg ();
@@ -376,11 +362,9 @@ do_processArguments (int argc_in,
 
 void
 do_initializeSignals (bool useReactor_in,
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
                       bool useCursesLibrary,
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                       bool allowUserRuntimeStats_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
@@ -466,7 +450,6 @@ do_initializeSignals (bool useReactor_in,
 
   // *NOTE*: let (n)curses install its' own signal handler and process events in
   //         (w)getch()
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   if (useCursesLibrary)
   {
@@ -477,7 +460,6 @@ do_initializeSignals (bool useReactor_in,
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 }
 
 ACE_THR_FUNC_RETURN
@@ -646,7 +628,6 @@ connection_setup_function (void* arg_in)
     goto clean_up;
   }
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   state_p =
       &const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
@@ -656,7 +637,6 @@ connection_setup_function (void* arg_in)
   state_p->sessionState =
       &const_cast<struct IRC_SessionState&> (connection_p->state ());
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
   // step6: clean up
   connection_p->decrease (); connection_p = NULL;
@@ -761,12 +741,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   struct IRC_Client_CursesState& state_r =
     const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
   // step3: initialize client connector
   IRC_Client_ConnectionConfiguration connection_configuration;
@@ -782,14 +760,9 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     &configuration_in.protocolConfiguration;
   connection_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
-#if defined (GUI_SUPPORT)
-  connection_configuration.UIState =
 #if defined (CURSES_SUPPORT)
-    &state_r;
-#else
-    NULL;
+  connection_configuration.UIState = &state_r;
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
@@ -963,7 +936,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", returning\n"),
                 group_id_2));
 
-#if defined (GUI_SUPPORT)
   // step6b: setup GUI
 #if defined (CURSES_SUPPORT)
   configuration_in.cursesConfiguration.hooks.initHook = curses_init;
@@ -989,7 +961,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     return;
   } // end IF
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
   // step6b: dispatch events
   event_dispatch_state_s.proactorGroupId = -1;
@@ -998,11 +969,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Event_Tools::startEventDispatch(), returning\n")));
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-    COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (true, true);
+    COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (true,
+                                                           true);
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
     connection_manager_p->abort ();
     connection_manager_p->wait ();
     return;
@@ -1010,11 +980,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   Common_Event_Tools::dispatchEvents (event_dispatch_state_s);
 
   // step7: clean up
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
-  COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (true, true);
+  COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (true,
+                                                         true);
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   connection_manager_p->abort ();
   connection_manager_p->wait ();
 
@@ -1068,13 +1037,11 @@ do_printVersion (const std::string& programName_in)
             << converter.str ()
             << std::endl;
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   std::cout << ACE_TEXT ("curses: ")
             << curses_version ()
             << std::endl;
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 }
 
 int
@@ -1143,7 +1110,6 @@ ACE_TMAIN (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   bool debug_parser                          = false;
   bool log_to_file                           = IRC_CLIENT_SESSION_DEFAULT_LOG;
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #if defined (CURSES_USE)
   bool use_curses_library                    = true;
@@ -1151,7 +1117,6 @@ ACE_TMAIN (int argc_in,
   bool use_curses_library                    = false;
 #endif // CURSES_USE
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   std::string nickname_string                =
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
   bool use_reactor                           =
@@ -1166,11 +1131,9 @@ ACE_TMAIN (int argc_in,
                             configuration_file_name,
                             debug_parser,
                             log_to_file,
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
                             use_curses_library,
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                             nickname_string,
                             use_reactor,
                             statistic_reporting_interval,
@@ -1235,11 +1198,9 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (false);
   ACE_Sig_Set ignored_signal_set (false);
   do_initializeSignals (use_reactor,
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
                         use_curses_library,
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
                         true,
                         signal_set,
                         ignored_signal_set);
@@ -1295,12 +1256,10 @@ ACE_TMAIN (int argc_in,
   struct IRC_Client_Configuration configuration;
 
   ////////////////////////////////////////
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   if (use_curses_library)
     configuration.GUIFramework = COMMON_UI_FRAMEWORK_CURSES;
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   //   userData.loginOptions.user.username = ;
   std::string host_name;
   if (!Net_Common_Tools::getHostname (host_name))
@@ -1416,7 +1375,6 @@ ACE_TMAIN (int argc_in,
            previous_signal_actions,
            signal_handler);
 
-  // debug info
   timer.stop ();
   std::string working_time_string;
   ACE_Time_Value working_time;
@@ -1426,7 +1384,6 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
 
-  // debug info
   process_profile.stop ();
   ACE_Profile_Timer::ACE_Elapsed_Time elapsed_time;
   elapsed_time.real_time = 0.0;
@@ -1461,7 +1418,7 @@ ACE_TMAIN (int argc_in,
   std::string system_time_string;
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
-  // debug info
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),

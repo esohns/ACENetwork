@@ -59,9 +59,7 @@
 #include "common_xml_parser.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_common.h"
-#endif // GUI_SUPPORT
 
 #include "net_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -350,11 +348,7 @@ struct Net_WLAN_AssociationConfiguration
 
 enum Net_WLAN_EventType
 {
-#if defined (GUI_SUPPORT)
   NET_WLAN_EVENT_INTERFACE_HOTPLUG = COMMON_UI_EVENT_OTHER_USER_BASE,
-#else
-  NET_WLAN_EVENT_INTERFACE_HOTPLUG = 0,
-#endif // GUI_SUPPORT
   NET_WLAN_EVENT_INTERFACE_REMOVE,
   NET_WLAN_EVENT_SCAN_COMPLETE,
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)

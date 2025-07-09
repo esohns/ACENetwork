@@ -102,14 +102,13 @@ set (${EXECUTABLE}_EXE_SRCS
      test_u_signalhandler.cpp
      test_u_signalhandler.h)
 #  test_u_template_instantiations.cpp
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE}_EXE_SRCS
-       ${${EXECUTABLE}_EXE_SRCS}
-       test_u_callbacks.cpp
-       test_u_callbacks.h)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      test_u_callbacks.cpp
+      test_u_callbacks.h)
+endif (GTK_SUPPORT)
+if (WXWIDGETS_SUPPORT)
 #  set (${EXECUTABLE}_EXE_SRCS
 #       ${${EXECUTABLE}_EXE_SRCS}
 #       test_u_wxwidgets_ui.cpp
@@ -117,8 +116,7 @@ if (GUI_SUPPORT)
 #       test_u_wxwidgets_ui.inl
 #       test_u_wxwidgets_ui_base.cpp
 #       test_u_wxwidgets_ui_base.h)
- endif (WXWIDGETS_SUPPORT)
-endif (GUI_SUPPORT)
+endif (WXWIDGETS_SUPPORT)
 
 set (${EXECUTABLE}_EXE_CFG
      etc/test_u.gtk2
@@ -184,20 +182,18 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_U)
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
 
-if (GUI_SUPPORT)
- if (GTK_USE)
-  if (GTK2_USE)
-   set (UI_FILE "test_u.gtk2")
-  elseif (GTK3_USE)
-   set (UI_FILE "test_u.gtk3")
-  endif ()
- elseif (WXWIDGETS_USE)
-   set (UI_FILE "test_u.xrc")
+if (GTK_USE)
+ if (GTK2_USE)
+  set (UI_FILE "test_u.gtk2")
+ elseif (GTK3_USE)
+  set (UI_FILE "test_u.gtk3")
  endif ()
- if (NOT ${UI_FILE} STREQUAL "")
-  set (UI_FILE "etc/${UI_FILE}")
- endif (NOT ${UI_FILE} STREQUAL "")
-endif (GUI_SUPPORT)
+elseif (WXWIDGETS_USE)
+  set (UI_FILE "test_u.xrc")
+endif ()
+if (NOT ${UI_FILE} STREQUAL "")
+ set (UI_FILE "etc/${UI_FILE}")
+endif (NOT ${UI_FILE} STREQUAL "")
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -243,14 +239,12 @@ elseif (WIN32)
   file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  endif (IMAGEMAGICK_SUPPORT)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
-  endif (GTK_SUPPORT)
-  if (WXWIDGETS_SUPPORT)
-   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
-  endif (WXWIDGETS_SUPPORT)
- endif (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
+ endif (WXWIDGETS_SUPPORT)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}

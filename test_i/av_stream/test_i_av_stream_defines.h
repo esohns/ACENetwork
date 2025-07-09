@@ -21,9 +21,6 @@
 #ifndef TEST_I_CAMSTREAM_DEFINES_H
 #define TEST_I_CAMSTREAM_DEFINES_H
 
-#include "ace/config-lite.h"
-
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #define TEST_I_DEFAULT_GTK_RC_FILE                                "resources.rc"
 #if defined (GTK2_USE)
@@ -34,7 +31,6 @@
 #define TEST_I_DEFAULT_TARGET_GLADE_FILE                          "test_i_server.gtk3"
 #endif // GTKx_USE
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 #define TEST_I_DEFAULT_OUTPUT_FILE                                "output.tmp"
 
 //// *NOTE*: 640x480 RGB(A) --> 307200 * 1+1+1(+1) = 921600 (1228800)
@@ -61,6 +57,7 @@
 
 //---------------------------------------
 
+#if defined (GTK_SUPPORT)
 #define TEST_I_STREAM_UI_GTK_ACTION_CLOSE_ALL_NAME                "action_close_all"
 #define TEST_I_STREAM_UI_GTK_ACTION_REPORT_NAME                   "action_report"
 #define TEST_I_STREAM_UI_GTK_ACTION_RESET_NAME                    "action_reset"
@@ -115,5 +112,6 @@
 
 // GTK progress/status bar
 //#define TEST_I_STREAM_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION        "Stream::main"
+#endif // GTK_SUPPORT
 
 #endif

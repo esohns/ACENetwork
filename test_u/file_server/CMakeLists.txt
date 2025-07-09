@@ -96,17 +96,15 @@ set (${EXECUTABLE}_SRCS
      test_u_stream.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h)
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE}_SRCS
-       ${${EXECUTABLE}_SRCS}
-       test_u_callbacks.cpp
-       test_u_callbacks.h)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE}_SRCS
+      ${${EXECUTABLE}_SRCS}
+      test_u_callbacks.cpp
+      test_u_callbacks.h)
 # elseif (WXWIDGETS_USE)
 #  set (${EXECUTABLE}_SRCS
 #       ${${EXECUTABLE}_SRCS})
- endif (GTK_SUPPORT)
-endif (GUI_SUPPORT)
+endif (GTK_SUPPORT)
 
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -191,14 +189,12 @@ elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
-  endif (GTK_SUPPORT)
-  if (WXWIDGETS_SUPPORT)
-   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
-  endif (WXWIDGETS_SUPPORT)
- endif (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
+ endif (WXWIDGETS_SUPPORT)
  if (SSL_SUPPORT)
   file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIB_PATH)
  endif (SSL_SUPPORT)

@@ -26,20 +26,13 @@
 #include "net_wlan_imonitor.h"
 
 // forward declarations
-#if defined (GUI_SUPPORT)
 struct WLANMonitor_UI_CBData;
-#endif // GUI_SUPPORT
 
 class Test_U_EventHandler
  : public Net_WLAN_IMonitorCB
 {
  public:
-  Test_U_EventHandler (
-#if defined (GUI_SUPPORT)
-                       struct WLANMonitor_UI_CBData*); // UI callback data
-#else
-                      );
-#endif // GUI_SUPPORT
+  Test_U_EventHandler (struct WLANMonitor_UI_CBData*); // UI callback data
   inline virtual ~Test_U_EventHandler () {}
 
   // implement Net_WLAN_IMonitorCB
@@ -105,9 +98,7 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
 
-#if defined (GUI_SUPPORT)
   struct WLANMonitor_UI_CBData* CBData_;
-#endif // GUI_SUPPORT
 };
 
 #endif

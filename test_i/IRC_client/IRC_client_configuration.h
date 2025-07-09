@@ -29,12 +29,10 @@
 #include "common_defines.h"
 #include "common_inotify.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #include "common_ui_curses_common.h"
 #include "common_ui_curses_manager.h"
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 
@@ -45,14 +43,12 @@
 #include "irc_defines.h"
 
 #include "test_i_common.h"
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
 #endif // GTK_SUPPORT
 #if defined (WXWIDGETS_SUPPORT)
-//#include "test_u_wxwidgets_common.h"
+#include "test_i_wxwidgets_common.h"
 #endif // WXWIDGETS_SUPPORT
-#endif // GUI_SUPPORT
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
@@ -77,26 +73,18 @@ struct IRC_Client_InputHandlerConfiguration
 };
 
 struct IRC_Client_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_I_GTK_Configuration
 #else
  : Test_I_Configuration
 #endif // GTK_USE
-#else
- : Test_I_Configuration
-#endif // GUI_SUPPORT
 {
   IRC_Client_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_I_GTK_Configuration ()
 #else
    : Test_I_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_I_Configuration ()
-#endif // GUI_SUPPORT
    , parserConfiguration ()
    ///////////////////////////////////////
    , connectionConfigurations ()
@@ -105,11 +93,9 @@ struct IRC_Client_Configuration
    ///////////////////////////////////////
    , protocolConfiguration ()
    ///////////////////////////////////////
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
    , cursesConfiguration ()
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
    , encoding (IRC_PRT_DEFAULT_ENCODING)
 //, groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
@@ -126,11 +112,9 @@ struct IRC_Client_Configuration
   // ***************************** protocol ************************************
   struct IRC_ProtocolConfiguration           protocolConfiguration;
   // ***************************************************************************
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
   struct Common_UI_Curses_Configuration      cursesConfiguration;
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
@@ -143,7 +127,6 @@ struct IRC_Client_Configuration
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 typedef Common_UI_Curses_Manager_T<ACE_MT_SYNCH,
                                    struct Common_UI_Curses_Configuration,
@@ -151,6 +134,5 @@ typedef Common_UI_Curses_Manager_T<ACE_MT_SYNCH,
 typedef ACE_Singleton<Common_UI_Curses_Manager_t,
                       ACE_MT_SYNCH::MUTEX> COMMON_UI_CURSES_MANAGER_SINGLETON;
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 
 #endif

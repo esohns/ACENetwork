@@ -42,11 +42,9 @@
 #include "bittorrent_stream_peer.h"
 #include "bittorrent_stream_tracker.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_streamhandler.h"
@@ -174,18 +172,14 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration
   BitTorrent_Client_PeerModuleHandlerConfiguration ()
    : BitTorrent_PeerModuleHandlerConfiguration ()
    ///////////////////////////////////////
-#if defined (GUI_SUPPORT)
    , CBData (NULL)
-#endif // GUI_SUPPORT
    , session (NULL)
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {}
 
-#if defined (GUI_SUPPORT)
   struct BitTorrent_Client_UI_CBData*          CBData;
-#endif // GUI_SUPPORT
   BitTorrent_Client_ISession_t*                session;
   BitTorrent_Client_PeerStreamConfiguration_t* streamConfiguration;
   BitTorrent_Client_IPeerNotify_t*             subscriber; // (initial) subscriber
@@ -203,18 +197,14 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration
   BitTorrent_Client_TrackerModuleHandlerConfiguration ()
    : BitTorrent_TrackerModuleHandlerConfiguration ()
    ///////////////////////////////////////
-#if defined (GUI_SUPPORT)
    , CBData (NULL)
-#endif // GUI_SUPPORT
    , session (NULL)
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {}
 
-#if defined (GUI_SUPPORT)
   struct BitTorrent_Client_UI_CBData*             CBData;
-#endif // GUI_SUPPORT
   BitTorrent_Client_ISession_t*                   session;
   BitTorrent_Client_TrackerStreamConfiguration_t* streamConfiguration;
   BitTorrent_Client_ITrackerNotify_t*             subscriber; // (initial) subscriber

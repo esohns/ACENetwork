@@ -26,9 +26,7 @@
 #include "common_event_common.h"
 #include "common_event_defines.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_common.h"
-#endif // GUI_SUPPORT
 
 #include "net_common.h"
 
@@ -48,18 +46,14 @@ struct Net_SessionConfiguration
    , connectionConfigurations ()
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    //, parserConfiguration (NULL)
-#if defined (GUI_SUPPORT)
    , CBData (NULL)
-#endif // GUI_SUPPORT
   {}
 
   struct Net_ConnectionConfigurationBase* connectionConfiguration;
   Net_SessionConnectionConfigurations_t   connectionConfigurations; // *TODO*: this is part of the state; move it there
   enum Common_EventDispatchType           dispatch;
 
-#if defined (GUI_SUPPORT)
   struct Common_UI_CBData*                CBData;
-#endif // GUI_SUPPORT
 };
 
 //template <typename ConnectionConfigurationType,

@@ -27,19 +27,15 @@
 
 #include "common_event_tools.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "net_macros.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_SUPPORT)
 #include "IRC_client_curses.h"
 #endif // CURSES_SUPPORT
-#endif // GUI_SUPPORT
 #include "IRC_client_network.h"
 
 #include "IRC_client_gui_common.h"
@@ -166,16 +162,13 @@ done_connect:
   // ...shutdown ?
   if (shutdown)
   {
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_SUPPORT)
+#if defined (CURSES_USE)
     COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
                                                            true); // high priority ?
-#endif // CURSES_SUPPORT
-#if defined (GTK_SUPPORT)
+#elif defined (GTK_USE)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, // wait ?
                                                         true); // high priority ?
-#endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
+#endif // CURSES_USE || GTK_USE
 
     // step2: stop event dispatch
     Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,

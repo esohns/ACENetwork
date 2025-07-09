@@ -33,39 +33,30 @@
 #include "test_i_common.h"
 #include "test_i_defines.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "test_i_wxwidgets_common.h"
-#endif
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
 
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_stream_common.h"
 
 struct BitTorrent_Client_CursesState;
 struct BitTorrent_Client_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_I_GTK_Configuration
 #else
  : Test_I_Configuration
 #endif // GTK_USE
-#else
- : Test_I_Configuration
-#endif // GUI_SUPPORT
 {
   BitTorrent_Client_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_I_GTK_Configuration ()
 #else
    : Test_I_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_I_Configuration ()
-#endif // GUI_SUPPORT
    , signalHandlerConfiguration ()
    ///////////////////////////////////////
    , peerConnectionConfigurations ()
@@ -79,11 +70,9 @@ struct BitTorrent_Client_Configuration
 //   , protocolConfiguration ()
    , sessionConfiguration ()
    ///////////////////////////////////////
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
    , cursesState (NULL)
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
    , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (TEST_I_DEFAULT_SESSION_LOG)
    , peerUserData ()
@@ -106,12 +95,10 @@ struct BitTorrent_Client_Configuration
 //  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
   struct BitTorrent_Client_SessionConfiguration       sessionConfiguration;
   // ***************************************************************************
-#if defined (GUI_SUPPORT)
 #if defined (CURSES_USE)
   // *TODO*: move this somewhere else
   struct BitTorrent_Client_CursesState*               cursesState;
 #endif // CURSES_USE
-#endif // GUI_SUPPORT
   int                                                 groupId;
   bool                                                logToFile;
 

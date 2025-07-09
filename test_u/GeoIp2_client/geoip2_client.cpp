@@ -512,12 +512,10 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-//#if defined (GUI_SUPPORT)
 //#if defined (GTK_USE)
 //  Common_Logger_t logger (logstack_p,
 //                          lock_p);
 //#endif // GTK_USE
-//#endif // GUI_SUPPORT
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
@@ -528,18 +526,7 @@ ACE_TMAIN (int argc_in,
                                                false,                                             // log to syslog ?
                                                false,                                             // trace messages ?
                                                trace_information,                                 // debug messages ?
-//#if defined (GUI_SUPPORT)
-//#if defined (GTK_USE)
-//                                                      (UI_file_path.empty () ? NULL
-//                                                                             : &logger)))               // (ui) logger ?
-//#elif defined (WXWIDGETS_USE)
-//                                            NULL))                              // (ui) logger ?
-//#else
-//                                            NULL))                              // (ui) logger ?
-//#endif // XXX_USE
-//#else
                                                NULL)))                                            // (ui) logger ?
-//#endif // GUI_SUPPORT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));

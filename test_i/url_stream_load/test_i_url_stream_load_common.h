@@ -30,13 +30,12 @@
 #include "http_common.h"
 
 #include "test_i_common.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "test_i_wxwidgets_common.h"
-#endif
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
 
 #include "test_i_url_stream_load_stream_common.h"
 
@@ -60,26 +59,18 @@ struct Test_I_URLStreamLoad_SignalHandlerConfiguration
 };
 
 struct Test_I_URLStreamLoad_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_I_GTK_Configuration
 #else
  : Test_I_Configuration
 #endif // GTK_USE
-#else
- : Test_I_Configuration
-#endif // GUI_SUPPORT
 {
   Test_I_URLStreamLoad_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_I_GTK_Configuration ()
 #else
    : Test_I_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_I_Configuration ()
-#endif // GUI_SUPPORT
    , parserConfiguration ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
@@ -113,7 +104,6 @@ typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct Test_I_URLStreamLoad_UI_ProgressData
 #if defined (GTK_USE)
  : Test_I_GTK_ProgressData
@@ -179,6 +169,5 @@ struct Test_I_URLStreamLoad_UI_CBData
 //  struct Test_I_URLStreamLoad_UI_CBData* CBData;
 //  guint                                  eventSourceID;
 //};
-#endif // GUI_SUPPORT
 
 #endif

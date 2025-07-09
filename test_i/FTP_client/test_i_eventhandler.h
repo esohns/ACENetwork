@@ -32,20 +32,14 @@
 #include "test_i_session_message.h"
 
 // forward declarations
-#if defined (GUI_SUPPORT)
 struct FTP_Client_UI_CBData;
-#endif // GUI_SUPPORT
 
 class Test_I_EventHandler
  : public FTP_Client_ISessionNotify_t
 {
  public:
-#if defined (GUI_SUPPORT)
   Test_I_EventHandler (struct FTP_Client_UI_CBData*, // UI callback data handle
                        FTP_IControl*);               // FTP control handle
-#else
-  Test_I_EventHandler (FTP_IControl*);               // FTP control handle
-#endif // GUI_SUPPORT
   inline virtual ~Test_I_EventHandler () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -65,9 +59,7 @@ class Test_I_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler (const Test_I_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler& operator= (const Test_I_EventHandler&))
 
-#if defined (GUI_SUPPORT)
   struct FTP_Client_UI_CBData*   CBData_;
-#endif // GUI_SUPPORT
   FTP_IControl*                  control_;
   struct FTP_Client_SessionData* sessionData_;
 };
@@ -78,11 +70,7 @@ class Test_I_EventHandler_2
  : public FTP_Client_ISessionNotify_t
 {
  public:
-#if defined (GUI_SUPPORT)
   Test_I_EventHandler_2 (struct FTP_Client_UI_CBData*); // UI callback data handle
-#else
-  Test_I_EventHandler_2 ();
-#endif // GUI_SUPPORT
   inline virtual ~Test_I_EventHandler_2 () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -102,9 +90,7 @@ class Test_I_EventHandler_2
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2 (const Test_I_EventHandler_2&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2& operator= (const Test_I_EventHandler_2&))
 
-#if defined (GUI_SUPPORT)
   struct FTP_Client_UI_CBData*   CBData_;
-#endif // GUI_SUPPORT
   ACE_FILE_IO                    stream_;
   struct FTP_Client_SessionData* sessionData_;
 };

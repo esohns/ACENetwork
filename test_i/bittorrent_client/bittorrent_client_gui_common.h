@@ -24,33 +24,28 @@
 #include <map>
 #include <string>
 
+#if defined (GTK_SUPPORT)
+#include "gtk/gtk.h"
+#endif // GTK_SUPPORT
+
 #include "ace/INET_Addr.h"
 #include "ace/os_include/os_pthread.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Singleton.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-#include "gtk/gtk.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
-
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 //#include "net_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
-#elif defined (WXWIDGETS_USE)
+#endif // GTK_SUPPORT
+#if defined (WXWIDGETS_SUPPORT)
 #include "test_i_wxwidgets_common.h"
-#endif // GTK_USE || WXWIDGETS_USE
-#endif // GUI_SUPPORT
+#endif // WXWIDGETS_SUPPORT
 
 #include "bittorrent_stream_common.h"
 

@@ -24,11 +24,9 @@
 #include <list>
 #include <string>
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
@@ -40,13 +38,11 @@
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -71,11 +67,9 @@
 
 #include "test_i_common.h"
 #include "test_i_stream_common.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_gtk_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "test_i_connection_common.h"
 #include "test_i_connection_manager_common.h"
@@ -208,26 +202,18 @@ struct FTP_Client_SignalHandlerConfiguration
 //////////////////////////////////////////
 typedef Net_IListener_T<FTP_Client_ConnectionConfiguration> FTP_Client_IListener_t;
 struct FTP_Client_Configuration
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
  : Test_I_GTK_Configuration
 #else
  : Test_I_Configuration
 #endif // GTK_USE
-#else
- : Test_I_Configuration
-#endif // GUI_SUPPORT
 {
   FTP_Client_Configuration ()
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
    : Test_I_GTK_Configuration ()
 #else
    : Test_I_Configuration ()
 #endif // GTK_USE
-#else
-   : Test_I_Configuration ()
-#endif // GUI_SUPPORT
    , allocatorConfiguration ()
    , signalHandlerConfiguration ()
    , connectionConfiguration ()
@@ -266,7 +252,6 @@ typedef FTP_Control_T<FTP_Client_AsynchConnector_t,
 
 //////////////////////////////////////////
 
-#if defined (GUI_SUPPORT)
 struct FTP_Client_UI_ProgressData
 #if defined (GTK_USE)
  : Test_I_GTK_ProgressData
@@ -333,6 +318,5 @@ struct FTP_Client_ThreadData
 
   struct FTP_Client_UI_CBData* CBData;
 };
-#endif // GUI_SUPPORT
 
 #endif

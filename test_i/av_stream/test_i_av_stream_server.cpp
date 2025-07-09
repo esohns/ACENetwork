@@ -59,14 +59,12 @@
 
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_defines.h"
 #if defined (GTK_SUPPORT)
 //#include "common_ui_glade_definition.h"
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager_common.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -87,11 +85,9 @@
 #include "test_i_common.h"
 #include "test_i_defines.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 #include "test_i_common_modules.h"
 #include "test_i_module_eventhandler.h"
 
@@ -1252,11 +1248,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
 //  int group_id = -1;
   Net_IStreamStatisticHandler_t* report_handler_p = NULL;
   bool result_2 = false;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   ACE_INET_Addr inet_address, gateway_address;
   if (!Net_Common_Tools::interfaceToIPAddress (networkInterface_in,
@@ -1775,7 +1769,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // - dispatch UI events (if any)
 
   // step1a: start GUI event loop ?
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFilename_in.empty ())
   {
 #if defined (GTK_USE)
@@ -1821,7 +1814,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_UNUSED_ARG (was_visible_b);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
-#endif // GUI_SUPPORT
 
   // step1b: initialize worker(s)
   if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
@@ -1838,14 +1830,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     //					 iterator++)
     //				g_source_remove(*iterator);
     //		} // end lock scope
-#if defined (GUI_SUPPORT)
     if (!UIDefinitionFilename_in.empty ())
 #if defined (GTK_USE)
       gtk_manager_p->stop (true, true);
 #else
       ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
     timer_manager_p->stop ();
     goto clean;
   } // end IF
@@ -1924,14 +1914,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
         //					 iterator++)
         //				g_source_remove(*iterator);
         //		} // end lock scope
-#if defined (GUI_SUPPORT)
         if (!UIDefinitionFilename_in.empty ())
 #if defined (GTK_USE)
           gtk_manager_p->stop (true, true);
 #else
           ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
         timer_manager_p->stop ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         switch (mediaFramework_in)
@@ -2162,14 +2150,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
         //					 iterator++)
         //				g_source_remove(*iterator);
         //		} // end lock scope
-#if defined (GUI_SUPPORT)
         if (!UIDefinitionFilename_in.empty ())
 #if defined (GTK_USE)
           gtk_manager_p->stop (true, true);
 #else
           ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
         timer_manager_p->stop ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         switch (mediaFramework_in)
@@ -2271,14 +2257,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
         //					 iterator++)
         //				g_source_remove(*iterator);
         //		} // end lock scope
-#if defined (GUI_SUPPORT)
         if (!UIDefinitionFilename_in.empty ())
 #if defined (GTK_USE)
           gtk_manager_p->stop (true, true);
 #else
           ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
         timer_manager_p->stop ();
         goto clean;
       } // end IF
@@ -2326,14 +2310,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 //        //					 iterator++)
 //        //				g_source_remove(*iterator);
 //        //		} // end lock scope
-//#if defined (GUI_SUPPORT)
 //        if (!UIDefinitionFilename_in.empty ())
 //#if defined (GTK_USE)
 //          gtk_manager_p->stop (true, true, true);
 //#else
 //          ;
 //#endif // GTK_USE
-//#endif // GUI_SUPPORT
 //        timer_manager_p->stop ();
 //        goto clean;
 //      } // end IF
@@ -2357,13 +2339,11 @@ clean:
   //					 iterator++)
   //				g_source_remove(*iterator);
   //		} // end lock scope
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFilename_in.empty ())
   {
 #if defined (GTK_USE)
     gtk_manager_p->wait (false);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 //    connection_manager_p->abort ();
   } // end IF
   else
@@ -2646,7 +2626,6 @@ ACE_TMAIN (int argc_in,
     number_of_dispatch_threads = 1;
 
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
-#if defined (GUI_SUPPORT)
   struct Test_I_AVStream_UI_CBData* ui_cb_data_p = NULL;
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -2741,7 +2720,6 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (ui_cb_data_p);
-#endif // GUI_SUPPORT
 
   // step1d: initialize logging and/or tracing
   Common_Logger_Queue_t logger;
@@ -2858,7 +2836,6 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
   bool result_2 = false;
@@ -2920,13 +2897,10 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 continue_:
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   ACE_High_Res_Timer timer;
   timer.start ();
   // step2: do actual work

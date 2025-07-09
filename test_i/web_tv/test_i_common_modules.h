@@ -64,14 +64,12 @@
 #include "stream_dev_target_wasapi.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (GUI_SUPPORT)
 #if defined (FFMPEG_SUPPORT)
 #include "stream_vis_libav_resize.h"
 #endif // FFMPEG_SUPPORT
 #if defined (GTK_SUPPORT)
 #include "stream_vis_gtk_cairo.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 //#include "http_common.h"
 #include "http_module_parser.h"

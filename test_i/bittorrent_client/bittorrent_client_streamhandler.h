@@ -45,41 +45,25 @@ class BitTorrent_SessionMessage_T;
 template <typename SessionMessageType>
 class BitTorrent_Bencoding_ParserDriver_T;
 
-template <typename SessionDataType,     // not (!) reference-counted
+template <typename SessionDataType,      // not (!) reference-counted
           typename UserDataType,
-          typename SessionInterfaceType // derived from Net_ISession_T
+          typename SessionInterfaceType, // derived from Net_ISession_T
           ////////////////////////////////
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>         // ui feedback data type
-#else
-          >
-#endif // GUI_SUPPORT
+          typename CBDataType>           // ui feedback data type
 class BitTorrent_Client_PeerStreamHandler_T
  : public BitTorrent_PeerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType>
-#else
-                                         >
-#endif // GUI_SUPPORT
+                                         SessionInterfaceType,
+                                         CBDataType>
 {
   typedef BitTorrent_PeerStreamHandler_T<SessionDataType,
                                          UserDataType,
-                                         SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType> inherited;
-#else
-                                         > inherited;
-#endif // GUI_SUPPORT
+                                         SessionInterfaceType,
+                                         CBDataType> inherited;
 
  public:
-  BitTorrent_Client_PeerStreamHandler_T (SessionInterfaceType* // session handle
-#if defined (GUI_SUPPORT)
-                                         ,CBDataType* = NULL); // ui feedback data handle
-#else
-                                        );
-#endif // GUI_SUPPORT
+  BitTorrent_Client_PeerStreamHandler_T (SessionInterfaceType*, // session handle
+                                         CBDataType* = NULL);   // ui feedback data handle
   inline virtual ~BitTorrent_Client_PeerStreamHandler_T () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -103,42 +87,26 @@ class BitTorrent_Client_PeerStreamHandler_T
 
 //////////////////////////////////////////
 
-template <typename SessionDataType,     // not (!) reference-counted
+template <typename SessionDataType,      // not (!) reference-counted
           typename UserDataType,
-          typename SessionInterfaceType // derived from Net_ISession_T
+          typename SessionInterfaceType, // derived from Net_ISession_T
           ////////////////////////////////
-#if defined (GUI_SUPPORT)
-          ,typename CBDataType>         // ui feedback data type
-#else
-          >
-#endif // GUI_SUPPORT
+          typename CBDataType>           // ui feedback data type
 class BitTorrent_Client_TrackerStreamHandler_T
  : public BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                             UserDataType,
-                                            SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                            ,CBDataType>
-#else
-                                            >
-#endif // GUI_SUPPORT
+                                            SessionInterfaceType,
+                                            CBDataType>
  //, public Common_IInitialize_T<struct Common_ParserConfiguration>
 {
  typedef BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                            UserDataType,
-                                           SessionInterfaceType
-#if defined (GUI_SUPPORT)
-                                           ,CBDataType> inherited;
-#else
-                                           > inherited;
-#endif // GUI_SUPPORT
+                                           SessionInterfaceType,
+                                           CBDataType> inherited;
 
  public:
-  BitTorrent_Client_TrackerStreamHandler_T (SessionInterfaceType* // session handle
-#if defined (GUI_SUPPORT)
-                                            ,CBDataType* = NULL); // ui feedback data handle
-#else
-                                           );
-#endif // GUI_SUPPORT
+  BitTorrent_Client_TrackerStreamHandler_T (SessionInterfaceType*, // session handle
+                                            CBDataType* = NULL);   // ui feedback data handle
   inline virtual ~BitTorrent_Client_TrackerStreamHandler_T () {}
 
   // implement Stream_ISessionDataNotify_T

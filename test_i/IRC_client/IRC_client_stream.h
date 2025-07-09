@@ -66,17 +66,14 @@ class IRC_Client_ConnectionConfiguration
    ///////////////////////////////////////
    , protocolConfiguration (NULL)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
-#if defined (GUI_SUPPORT)
    , UIState (NULL)
-#endif // GUI_SUPPORT
   {}
 
   struct IRC_ProtocolConfiguration* protocolConfiguration;
   bool                              logToFile;
-#if defined (GUI_SUPPORT)
   struct Common_UI_State*           UIState;
-#endif // GUI_SUPPORT
 };
+
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  IRC_Client_ConnectionConfiguration,

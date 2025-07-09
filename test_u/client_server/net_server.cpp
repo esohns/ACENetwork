@@ -60,14 +60,12 @@
 #include "common_timer_second_publisher.h"
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_defines.h"
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 //#include "common_ui_glade_definition.h"
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -88,11 +86,9 @@
 
 #include "net_client_defines.h"
 #include "net_client_server_defines.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_u_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_stream.h"
@@ -139,7 +135,6 @@ do_printUsage (const std::string& programName_in)
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-#if defined (GUI_SUPPORT)
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -147,7 +142,6 @@ do_printUsage (const std::string& programName_in)
             << UI_file_path
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
-#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [VALUE]   : client ping interval (ms) [")
             << NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS
             << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
@@ -208,12 +202,10 @@ do_processArguments (const int& argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      unsigned int& maximumNumberOfConnections_out,
 #if defined (SSL_SUPPORT)
-                    std::string& certificateFile_out,
-                    std::string& privateKeyFile_out,
+                     std::string& certificateFile_out,
+                     std::string& privateKeyFile_out,
 #endif // SSL_SUPPORT
-#if defined (GUI_SUPPORT)
                      std::string& UIFile_out,
-#endif // GUI_SUPPORT
                      ACE_Time_Value& pingInterval_out,
                      //unsigned int& keepAliveTimeout_out,
                      bool& logToFile_out,
@@ -251,14 +243,12 @@ do_processArguments (const int& argc_in,
   privateKeyFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   privateKeyFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_PEM_PRIVATE_KEY_FILE);
 #endif // SSL_SUPPORT
-#if defined (GUI_SUPPORT)
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-#endif // GUI_SUPPORT
   pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS / 1000,
                         (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS % 1000) * 1000);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
@@ -277,17 +267,13 @@ do_processArguments (const int& argc_in,
   numberOfDispatchThreads_out =
     NET_SERVER_DEFAULT_NUMBER_OF_PROACTOR_DISPATCH_THREADS;
 
-  ACE_Get_Opt argument_parser (argc_in,                                // argc
-                               argv_in,                                // argv
-#if defined (GUI_SUPPORT)
+  ACE_Get_Opt argument_parser (argc_in,                                   // argc
+                               argv_in,                                   // argv
                                ACE_TEXT ("c:e:f:g::i:k:ln:op:rSs:tuvx:"), // optstring
-#else
-                               ACE_TEXT ("c:e:f:i:k:ln:op:rSs:tuvx:"), // optstring
-#endif // GUI_SUPPORT
-                               1,                                      // skip_args
-                               1,                                      // report_errors
-                               ACE_Get_Opt::PERMUTE_ARGS,              // ordering
-                               0);                                     // long_only
+                               1,                                         // skip_args
+                               1,                                         // report_errors
+                               ACE_Get_Opt::PERMUTE_ARGS,                 // ordering
+                               0);                                        // long_only
   int option = 0;
   std::stringstream converter;
   while ((option = argument_parser ()) != EOF)
@@ -302,7 +288,6 @@ do_processArguments (const int& argc_in,
         converter >> maximumNumberOfConnections_out;
         break;
       }
-#if defined (GUI_SUPPORT)
       case 'g':
       {
         ACE_TCHAR* opt_arg = argument_parser.opt_arg ();
@@ -312,7 +297,6 @@ do_processArguments (const int& argc_in,
           UIFile_out.clear ();
         break;
       }
-#endif // GUI_SUPPORT
       case 'i':
       {
         unsigned int ping_interval = 0;
@@ -510,9 +494,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
          const std::string& certificateFile_in,
          const std::string& privateKeyFile_in,
 #endif // SSL_SUPPORT
-#if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFile_in,
-#endif // GUI_SUPPORT
          const ACE_Time_Value& pingInterval_in,
          //unsigned int keepAliveTimeout_in,
          const std::string& networkInterface_in,
@@ -523,9 +505,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
          unsigned int numberOfDispatchThreads_in,
          enum Net_TransportLayerType protocol_in,
          struct Server_Configuration& configuration_in,
-#if defined (GUI_SUPPORT)
          struct Server_UI_CBData& CBData_in,
-#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -533,7 +513,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -545,7 +524,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // GTK_USE
   CBData_in.configuration = &configuration_in;
   CBData_in.progressData.configuration = &configuration_in;
-#endif // GUI_SUPPORT
 
   int result = -1;
   Test_U_TCPConnectionManager_t* connection_manager_p =
@@ -556,11 +534,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   ACE_ASSERT (connection_manager_2);
 
   // step0a: initialize configuration
-  Test_U_EventHandler_t ui_event_handler (
-#if defined (GUI_SUPPORT)
-                                          &CBData_in
-#endif // GUI_SUPPORT
-                                         );
+  Test_U_EventHandler_t ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 //  Test_U_Module_EventHandler* event_handler_p =
@@ -598,12 +572,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   stream_configuration.cloneModule = !(UIDefinitionFile_in.empty ());
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module =
-#if defined (GUI_SUPPORT)
       (!UIDefinitionFile_in.empty () ? &event_handler
                                      : NULL);
-#else
-      NULL;
-#endif // GUI_SUPPORT
   // *TODO*: is this correct ?
   stream_configuration.serializeOutput =
     (useReactor_in && (numberOfDispatchThreads_in > 1));
@@ -616,14 +586,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     statisticReportingInterval_in;
   modulehandler_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
-#if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
   ACE_ASSERT (CBData_in.UIState);
   modulehandler_configuration.lock = &(CBData_in.UIState->subscribersLock);
 #endif // GTK_USE || WXWIDGETS_USE
-#endif // GUI_SUPPORT
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
@@ -806,7 +774,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // - dispatch UI events (if any)
 
   // step1a: start UI event loop ?
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
   {
 #if defined (GTK_USE)
@@ -850,7 +817,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end IF
 #endif // GTK_USE
   } // end IF
-#endif // GUI_SUPPORT
 
   // step4b: initialize worker(s)
   if (!Common_Event_Tools::startEventDispatch (event_dispatch_state_s))
@@ -858,14 +824,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
 
-#if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
       gtk_manager_p->stop (true, true);
 #else
       ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
@@ -897,14 +861,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
 
-#if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
         gtk_manager_p->stop (true, true);
 #else
         ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
       Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                  true); // wait ?
       Common_Timer_Tools::finalize ();
@@ -943,14 +905,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true); // wait ?
 
-#if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
       gtk_manager_p->stop (true, true);
 #else
       ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
@@ -963,14 +923,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true); // wait ?
-#if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
       gtk_manager_p->stop (true, true);
 #else
       ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
@@ -996,14 +954,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true); // wait ?
-#if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
       gtk_manager_p->stop (true, true);
 #else
       ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
@@ -1039,14 +995,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 //                                           !useReactor_in,
 //                                           (useReactor_in ? event_dispatch_state_s.reactorGroupId
 //                                                          : event_dispatch_state_s.proactorGroupId));
-//#if defined (GUI_SUPPORT)
 //      if (!UIDefinitionFile_in.empty ())
 //#if defined (GTK_USE)
 //        gtk_manager_p->stop (true, true, true);
 //#else
 //        ;
 //#endif // GTK_USE
-//#endif // GUI_SUPPORT
 //      Common_Timer_Tools::finalize ();
 //      return;
 //    } // end IF
@@ -1063,14 +1017,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true); // wait ?
-#if defined (GUI_SUPPORT)
     if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
       gtk_manager_p->stop (true, true);
 #else
       ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
     Common_Timer_Tools::finalize ();
     return;
   } // end IF
@@ -1116,14 +1068,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
       Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                  true); // wait ?
-#if defined (GUI_SUPPORT)
       if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
         gtk_manager_p->stop (true, true);
 #else
         ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
       Common_Timer_Tools::finalize ();
       return;
     } // end IF
@@ -1137,14 +1087,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // clean up
   // *NOTE*: listener has stopped, interval timer has been cancelled,
   // and connections have been aborted...
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
 #if defined (GTK_USE)
     gtk_manager_p->stop (true, true);
 #else
         ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   Common_Timer_Tools::finalize ();
 
   //// wait for connection processing to complete
@@ -1184,12 +1132,12 @@ do_printVersion (const std::string& programName_in)
 
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
             << ACE_TEXT (ACENetwork_PACKAGE_NAME)
             << ACE_TEXT (": ")
             << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
             << std::endl
-#endif
+#endif // HAVE_CONFIG_H
   ;
 
   converter.str ("");
@@ -1267,14 +1215,12 @@ ACE_TMAIN (int argc_in,
   private_key_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   private_key_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_PEM_PRIVATE_KEY_FILE);
 #endif // SSL_SUPPORT
-#if defined (GUI_SUPPORT)
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-#endif // GUI_SUPPORT
   ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS / 1000,
                                 (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS % 1000) * 1000);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
@@ -1301,9 +1247,7 @@ ACE_TMAIN (int argc_in,
                             certificate_file,
                             private_key_file,
 #endif // SSL_SUPPORT
-#if defined (GUI_SUPPORT)
                             UI_file_path,
-#endif // GUI_SUPPORT
                             ping_interval,
                             //keep_alive_timeout,
                             log_to_file,
@@ -1369,7 +1313,6 @@ ACE_TMAIN (int argc_in,
     number_of_dispatch_threads = 1;
 
   // step1d: initialize logging and/or tracing
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -1377,15 +1320,12 @@ ACE_TMAIN (int argc_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_Logger_Queue_t logger;
   logger.initialize (&state_r.logQueue,
                      &state_r.logQueueLock);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
@@ -1396,7 +1336,6 @@ ACE_TMAIN (int argc_in,
                                      true,                          // log to syslog ?
                                      false,                         // trace messages ?
                                      trace_information,             // debug messages ?
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                                      (UI_file_path.empty () ? NULL
                                                             : &logger))) // (ui) logger ?
@@ -1405,9 +1344,6 @@ ACE_TMAIN (int argc_in,
 #else
                                      NULL))                              // (ui) logger ?
 #endif // XXX_USE
-#else
-                                     NULL))                              // (ui) logger ?
-#endif // GUI_SUPPORT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initialize(), aborting\n")));
@@ -1442,7 +1378,6 @@ ACE_TMAIN (int argc_in,
 
   // step1h: initialize UI framework
   struct Server_Configuration configuration;
-#if defined (GUI_SUPPORT)
   struct Server_UI_CBData ui_cb_data;
 #if defined (GTK_USE)
   ui_cb_data.allowUserRuntimeStatistic =
@@ -1468,7 +1403,6 @@ ACE_TMAIN (int argc_in,
   if (!UI_file_path.empty ())
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (configuration.GTKConfiguration);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // step1e: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (false);
@@ -1504,11 +1438,9 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 //  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   Server_SignalHandler signal_handler;
 
   // step1g: set process resource limits
@@ -1552,9 +1484,7 @@ ACE_TMAIN (int argc_in,
            certificate_file,
            private_key_file,
 #endif // SSL_SUPPORT
-#if defined (GUI_SUPPORT)
            UI_file_path,
-#endif // GUI_SUPPORT
            ping_interval,
            //keep_alive_timeout,
            network_interface,
@@ -1565,16 +1495,13 @@ ACE_TMAIN (int argc_in,
            number_of_dispatch_threads,
            protocol_e,
            configuration,
-#if defined (GUI_SUPPORT)
            ui_cb_data,
-#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
            signal_handler);
   timer.stop ();
 
-  // debug info
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
@@ -1621,7 +1548,6 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
-  // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),

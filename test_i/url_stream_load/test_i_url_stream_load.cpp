@@ -62,13 +62,11 @@
 
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -92,11 +90,9 @@
 
 #include "http_defines.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "test_i_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 #include "test_i_common.h"
 #include "test_i_connection_common.h"
 #include "test_i_connection_manager_common.h"
@@ -194,11 +190,9 @@ do_process_arguments (int argc_in,
                       bool& showConsole_out,
 #endif
                       bool& debugParser_out,
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                       std::string& GtkRcFileName_out,
 #endif // GTK_USE
-#endif // GUI_SUPPORT
                       std::string& fileName_out,
                       std::string& UIDefinitonFileName_out,
                       bool& logToFile_out,
@@ -227,13 +221,11 @@ do_process_arguments (int argc_in,
   showConsole_out = false;
 #endif
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GtkRcFileName_out = configuration_directory;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   fileName_out = temp_directory;
   fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   fileName_out +=
@@ -297,11 +289,9 @@ do_process_arguments (int argc_in,
       }
       case 'e':
       {
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
         GtkRcFileName_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
         break;
       }
       case 'f':
@@ -532,9 +522,7 @@ do_work (bool debugParser_in,
          const std::string& URL_in,
          const ACE_INET_Addr& remoteHost_in,
          struct Test_I_URLStreamLoad_Configuration& configuration_in,
-#if defined (GUI_SUPPORT)
          struct Test_I_URLStreamLoad_UI_CBData& CBData_in,
-#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -566,11 +554,7 @@ do_work (bool debugParser_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-#if defined (GUI_SUPPORT)
   Test_I_EventHandler message_handler (&CBData_in);
-#else
-  Test_I_EventHandler message_handler;
-#endif // GUI_SUPPORT
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_Module_EventHandler_2_Module event_handler_module_2 (NULL,
@@ -728,11 +712,9 @@ do_work (bool debugParser_in,
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
@@ -811,7 +793,6 @@ do_work (bool debugParser_in,
   timer_manager_p->start (NULL);
 
   // step1a: start GTK event loop ?
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())
   {
 #if defined (GTK_USE)
@@ -847,7 +828,6 @@ do_work (bool debugParser_in,
     ACE_UNUSED_ARG (was_visible_b);
 #endif
   } // end IF
-#endif // GUI_SUPPORT
 
   // *WARNING*: from this point on, clean up any remote connections !
 
@@ -877,11 +857,9 @@ do_work (bool debugParser_in,
     goto clean;
   } // end IF
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   gtk_manager_p->wait (false);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // step3: clean up
   connection_manager_p->stop (false, // wait ?
@@ -935,7 +913,6 @@ clean:
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                              true); // wait ?
   timer_manager_p->stop ();
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true,  // wait ?
@@ -943,7 +920,6 @@ clean:
 #else
     ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 }
 
 void
@@ -1021,27 +997,22 @@ ACE_TMAIN (int argc_in,
   ACE_INET_Addr address;
   bool use_ssl;
   struct Test_I_URLStreamLoad_Configuration configuration;
-#if defined (GUI_SUPPORT)
   struct Test_I_URLStreamLoad_UI_CBData ui_cb_data;
   ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
   std::string gtk_rc_file;
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   std::string log_file_name;
   ACE_Sig_Set signal_set (false);
   ACE_Sig_Set ignored_signal_set (false);
   Common_SignalActions_t previous_signal_actions;
   ACE_Sig_Set previous_signal_mask (false); // fill ?
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 //  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   Test_I_SignalHandler signal_handler;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
   configuration.GTKConfiguration.argc = argc_in;
@@ -1053,7 +1024,6 @@ ACE_TMAIN (int argc_in,
       idle_initialize_UI_cb;
   configuration.GTKConfiguration.definition = &gtk_ui_definition;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   ACE_High_Res_Timer timer;
   std::string working_time_string;
   ACE_Time_Value working_time;
@@ -1083,7 +1053,6 @@ ACE_TMAIN (int argc_in,
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   // step1a set defaults
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -1092,7 +1061,6 @@ ACE_TMAIN (int argc_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   ui_cb_data.UIState = &state_r;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   Common_Logger_Queue_t logger;
   logger.initialize (&state_r.logQueue,
                      &state_r.logQueueLock);
@@ -1102,7 +1070,6 @@ ACE_TMAIN (int argc_in,
   debug_parser = COMMON_PARSER_DEFAULT_YACC_TRACE;
   path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (GUI_SUPPORT)
   configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
@@ -1112,7 +1079,6 @@ ACE_TMAIN (int argc_in,
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   output_file = path;
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file +=
@@ -1140,11 +1106,9 @@ ACE_TMAIN (int argc_in,
                              show_console,
 #endif // ACE_WIN32 || ACE_WIN64
                              debug_parser,
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
                              gtk_rc_file,
 #endif // GTK_USE
-#endif // GUI_SUPPORT
                              output_file,
                              ui_definition_file,
                              log_to_file,
@@ -1182,14 +1146,12 @@ ACE_TMAIN (int argc_in,
   //} // end IF
   if ((!ui_definition_file.empty () &&
        !Common_File_Tools::isReadable (ui_definition_file))
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
       || (!gtk_rc_file.empty () &&
           !Common_File_Tools::isReadable (gtk_rc_file)))//                       ||
 #else
      )
 #endif // GTK_USE
-#endif // GUI_SUPPORT
       //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1273,18 +1235,15 @@ ACE_TMAIN (int argc_in,
     goto error;
   } // end IF
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
   if (!gtk_rc_file.empty ())
     ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   if (!ui_definition_file.empty ())
   {
-#if defined (GUI_SUPPORT)
     ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
 //    ACE_ASSERT (CBData_in.UIState);
@@ -1299,7 +1258,6 @@ ACE_TMAIN (int argc_in,
       goto error;
     } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   } // end IF
 
   configuration.dispatchConfiguration.dispatch =
@@ -1316,9 +1274,7 @@ ACE_TMAIN (int argc_in,
            url,
            address,
            configuration,
-#if defined (GUI_SUPPORT)
            ui_cb_data,
-#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
@@ -1328,7 +1284,6 @@ ACE_TMAIN (int argc_in,
            signal_handler);
   timer.stop ();
 
-  // debug info
   timer.elapsed_time (working_time);
   working_time_string = Common_Timer_Tools::periodToString (working_time);
 
@@ -1354,7 +1309,6 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
-  // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),

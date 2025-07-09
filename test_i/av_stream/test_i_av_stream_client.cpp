@@ -55,22 +55,18 @@
 #include "common_event_tools.h"
 
 #include "common_log_tools.h"
-#if defined (GUI_SUPPORT)
 #include "common_logger_queue.h"
-#endif // GUI_SUPPORT
 
 #include "common_signal_tools.h"
 
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_defines.h"
 
 #if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager_common.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -93,11 +89,9 @@
 #include "test_i_common.h"
 #include "test_i_defines.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 #include "test_i_common_modules.h"
 
 #include "test_i_av_stream_common.h"
@@ -1397,12 +1391,10 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 //  Net_IStreamStatisticHandler_t* report_handler_p = NULL;
   //Test_I_AVStream_Client_Stream_IStatistic_t stream_report_handler;
   Stream_IStreamControlBase* stream_p = NULL, *stream_2 = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
   Common_UI_GTK_State_t* ui_state_p = NULL;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Test_I_AVStream_Client_MediaFoundation_TCPConnectionConfiguration_t mediafoundation_tcp_connection_configuration;
   Test_I_AVStream_Client_MediaFoundation_UDPConnectionConfiguration_t mediafoundation_udp_connection_configuration;
@@ -1776,7 +1768,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   // *TODO*: turn these into an option
   (*modulehandler_iterator).second.second->buffers =
       STREAM_LIB_V4L_DEFAULT_DEVICE_BUFFERS;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -1785,7 +1776,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       &ui_state_p->lock;
   CBData_in.UIState = ui_state_p;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   (*modulehandler_iterator).second.second->method =
       V4L2_MEMORY_USERPTR;
@@ -1898,7 +1888,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   // step1a: start GTK event loop ?
   if (!UIDefinitionFilename_in.empty ())
   {
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
     gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
@@ -1925,7 +1914,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       goto clean;
     } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     HWND window_p = GetConsoleWindow ();
@@ -2036,12 +2024,10 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
     // clean up
   //    connection_manager_p->stop ();
   } // end IF
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   else
     gtk_manager_p->wait (false);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
 //    connection_manager_p->abort ();
   iconnection_manager_p->wait ();
@@ -2336,7 +2322,6 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-#if defined (GUI_SUPPORT)
 //  struct Common_UI_CBData* ui_cb_data_p = NULL;
 #if defined (GTK_USE)
   Common_UI_GTK_Configuration_t* gtk_configuration_p = NULL;
@@ -2450,7 +2435,6 @@ ACE_TMAIN (int argc_in,
 //  ui_cb_data_p = &ui_cb_data;
 #endif // ACE_WIN32 || ACE_WIN64
 //  ACE_ASSERT (ui_cb_data_p);
-#endif // GUI_SUPPORT
 
   // step1d: initialize logging and/or tracing
   Common_Logger_Queue_t logger;
@@ -2559,7 +2543,6 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-#if defined (GUI_SUPPORT)
   // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
 #if defined (GTK_USE)
   if (!gtk_glade_filename.empty ())
@@ -2589,7 +2572,6 @@ ACE_TMAIN (int argc_in,
     } // end IF
   } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   ACE_High_Res_Timer timer;
   timer.start ();

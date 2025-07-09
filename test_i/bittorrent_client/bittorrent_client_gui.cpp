@@ -959,18 +959,15 @@ ACE_TMAIN (int argc_in,
     return EXIT_SUCCESS;
   } // end IF
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ui_cb_data.UIFileDirectory = UIDefinitionFile_directory;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
 //  ui_cb_data.configuration->protocolConfiguration.loginOptions.nickName =
 //      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   ui_cb_data.progressData.state = &state_r;
 
@@ -987,7 +984,6 @@ ACE_TMAIN (int argc_in,
   ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (rc_file_name);
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (ui_cb_data.configuration->GTKConfiguration);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // step9: do work
   ACE_High_Res_Timer timer;

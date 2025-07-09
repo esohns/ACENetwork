@@ -21,15 +21,11 @@
 #ifndef BITTORRENT_CLIENT_GUI_TOOLS_H
 #define BITTORRENT_CLIENT_GUI_TOOLS_H
 
-//#include <string>
-
 #include "ace/Global_Macros.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #include "bittorrent_client_gui_common.h"
 
@@ -42,13 +38,11 @@ class BitTorrent_Client_UI_Tools
 //                       const BitTorrent_Client_GUI_Connections_t&, // connections
 //                       std::string&,                               // return value: nickname
 //                       std::string&);                              // return value: channel
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
   static BitTorrent_Client_GUI_Session_t* current (const  Common_UI_GTK_State_t&,            // GTK state
                                                    const BitTorrent_Client_GUI_Sessions_t&); // sessions
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_UI_Tools ())

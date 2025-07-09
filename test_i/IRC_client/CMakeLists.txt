@@ -27,20 +27,16 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif (NOT EXISTS ${ACEStream_DIR})
 
-if (GUI_SUPPORT)
 if (CURSES_SUPPORT)
  include_directories (${CURSES_INCLUDE_DIRS})
 endif (CURSES_SUPPORT)
-endif (GUI_SUPPORT)
 if (UNIX)
 # include_directories (${PKG_CAP_INCLUDE_DIRS})
  # *WORKAROUND*
- if (GUI_SUPPORT)
-  if (CURSES_USE)
-   add_definitions (-DNCURSES_INTERNALS)
-   include_directories (${PKG_CURSES_INCLUDE_DIRS})
-  endif (CURSES_USE)
- endif (GUI_SUPPORT)
+ if (CURSES_USE)
+  add_definitions (-DNCURSES_INTERNALS)
+  include_directories (${PKG_CURSES_INCLUDE_DIRS})
+ endif (CURSES_USE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/log)
@@ -118,33 +114,31 @@ set (${EXECUTABLE}_EXE_SRCS
      Streambuf_alt.cpp
      Streambuf_alt.h
      Streambuf_alt.inl)
-if (GUI_SUPPORT)
+set (${EXECUTABLE}_EXE_SRCS
+     ${${EXECUTABLE}_EXE_SRCS}
+     IRC_client_gui_tools.cpp
+     IRC_client_gui_tools.h)
+if (CURSES_SUPPORT)
  set (${EXECUTABLE}_EXE_SRCS
       ${${EXECUTABLE}_EXE_SRCS}
-      IRC_client_gui_tools.cpp
-      IRC_client_gui_tools.h)
- if (CURSES_SUPPORT)
-  set (${EXECUTABLE}_EXE_SRCS
-       ${${EXECUTABLE}_EXE_SRCS}
-       IRC_client_curses.cpp
-       IRC_client_curses.h)
- endif (CURSES_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE}_EXE_SRCS
-       ${${EXECUTABLE}_EXE_SRCS}
-       IRC_client_gui_callbacks.cpp
-       IRC_client_gui_callbacks.h)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
-   #  set (${EXECUTABLE}_EXE_SRCS
-   #       ${${EXECUTABLE}_EXE_SRCS}
-   #       test_u_wxwidgets_ui.cpp
-   #       test_u_wxwidgets_ui.h
-   #       test_u_wxwidgets_ui.inl
-   #       test_u_wxwidgets_ui_base.cpp
-   #       test_u_wxwidgets_ui_base.h)
- endif (WXWIDGETS_SUPPORT)
-endif (GUI_SUPPORT)
+      IRC_client_curses.cpp
+      IRC_client_curses.h)
+endif (CURSES_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      IRC_client_gui_callbacks.cpp
+      IRC_client_gui_callbacks.h)
+endif (GTK_SUPPORT)
+if (WXWIDGETS_SUPPORT)
+  #  set (${EXECUTABLE}_EXE_SRCS
+  #       ${${EXECUTABLE}_EXE_SRCS}
+  #       test_u_wxwidgets_ui.cpp
+  #       test_u_wxwidgets_ui.h
+  #       test_u_wxwidgets_ui.inl
+  #       test_u_wxwidgets_ui_base.cpp
+  #       test_u_wxwidgets_ui_base.h)
+endif (WXWIDGETS_SUPPORT)
 set (${EXECUTABLE}_INI
      etc/IRC_client.ini
      etc/IRC_client_phonebook.ini)
@@ -245,23 +239,21 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      IRC_client_stream_common.h
      IRC_client_tools.cpp
      IRC_client_tools.h)
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE_GUI}_EXE_SRCS
-       ${${EXECUTABLE_GUI}_EXE_SRCS}
-       IRC_client_gui_callbacks.cpp
-       IRC_client_gui_callbacks.h)
- endif (GTK_SUPPORT)
- if (WXWIDGETS_SUPPORT)
-   #  set (${EXECUTABLE}_EXE_SRCS
-   #       ${${EXECUTABLE}_EXE_SRCS}
-   #       test_u_wxwidgets_ui.cpp
-   #       test_u_wxwidgets_ui.h
-   #       test_u_wxwidgets_ui.inl
-   #       test_u_wxwidgets_ui_base.cpp
-   #       test_u_wxwidgets_ui_base.h)
- endif (WXWIDGETS_SUPPORT)
-endif (GUI_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE_GUI}_EXE_SRCS
+      ${${EXECUTABLE_GUI}_EXE_SRCS}
+      IRC_client_gui_callbacks.cpp
+      IRC_client_gui_callbacks.h)
+endif (GTK_SUPPORT)
+if (WXWIDGETS_SUPPORT)
+  #  set (${EXECUTABLE}_EXE_SRCS
+  #       ${${EXECUTABLE}_EXE_SRCS}
+  #       test_u_wxwidgets_ui.cpp
+  #       test_u_wxwidgets_ui.h
+  #       test_u_wxwidgets_ui.inl
+  #       test_u_wxwidgets_ui_base.cpp
+  #       test_u_wxwidgets_ui_base.h)
+endif (WXWIDGETS_SUPPORT)
 
 #set_source_files_properties (${IRC_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 

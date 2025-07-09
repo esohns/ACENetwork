@@ -76,14 +76,12 @@
 
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
 #include "common_ui_tools.h"
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -125,11 +123,9 @@
 #include "test_i_web_tv_common.h"
 #include "test_i_web_tv_defines.h"
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream");
 const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream_3");
@@ -167,7 +163,6 @@ do_print_usage (const std::string& programName_in)
             << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -177,7 +172,6 @@ do_print_usage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
   std::string output_file = Common_File_Tools::getTempDirectory ();
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file +=
@@ -186,15 +180,13 @@ do_print_usage (const std::string& programName_in)
             << output_file
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-#if defined (GUI_SUPPORT)
   std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g[[PATH]]: UI definition file [\"")
             << UI_file
-            << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
+            << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\" : no GUI}")
             << std::endl;
-#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l        : log to a file [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -230,15 +222,11 @@ do_process_arguments (int argc_in,
                       ACE_TCHAR** argv_in, // cannot be const...
                       std::string& configurationFile_out,
                       bool& debugParser_out,
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
                       std::string& GtkRcFileName_out,
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
                       std::string& outputFileName_out,
-#if defined (GUI_SUPPORT)
                       std::string& UIDefinitonFileName_out,
-#endif // GUI_SUPPORT
                       bool& logToFile_out,
                       bool& useReactor_out,
                       ACE_Time_Value& statisticReportingInterval_out,
@@ -262,23 +250,19 @@ do_process_arguments (int argc_in,
   configurationFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_INI_FILE);
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   GtkRcFileName_out = configuration_directory;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
   outputFileName_out = temp_directory;
   outputFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   outputFileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_DEFAULT_TARGET_FILE);
-#if defined (GUI_SUPPORT)
   UIDefinitonFileName_out = configuration_directory;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
-#endif // GUI_SUPPORT
   logToFile_out = false;
   useReactor_out = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
@@ -290,12 +274,10 @@ do_process_arguments (int argc_in,
   useHardwareDecoder_out = false;
 
   std::string options_string = ACE_TEXT_ALWAYS_CHAR ("c:df:lrs:tu:vz");
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   options_string += ACE_TEXT_ALWAYS_CHAR ("e:");
 #endif // GTK_SUPPORT
   options_string += ACE_TEXT_ALWAYS_CHAR ("g:");
-#endif // GUI_SUPPORT
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
                                ACE_TEXT (options_string.c_str ()),
@@ -321,7 +303,6 @@ do_process_arguments (int argc_in,
         debugParser_out = true;
         break;
       }
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
       case 'e':
       {
@@ -329,20 +310,17 @@ do_process_arguments (int argc_in,
         break;
       }
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
       case 'f':
       {
         outputFileName_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
-#if defined (GUI_SUPPORT)
       case 'g':
       {
         UIDefinitonFileName_out =
             ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
-#endif // GUI_SUPPORT
       case 'l':
       {
         logToFile_out = true;
@@ -627,9 +605,7 @@ do_work (const std::string& configurationFile_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          unsigned int channel_in,
          struct Test_I_WebTV_Configuration& configuration_in,
-#if defined (GUI_SUPPORT)
          struct Test_I_WebTV_UI_CBData& CBData_in,
-#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -764,7 +740,6 @@ do_work (const std::string& configurationFile_in,
   Test_I_TimeoutHandler timeout_handler, timeout_handler_2;
   timeout_handler.lock_ = &timeout_handler_lock;
   timeout_handler_2.lock_ = &timeout_handler_lock;
-#if defined (GUI_SUPPORT)
   Test_I_EventHandler message_handler (&CBData_in); // master.m3u(8)
   Test_I_EventHandler_2 message_handler_2 (&CBData_in); // audio/video playlists
   Test_I_EventHandler_3 message_handler_3 (&CBData_in); // audio/video content
@@ -774,11 +749,6 @@ do_work (const std::string& configurationFile_in,
   CBData_in.AudioStream = &audio_input_stream;
   CBData_in.audioTimeoutHandler = &timeout_handler;
   CBData_in.videoTimeoutHandler = &timeout_handler_2;
-#else
-  Test_I_EventHandler message_handler;
-  Test_I_EventHandler_2 message_handler_2;
-  Test_I_EventHandler_3 message_handler_3;
-#endif // GUI_SUPPORT
 
   // *********************** socket configuration data ************************
   Test_I_WebTV_ConnectionConfiguration_t connection_configuration;
@@ -1142,11 +1112,9 @@ do_work (const std::string& configurationFile_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   timer_configuration.dispatch = COMMON_TIMER_DISPATCH_REACTOR;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
@@ -1193,7 +1161,6 @@ do_work (const std::string& configurationFile_in,
   timer_manager_p->start (NULL);
 
   // step1a: start GTK event loop ?
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())
   {
 #if defined (GTK_USE)
@@ -1228,15 +1195,16 @@ do_work (const std::string& configurationFile_in,
 //    ACE_UNUSED_ARG (was_visible_b);
 //#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
-#else
-  if (!input_stream.initialize (configuration_in.streamConfiguration_3))
+  else
   {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("failed to Test_I_Stream::initialize(), returning\n")));
-    goto clean;
+    if (!av_input_stream.initialize (configuration_in.streamConfiguration_3a))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("failed to Test_I_AVStream::initialize(), returning\n")));
+      goto clean;
+    } // end IF
+    av_input_stream.start ();
   } // end IF
-  input_stream.start ();
-#endif // GUI_SUPPORT
 
   // *WARNING*: from this point on, clean up any remote connections !
 
@@ -1255,11 +1223,9 @@ do_work (const std::string& configurationFile_in,
     goto clean;
   } // end IF
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   gtk_manager_p->wait (false);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // step3: clean up
   timer_manager_p->stop ();
@@ -1298,7 +1264,6 @@ do_work (const std::string& configurationFile_in,
 clean:
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                              true); // wait ?
-#if defined (GUI_SUPPORT)
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true,  // wait ?
@@ -1306,7 +1271,10 @@ clean:
 #else
     ;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
+  else
+    av_input_stream.stop (true,   // wait for completion ?
+                          false,  // recurse ?
+                          false); // high priority
 
   audio_input_stream.stop (true,   // wait for completion ?
                            false,  // recurse ?
@@ -1378,9 +1346,7 @@ ACE_TMAIN (int argc_in,
   bool debug_parser;
   std::string configuration_path;
   std::string output_filename_string;
-#if defined (GUI_SUPPORT)
   std::string ui_definition_file;
-#endif // GUI_SUPPORT
   bool log_to_file;
   bool use_reactor;
   ACE_Time_Value statistic_reporting_interval;
@@ -1390,7 +1356,6 @@ ACE_TMAIN (int argc_in,
   bool use_hardware_decoder_b;
 
   struct Test_I_WebTV_Configuration configuration;
-#if defined (GUI_SUPPORT)
   struct Test_I_WebTV_UI_CBData ui_cb_data;
   ui_cb_data.configuration = &configuration;
 #if defined (GTK_SUPPORT)
@@ -1403,7 +1368,6 @@ ACE_TMAIN (int argc_in,
   Common_UI_GTK_State_t& state_r =
       const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   Common_Logger_Queue_t logger;
   logger.initialize (&state_r.logQueue,
                      &state_r.logQueueLock);
@@ -1413,13 +1377,10 @@ ACE_TMAIN (int argc_in,
   Common_SignalActions_t previous_signal_actions;
   ACE_Sig_Set previous_signal_mask (false); // fill ?
 //  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 //  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   Test_I_SignalHandler signal_handler;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
   configuration.GTKConfiguration.argc = argc_in;
@@ -1431,7 +1392,6 @@ ACE_TMAIN (int argc_in,
       idle_initialize_UI_cb;
   configuration.GTKConfiguration.definition = &gtk_ui_definition;
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   ACE_High_Res_Timer timer;
   std::string working_time_string;
   ACE_Time_Value working_time;
@@ -1469,23 +1429,19 @@ ACE_TMAIN (int argc_in,
   configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_INI_FILE);
   debug_parser = false;
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
   gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
   output_filename_string = Common_File_Tools::getTempDirectory ();
   output_filename_string += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_filename_string +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_DEFAULT_TARGET_FILE);
-#if defined (GUI_SUPPORT)
   ui_definition_file = configuration_path;
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   ui_definition_file +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
-#endif // GUI_SUPPORT
   log_to_file = false;
   use_reactor =
     (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -1503,15 +1459,11 @@ ACE_TMAIN (int argc_in,
                              argv_in,
                              configuration_file,
                              debug_parser,
-#if defined (GUI_SUPPORT)
 #if defined (GTK_SUPPORT)
                              gtk_rc_file,
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
                              output_filename_string,
-#if defined (GUI_SUPPORT)
                              ui_definition_file,
-#endif // GUI_SUPPORT
                              log_to_file,
                              use_reactor,
                              statistic_reporting_interval,
@@ -1543,14 +1495,12 @@ ACE_TMAIN (int argc_in,
   //  use_thread_pool = true;
   //} // end IF
   if (!Common_File_Tools::isReadable (configuration_file)
-#if defined (GUI_SUPPORT)
       || (!ui_definition_file.empty () &&
           !Common_File_Tools::isReadable (ui_definition_file))
 #if defined (GTK_SUPPORT)
       || (!gtk_rc_file.empty () &&
           !Common_File_Tools::isReadable (gtk_rc_file))
 #endif // GTK_SUPPORT
-#endif // GUI_SUPPORT
       //(use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
      )
   {
@@ -1638,18 +1588,15 @@ ACE_TMAIN (int argc_in,
     goto error;
   } // end IF
 
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
   if (!gtk_rc_file.empty ())
     ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   if (!ui_definition_file.empty ())
   {
-#if defined (GUI_SUPPORT)
     ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
 //    ACE_ASSERT (CBData_in.UIState);
@@ -1664,7 +1611,6 @@ ACE_TMAIN (int argc_in,
       goto error;
     } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
   } // end IF
 
   configuration.dispatchConfiguration.dispatch =
@@ -1681,9 +1627,7 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            channel_i,
            configuration,
-#if defined (GUI_SUPPORT)
            ui_cb_data,
-#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
@@ -1691,7 +1635,6 @@ ACE_TMAIN (int argc_in,
            use_hardware_decoder_b);
   timer.stop ();
 
-  // debug info
   timer.elapsed_time (working_time);
   working_time_string = Common_Timer_Tools::periodToString (working_time);
 
@@ -1717,7 +1660,6 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
-  // debug info
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),

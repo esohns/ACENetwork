@@ -118,14 +118,12 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_web_tv_stream_common.h
      test_i_web_tv_tools.cpp
      test_i_web_tv_tools.h)
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  set (${EXECUTABLE}_EXE_SRCS
-       ${${EXECUTABLE}_EXE_SRCS}
-       test_i_gtk_callbacks.cpp
-       test_i_gtk_callbacks.h)
- endif (GTK_SUPPORT)
-endif (GUI_SUPPORT)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      test_i_gtk_callbacks.cpp
+      test_i_gtk_callbacks.h)
+endif (GTK_SUPPORT)
 set (${EXECUTABLE}_EXE_CFG
      etc/test_i.gtk2
      etc/test_i.gtk3)
@@ -223,19 +221,17 @@ endif (UNIX)
 set (configuration_file "etc/web_tv.ini")
 set (ui_definition_file "")
 set (ui_rc_file "resources.rc")
-if (GUI_SUPPORT)
- if (GTK_SUPPORT)
-  if (GTK2_USE)
-   set (ui_definition_file "test_i.gtk2")
-  elseif (GTK3_USE)
-   set (ui_definition_file "test_i.gtk3")
-  endif ()
- endif (GTK_SUPPORT)
- if (NOT ${ui_definition_file} STREQUAL "")
-  set (ui_definition_file "etc/${ui_definition_file}")
- endif (NOT ${ui_definition_file} STREQUAL "")
- set (ui_rc_file "etc/${ui_rc_file}")
-endif (GUI_SUPPORT)
+if (GTK_SUPPORT)
+ if (GTK2_USE)
+  set (ui_definition_file "test_i.gtk2")
+ elseif (GTK3_USE)
+  set (ui_definition_file "test_i.gtk3")
+ endif ()
+endif (GTK_SUPPORT)
+if (NOT ${ui_definition_file} STREQUAL "")
+ set (ui_definition_file "etc/${ui_definition_file}")
+endif (NOT ${ui_definition_file} STREQUAL "")
+set (ui_rc_file "etc/${ui_rc_file}")
 
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
@@ -264,10 +260,8 @@ endif ()
 ##########################################
 
 set (configuration_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/${configuration_file}")
-if (GUI_SUPPORT)
- set (ui_definition_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/${ui_definition_file}")
- set (ui_rc_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/${ui_rc_file}")
-endif (GUI_SUPPORT)
+set (ui_definition_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/${ui_definition_file}")
+set (ui_rc_file "${CMAKE_SOURCE_DIR}/test_i/web_tv/${ui_rc_file}")
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
@@ -284,14 +278,12 @@ if (UNIX)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
- if (GUI_SUPPORT)
-  if (GTK_SUPPORT)
-   file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
-  endif (GTK_SUPPORT)
-  if (WXWIDGETS_SUPPORT)
-   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
-  endif (WXWIDGETS_SUPPORT)
- endif (GUI_SUPPORT)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
+ endif (WXWIDGETS_SUPPORT)
  if (SSL_SUPPORT)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)

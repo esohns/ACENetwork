@@ -55,13 +55,11 @@
 
 #include "common_timer_tools.h"
 
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
 #include "ACEStream_config.h"
@@ -81,11 +79,9 @@
 #include "test_i_defines.h"
 
 #include "IRC_client_defines.h"
-#if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "IRC_client_gui_callbacks.h"
-#endif // GTK_USE
-#endif // GUI_SUPPORT
+#endif // GTK_SUPPORT
 #include "IRC_client_gui_common.h"
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_messageallocator.h"
@@ -593,7 +589,6 @@ do_work (unsigned int numberOfDispatchThreads_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5: start UI event loop
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -617,7 +612,6 @@ do_work (unsigned int numberOfDispatchThreads_in,
     return;
   } // end IF
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // step6: initialize worker(s)
 //  int group_id = -1;
@@ -628,12 +622,10 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
     // clean up
     timer_manager_p->stop ();
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
     gtk_manager_p->stop (true,  // wait ?
                          true); // high priority ?
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
     return;
   } // end IF
@@ -645,11 +637,9 @@ do_work (unsigned int numberOfDispatchThreads_in,
 
   // step8: clean up
   timer_manager_p->stop ();
-#if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   gtk_manager_p->wait (false); // don't wait for message queue
 #endif // GTK_USE
-#endif // GUI_SUPPORT
 
   // wait for connection processing to complete
   IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
