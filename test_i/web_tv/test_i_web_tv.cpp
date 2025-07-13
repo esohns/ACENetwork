@@ -660,7 +660,7 @@ do_work (const std::string& configurationFile_in,
 #if defined (SSL_SUPPORT)
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                      (Common_Error_Tools::inDebugSession () ? ACE_TEXT_ALWAYS_CHAR ("..") : ACE_TEXT_ALWAYS_CHAR ("")),
+                                                      (Common_Error_Tools::inDebugSession () ? ACE_TEXT_ALWAYS_CHAR ("..") : ACE_TEXT_ALWAYS_CHAR ("..")),
                                                       false); // data
   filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
   filename_string +=
