@@ -609,12 +609,10 @@ network_wlan_nl80211_finish_cb (struct nl_msg* message_in,
   { // received the final scan result
     cb_data_p->scanning = false;
 
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": scanning...DONE in %s\n"),
                 ACE_TEXT (cb_data_p->monitor->interfaceIdentifier ()).c_str (),
                 ACE_TEXT (Common_Timer_Tools::periodToString (COMMON_TIME_NOW - cb_data_p->timestamp).c_str ())));
-#endif // _DEBUG
 
     ACE_ASSERT (cb_data_p->monitor);
     Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
@@ -719,12 +717,10 @@ network_wlan_nl80211_multicast_groups_cb (struct nl_msg* message_in,
         cb_data_p->map->find (nla_get_string (nlattr_2[CTRL_ATTR_MCAST_GRP_NAME]));
     if (unlikely (iterator == cb_data_p->map->end ()))
     {
-#if defined (_DEBUG)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("unknown/invalid multicast group (was name: \"%s\"; id: %u), continuing\n"),
                   ACE_TEXT (nla_get_string (nlattr_2[CTRL_ATTR_MCAST_GRP_NAME])),
                   nla_get_u32 (nlattr_2[CTRL_ATTR_MCAST_GRP_ID])));
-#endif // _DEBUG
       continue;
     } // end IF
     (*iterator).second =
@@ -975,7 +971,6 @@ nla_put_failure:
       cb_data_p->monitor->set3R (ssid_string,
                                  buffer_a,
                                  state_s);
-#if defined (_DEBUG)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("\"%s\": detected access point (frequency (MHz): %u, signal strength (dBm): %u.%.2u, MAC: %s, SSID: %s, age (ms): %u)...\n"),
                   ACE_TEXT (buffer_a),
@@ -984,7 +979,6 @@ nla_put_failure:
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (state_s.linkLayerAddress.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
                   ACE_TEXT (ssid_string.c_str ()),
                   state_s.lastSeen));
-#endif // _DEBUG
 
       break;
     }
@@ -1133,14 +1127,12 @@ nla_put_failure:
                       data_p + 10,
                       ETH_ALEN);
       status_i = (data_p[29] << 8) + data_p[28];
-#if defined (_DEBUG)
       ACE_DEBUG (((status_i ? LM_ERROR : LM_DEBUG),
                   ACE_TEXT ("\"%s\": authenticated with access point (was: MAC: %s): %u\n"),
                   ACE_TEXT (buffer_a),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
 //                  ACE_TEXT (get_status_str (status_i))));
                   status_i));
-#endif // _DEBUG
 
 update_state:
       ACE_ASSERT (cb_data_p->monitor);
@@ -1215,14 +1207,12 @@ update_state:
                       data_p + 10,
                       ETH_ALEN);
       status_i = (data_p[27] << 8) + data_p[26];
-#if defined (_DEBUG)
       ACE_DEBUG (((status_i ? LM_ERROR : LM_DEBUG),
                   ACE_TEXT ("\"%s\": associated with access point (was: MAC: %s): %u\n"),
                   ACE_TEXT (buffer_a),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
 //                  ACE_TEXT (get_status_str (status_i))));
                   status_i));
-#endif // _DEBUG
 
 update_state_2:
       ACE_ASSERT (cb_data_p->monitor);
@@ -1281,14 +1271,12 @@ update_state_2:
                       data_p + 10,
                       ETH_ALEN);
       reason_i = (data_p[25] << 8) + data_p[24];
-#if defined (_DEBUG)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("\"%s\": deauthenticated with access point (was: MAC: %s; SSID: %s): %d\n"),
                   ACE_TEXT (buffer_a),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
                   ACE_TEXT (cb_data_p->monitor->SSID ().c_str ()),
                   reason_i));
-#endif // _DEBUG
       ACE_UNUSED_ARG (reason_i);
 
       ACE_ASSERT (cb_data_p->monitor);
@@ -1337,7 +1325,6 @@ update_state_2:
                     ACE_TEXT (buffer_a),
                     ACE_TEXT (ssid_string.c_str ())));
       }
-#if defined (_DEBUG)
       struct ether_addr ap_mac_address_s;
       ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
       ACE_DEBUG ((LM_DEBUG,
@@ -1345,7 +1332,6 @@ update_state_2:
                   ACE_TEXT (buffer_a),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
                   ACE_TEXT (ssid_string.c_str ())));
-#endif // _DEBUG
 
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
@@ -1392,7 +1378,6 @@ update_state_2:
                     ACE_TEXT (buffer_a),
                     ACE_TEXT (ssid_string.c_str ())));
       }
-#if defined (_DEBUG)
       struct ether_addr ap_mac_address_s;
       ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
       ACE_DEBUG ((LM_DEBUG,
@@ -1400,7 +1385,6 @@ update_state_2:
                   ACE_TEXT (buffer_a),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
                   ACE_TEXT (ssid_string.c_str ())));
-#endif // _DEBUG
 
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
@@ -1454,14 +1438,12 @@ update_state_2:
         *(cb_data_p->error) = ETIMEDOUT;
         return NL_STOP;
       } // end IF
-#if defined (_DEBUG)
       ACE_DEBUG (((status_i ? LM_ERROR : LM_DEBUG),
                   ACE_TEXT ("\"%s\": connected to access point (is: MAC: %s; SSID: %s): %u\n"),
                   ACE_TEXT (buffer_a),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
                   ACE_TEXT (cb_data_p->monitor->SSID ().c_str ()),
                   status_i));
-#endif // _DEBUG
 
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =

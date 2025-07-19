@@ -67,9 +67,6 @@ if (UNIX)
  if (DBUS_SUPPORT)
   add_definitions (-DDBUS_SUPPORT)
  endif (DBUS_SUPPORT)
-# *TODO*: currently (!) implies DHCLIENT_SUPPORT off
-# CMAKE_DEPENDENT_OPTION (DBUS_SUPPORT "compile DBus/NetworkManager support" ${DBUS_SUPPORT_ENABLE}
-#                         "DHCLIENT_SUPPORT" OFF)
 elseif (WIN32)
  option (WLANAPI_SUPPORT "compile wlanapi support" ON)
  add_feature_info (wlanapi WLANAPI_SUPPORT "support wlanapi")

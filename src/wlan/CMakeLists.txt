@@ -22,21 +22,8 @@ if (WIN32)
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif (WIN32)
 
-#string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
-#string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
-#find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-#              REQUIRED
-#              CONFIG
-#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
-#              PATH_SUFFIXES Common/${BUILD_PATH_SUFFIX}
-#              NO_DEFAULT_PATH)
-#if (NOT EXISTS ${Common_DIR})
-# message (FATAL_ERROR "could not find package \"Common\", aborting")
-#endif ()
-#add_definitions (-DCOMMON_HAS_DLL)
 if (UNIX)
  if (DBUS_SUPPORT)
-#  add_definitions (-DCOMMON_DBUS_HAS_DLL)
   add_definitions (-DSD_BUS_SUPPORT)
  endif (DBUS_SUPPORT)
 endif (UNIX)
@@ -56,6 +43,8 @@ if (UNIX)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
+  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                              "$<BUILD_INTERFACE:${PKG_NM_INCLUDE_DIRS}>")
  endif (DBUS_SUPPORT)
 
  if (DHCLIENT_SUPPORT)
@@ -233,6 +222,8 @@ if (UNIX)
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PKG_DBUS_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PKG_NM_LIBRARIES})
+
   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC CommonDBus)
  endif (DBUS_SUPPORT)
 elseif (WIN32)
