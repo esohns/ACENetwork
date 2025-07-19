@@ -273,9 +273,7 @@ struct Net_WLAN_nl80211_CBData
    , protocolFeatures (NULL)
    , scanning (false)
    , SSIDs ()
-#if defined (_DEBUG)
    , timestamp (ACE_Time_Value::zero)
-#endif // _DEBUG
    , type (NL80211_IFTYPE_UNSPECIFIED)
    , map (NULL)
    , monitor (NULL)
@@ -295,9 +293,7 @@ struct Net_WLAN_nl80211_CBData
   ACE_UINT32*                           protocolFeatures;
   bool                                  scanning;
   Net_WLAN_SSIDs_t*                     SSIDs;
-#if defined (_DEBUG)
   ACE_Time_Value                        timestamp;
-#endif // _DEBUG
   enum nl80211_iftype                   type;
   Net_WLAN_nl80211_MulticastGroupIds_t* map;
   Net_WLAN_IMonitorBase*                monitor;
