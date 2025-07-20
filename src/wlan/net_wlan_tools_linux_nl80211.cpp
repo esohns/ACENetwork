@@ -448,7 +448,7 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
                 ACE_TEXT ("missing 'SSID' information element, aborting\n")));
     return NL_STOP;
   } // end IF
-  ACE_ASSERT (information_element_p->length <= IW_ESSID_MAX_SIZE);
+  ACE_ASSERT (information_element_p->length <= NET_WLAN_ESSID_MAX_SIZE);
   std::string SSID_string (reinterpret_cast<char*> (&information_element_p->data),
                            information_element_p->length);
   cb_data_p->SSIDs->push_back (SSID_string);
@@ -549,7 +549,7 @@ network_wlan_nl80211_ssids_cb (struct nl_msg* message_in,
                 ACE_TEXT ("missing 'SSID' information element, aborting\n")));
     return NL_STOP;
   } // end IF
-  ACE_ASSERT (information_element_p->length <= IW_ESSID_MAX_SIZE);
+  ACE_ASSERT (information_element_p->length <= NET_WLAN_ESSID_MAX_SIZE);
   SSID_string.assign (reinterpret_cast<char*> (&information_element_p->data),
                       information_element_p->length);
   cb_data_p->SSIDs->push_back (SSID_string);
@@ -1257,7 +1257,7 @@ Net_WLAN_Tools::authenticate (const std::string& interfaceIdentifier_in,
                 (interfaceIdentifier_in.size () > IFNAMSIZ)        ||
                 Net_Common_Tools::isAny (accessPointMACAddress_in) ||
                 ESSID_in.empty ()                                  ||
-                (ESSID_in.size () > IW_ESSID_MAX_SIZE)             ||
+                (ESSID_in.size () > NET_WLAN_ESSID_MAX_SIZE)       ||
 //                (authenticationType_in != )                ||
                 !frequency_in                                      ||
                 !driverFamilyId_in))
@@ -1358,7 +1358,7 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
                 (interfaceIdentifier_in.size () > IFNAMSIZ)        ||
                 Net_Common_Tools::isAny (accessPointMACAddress_in) ||
                 SSID_in.empty ()                                   ||
-                (SSID_in.size () > IW_ESSID_MAX_SIZE)              ||
+                (SSID_in.size () > NET_WLAN_ESSID_MAX_SIZE)        ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1587,7 +1587,7 @@ Net_WLAN_Tools::connect (const std::string& interfaceIdentifier_in,
                 (interfaceIdentifier_in.size () > IFNAMSIZ)        ||
                 Net_Common_Tools::isAny (accessPointMACAddress_in) ||
                 ESSID_in.empty ()                                  ||
-                (ESSID_in.size () > IW_ESSID_MAX_SIZE)             ||
+                (ESSID_in.size () > NET_WLAN_ESSID_MAX_SIZE)       ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1670,7 +1670,7 @@ Net_WLAN_Tools::deauthenticate (const std::string& interfaceIdentifier_in,
                 (interfaceIdentifier_in.size () > IFNAMSIZ)        ||
 //                Net_Common_Tools::isAny (accessPointMACAddress_in) ||
 //                ESSID_in.empty ()                                  ||
-//                (ESSID_in.size () > IW_ESSID_MAX_SIZE)             ||
+//                (ESSID_in.size () > NET_WLAN_ESSID_MAX_SIZE)       ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1756,7 +1756,7 @@ Net_WLAN_Tools::disassociate (const std::string& interfaceIdentifier_in,
                 (interfaceIdentifier_in.size () > IFNAMSIZ)        ||
 //                Net_Common_Tools::isAny (accessPointMACAddress_in) ||
 //                ESSID_in.empty ()                                  ||
-//                (ESSID_in.size () > IW_ESSID_MAX_SIZE)             ||
+//                (ESSID_in.size () > NET_WLAN_ESSID_MAX_SIZE)       ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1842,7 +1842,7 @@ Net_WLAN_Tools::disconnect (const std::string& interfaceIdentifier_in,
                 (interfaceIdentifier_in.size () > IFNAMSIZ)        ||
 //                Net_Common_Tools::isAny (accessPointMACAddress_in) ||
 //                ESSID_in.empty ()                                  ||
-//                (ESSID_in.size () > IW_ESSID_MAX_SIZE)             ||
+//                (ESSID_in.size () > NET_WLAN_ESSID_MAX_SIZE)       ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1930,9 +1930,9 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
   bool result = false;
 
   // sanity check(s)
-  if (unlikely (interfaceIdentifier_in.empty ()             ||
-                (interfaceIdentifier_in.size () > IFNAMSIZ) ||
-                (ESSID_in.size () > IW_ESSID_MAX_SIZE)      ||
+  if (unlikely (interfaceIdentifier_in.empty ()              ||
+                (interfaceIdentifier_in.size () > IFNAMSIZ)  ||
+                (ESSID_in.size () > NET_WLAN_ESSID_MAX_SIZE) ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,

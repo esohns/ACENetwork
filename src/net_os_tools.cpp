@@ -21,13 +21,13 @@
 
 #include "net_os_tools.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (ACE_LINUX)
+#include "linux/capability.h"
+
 #if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
 #endif // DBUS_SUPPORT
-#include "linux/capability.h"
-#endif // ACE_WIN32 || ACE_WIN64
+#endif // ACE_LINUX
 
 #include <regex>
 #include <string>
@@ -41,13 +41,12 @@
 #include "common_process_tools.h"
 #include "common_string_tools.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (ACE_LINUX)
 #if defined (DBUS_SUPPORT)
 #include "common_dbus_defines.h"
 #include "common_dbus_tools.h"
 #endif // DBUS_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
+#endif // ACE_LINUX
 
 #include "net_common_tools.h"
 #include "net_defines.h"
@@ -504,7 +503,11 @@ Net_OS_Tools::networkManagerManageInterface (const std::string& interfaceIdentif
   std::smatch::iterator iterator;
   bool section_found_b = false, value_found_b = false, modified_b = false;
   bool is_managing_interface_b =
-      Net_OS_Tools::isNetworkManagerManagingInterface (interfaceIdentifier_in);
+#if defined (DBUS_SUPPORT)
+    Net_OS_Tools::isNetworkManagerManagingInterface (interfaceIdentifier_in);
+#else
+    false;
+#endif // DBUS_SUPPORT
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
@@ -1104,6 +1107,7 @@ map:
   return false;
 }
 
+#if defined (DBUS_SUPPORT)
 bool
 Net_OS_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIdentifier_in)
 {
@@ -1115,9 +1119,6 @@ Net_OS_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIde
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
   if (!Common_Process_Tools::id (ACE_TEXT_ALWAYS_CHAR (NET_EXE_NETWORKMANAGER_STRING)))
     return false; // *TODO*: avoid false negatives
-
-#if defined (DBUS_SUPPORT)
-//  // sanity check(s)
 //  if (!Common_DBus_Tools::isUnitRunning (NULL,
 //                                         COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
 //    return false; // *TODO*: avoid false negatives
@@ -1148,8 +1149,8 @@ Net_OS_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIde
                                           false);
 
   std::string device_object_path_string =
-      Net_WLAN_Tools::deviceToDBusObjectPath (connection_p,
-                                              interfaceIdentifier_in);
+    Net_WLAN_Tools::deviceToDBusObjectPath (connection_p,
+                                            interfaceIdentifier_in);
   if (unlikely (device_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1159,10 +1160,10 @@ Net_OS_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIde
   } // end IF
 
   message_p =
-      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_NETWORKMANAGER_SERVICE),
-                                    device_object_path_string.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
-                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+    dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_NETWORKMANAGER_SERVICE),
+                                  device_object_path_string.c_str (),
+                                  ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
+                                  ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1222,13 +1223,8 @@ clean:
     dbus_connection_close (connection_p);
     dbus_connection_unref (connection_p);
   } // end IF
-#else
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (false);
-
-  ACE_NOTREACHED (return false;)
-#endif // DBUS_SUPPORT
 
   return result;
 }
+#endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64

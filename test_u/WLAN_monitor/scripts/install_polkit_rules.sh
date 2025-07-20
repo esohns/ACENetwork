@@ -1,5 +1,5 @@
 #!/bin/sh
-# author:      Erik Sohns <eriksohns@123mail.org>
+# author:      Erik Sohns <erik.sohns@posteo.net>
 # this script installs required polkit rules
 # return value: - 0 success, 1 failure
 
@@ -48,12 +48,12 @@ DISTRIBUTION="$(lsb_release -i | cut -f 2)"
 #[ ${DISTRIBUTION} != "ArchLinux" -a ${DISTRIBUTION} != "Ubuntu" ] && echo "invalid/unknown linux distribution (was: \"${DISTRIBUTION}\"), aborting" && exit 1
 case "${DISTRIBUTION}" in
 # ArchLinux)
-#  POLKIT_RULES="${PROJECT_DIR}/libACENetwork/test_u/WLAN_monitor/etc/10-wlan_management.rules" # archlinux
+#  POLKIT_RULES="${PROJECT_DIR}/ACENetwork/test_u/WLAN_monitor/etc/10-wlan_management.rules" # archlinux
 #  ETC_POLKIT_RULES_DIR="/etc/polkit-1/rules.d" # archlinux
 #  ;;
  Ubuntu)
-  LA_RULES_FILE="${PROJECT_DIR}/libACENetwork/test_u/WLAN_monitor/etc/10-wlan_management.pkla"
-  RULES_FILE="${PROJECT_DIR}/libACENetwork/test_u/WLAN_monitor/etc/10-wlan_management.rules"
+  LA_RULES_FILE="${PROJECT_DIR}/ACENetwork/test_u/WLAN_monitor/etc/10-wlan_management.pkla"
+  RULES_FILE="${PROJECT_DIR}/ACENetwork/test_u/WLAN_monitor/etc/10-wlan_management.rules"
   ETC_RULES_DIRECTORY="/etc/polkit-1/localauthority/50-local.d" # ubuntu (artful)
   ;;
  *)
@@ -84,4 +84,3 @@ echo "copied \"$(basename ${RULES_FILE})\" to \"${USR_SHARE_RULES_DIRECTORY}\"..
 #chmod --quiet ug+s ${BIN}
 #[ $? -ne 0 ] && echo "ERROR: failed to chmod u+s ${BIN}: \"$?\", aborting" && exit 1
 #echo "modified \"$BINS\": suid sgid root"
-

@@ -31,12 +31,11 @@
 #include "netlink/handlers.h"
 #endif // NL80211_SUPPORT
 
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
 #include <map>
 
 #include "dbus/dbus.h"
-//#include "dbus/dbus-glib.h"
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include <string>
@@ -58,14 +57,14 @@ struct nlmsgerr;
 struct nl_msg;
 #endif // NL80211_SUPPORT
 
-#if defined (DBUS_SUPPORT)
-void
-network_wlan_dbus_main_wakeup_cb (void*);
+#if defined (DBUS_NM_SUPPORT)
+// void
+// network_wlan_dbus_main_wakeup_cb (void*);
 DBusHandlerResult
 network_wlan_dbus_default_filter_cb (struct DBusConnection*,
                                      struct DBusMessage*,
                                      void*);
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
@@ -245,15 +244,15 @@ class Net_WLAN_Monitor_T<AddressType,
   inline virtual bool do_authenticate (const std::string&, const struct ether_addr&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void do_scan (const std::string& interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { ACE_UNUSED_ARG (APMACAddress_in); Net_WLAN_Tools::scan (interfaceIdentifier_in, SSID_in, inherited::handle_, false); }
   // *TODO*: remove these ASAP
-#if defined (NL80211_SUPPORT)
+#if defined (NL80211_USE)
   inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::socketHandle_); return inherited::socketHandle_; }
   inline virtual const int get_3 () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
-#endif // NL80211_SUPPORT
-#if defined (DBUS_SUPPORT)
+#endif // NL80211_USE
+#if defined (DBUS_NM_USE)
   inline virtual const struct DBusConnection* const getP_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual const std::string& get1RR_2 (const std::string&) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR ("")); ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");) }
   inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_USE
 
   struct iw_range range_;
 
@@ -442,7 +441,7 @@ class Net_WLAN_Monitor_T<AddressType,
 
 //////////////////////////////////////////
 
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
 template <typename AddressType,
           typename ConfigurationType,
           ////////////////////////////////
@@ -485,14 +484,14 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  inline virtual const struct DBusConnection* const getP_2 () const { return connection_; }
+  inline virtual const struct DBusConnection* const getP_2 () const { ACE_ASSERT (connection_); return connection_; }
   virtual const std::string& get1RR_2 (const std::string&) const;
   virtual void set2R (const std::string&,
                       const std::string&);
-#if defined (NL80211_SUPPORT)
+#if defined (NL80211_USE)
   inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual const int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
-#endif // NL80211_SUPPORT
+#endif // NL80211_USE
 
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR (""))); }
 
@@ -504,10 +503,14 @@ class Net_WLAN_Monitor_T<AddressType,
   typedef INTERFACEIDENTIFIER_TO_OBJECTPATH_T::iterator INTERFACEIDENTIFIER_TO_OBJECTPATH_ITERATOR_T;
   typedef std::pair<std::string, std::string> INTERFACEIDENTIFIER_TO_OBJECTPATH_PAIR_T;
   struct INTERFACEIDENTIFIER_TO_OBJECTPATH_FIND_PREDICATE
-   : public std::binary_function<INTERFACEIDENTIFIER_TO_OBJECTPATH_PAIR_T,
-                                 std::string,
-                                 bool>
+   // : public std::binary_function<INTERFACEIDENTIFIER_TO_OBJECTPATH_PAIR_T,
+   //                               std::string,
+   //                               bool>
   {
+    typedef INTERFACEIDENTIFIER_TO_OBJECTPATH_PAIR_T first_argument_type;
+    typedef std::string                              second_argument_type;
+    typedef bool                                     result_type;
+
     inline bool operator() (const INTERFACEIDENTIFIER_TO_OBJECTPATH_PAIR_T& entry_in, std::string value_in) const { return entry_in.second == value_in; }
   };
 
@@ -543,7 +546,7 @@ class Net_WLAN_Monitor_T<AddressType,
   inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
-#endif /* DBUS_SUPPORT */
+#endif /* DBUS_NM_SUPPORT */
 #endif /* ACE_WIN32 || ACE_WIN64 || ACE_LINUX */
 
 //////////////////////////////////////////
@@ -561,9 +564,9 @@ class Net_WLAN_Monitor_T<AddressType,
 #if defined (NL80211_SUPPORT)
 #include "net_wlan_monitor_nl80211.inl"
 #endif /* NL80211_SUPPORT */
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
 #include "net_wlan_monitor_dbus.inl"
-#endif /* DBUS_SUPPORT */
+#endif /* DBUS_NM_SUPPORT */
 #endif /* ACE_WIN32 || ACE_WIN64 */
 
 #endif

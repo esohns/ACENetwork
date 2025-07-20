@@ -26,9 +26,9 @@
 #include "Ks.h"
 #include "wlanapi.h"
 #else
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
 #include "dbus/dbus.h"
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include <string>
@@ -75,10 +75,10 @@ struct Net_WLAN_MonitorConfiguration
    , randomizeMACAddressForScans (NET_WLAN_MONITOR_NL80211_DEFAULT_RANDOMIZEMACADDRESSFORSCANS)
    , wiPhyIdentifier ()
 #endif // NL80211_SUPPORT
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
    , notificationCB (NULL)
    , notificationCBData (NULL)
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , SSID ()
@@ -121,10 +121,10 @@ struct Net_WLAN_MonitorConfiguration
   bool                          randomizeMACAddressForScans;
   std::string                   wiPhyIdentifier;
 #endif // NL80211_SUPPORT
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
   DBusHandleMessageFunction     notificationCB;
   void*                         notificationCBData;
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   enum Common_EventDispatchType dispatch;
   std::string                   SSID;

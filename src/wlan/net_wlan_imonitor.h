@@ -27,9 +27,12 @@
 #else
 #include "net/ethernet.h"
 
-#if defined (DBUS_SUPPORT)
+#if defined (NL80211_USE)
+#include "netlink/netlink.h"
+#endif // NL80211_USE
+#if defined (DBUS_USE)
 #include "dbus/dbus.h"
-#endif // DBUS_SUPPORT
+#endif // DBUS_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include <string>
@@ -124,7 +127,7 @@ class Net_WLAN_IMonitorBase
 #endif // NL80211_USE
 #if defined (DBUS_USE)
  , public Common_IGetP_2_T<struct DBusConnection>
- , public Common_IGet1RR_2_T<std::string,
+ , public Common_IGet1RR_2_T<std::string, // SSID
                              std::string> // cache access
  , public Common_ISet2R_T<std::string,
                           std::string>  // cache access
@@ -164,7 +167,7 @@ class Net_WLAN_IMonitorBase
   // *IMPORTANT NOTE*: does not block; results are reported by callback (see:
   //                   subscribe())
   // *NOTE*: effectively does the following:
-  //         - disconnect from any AP (if associated)
+  //         - disconnect from any AP (if associated and identifier is different)
   //         - reconfigure the interface and reset the SSID
   //         - reset the 'auto-associate' flag
   //         - resume scanning

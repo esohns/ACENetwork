@@ -47,8 +47,7 @@
 #include "net_wlan_common.h"
 
 // forward declarations
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#elif defined (ACE_LINUX)
+#if defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
 struct sockaddr_nl;
 struct nlmsgerr;
@@ -77,7 +76,7 @@ int
 network_wlan_nl80211_feature_cb (struct nl_msg*,
                                  void*);
 #endif // NL80211_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
+#endif // ACE_LINUX
 
 class Net_WLAN_Tools
 {

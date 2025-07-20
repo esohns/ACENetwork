@@ -6,6 +6,9 @@ include (Threads)
 include (NetlinkConfig)
 include (SSLConfig)
 
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/dbus/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/dbus/scripts")
+include (dbus)
+
 include (ACE)
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
@@ -19,7 +22,6 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-add_definitions (-DCOMMON_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -30,7 +32,6 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
-add_definitions (-DSTREAM_HAS_DLL)
 
 if (UNIX)
  add_link_options ("LINKER:--as-needed")

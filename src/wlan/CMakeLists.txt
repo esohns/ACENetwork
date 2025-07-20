@@ -1,4 +1,3 @@
-#include (iconv)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 include (PreXMLImplementation)
 #include (SetXMLImplementation)
@@ -23,9 +22,9 @@ if (WIN32)
 endif (WIN32)
 
 if (UNIX)
- if (DBUS_SUPPORT)
+ if (DBUS_NM_SUPPORT)
   add_definitions (-DSD_BUS_SUPPORT)
- endif (DBUS_SUPPORT)
+ endif (DBUS_NM_SUPPORT)
 endif (UNIX)
 
 if (UNIX)
@@ -40,13 +39,12 @@ if (UNIX)
    message (FATAL_ERROR "libnl not found, aborting")
   endif ()
  endif (NL80211_SUPPORT)
- if (DBUS_SUPPORT)
+ if (DBUS_NM_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               "$<BUILD_INTERFACE:${PKG_NM_INCLUDE_DIRS}>")
- endif (DBUS_SUPPORT)
-
+ endif (DBUS_NM_SUPPORT)
  if (DHCLIENT_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC ${BIND9_CFLAGS})
  endif (DHCLIENT_SUPPORT)
@@ -151,9 +149,13 @@ if (UNIX)
  if (DBUS_SUPPORT)
   set (source_files
        ${source_files}
-       net_wlan_monitor_dbus.inl
        net_wlan_tools_linux_dbus.cpp)
  endif (DBUS_SUPPORT)
+ if (DBUS_NM_SUPPORT)
+  set (source_files
+       ${source_files}
+       net_wlan_monitor_dbus.inl)
+ endif (DBUS_NM_SUPPORT)
 elseif (WIN32)
  if (WLANAPI_SUPPORT)
   set (source_files
@@ -199,9 +201,9 @@ if (UNIX)
  if (NL80211_SUPPORT)
 #  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
  endif (NL80211_SUPPORT)
- if (DBUS_SUPPORT)
+ if (DBUS_NM_SUPPORT)
   add_dependencies (${PROJECT_NAME}_WLAN CommonDBus)
- endif (DBUS_SUPPORT)
+ endif (DBUS_NM_SUPPORT)
 endif (UNIX)
 
 add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME})
@@ -220,12 +222,12 @@ if (UNIX)
    message (FATAL_ERROR "libnl not found, aborting")
   endif ()
  endif (NL80211_SUPPORT)
- if (DBUS_SUPPORT)
+ if (DBUS_NM_SUPPORT)
   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PKG_DBUS_LIBRARIES})
   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC ${PKG_NM_LIBRARIES})
 
   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC CommonDBus)
- endif (DBUS_SUPPORT)
+ endif (DBUS_NM_SUPPORT)
 elseif (WIN32)
  if (MSXML_SUPPORT)
   target_link_libraries (${PROJECT_NAME}_WLAN PUBLIC msxml2.lib)
@@ -274,12 +276,12 @@ if (UNIX)
        net_wlan_monitor_nl80211.inl
        net_wlan_tools_linux_nl80211.cpp)
  endif (NL80211_SUPPORT)
- if (DBUS_SUPPORT)
+ if (DBUS_NM_SUPPORT)
   set (include_files
        ${include_files}
        net_wlan_monitor_dbus.inl
        net_wlan_tools_linux_dbus.cpp)
- endif (DBUS_SUPPORT)
+ endif (DBUS_NM_SUPPORT)
 elseif (WIN32)
  set (include_files
       ${include_files}

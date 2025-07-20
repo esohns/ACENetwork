@@ -69,28 +69,19 @@
 #include "common_tools.h"
 
 #if defined (ACE_LINUX)
-#if defined (DBUS_SUPPORT)
-#include "common_dbus_defines.h"
-#include "common_dbus_tools.h"
-#endif // DBUS_SUPPORT
 #include "common_string_tools.h"
 
 #include "common_timer_tools.h"
 #elif (defined (ACE_WIN32) || defined (ACE_WIN64))
 #include "common_error_tools.h"
-#endif // ACE_LINUX
+#endif // ACE_LINUX || ACE_WIN32 || ACE_WIN64
 
 #include "net_common.h"
 #include "net_defines.h"
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
-//#include "net_wlan_configuration.h"
-//#include "net_wlan_monitor_common.h"
 #if defined (ACE_LINUX)
-#if defined (DBUS_SUPPORT)
-#include "net_wlan_defines.h"
-#endif // DBUS_SUPPORT
 #include "net_wlan_tools.h"
 #endif // ACE_LINUX
 

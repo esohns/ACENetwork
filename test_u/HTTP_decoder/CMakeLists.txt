@@ -27,9 +27,6 @@ add_definitions (-DSTREAM_HAS_DLL)
 
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
-# if (DBUS_SUPPORT)
-#  include_directories (${PKG_DBUS_INCLUDE_DIRS})
-# endif ()
  include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
 
 # include_directories (/usr/local/src/ACE_wrappers)

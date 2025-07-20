@@ -23,16 +23,15 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
-//#if defined (DBUS_SUPPORT)
+//#if defined (DBUS_NM_SUPPORT)
 //#include "NetworkManager.h"
-//#endif // DBUS_SUPPORT
+//#endif // DBUS_NM_SUPPORT
 
 //#include "net_configuration.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#elif defined (ACE_LINUX)
-#if defined (DHCLIENT_USE)
+#if defined (ACE_LINUX)
+#if defined (DHCLIENT_SUPPORT)
 void
 net_wlan_dhclient_connection_event_cb (dhcpctl_handle handle_in,
                                        dhcpctl_status status_in,
@@ -159,5 +158,5 @@ continue_:
     return;
   }
 }
-#endif // DHCLIENT_USE
-#endif // ACE_WIN32 || ACE_WIN64
+#endif // DHCLIENT_SUPPORT
+#endif // ACE_LINUX

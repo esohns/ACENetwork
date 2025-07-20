@@ -114,12 +114,12 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 #else
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d           : use DBus/NetworkManager implementation [")
             << (NET_WLAN_MONITOR_DEFAULT_API == NET_WLAN_MONITOR_API_DBUS)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_STR;
@@ -259,13 +259,13 @@ do_processArguments (const int& argc_in,
         break;
       }
 #else
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
       case 'd':
       {
         API_out = NET_WLAN_MONITOR_API_DBUS;
         break;
       }
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
       case 'g':
       {
@@ -604,14 +604,16 @@ do_work (bool autoAssociate_in,
 #endif // WEXT_SUPPORT
       break;
     case NET_WLAN_MONITOR_API_NL80211:
+#if defined (NL80211_SUPPORT)
       iwlanmonitor_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
       istatistic_handler_p = NET_WLAN_NL80211MONITOR_SINGLETON::instance ();
+#endif // NL80211_SUPPORT
       break;
     case NET_WLAN_MONITOR_API_DBUS:
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
       iwlanmonitor_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
       istatistic_handler_p = NET_WLAN_DBUSMONITOR_SINGLETON::instance ();
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
       break;
     default:
     {

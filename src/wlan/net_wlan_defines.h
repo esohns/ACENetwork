@@ -24,7 +24,7 @@
 // protocol
 // (see also: http://standards.ieee.org/findstds/standard/802.11-2016.html)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#define NET_WLAN_ESSID_MAX_SIZE                                           32
+#define NET_WLAN_ESSID_MAX_SIZE                                           DOT11_SSID_MAX_LENGTH
 #else
 #if defined (WEXT_SUPPORT)
 #define NET_WLAN_ESSID_MAX_SIZE                                           IW_ESSID_MAX_SIZE
@@ -82,7 +82,6 @@
 #define NET_WLAN_MONITOR_UNIX_DEFAULT_BACKGROUNDSCANS                     false
 #define NET_WLAN_MONITOR_DEFAULT_DATA_POLL_INTERVAL_MS                    50 // ms
 
-#if defined (NL80211_SUPPORT)
 // *TODO*: use official definitions from the standard as soon as they are
 //         available programatically (see also: Std 802.11-2007 7.3.1.7)
 #define NET_WLAN_MONITOR_NL80211_REASON_CODE_LEAVING                      3
@@ -96,9 +95,7 @@
 
 // features (protocol)
 #define NET_WLAN_MONITOR_NL80211_DEFAULT_SPLITWIPHYDUMPS                  true
-#endif // NL80211_SUPPORT
 
-#if defined (DBUS_SUPPORT)
 // NetworkManager
 #define NET_WLAN_DBUS_NETWORKMANAGER_SERVICE                      "org.freedesktop.NetworkManager"
 
@@ -124,7 +121,6 @@
 #define NET_WLAN_DBUS_WPASUPPLICANT_INTERFACE_INTERFACE           "fi.w1.wpa_supplicant1.Interface"
 
 #define NET_WLAN_DBUS_WPASUPPLICANT_OBJECT_PATH                   "/fi/w1/wpa_supplicant1"
-#endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #define NET_WLAN_MONITOR_THREAD_NAME                                      "WLAN monitor"

@@ -35,15 +35,15 @@
 /****************************************/
 
 // options
-#cmakedefine TRACING
-#cmakedefine VALGRIND_SUPPORT
+/* #cmakedefine TRACING */
+/* #cmakedefine VALGRIND_SUPPORT */
 // sub-options - src
-#cmakedefine SSL_SUPPORT
-#cmakedefine NETLINK_SUPPORT
+/* #cmakedefine SSL_SUPPORT */
+/* #cmakedefine NETLINK_SUPPORT */
 // sub-options - wlan
-#cmakedefine WEXT_SUPPORT
-#cmakedefine NL80211_SUPPORT
-#cmakedefine DBUS_SUPPORT
-#cmakedefine DHCLIENT_SUPPORT
-#cmakedefine WLANAPI_SUPPORT
-#cmakedefine WINXP_SUPPORT
+/* #cmakedefine WEXT_SUPPORT */
+/* #cmakedefine NL80211_SUPPORT */
+/* #cmakedefine DBUS_NM_SUPPORT */
+/* #cmakedefine DHCLIENT_SUPPORT */
+/* #cmakedefine WLANAPI_SUPPORT */
+/* #cmakedefine WINXP_SUPPORT */

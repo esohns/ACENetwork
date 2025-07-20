@@ -79,7 +79,7 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA*,
 struct nl_sock;
 #endif // NL80211_SUPPORT
 
-#if defined (DHCLIENT_USE)
+#if defined (DHCLIENT_SUPPORT)
 void
 net_wlan_dhclient_connection_event_cb (dhcpctl_handle, // omapi object handle
                                        dhcpctl_status, // result status
@@ -88,7 +88,7 @@ void
 net_wlan_dhclient_connect_cb (dhcpctl_handle, // omapi object handle
                               dhcpctl_status, // result status
                               void*);         // user data
-#endif // DHCLIENT_USE
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
@@ -197,9 +197,9 @@ class Net_WLAN_Monitor_Base_T
   struct nl_sock*                       socketHandle_;
 #endif // NL80211_SUPPORT
 
-#if defined (DHCLIENT_USE)
+#if defined (DHCLIENT_SUPPORT)
   struct Net_WLAN_dhclient_CBData       dhclientCBData_;
-#endif // DHCLIENT_USE
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   ConfigurationType*                    configuration_;
   bool                                  isActive_;

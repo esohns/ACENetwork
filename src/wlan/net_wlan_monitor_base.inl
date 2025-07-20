@@ -422,8 +422,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
   // *TODO*: disable sequence checks selectively for multicast messages
   nl_socket_disable_seq_check (socketHandle_);
 #endif // NL80211_SUPPORT
-//#if defined (DBUS_SUPPORT)
-//#endif // DBUS_SUPPORT
 
 #endif // ACE_WIN32 || ACE_WIN64
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
@@ -617,17 +615,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // ACE_WIN32 || ACE_WIN64
   std::string current_ssid_s = this->SSID ();
   if (likely (!SSID_in.empty ()))
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_ASSERT (SSID_in.size () <= DOT11_SSID_MAX_LENGTH);
-#else
-#if defined (WEXT_SUPPORT)
-    ACE_ASSERT (SSID_in.size () <= IW_ESSID_MAX_SIZE);
-#elif defined (NL80211_SUPPORT) || defined (DBUS_SUPPORT)
-    ACE_ASSERT (SSID_in.size () <= 32);
-#endif // NL80211_SUPPORT || DBUS_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-
+  { ACE_ASSERT (SSID_in.size () <= NET_WLAN_ESSID_MAX_SIZE);
     if (unlikely (!ACE_OS::strcmp (SSID_in.c_str (),
                                    current_ssid_s.c_str ())))
       return true; // nothing to do
@@ -857,7 +845,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          >
+          >USE
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
@@ -1090,9 +1078,7 @@ reset_state:
       std::string scan_time_string;
       ACE_High_Res_Timer timer;
 #elif defined (NL80211_USE)
-#if defined (_DEBUG)
       nl80211CBData_.timestamp = COMMON_TIME_NOW;
-#endif // _DEBUG
 #endif // WEXT_USE || NL80211_USE
 
 #if defined (WEXT_USE)
@@ -2337,16 +2323,13 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ACE_ASSERT (configuration_);
   if (!success_in)
   {
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": failed to associate with access point (SSID was: %s)\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
-#endif // _DEBUG
     return;
   } // end IF
 
-#if defined (_DEBUG)
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     Net_WLAN_AccessPointCacheConstIterator_t iterator =
         SSIDCache_.find (configuration_->SSID);
@@ -2361,7 +2344,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_2.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
-#endif // _DEBUG
 }
 template <typename AddressType,
           typename ConfigurationType,
@@ -2403,21 +2385,16 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ACE_ASSERT (configuration_);
   if (!success_in)
   {
-#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": failed to disassociate with access point (SSID was: %s)\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
-#endif // _DEBUG
     return;
   } // end IF
-
-#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": disassociated with access point (SSID was: %s)\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
-#endif // _DEBUG
 }
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -2510,7 +2487,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
     } // end FOR
   } // end lock scope
 
-#if defined (_DEBUG)
   // sanity check(s)
   if (!success_in)
     return;
@@ -2566,7 +2542,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
 //continue_:
   ;
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 }
 template <typename AddressType,
           typename ConfigurationType
@@ -2640,7 +2615,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ACE_ASSERT (configuration_);
   if (!success_in)
   {
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": failed to disconnect from access point (SSID was: %s)\n"),
@@ -2652,11 +2626,9 @@ Net_WLAN_Monitor_Base_T<AddressType,
                 ACE_TEXT (interfaceIdentifier_in.c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
     return;
   } // end IF
 
-#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": disconnected from access point (SSID was: %s)\n"),
@@ -2668,7 +2640,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // _DEBUG
 }
 
 template <typename AddressType,

@@ -49,12 +49,12 @@ extern "C"
 
 #include "common_tools.h"
 
-#if defined (ACE_LINUX) && defined (DBUS_SUPPORT) && defined (SD_BUS_SUPPORT)
+#if defined (ACE_LINUX) && defined (DBUS_NM_SUPPORT) && defined (SD_BUS_SUPPORT)
 #include "common_dbus_defines.h"
 #include "common_dbus_tools.h"
 
 #include "net_os_tools.h"
-#endif // ACE_LINUX && DBUS_SUPPORT && SD_BUS_SUPPORT
+#endif // ACE_LINUX && DBUS_NM_SUPPORT && SD_BUS_SUPPORT
 
 #include "common_math_tools.h"
 
@@ -733,19 +733,19 @@ Net_WLAN_Monitor_T<AddressType,
   nl_socket_set_cb (inherited::socketHandle_, callbacks_);
 
   // sanity check(s)
-#if defined (ACE_LINUX) && defined (DBUS_SUPPORT) && defined (SD_BUS_SUPPORT)
+#if defined (ACE_LINUX) && defined (DBUS_NM_SUPPORT) && defined (SD_BUS_SUPPORT)
   if (Common_DBus_Tools::isUnitRunning (NULL,
                                         COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
-    if (!Net_OS_Tools::networkManagerManageInterface (configuration_in.interfaceIdentifier,
-                                                      false))
+    if (unlikely (!Net_OS_Tools::networkManagerManageInterface (configuration_in.interfaceIdentifier,
+                                                                false)))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_OS_Tools::networkManagerManageInterface(\"%s\",false), continuing\n"),
                   ACE_TEXT (configuration_in.interfaceIdentifier.c_str ())));
   if (Common_DBus_Tools::isUnitRunning (NULL,
                                         COMMON_SYSTEMD_UNIT_WPASUPPLICANT))
-    if (!Net_WLAN_Tools::WPASupplicantManageInterface (NULL,
-                                                       configuration_in.interfaceIdentifier,
-                                                       false))
+    if (unlikely (!Net_WLAN_Tools::WPASupplicantManageInterface (NULL,
+                                                                 configuration_in.interfaceIdentifier,
+                                                                 false)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_WLAN_Tools::WPASupplicantManageInterface(\"%s\",false), aborting\n"),
@@ -758,10 +758,10 @@ Net_WLAN_Monitor_T<AddressType,
 //    ACE_DEBUG ((LM_WARNING,
 //                ACE_TEXT ("systemd unit \"%s\" is running and managing interface \"%s\"; this may interfere with the WLAN monitoring activity: please reinstall, continuing\n"),
 //                ACE_TEXT (COMMON_SYSTEMD_UNIT_IFUPDOWN)));
-#endif // ACE_LINUX && DBUS_SUPPORT && SD_BUS_SUPPORT
+#endif // ACE_LINUX && DBUS_NM_SUPPORT && SD_BUS_SUPPORT
   std::string interface_identifier_string =
-          (configuration_in.interfaceIdentifier.empty () ? Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)
-                                                         : configuration_in.interfaceIdentifier);
+    (configuration_in.interfaceIdentifier.empty () ? Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)
+                                                   : configuration_in.interfaceIdentifier);
   if (!Net_WLAN_Tools::getProtocolFeatures (interface_identifier_string,
                                             inherited::socketHandle_,
                                             inherited::familyId_,

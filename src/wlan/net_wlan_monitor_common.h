@@ -67,7 +67,7 @@ typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
 typedef ACE_Singleton<Net_WLAN_Nl80211Monitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_NL80211MONITOR_SINGLETON;
 #endif // NL80211_SUPPORT
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
 typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -75,7 +75,7 @@ typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                struct Net_UserData> Net_WLAN_DBusMonitor_t;
 typedef ACE_Singleton<Net_WLAN_DBusMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_DBUSMONITOR_SINGLETON;
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////

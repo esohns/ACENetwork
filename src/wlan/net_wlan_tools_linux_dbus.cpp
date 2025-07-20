@@ -26,9 +26,6 @@
 //#include <linux/ieee80211.h>
 #include <net/if_arp.h>
 #include "ifaddrs.h"
-//#if defined (WEXT_SUPPORT)
-//#include "iwlib.h"
-//#endif // WEXT_SUPPORT
 
 #include "ace/Handle_Set.h"
 #include "ace/INET_Addr.h"
@@ -659,8 +656,8 @@ Net_WLAN_Tools::deviceToDBusObjectPath (struct DBusConnection* connection_in,
     goto error;
   } // end IF
   reply_p = Common_DBus_Tools::exchange (connection_in,
-                                                   message_p,
-                                                   -1); // timeout (ms)
+                                         message_p,
+                                         -1); // timeout (ms)
   ACE_ASSERT (!message_p);
   if (unlikely (!reply_p))
   {

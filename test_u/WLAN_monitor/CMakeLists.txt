@@ -1,9 +1,14 @@
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 include (PreXMLImplementation)
 include (SetXMLImplementation)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/dhcp/scripts")
 include (PreDHCPClientImplementation)
 include (SetDHCPClientImplementation)
+
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/dbus/scripts")
+include (dbus)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../src/wlan/scripts")
 include (PreMonitorImplementation)
 include (SetMonitorImplementation)
@@ -16,17 +21,6 @@ if (UNIX)
 endif (UNIX)
 
 if (UNIX)
-# *NOTE*: Common requires libcap
-# pkg_check_modules (PKG_CAP REQUIRED libcap)
- if (WEXT_USE)
- elseif (NL80211_USE)
-#  pkg_check_modules (PKG_NL80211 REQUIRED libnl-3.0 libnl-genl-3.0)
-#  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-#  pkg_check_modules (PKG_SYSTEMD REQUIRED libsystemd)
- elseif (DBUS_USE)
-#  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
- endif ()
-
  if (DHCLIENT_USE)
   pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
   pkg_check_modules (PKG_SSL REQUIRED openssl)

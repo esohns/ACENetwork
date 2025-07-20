@@ -31,9 +31,9 @@
 #include "netlink/errno.h"
 #endif  // NL80211_SUPPORT
 
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
 #include "NetworkManager.h"
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 
 #include "common_timer_tools.h"
 
@@ -42,7 +42,7 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
-#if defined (DBUS_SUPPORT)
+#if defined (DBUS_NM_SUPPORT)
 //void
 //network_wlan_dbus_main_wakeup_cb (void* userData_in)
 //{
@@ -565,7 +565,7 @@ continue_:
 
 //  Net_WLAN_IMonitorCB* iwlan_cb_p = static_cast<Net_WLAN_IMonitorCB*> (userData_in);
 //}
-#endif // DBUS_SUPPORT
+#endif // DBUS_NM_SUPPORT
 
 #if defined (NL80211_SUPPORT)
 int

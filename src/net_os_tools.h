@@ -23,7 +23,6 @@
 
 #include <string>
 
-#include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 
 class Net_OS_Tools
@@ -50,7 +49,9 @@ class Net_OS_Tools
 #else
   static bool isIfUpDownManagingInterface (const std::string&);
 
+#if defined (DBUS_SUPPORT)
   static bool isNetworkManagerManagingInterface (const std::string&);
+#endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 };
 
