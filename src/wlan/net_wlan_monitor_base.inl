@@ -845,7 +845,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          >USE
+          >
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
