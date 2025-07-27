@@ -1379,7 +1379,7 @@ yy::BitTorrent_Bencoding_Parser::set (yyscan_t context_in)
   ACE_ASSERT (scanner);
 
   struct Common_FlexScannerState& state_r =
-      const_cast<struct Common_FlexScannerState&> (scanner->getR ());
+      const_cast<struct Common_FlexScannerState&> (scanner->getR_2 ());
   state_r.context = context_in;
 }
 

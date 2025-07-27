@@ -84,7 +84,8 @@ class BitTorrent_ParserDriver
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver& operator= (const BitTorrent_ParserDriver&))
 
   // implement Common_ILexScanner_T
-  inline virtual const Common_FlexScannerState& getR () const { static Common_FlexScannerState dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
+  inline virtual const struct Common_FlexBisonParserConfiguration getR () { ACE_ASSERT (false); static struct Common_FlexBisonParserConfiguration dummy; ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
+  inline virtual const Common_FlexScannerState& getR_2 () const { ACE_ASSERT (false); static Common_FlexScannerState dummy; ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
   inline virtual const BitTorrent_IParser_t* const getP () const { return this; }
   inline virtual void setP (BitTorrent_IParser_t*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void setDebug (yyscan_t state_in, bool toggle_in) { BitTorrent_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); }

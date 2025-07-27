@@ -80,7 +80,8 @@ class POP_ParserDriver_T
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
   //inline bool getDebugScanner () const { return (POP_Scanner_get_debug (scannerState_) != 0); }
-  inline virtual const struct Common_FlexScannerState& getR () const { static struct Common_FlexScannerState dummy;  ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
+  inline virtual const struct Common_FlexBisonParserConfiguration& getR () const { static struct Common_FlexBisonParserConfiguration dummy;  ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
+  inline virtual const struct Common_FlexScannerState& getR_2 () const { static struct Common_FlexScannerState dummy;  ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
 
   // *NOTE*: current (unscanned) data fragment
   ACE_Message_Block*                         fragment_;
