@@ -112,15 +112,16 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 
 // #if defined (FAAD_SUPPORT)
 //   ACE_NEW_RETURN (module_p,
-//                  Test_I_FAADDecoder_Module (this,
-//                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
-//                  false);
-// #elif defined (FFMPEG_SUPPORT)
+//                   Test_I_FAADDecoder_Module (this,
+//                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
+//                   false);
+// #endif // FAAD_SUPPORT
+#if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_AudioDecoder_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
                   false);
-// #endif // FAAD_SUPPORT || FFMPEG_SUPPORT
+#endif // FFMPEG_SUPPORT
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 
