@@ -537,7 +537,6 @@ struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-   , window (NULL)
   {}
 
   struct Stream_MediaFramework_ALSA_Configuration*        ALSAConfiguration;
@@ -552,15 +551,6 @@ struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t*  streamConfiguration;
   Test_I_AVStream_Client_ALSA_V4L_ISessionNotify_t*       subscriber;
   Test_I_AVStream_Client_ALSA_V4L_Subscribers_t*          subscribers;
-#if defined (GTK_USE)
-  GdkWindow*                                              window;
-#elif defined (WXWIDGETS_USE)
-  wxWindow*                                               window;
-#elif defined (QT_USE)
-  XID                                                     window;
-#else
-  void*                                                   window;
-#endif // GTK_USE || WXWIDGETS_USE || QT_USE
 };
 #endif // ACE_WIN32 || ACE_WIN64
 

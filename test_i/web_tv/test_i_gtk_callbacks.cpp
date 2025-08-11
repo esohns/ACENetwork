@@ -939,9 +939,9 @@ idle_initialize_UI_cb (gpointer userData_in)
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
-  (*iterator_4b).second.second->window =
+  (*iterator_4b).second.second->window.gdk_window =
     gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
-  ACE_ASSERT ((*iterator_4b).second.second->window);
+  ACE_ASSERT ((*iterator_4b).second.second->window.gdk_window);
 
   // select some widgets
 #if GTK_CHECK_VERSION (2,30,0)
@@ -2954,7 +2954,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 //                                         userData_in);
 // #endif // GTK_CHECK_VERSION (x,0,0)
 
-    (*iterator_4b).second.second->window =
+    (*iterator_4b).second.second->window.gdk_window =
       gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
   } // end IF
   else
@@ -2965,7 +2965,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
     gtk_window_deiconify (window_p);
 
-    (*iterator_4b).second.second->window =
+    (*iterator_4b).second.second->window.gdk_window =
       gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
 
     g_signal_emit_by_name (G_OBJECT (drawing_area_p),
@@ -2984,7 +2984,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
       return;
     }
   } // end ELSE
-  ACE_ASSERT ((*iterator_4b).second.second->window);
+  ACE_ASSERT ((*iterator_4b).second.second->window.gdk_window);
 
   Common_UI_IFullscreen* ifullscreen_p =
       dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());

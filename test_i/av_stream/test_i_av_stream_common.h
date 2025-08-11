@@ -59,6 +59,7 @@ extern "C"
 #include "common_time_common.h"
 
 #include "common_ui_common.h"
+#include "common_ui_windowtype_converter.h"
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -251,13 +252,7 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
    , pixelBufferLock (NULL)
 #endif // GTK_USE
    , parserConfiguration (NULL)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    , window ()
-#else
-#if defined (GTK_USE)
-    , window (NULL)
-#endif // GTK_USE
-#endif // ACE_WIN32 || ACE_WIN64
+   , window ()
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     deviceIdentifier.identifier._guid = GUID_NULL;
@@ -283,13 +278,7 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
   ACE_SYNCH_MUTEX*                                     pixelBufferLock;
 #endif // GTK_USE
   struct Common_FlexBisonParserConfiguration*          parserConfiguration;                  // parser module(s)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HWND                                                 window;
-#else
-#if defined (GTK_USE)
-  GdkWindow*                                           window;
-#endif // GTK_USE
-#endif // ACE_WIN32 || ACE_WIN64
+  union Common_UI_Window                               window;
 };
 
 struct Test_I_AVStream_Configuration

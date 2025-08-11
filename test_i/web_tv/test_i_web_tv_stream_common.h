@@ -42,6 +42,7 @@
 
 #include "common_parser_m3u_iparser.h"
 
+#include "common_ui_windowtype_converter.h"
 #if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
@@ -261,9 +262,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
    , outputFormat ()
 #endif // FFMPEG_SUPPORT
-#if defined (GTK_USE)
-   , window (NULL)
-#endif // GTK_USE
+   , window ()
   {
     inbound = true;
   }
@@ -285,9 +284,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
 #endif // FFMPEG_SUPPORT
-#if defined (GTK_USE)
-  GdkWindow*                                       window;
-#endif // GTK_USE
+  union Common_UI_Window                           window;
 };
 
 struct Test_I_WebTV_StreamConfiguration_3
