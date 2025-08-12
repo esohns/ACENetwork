@@ -939,9 +939,11 @@ idle_initialize_UI_cb (gpointer userData_in)
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
+  ACE_ASSERT (!(*iterator_4b).second.second->window.gdk_window);
   (*iterator_4b).second.second->window.gdk_window =
     gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT ((*iterator_4b).second.second->window.gdk_window);
+  (*iterator_4b).second.second->window.type = Common_UI_Window::TYPE_GTK;
 
   // select some widgets
 #if GTK_CHECK_VERSION (2,30,0)
@@ -2895,6 +2897,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
       data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
+  ACE_ASSERT ((*iterator_4b).second.second->window.type == Common_UI_Window::TYPE_GTK);
   ACE_ASSERT (data_p->AVStream);
   if (!data_p->AVStream->isRunning ())
     return;

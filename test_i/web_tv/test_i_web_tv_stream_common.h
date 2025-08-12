@@ -284,7 +284,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
 #endif // FFMPEG_SUPPORT
-  union Common_UI_Window                           window;
+  struct Common_UI_Window                          window;
 };
 
 struct Test_I_WebTV_StreamConfiguration_3

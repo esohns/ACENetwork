@@ -278,7 +278,7 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
   ACE_SYNCH_MUTEX*                                     pixelBufferLock;
 #endif // GTK_USE
   struct Common_FlexBisonParserConfiguration*          parserConfiguration;                  // parser module(s)
-  union Common_UI_Window                               window;
+  struct Common_UI_Window                              window;
 };
 
 struct Test_I_AVStream_Configuration

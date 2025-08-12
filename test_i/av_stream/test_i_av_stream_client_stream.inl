@@ -98,7 +98,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   layout_out->append (module_p, NULL, 0);
   module_p = NULL;
 
-  if ((*iterator_2).second.second->window.gdk_window)
+  if ((*iterator_2).second.second->window.type == Common_UI_Window::TYPE_WIN32)
   {
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_DirectShow_Distributor_Module (this,
@@ -116,7 +116,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   ACE_ASSERT (inherited::configuration_->configuration_->module_2);
   layout_out->append (inherited::configuration_->configuration_->module_2, NULL, 0);
 
-  if ((*iterator_2).second.second->window.gdk_window)
+  if ((*iterator_2).second.second->window.type == Common_UI_Window::TYPE_WIN32)
   {
 #if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
     module_p = NULL;
@@ -718,7 +718,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-  if ((*iterator).second.second->window.gdk_window)
+  if ((*iterator).second.second->window.type == Common_UI_Window::TYPE_WIN32)
   {
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_MediaFoundation_Display_Module (this,
