@@ -630,7 +630,7 @@ curses_main (struct Common_UI_Curses_State* state_in)
     // step3ba: done ?
     if (state_r.finished)
     {
-      result = OK;
+      result = 0/*OK*/;
       break; // done
     } // end IF
 
@@ -673,7 +673,7 @@ clean:
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
   } // end IF
 
-  return (result == OK);
+  return (result == 0/*OK*/);
 }
 
 //////////////////////////////////////////
@@ -773,8 +773,8 @@ curses_join (const std::string& channel_in,
   //ACE_ASSERT (panel_p->win);
   WINDOW* window_p =
     //dupwin (panel_p->win);
-                      newwin (LINES - 2, COLS,
-                              0, 0);
+      newwin (LINES - 2, COLS,
+              0, 0);
   if (!window_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -856,7 +856,7 @@ curses_join (const std::string& channel_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to doupdate(), continuing\n")));
 
-  return (result == OK);
+  return (result == 0/*OK*/);
 }
 
 bool
@@ -901,7 +901,7 @@ curses_part (const std::string& channel_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to doupdate(), continuing\n")));
 
-  return (result == OK);
+  return (result == 0/*OK*/);
 }
 
 bool
@@ -942,5 +942,5 @@ curses_mode (const std::string& channel_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddstr(), continuing\n")));
 
-  return (result == OK);
+  return (result == 0/*OK*/);
 }
