@@ -91,7 +91,15 @@ idle_end_session_cb (gpointer userData_in)
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != state_r.builders.end ());
 
-  // stop progress reporting
+  // stop progress reporting ?
+  // *NOTE*: only disable the progressbar when not currently playing...
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  if (gtk_toggle_button_get_active (toggle_button_p))
+    return G_SOURCE_REMOVE;
+
 //  GtkSpinner* spinner_p =
 //    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
 //                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
@@ -99,7 +107,7 @@ idle_end_session_cb (gpointer userData_in)
 //  gtk_spinner_stop (spinner_p);
 //  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
-  //ACE_ASSERT (data_p->progressData.eventSourceId);
+  if (data_p->progressData.eventSourceId)
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     if (!g_source_remove (data_p->progressData.eventSourceId))
       ACE_DEBUG ((LM_ERROR,
@@ -107,7 +115,7 @@ idle_end_session_cb (gpointer userData_in)
                   data_p->progressData.eventSourceId));
     state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
     data_p->progressData.eventSourceId = 0;
-  } // end lock scope
+  } // end IF | lock scope
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -151,22 +159,25 @@ idle_end_session_2 (gpointer userData_in)
 //  gtk_spinner_stop (spinner_p);
 //  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
-  //ACE_ASSERT (data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    if (!g_source_remove (data_p->progressData.eventSourceId))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                  data_p->progressData.eventSourceId));
-    state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
-    data_p->progressData.eventSourceId = 0;
-
-    if (data_p->videoUpdateEventSourceId &&
-        !g_source_remove (data_p->videoUpdateEventSourceId))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                  data_p->videoUpdateEventSourceId));
-    state_r.eventSourceIds.erase (data_p->videoUpdateEventSourceId);
-    data_p->videoUpdateEventSourceId = 0;
+    if (data_p->progressData.eventSourceId)
+    {
+      if (!g_source_remove (data_p->progressData.eventSourceId))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    data_p->progressData.eventSourceId));
+      state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
+      data_p->progressData.eventSourceId = 0;
+    } // end IF
+    if (data_p->videoUpdateEventSourceId)
+    {
+      if (!g_source_remove (data_p->videoUpdateEventSourceId))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    data_p->videoUpdateEventSourceId));
+      state_r.eventSourceIds.erase (data_p->videoUpdateEventSourceId);
+      data_p->videoUpdateEventSourceId = 0;
+    } // end IF
   } // end lock scope
 
   GtkProgressBar* progressbar_p =
@@ -218,35 +229,6 @@ idle_end_session_2 (gpointer userData_in)
                                       1);
     g_value_unset (&value);
   } // end IF
-
-  return G_SOURCE_REMOVE;
-}
-
-gboolean
-idle_end_session_3 (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_3"));
-
-  ACE_UNUSED_ARG (userData_in);
-
-  // sanity check(s)
-  //struct Test_I_WebTV_UI_CBData* data_p =
-  //    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-  //ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
-  GtkToggleButton* toggle_button_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
-  ACE_ASSERT (toggle_button_p);
-  gtk_toggle_button_set_active (toggle_button_p, FALSE);
 
   return G_SOURCE_REMOVE;
 }
@@ -1424,17 +1406,17 @@ continue_2:
   ACE_ASSERT (drawing_area_p);
   //isetp_p->setP (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)));
 
-  //ACE_ASSERT (!data_p->progressData.eventSourceId);
+  if (!data_p->progressData.eventSourceId)
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     data_p->progressData.eventSourceId =
     //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
     //                 idle_update_progress_cb,
     //                 &data_p->progressData,
     //                 NULL);
-    g_timeout_add (//G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
-                    COMMON_UI_REFRESH_DEFAULT_PROGRESS_MS, // ms (?)
-                    idle_update_progress_cb,
-                    &data_p->progressData);//,
+      g_timeout_add (//G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
+                     COMMON_UI_REFRESH_DEFAULT_PROGRESS_MS, // ms (?)
+                     idle_update_progress_cb,
+                     &data_p->progressData);//,
 //                       NULL);
     if (data_p->progressData.eventSourceId > 0)
       state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
@@ -1444,13 +1426,13 @@ continue_2:
                   ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", aborting\n")));
       return G_SOURCE_REMOVE;
     } // end IF
-  } // end lock scope
+  } // end IF | lock scope
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     data_p->videoUpdateEventSourceId =
-    g_timeout_add (COMMON_UI_REFRESH_DEFAULT_VIDEO_MS, // ms (?)
-                   idle_update_video_display_cb,
-                   userData_in);
+      g_timeout_add (COMMON_UI_REFRESH_DEFAULT_VIDEO_MS, // ms (?)
+                     idle_update_video_display_cb,
+                     userData_in);
     ACE_ASSERT (data_p->videoUpdateEventSourceId > 0);
     state_r.eventSourceIds.insert (data_p->videoUpdateEventSourceId);
   } // end lock scope
@@ -1550,7 +1532,7 @@ idle_update_progress_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
-         // sanity check(s)
+  // sanity check(s)
   struct Test_I_WebTV_UI_ProgressData* data_p =
     static_cast<struct Test_I_WebTV_UI_ProgressData*> (userData_in);
   ACE_ASSERT (data_p);
@@ -2388,7 +2370,7 @@ continue_4:
     gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
     gtk_progress_bar_set_show_text (progressbar_p, TRUE);
 
-    //ACE_ASSERT (!data_p->progressData.eventSourceId);
+    if (!data_p->progressData.eventSourceId)
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       data_p->progressData.eventSourceId =
         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -2408,7 +2390,7 @@ continue_4:
                     ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", aborting\n")));
         goto error;
       } // end IF
-    } // end lock scope
+    } // end IF | lock scope
 
     return;
   } // end IF
@@ -2596,36 +2578,40 @@ button_load_clicked_cb (GtkWidget* widget_in,
                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
-              data_p->videoHandle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: opened TCP socket to %s\n"),
-              data_p->videoHandle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
+//              data_p->videoHandle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%d: opened TCP socket to %s\n"),
+//              data_p->videoHandle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+//#endif // ACE_WIN32 || ACE_WIN64
 
-  if (unlikely (data_p->progressData.eventSourceId))
-    goto continue_;
+  GtkProgressBar* progressbar_p =
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
+  ACE_ASSERT (progressbar_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
+  gtk_progress_bar_set_show_text (progressbar_p, TRUE);
+
+  if (!data_p->progressData.eventSourceId) // *TODO*: why oh why ?
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, FALSE);
     data_p->progressData.eventSourceId =
-                                         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                                         //                 idle_update_progress_cb,
-                                         //                 &data_p->progressData,
-                                         //                 NULL);
-        g_timeout_add (//G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
+    //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+    //                 idle_update_progress_cb,
+    //                 &data_p->progressData,
+    //                 NULL);
+      g_timeout_add (//G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
                        COMMON_UI_REFRESH_DEFAULT_PROGRESS_MS, // ms (?)
                        idle_update_progress_cb,
-                       &data_p->progressData);//,
-               //                       NULL);
+                       &data_p->progressData);
     ACE_ASSERT (data_p->progressData.eventSourceId > 0);
     state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
   } // end lock scope
 
-continue_:
   return FALSE;
 } // button_load_clicked_cb
 
@@ -3142,20 +3128,12 @@ key_cb (GtkWidget* widget_in,
                                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
       ACE_ASSERT (toggle_button_p);
       if (gtk_toggle_button_get_active (toggle_button_p))
-      {
-        guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
-                                                 idle_end_session_3,
-                                                 userData_in,
-                                                 NULL);
-        if (unlikely (event_source_id == 0))
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to g_idle_add_full(idle_end_session_3): ""\"%m\", returning\n")));
-          return G_SOURCE_REMOVE;
-        } // end IF
-        { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, TRUE);
-          state_r.eventSourceIds.insert (event_source_id);
-        } // end lock scope
+      { 
+        GtkToggleButton* toggle_button_2 =
+          GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
+        ACE_ASSERT (toggle_button_2);
+        gtk_toggle_button_set_active (toggle_button_2, FALSE);
         return TRUE; // done (do not propagate further)
       } // end IF
 

@@ -425,10 +425,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                   inherited::mod_->name ()));
       bytes_to_skip = static_cast<unsigned int> (headFragment_->total_length ());
     } // end ELSE
-    ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
+    ACE_ASSERT (headFragment_->total_length () <= bytes_to_skip); // *NOTE*: might not have received all of the body...
   } // end IF
   else
-  { //ACE_ASSERT (!chunks_.empty ());
+  { // --> chunked transfer
     ACE_Message_Block* message_block_2 = NULL;
     CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
     CHUNKS_ITERATOR_T iterator_3;

@@ -28,7 +28,6 @@
 // idle routines
 gboolean idle_end_session_cb (gpointer);
 gboolean idle_end_session_2 (gpointer);
-gboolean idle_end_session_3 (gpointer); // this simply clicks "stop"
 gboolean idle_load_channel_configuration_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);

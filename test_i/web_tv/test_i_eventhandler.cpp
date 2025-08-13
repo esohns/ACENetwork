@@ -236,8 +236,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
        ++iterator)
   {
     for (M3U_KeyValuesIterator_t iterator_2 = (*iterator).keyValues.begin ();
-          iterator_2 != (*iterator).keyValues.end ();
-          ++iterator_2)
+         iterator_2 != (*iterator).keyValues.end ();
+         ++iterator_2)
     {
       if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                             ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING)))
@@ -275,15 +275,18 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
         converter >> resolution_s.resolution.height;
 #endif // ACE_WIN32 || ACE_WIN64
       } // end IF
-
-      if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
-                            ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_FRAMERATE_KEY_STRING)))
+      else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                                ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_FRAMERATE_KEY_STRING)))
       {
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter.clear ();
         converter.str ((*iterator_2).second);
         converter >> resolution_s.frameRate;
       } // end IF
+      else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                                ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_URI_KEY_STRING)) &&
+               (*iterator).URL.empty ())
+        (*iterator).URL = (*iterator_2).second;
     } // end FOR
     resolution_s.URI = (*iterator).URL;
     (*channel_iterator).second.resolutions.push_back (resolution_s);
@@ -321,7 +324,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
         channel_s.description = (*iterator_2).second;
       else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_URI_KEY_STRING)))
-        channel_s.URI = Common_String_Tools::uncomment ((*iterator_2).second);
+        channel_s.URI = (*iterator_2).second;
     } // end FOR
     if (is_channel_b)
       (*channel_iterator).second.audioChannels.push_back (channel_s);
@@ -371,17 +374,19 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     case STREAM_SESSION_MESSAGE_ABORT:
     {
 #if defined (GTK_USE)
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-
-      guint event_source_id = g_idle_add (idle_end_session_cb,
-                                          CBData_);
-      if (event_source_id == 0)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
-        return;
-      } // end IF
-      state_r.eventSourceIds.insert (event_source_id);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+        guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                                                 idle_end_session_cb,
+                                                 CBData_,
+                                                 NULL);
+        if (event_source_id == 0)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+          return;
+        } // end IF
+        state_r.eventSourceIds.insert (event_source_id);
+      } // end lock scope
 #endif // GTK_USE
 
       event_e = COMMON_UI_EVENT_ABORT;
@@ -512,32 +517,33 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 #endif // GTK_USE
 
 #if defined (GTK_USE)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-  state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
 
-  guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
-                                           idle_end_session_cb,
-                                           CBData_,
-                                           NULL);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
-
-  if (sessionId_in == CBData_->streamSessionId)
-  {
     guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
-                                             idle_end_session_2,
+                                             idle_end_session_cb,
                                              CBData_,
                                              NULL);
-    ACE_ASSERT (event_source_id);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
     state_r.eventSourceIds.insert (event_source_id);
-  } // end IF
 
-  state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
+    if (sessionId_in == CBData_->streamSessionId)
+    {
+      guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                                               idle_end_session_2,
+                                               CBData_,
+                                               NULL);
+      ACE_ASSERT (event_source_id);
+      state_r.eventSourceIds.insert (event_source_id);
+    } // end IF
+
+    state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
+  } // end lock scope
 #endif // GTK_USE
 
   //sessionDataMap_.erase (iterator);
@@ -690,15 +696,15 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (!segment_p->URLs.empty ());
 
 #if defined (GTK_USE)
-  guint event_source_id = g_idle_add (idle_notify_segment_data_cb,
-                                      CBData_);
-  if (unlikely (event_source_id == 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_notify_segment_data_cb): ""\"%m\", returning\n")));
-    return;
-  } // end IF
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    guint event_source_id = g_idle_add (idle_notify_segment_data_cb,
+                                        CBData_);
+    if (unlikely (event_source_id == 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_notify_segment_data_cb): ""\"%m\", returning\n")));
+      return;
+    } // end IF
     state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 #endif // GTK_USE
@@ -723,7 +729,6 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
@@ -775,7 +780,9 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     }
   } // end SWITCH
 #if defined (GTK_USE)
-  state_r.eventStack.push (event_e);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (event_e);
+  } // end lock scope
 #endif // GTK_USE
 }
 
@@ -858,32 +865,30 @@ Test_I_EventHandler_3::end (Stream_SessionId_t sessionId_in)
 #endif // GTK_USE
 
 #if defined (GTK_USE)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-  state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
-
-  guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
-                                           idle_end_session_cb,
-                                           CBData_,
-                                           NULL);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
-
-  if (sessionId_in == CBData_->streamSessionId)
-  {
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
-                                             idle_end_session_2,
+                                             idle_end_session_cb,
                                              CBData_,
                                              NULL);
-    ACE_ASSERT (event_source_id);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
     state_r.eventSourceIds.insert (event_source_id);
-  } // end IF
 
-  state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
+    if (sessionId_in == CBData_->streamSessionId)
+    {
+      guint event_source_id = g_idle_add_full (G_PRIORITY_DEFAULT, // same as timeout !
+                                               idle_end_session_2,
+                                               CBData_,
+                                               NULL);
+      ACE_ASSERT (event_source_id);
+      state_r.eventSourceIds.insert (event_source_id);
+    } // end IF
+    state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
+  } // end lock scope
 #endif // GTK_USE
 
   //sessionDataMap_.erase (iterator);
