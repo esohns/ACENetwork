@@ -824,6 +824,10 @@ do_work (const std::string& configurationFile_in,
     &configuration_in.connectionConfigurations;
   modulehandler_configuration.messageAllocator = &message_allocator;
   struct HTTP_ParserConfiguration parser_configuration;
+  parser_configuration.debugParser =
+    configuration_in.parserConfiguration.debugParser;
+  parser_configuration.debugScanner =
+    configuration_in.parserConfiguration.debugScanner;
   modulehandler_configuration.parserConfiguration =
     &parser_configuration;
 //  modulehandler_configuration.statisticReportingInterval =
