@@ -2493,6 +2493,9 @@ button_load_clicked_cb (GtkWidget* widget_in,
   Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_4 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
   ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration.end ());
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
   data_p->configuration->parserConfiguration.messageQueue = NULL;
   (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
@@ -2502,6 +2505,14 @@ button_load_clicked_cb (GtkWidget* widget_in,
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URL_string;
   bool use_SSL = false;
+
+  Test_I_TCPConnector_t connector (true);
+#if defined (SSL_SUPPORT)
+  Test_I_SSLConnector_t ssl_connector (true);
+#endif // SSL_SUPPORT
+  Test_I_AsynchTCPConnector_t asynch_connector (true);
+  struct Net_UserData user_data_s;
+
   if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
                              host_address,
                              hostname_string,
@@ -2511,25 +2522,15 @@ button_load_clicked_cb (GtkWidget* widget_in,
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
                ACE_TEXT ((*channel_iterator).second.mainURL.c_str ())));
-    return G_SOURCE_REMOVE;
+    goto error;
   } // end IF
   (*iterator_3).second.second->URL = (*channel_iterator).second.mainURL;
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address =
       host_address;
   static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
       hostname_string;
 
   // select connector
-  Test_I_TCPConnector_t connector (true);
-#if defined (SSL_SUPPORT)
-  Test_I_SSLConnector_t ssl_connector (true);
-#endif // SSL_SUPPORT
-  Test_I_AsynchTCPConnector_t asynch_connector (true);
-  struct Net_UserData user_data_s;
-//  ACE_ASSERT (!data_p->handle)
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
   {
 #if defined (SSL_SUPPORT)
@@ -2568,15 +2569,12 @@ button_load_clicked_cb (GtkWidget* widget_in,
                                           true, // peer address ?
                                           3); // #retries
   } // end ELSE
-//    iconnection_p =
-//        iconnection_manager_p->get (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-//                                    true);
   if (data_p->videoHandle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("failed to connect to %s, aborting\n"),
                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
-    return G_SOURCE_REMOVE;
+    goto error;
   } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
@@ -2611,6 +2609,11 @@ button_load_clicked_cb (GtkWidget* widget_in,
     ACE_ASSERT (data_p->progressData.eventSourceId > 0);
     state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
   } // end lock scope
+
+  return FALSE;
+
+error:
+  gtk_widget_set_sensitive (widget_in, TRUE);
 
   return FALSE;
 } // button_load_clicked_cb
