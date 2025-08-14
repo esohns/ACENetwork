@@ -2513,6 +2513,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
   Test_I_AsynchTCPConnector_t asynch_connector (true);
   struct Net_UserData user_data_s;
 
+  GtkProgressBar* progressbar_p = NULL;
+
   if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
                              host_address,
                              hostname_string,
@@ -2588,7 +2590,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 //#endif // ACE_WIN32 || ACE_WIN64
 
-  GtkProgressBar* progressbar_p =
+  progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progressbar_p);

@@ -29,6 +29,8 @@
 #include "stream_defines.h"
 #include "stream_itask.h"
 
+#include "stream_net_common.h"
+
 #include "net_connection_configuration.h"
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -131,6 +133,10 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            UserDataType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::open"));
+
+  // *IMPORTANT NOTE*: this ensures that 'this' will not be 'delete'd while in
+  //                   this method --> make sure to decrease the count again
+  inherited2::increase ();
 
   int result = -1;
   bool handle_reactor = false;
@@ -246,7 +252,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     {
       // *NOTE*: (most probably) maximum number of connections has been reached
       //ACE_DEBUG ((LM_ERROR,
-      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+      //            ACE_TEXT ("failed to Net_ConnectionBase_T::register_(), aborting\n")));
       goto error;
     } // end IF
     handle_manager = true;
@@ -324,15 +330,24 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
                   true); // recurse upstream (if any) ?
 
+  inherited2::decrease ();
+
   return 0;
 
 error:
   if (handle_reactor)
     inherited::deregisterFromReactor ();
   if (handle_stream)
+  {
+    Stream_Net_ConnectionStatesIterator_t iterator =
+      session_data_p->connectionStates.find (inherited2::state_.handle);
+    ACE_ASSERT (iterator != session_data_p->connectionStates.end ());
+    session_data_p->connectionStates.erase (iterator);
+
     stream_.stop (true,  // wait for completion ?
-                  true,  // wait for upstream (if any) ?
+                  false, // wait for upstream (if any) ?
                   true); // high priority ?
+  } // end IF
   if (handle_manager)
     inherited2::deregister ();
 
@@ -340,6 +355,10 @@ error:
     inherited2::state_.handle = ACE_INVALID_HANDLE;
     inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
   } // end lock scope
+
+  unsigned int ref_count_i = inherited2::count ();
+  if (ref_count_i > 1) // :( yep, it happens...
+    inherited2::decrease ();
 
   // *IMPORTANT NOTE*: the connector invokes close(NORMAL_CLOSE_OPERATION)
   //                   --> release the final reference there
@@ -389,7 +408,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     // [- any worker from ACE_Task_Base on clean-up]
     // - connector when connect() fails (e.g. connection refused)
     // - acceptor/connector when initialization fails (i.e. open() returned -1
-    //   due to e.g. too many connections)
+    //   due to e.g. too many connections). Note that there is a dangling
+    //   reference in this case; it is released in inherited::close(), which
+    //   invokes handle_close() (see below)
     case NORMAL_CLOSE_OPERATION:
     {
       // check specifically for the first case
@@ -419,7 +440,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       } // end IF | lock scope
 
       Net_ConnectionId_t id_i = this->id ();
-      result = inherited::close (arg_in);
+      result = inherited::close (arg_in); // --> calls handle_close()
       if (unlikely (result == -1))
       {
 //        int error = ACE_OS::last_error ();
@@ -428,6 +449,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                     id_i,
                     arg_in));
       } // end IF
+
       break;
     } // end IF
     default:
