@@ -109,6 +109,17 @@ struct Test_I_AVStream_Server_DirectShow_MessageData
    , sampleTime (0.0)
   {}
 
+  Test_I_AVStream_Server_DirectShow_MessageData
+  operator+= (const struct Test_I_AVStream_Server_DirectShow_MessageData& rhs_in)
+  {
+    header = rhs_in.header;
+    ACE_ASSERT (!sample);
+    sample = rhs_in.sample;
+    sampleTime = rhs_in.sampleTime;
+
+    return *this;
+  }
+
   struct acestream_av_stream_header header;
   IMediaSample*                     sample;
   double                            sampleTime;
@@ -121,6 +132,17 @@ struct Test_I_AVStream_Server_MediaFoundation_MessageData
    , sample (NULL)
    , sampleTime (0)
   {}
+
+  Test_I_AVStream_Server_MediaFoundation_MessageData
+  operator+= (const struct Test_I_AVStream_Server_MediaFoundation_MessageData& rhs_in)
+  {
+    header = rhs_in.header;
+    ACE_ASSERT (!sample);
+    sample = rhs_in.sample;
+    sampleTime = rhs_in.sampleTime;
+
+    return *this;
+  }
 
   struct acestream_av_stream_header header;
   IMFMediaBuffer*                   sample;

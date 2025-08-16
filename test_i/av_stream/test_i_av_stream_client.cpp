@@ -118,7 +118,9 @@ do_printUsage (const std::string& programName_in)
   std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -249,7 +251,9 @@ do_processArguments (int argc_in,
   STREAM_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // initialize results
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -562,9 +566,12 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
     goto error;
   } // end IF
   ACE_ASSERT (IGraphBuilder_out);
-  ACE_ASSERT (buffer_negotiation_p);
+  //ACE_ASSERT (buffer_negotiation_p);
   ACE_ASSERT (IAMStreamConfig_out);
-  buffer_negotiation_p->Release (); buffer_negotiation_p = NULL;
+  if (buffer_negotiation_p)
+  {
+    buffer_negotiation_p->Release (); buffer_negotiation_p = NULL;
+  } // end IF
 
   if (!Stream_Device_DirectShow_Tools::getCaptureFormat (IGraphBuilder_out,
                                                          CLSID_VideoInputDeviceCategory,
@@ -578,6 +585,7 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
               ACE_TEXT ("\"%s\": default capture format: %s\n"),
               ACE_TEXT (Stream_Device_DirectShow_Tools::devicePathToString (deviceIdentifier_in.identifier._string).c_str ()),
               ACE_TEXT (Stream_MediaFramework_DirectShow_Tools::toString (captureVideoFormat_inout, true).c_str ())));
+
   media_type_p =
     Stream_MediaFramework_DirectShow_Tools::copy (captureVideoFormat_inout);
   if (!media_type_p)
@@ -590,7 +598,7 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
   outputVideoFormat_inout = *media_type_p;
   delete (media_type_p); media_type_p = NULL;
 
-  // *NOTE*: the default save format is RGB32
+  // *NOTE*: the default transport format is RGB32 @ 640x480
   ACE_ASSERT (InlineIsEqualGUID (outputVideoFormat_inout.majortype, MEDIATYPE_Video));
   outputVideoFormat_inout.subtype = MEDIASUBTYPE_RGB32;
   outputVideoFormat_inout.bFixedSizeSamples = TRUE;
@@ -653,6 +661,10 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
                 ACE_TEXT (Stream_MediaFramework_Tools::mediaFormatTypeToString (outputVideoFormat_inout.formattype).c_str ())));
     goto error;
   } // end ELSE
+
+  Common_Image_Resolution_t resolution_s = {640, 480}; // default resolution
+  Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
+                                                         outputVideoFormat_inout);
 
   ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
   waveformatex_s.wFormatTag = STREAM_DEV_MIC_DEFAULT_FORMAT;
@@ -951,7 +963,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   struct Stream_ModuleConfiguration module_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration;
-  struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2; // visualization
+  struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2a; // resize for display
+  struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2b; // visualization
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_3; // network io
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_4; // audio capture
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t directshow_stream_configuration;
@@ -992,9 +1005,11 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       directshow_modulehandler_configuration.deviceIdentifier =
         videoDeviceIdentifier_in;
 
-      directshow_modulehandler_configuration_2 =
+      directshow_modulehandler_configuration_2a =
         directshow_modulehandler_configuration;
-      directshow_modulehandler_configuration_2.display =
+      directshow_modulehandler_configuration_2b =
+        directshow_modulehandler_configuration;
+      directshow_modulehandler_configuration_2b.display =
         Common_UI_Tools::getDefaultDisplay ();
 
       directshow_modulehandler_configuration_4 =
@@ -1018,9 +1033,12 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                   directshow_modulehandler_configuration,
                                                   directshow_stream_configuration_2);
 
+      directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2"),
+                                                              std::make_pair (&module_configuration,
+                                                                              &directshow_modulehandler_configuration_2a)));
       directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING),
                                                               std::make_pair (&module_configuration,
-                                                                              &directshow_modulehandler_configuration_2)));
+                                                                              &directshow_modulehandler_configuration_2b)));
       directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_CAPTURE_DEFAULT_NAME_STRING),
                                                               std::make_pair (&module_configuration,
                                                                               &directshow_modulehandler_configuration_4)));
@@ -1341,6 +1359,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                   (*directshow_stream_iterator).second.configuration_->format.audio,
                                   (*directshow_stream_iterator).second.configuration_->format.video,
                                   (*directshow_modulehandler_iterator).second.second->outputFormat);
+      Stream_MediaFramework_DirectShow_Tools::copy ((*directshow_modulehandler_iterator).second.second->outputFormat,
+                                                    directshow_modulehandler_configuration_2a.outputFormat);
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -2192,8 +2212,12 @@ ACE_TMAIN (int argc_in,
 #else
   Common_Tools::initialize (false); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR ("av_stream"));
 
-  std::string configuration_path = Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // step1a set defaults
   struct Stream_Device_Identifier audio_device_identifier;

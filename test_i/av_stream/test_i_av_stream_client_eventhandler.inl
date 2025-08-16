@@ -61,11 +61,11 @@ template <typename SessionDataType,
           typename CallbackDataType>
 void
 Test_I_AVStream_Client_EventHandler_T<SessionDataType,
-                             SessionEventType,
-                             MessageType,
-                             SessionMessageType,
-                             CallbackDataType>::start (Stream_SessionId_t sessionId_in,
-                                                       const SessionDataType& sessionData_in)
+                                      SessionEventType,
+                                      MessageType,
+                                      SessionMessageType,
+                                      CallbackDataType>::start (Stream_SessionId_t sessionId_in,
+                                                                const SessionDataType& sessionData_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_EventHandler_T::start"));
 
@@ -104,12 +104,12 @@ template <typename SessionDataType,
           typename CallbackDataType>
 void
 Test_I_AVStream_Client_EventHandler_T<SessionDataType,
-                             SessionEventType,
-                             MessageType,
-                             SessionMessageType,
-                             CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
-                                                        const SessionEventType& sessionEvent_in,
-                                                        bool expedite_in)
+                                      SessionEventType,
+                                      MessageType,
+                                      SessionMessageType,
+                                      CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                                 const SessionEventType& sessionEvent_in,
+                                                                 bool expedite_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_EventHandler_T::notify"));
 
@@ -130,10 +130,10 @@ template <typename SessionDataType,
           typename CallbackDataType>
 void
 Test_I_AVStream_Client_EventHandler_T<SessionDataType,
-                             SessionEventType,
-                             MessageType,
-                             SessionMessageType,
-                             CallbackDataType>::end (Stream_SessionId_t sessionId_in)
+                                      SessionEventType,
+                                      MessageType,
+                                      SessionMessageType,
+                                      CallbackDataType>::end (Stream_SessionId_t sessionId_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_EventHandler_T::end"));
 
@@ -167,8 +167,8 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
   SESSIONDATA_MAP_ITERATOR_T iterator;
   { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
     iterator = sessionData_.find (sessionId_in);
-    ACE_ASSERT (iterator != sessionData_.end ());
-    sessionData_.erase (iterator);
+    if (iterator != sessionData_.end ())
+      sessionData_.erase (iterator);
   } // end lock scope
 }
 
@@ -179,11 +179,11 @@ template <typename SessionDataType,
           typename CallbackDataType>
 void
 Test_I_AVStream_Client_EventHandler_T<SessionDataType,
-                             SessionEventType,
-                             MessageType,
-                             SessionMessageType,
-                             CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
-                                                        const MessageType& message_in)
+                                      SessionEventType,
+                                      MessageType,
+                                      SessionMessageType,
+                                      CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                                 const MessageType& message_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_EventHandler_T::notify"));
 
@@ -199,6 +199,9 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
+
+  if (message_in.getMediaType () == STREAM_MEDIATYPE_AUDIO)
+    return;
 
 #if defined (GTK_USE)
   guint event_source_id = 0;
@@ -223,11 +226,11 @@ template <typename SessionDataType,
           typename CallbackDataType>
 void
 Test_I_AVStream_Client_EventHandler_T<SessionDataType,
-                             SessionEventType,
-                             MessageType,
-                             SessionMessageType,
-                             CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
-                                                        const SessionMessageType& sessionMessage_in)
+                                      SessionEventType,
+                                      MessageType,
+                                      SessionMessageType,
+                                      CallbackDataType>::notify (Stream_SessionId_t sessionId_in,
+                                                                 const SessionMessageType& sessionMessage_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_EventHandler_T::notify"));
 

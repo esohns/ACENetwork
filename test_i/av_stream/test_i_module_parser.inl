@@ -122,15 +122,10 @@ Test_I_AVStream_Parser_T<ACE_SYNCH_USE,
 
   // initialize message
   DataMessageType* message_p = static_cast<DataMessageType*> (message_block_p);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  typename DataMessageType::DATA_T& message_data_r =
-    const_cast<typename DataMessageType::DATA_T&> (message_p->getR ());
-#else
   typename DataMessageType::DATA_T& message_data_container_r =
     const_cast<typename DataMessageType::DATA_T&> (message_p->getR ());
   typename DataMessageType::DATA_T::DATA_T& message_data_r =
     const_cast<typename DataMessageType::DATA_T::DATA_T&> (message_data_container_r.getR ());
-#endif // ACE_WIN32 || ACE_WIN64
   message_data_r.header = inherited::header_;
 
   // push downstream

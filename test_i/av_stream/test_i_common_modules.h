@@ -124,6 +124,16 @@ typedef Stream_TaskBaseAsynch_T<ACE_MT_SYNCH,
 
 typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
+                               struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
+                               Stream_ControlMessage_t,
+                               Test_I_AVStream_Server_DirectShow_Message,
+                               Test_I_AVStream_Server_DirectShow_SessionMessage,
+                               enum Stream_ControlType,
+                               enum Stream_SessionMessageType,
+                               struct Stream_UserData> Test_I_DirectShow_Server_TaskBaseSynch_t;
+
+typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
                                struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
                                Stream_ControlMessage_t,
                                Test_I_AVStream_Client_MediaFoundation_Message,
@@ -751,6 +761,9 @@ typedef Stream_Visualization_LibAVResize_T<Test_I_DirectShow_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Client_DirectShow_Resize;
 typedef Stream_Visualization_LibAVResize_T<Test_I_MediaFoundation_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat> Test_I_AVStream_Client_MediaFoundation_Resize;
+
+typedef Stream_Visualization_LibAVResize_T<Test_I_DirectShow_Server_TaskBaseSynch_t,
+                                           struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_DirectShow_Resize;
 #else
 typedef Stream_Decoder_LibAVConverter_T<Test_I_ALSA_V4L_TaskBaseSynch_t,
                                         struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Client_ALSA_V4L_Converter;
@@ -873,6 +886,13 @@ typedef Stream_Vis_Target_Direct3D_T<ACE_MT_SYNCH,
                                      struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_Direct3D_Display;
 
 #if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
+typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
+                                   Stream_ControlMessage_t,
+                                   Test_I_AVStream_Server_DirectShow_Message,
+                                   Test_I_AVStream_Server_DirectShow_SessionMessage> Test_I_AVStream_Server_DirectShow_Defragment;
+
 typedef Stream_MediaFramework_DirectShow_Source_Filter_T<Test_I_AVStream_Server_DirectShow_Message,
                                                          struct Test_I_AVStream_Server_DirectShow_FilterConfiguration,
                                                          struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Test_I_AVStream_Server_DirectShowFilter_t;
@@ -1289,6 +1309,13 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessi
                               libacestream_default_vis_libav_resize_module_name_string,
                               Stream_INotify_t,                                                // stream notification interface type
                               Test_I_AVStream_Client_MediaFoundation_Resize);                           // writer type
+
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                       // session data type
+                              enum Stream_SessionMessageType,                                      // session event type
+                              struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_vis_libav_resize_module_name_string,
+                              Stream_INotify_t,                                                    // stream notification interface type
+                              Test_I_AVStream_Server_DirectShow_Resize);                           // writer type
 #else
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                             // session data type
                               enum Stream_SessionMessageType,                            // session event type
@@ -1357,6 +1384,13 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                      // session event type
+                              struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_misc_defragment_module_name_string,
+                              Stream_INotify_t,                                                    // stream notification interface type
+                              Test_I_AVStream_Server_DirectShow_Defragment);                       // writer type
+
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                 // session data type
                               enum Stream_SessionMessageType,                                      // session event type
                               struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type

@@ -84,7 +84,12 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   //                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
   //                false);
   //layout_out->append (module_p, NULL, 0);
-  //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Client_DirectShow_Resize_Module (this,
+                                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                  false);
+  layout_out->append (module_p, NULL, 0);
+  module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Client_DirectShow_Video_Tagger_Module (this,
                                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
@@ -98,7 +103,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   layout_out->append (module_p, NULL, 0);
   module_p = NULL;
 
-  if ((*iterator_2).second.second->window.type == Common_UI_Window::TYPE_WIN32)
+  if ((*iterator_2).second.second->window.type != Common_UI_Window::TYPE_INVALID)
   {
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_DirectShow_Distributor_Module (this,
@@ -111,12 +116,18 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
       dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
     ACE_ASSERT (idistributor_p);
     idistributor_p->initialize (branches_a);
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_AVStream_Client_DirectShow_Resize_Module (this,
+                                                                     ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2")),
+                    false);
+    layout_out->append (module_p, branch_p, index_i);
   } // end IF
 
   ACE_ASSERT (inherited::configuration_->configuration_->module_2);
   layout_out->append (inherited::configuration_->configuration_->module_2, NULL, 0);
 
-  if ((*iterator_2).second.second->window.type == Common_UI_Window::TYPE_WIN32)
+  if ((*iterator_2).second.second->window.type != Common_UI_Window::TYPE_INVALID)
   {
 #if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
     module_p = NULL;
@@ -211,13 +222,9 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
     if (!Stream_MediaFramework_DirectShow_Tools::getBufferNegotiation ((*iterator).second.second->builder,
                                                                        STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L,
                                                                        buffer_negotiation_p))
-    {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::getBufferNegotiation(), aborting\n"),
+                  ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::getBufferNegotiation(), continuing\n"),
                   ACE_TEXT (stream_name_string_)));
-      goto error;
-    } // end IF
-    ACE_ASSERT (buffer_negotiation_p);
     goto continue_;
   } // end IF
   else
@@ -275,10 +282,11 @@ continue_:
   //} // end IF
   //ACE_ASSERT ((*iterator).second.second->direct3DConfiguration->handle);
 
+  //ACE_ASSERT ((*iterator).second.second->window.type == Common_UI_Window::TYPE_WIN32);
   if (!Stream_Module_Decoder_Tools::loadVideoRendererGraph (CLSID_VideoInputDeviceCategory,
                                                             configuration_in.configuration_->format.video,
                                                             (*iterator).second.second->outputFormat,
-                                                            (*iterator).second.second->window,
+                                                            NULL,
                                                             (*iterator).second.second->builder,
                                                             graph_configuration))
   {
@@ -334,25 +342,27 @@ continue_:
   } // end IF
   isample_grabber_p->Release (); isample_grabber_p = NULL;
 
-  ACE_ASSERT (buffer_negotiation_p);
-  ACE_OS::memset (&allocator_properties, 0, sizeof (allocator_properties));
-  // *TODO*: IMemAllocator::SetProperties returns VFW_E_BADALIGN (0x8004020e)
-  //         if this is -1/0 (why ?)
-  allocator_properties.cbAlign = 1;
-  allocator_properties.cbBuffer =
-    configuration_in.configuration_->allocatorConfiguration->defaultBufferSize;
-  allocator_properties.cbPrefix = -1; // <-- use default
-  allocator_properties.cBuffers =
-    STREAM_DEV_CAM_DIRECTSHOW_DEFAULT_DEVICE_BUFFERS;
-  result_2 =
-      buffer_negotiation_p->SuggestAllocatorProperties (&allocator_properties);
-  if (FAILED (result_2)) // E_UNEXPECTED: 0x8000FFFF --> graph already connected
+  if (buffer_negotiation_p)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to IAMBufferNegotiation::SuggestAllocatorProperties(): \"%s\", aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT (Common_Error_Tools::errorToString (result_2, true).c_str ())));
-    goto error;
+    ACE_OS::memset (&allocator_properties, 0, sizeof (allocator_properties));
+    // *TODO*: IMemAllocator::SetProperties returns VFW_E_BADALIGN (0x8004020e)
+    //         if this is -1/0 (why ?)
+    allocator_properties.cbAlign = 1;
+    allocator_properties.cbBuffer =
+      configuration_in.configuration_->allocatorConfiguration->defaultBufferSize;
+    allocator_properties.cbPrefix = -1; // <-- use default
+    allocator_properties.cBuffers =
+      STREAM_DEV_CAM_DIRECTSHOW_DEFAULT_DEVICE_BUFFERS;
+    result_2 =
+        buffer_negotiation_p->SuggestAllocatorProperties (&allocator_properties);
+    if (FAILED (result_2)) // E_UNEXPECTED: 0x8000FFFF --> graph already connected
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to IAMBufferNegotiation::SuggestAllocatorProperties(): \"%s\", aborting\n"),
+                  ACE_TEXT (stream_name_string_),
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2, true).c_str ())));
+      goto error;
+    } // end IF
   } // end IF
 
   if (!Stream_MediaFramework_DirectShow_Tools::connect ((*iterator).second.second->builder,
@@ -389,28 +399,34 @@ continue_:
                                                                  STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L));
 
 #if defined (_DEBUG)
-  ACE_OS::memset (&allocator_properties, 0, sizeof (allocator_properties));
-  result_2 =
-      buffer_negotiation_p->GetAllocatorProperties (&allocator_properties);
-  if (FAILED (result_2)) // E_FAIL (0x80004005)
+  if (buffer_negotiation_p)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("%s/%s: failed to IAMBufferNegotiation::GetAllocatorProperties(): \"%s\", continuing\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L),
-                ACE_TEXT (Common_Error_Tools::errorToString (result_2, true).c_str ())));
-    //goto error;
+    ACE_OS::memset (&allocator_properties, 0, sizeof (allocator_properties));
+    result_2 =
+        buffer_negotiation_p->GetAllocatorProperties (&allocator_properties);
+    if (FAILED (result_2)) // E_FAIL (0x80004005)
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("%s/%s: failed to IAMBufferNegotiation::GetAllocatorProperties(): \"%s\", continuing\n"),
+                  ACE_TEXT (stream_name_string_),
+                  ACE_TEXT_WCHAR_TO_TCHAR (STREAM_LIB_DIRECTSHOW_FILTER_NAME_CAPTURE_VIDEO_L),
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2, true).c_str ())));
+      //goto error;
+    } // end IF
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: negotiated allocator properties (buffers/size/alignment/prefix): %d/%d/%d/%d\n"),
+                  ACE_TEXT (stream_name_string_),
+                  allocator_properties.cBuffers,
+                  allocator_properties.cbBuffer,
+                  allocator_properties.cbAlign,
+                  allocator_properties.cbPrefix));
   } // end IF
-  else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s: negotiated allocator properties (buffers/size/alignment/prefix): %d/%d/%d/%d\n"),
-                ACE_TEXT (stream_name_string_),
-                allocator_properties.cBuffers,
-                allocator_properties.cbBuffer,
-                allocator_properties.cbAlign,
-                allocator_properties.cbPrefix));
 #endif // _DEBUG
-  buffer_negotiation_p->Release (); buffer_negotiation_p = NULL;
+  if (buffer_negotiation_p)
+  {
+    buffer_negotiation_p->Release (); buffer_negotiation_p = NULL;
+  } // end IF
 
   result_2 =
     (*iterator).second.second->builder->QueryInterface (IID_PPV_ARGS (&media_filter_p));

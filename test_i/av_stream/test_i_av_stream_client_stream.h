@@ -95,7 +95,7 @@ public:
 
      // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: module list
-                    bool&);          // return value: delete modules ?
+                     bool&);          // return value: delete modules ?
 
      // implement Common_IInitialize_T
   virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration

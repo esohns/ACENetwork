@@ -2135,7 +2135,8 @@ idle_initialize_source_UI_cb (gpointer userData_in)
     NULL;
   Test_I_AVStream_Client_DirectShow_StreamConfigurationsIterator_t directshow_stream_iterator;
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
-  Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator_2; // visualization
+  Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator_2a; // resize
+  Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator_2b; // visualization
   Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t mediafoundation_stream_iterator;
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
   switch (ui_cb_data_base_p->mediaFramework)
@@ -2153,9 +2154,12 @@ idle_initialize_source_UI_cb (gpointer userData_in)
       directshow_modulehandler_iterator =
         (*directshow_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_ASSERT (directshow_modulehandler_iterator != (*directshow_stream_iterator).second.end ());
-      directshow_modulehandler_iterator_2 =
+      directshow_modulehandler_iterator_2a =
+        (*directshow_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2"));
+      ACE_ASSERT (directshow_modulehandler_iterator_2a != (*directshow_stream_iterator).second.end ());
+      directshow_modulehandler_iterator_2b =
         (*directshow_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING));
-      ACE_ASSERT (directshow_modulehandler_iterator_2 != (*directshow_stream_iterator).second.end ());
+      ACE_ASSERT (directshow_modulehandler_iterator_2b != (*directshow_stream_iterator).second.end ());
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -2816,15 +2820,19 @@ idle_initialize_source_UI_cb (gpointer userData_in)
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_ASSERT (gdk_win32_window_is_win32 (window_p));
   switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-    { ACE_ASSERT (!(*directshow_modulehandler_iterator_2).second.second->window.gdk_window);
-      (*directshow_modulehandler_iterator_2).second.second->window.gdk_window =
-        window_p;
-      (*directshow_modulehandler_iterator_2).second.second->window.type =
-        Common_UI_Window::TYPE_GTK;
+    { ACE_ASSERT (!(*directshow_modulehandler_iterator).second.second->window.win32_hwnd);
+      ACE_ASSERT (!(*directshow_modulehandler_iterator_2b).second.second->window.win32_hwnd);
+      (*directshow_modulehandler_iterator).second.second->window.win32_hwnd =
+        gdk_win32_window_get_impl_hwnd (window_p);
+      (*directshow_modulehandler_iterator).second.second->window.type =
+        Common_UI_Window::TYPE_WIN32;
+      (*directshow_modulehandler_iterator_2b).second.second->window.win32_hwnd =
+        gdk_win32_window_get_impl_hwnd (window_p);
+      (*directshow_modulehandler_iterator_2b).second.second->window.type =
+        Common_UI_Window::TYPE_WIN32;
       directshow_ui_cb_data_p->configuration->direct3DConfiguration.presentationParameters.hDeviceWindow =
         gdk_win32_window_get_impl_hwnd (window_p);
       break;
@@ -2876,7 +2884,7 @@ idle_initialize_source_UI_cb (gpointer userData_in)
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
       Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
-                                                             (*directshow_modulehandler_iterator).second.second->outputFormat);
+                                                             (*directshow_modulehandler_iterator_2a).second.second->outputFormat);
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -3960,15 +3968,14 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_ASSERT (gdk_win32_window_is_win32 (window_p));
   switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-    { ACE_ASSERT (!(*directshow_modulehandler_iterator).second.second->window.gdk_window);
-      (*directshow_modulehandler_iterator).second.second->window.gdk_window =
-        window_p;
+    { ACE_ASSERT (!(*directshow_modulehandler_iterator).second.second->window.win32_hwnd);
+      (*directshow_modulehandler_iterator).second.second->window.win32_hwnd =
+        gdk_win32_window_get_impl_hwnd (window_p);
       (*directshow_modulehandler_iterator).second.second->window.type =
-        Common_UI_Window::TYPE_GTK;
+        Common_UI_Window::TYPE_WIN32;
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -6942,9 +6949,12 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
         return;
       } // end IF
       ACE_ASSERT ((*directshow_modulehandler_iterator).second.second->builder);
-      ACE_ASSERT (buffer_negotiation_p);
+      //ACE_ASSERT (buffer_negotiation_p);
       ACE_ASSERT (directshow_ui_cb_data_p->streamConfiguration);
-      buffer_negotiation_p->Release (); buffer_negotiation_p = NULL;
+      if (buffer_negotiation_p)
+      {
+        buffer_negotiation_p->Release (); buffer_negotiation_p = NULL;
+      } // end IF
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -8034,7 +8044,7 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
         directshow_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_ASSERT (directshow_stream_iterator != directshow_ui_cb_data_p->configuration->streamConfigurations.end ());
       directshow_modulehandler_iterator =
-        (*directshow_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
+        (*directshow_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2"));
       ACE_ASSERT (directshow_modulehandler_iterator != (*directshow_stream_iterator).second.end ());
 
       break;
@@ -8205,22 +8215,15 @@ drawingarea_size_allocate_target_cb (GtkWidget* widget_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Image_Resolution_t resolution_s;
+  resolution_s.cx = allocation_in->width;
+  resolution_s.cy = allocation_in->height;
   switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-    { //ACE_ASSERT (directshow_ui_cb_data_p->configuration->moduleHandlerConfiguration->windowController);
-      //gint x, y;
-      //gtk_widget_translate_coordinates (widget_in,
-      //                                  gtk_widget_get_toplevel (widget_in),
-      //                                  0, 0, &x, &y);
-      (*directshow_modulehandler_iterator).second.second->area.left =
-        allocation_in->x;
-      (*directshow_modulehandler_iterator).second.second->area.top =
-        allocation_in->y;
-      (*directshow_modulehandler_iterator).second.second->area.right =
-        allocation_in->x + allocation_in->width;
-      (*directshow_modulehandler_iterator).second.second->area.bottom =
-        allocation_in->y + allocation_in->height;
+    {
+      Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
+                                                             (*directshow_modulehandler_iterator).second.second->outputFormat);
 
       //HRESULT result =
       //  ui_cb_data_p->configuration.moduleHandlerConfiguration->windowController->SetWindowPosition (directshow_ui_cb_data_p->configuration->moduleHandlerConfiguration.area.left,

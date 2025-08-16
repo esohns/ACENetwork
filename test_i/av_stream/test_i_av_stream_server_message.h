@@ -47,14 +47,17 @@ class Test_I_AVStream_Server_SessionMessage;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+typedef Stream_DataBase_T<struct Test_I_AVStream_Server_DirectShow_MessageData> Test_I_AVStream_Server_DirectShow_MessageData_t;
+typedef Stream_DataBase_T < struct Test_I_AVStream_Server_MediaFoundation_MessageData> Test_I_AVStream_Server_MediaFoundation_MessageData_t;
+
 class Test_I_AVStream_Server_DirectShow_Message
- : public Stream_MediaFramework_DirectShow_DataMessageBase_T<struct Test_I_AVStream_Server_DirectShow_MessageData,
-                                                             enum Stream_MessageType,
-                                                             int>
+ : public Stream_DataMessageBase_2<Test_I_AVStream_Server_DirectShow_MessageData_t,
+                                   enum Stream_MessageType,
+                                   int>
 {
-  typedef Stream_MediaFramework_DirectShow_DataMessageBase_T<struct Test_I_AVStream_Server_DirectShow_MessageData,
-                                                             enum Stream_MessageType,
-                                                             int> inherited;
+  typedef Stream_DataMessageBase_2<Test_I_AVStream_Server_DirectShow_MessageData_t,
+                                   enum Stream_MessageType,
+                                   int> inherited;
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -98,11 +101,13 @@ class Test_I_AVStream_Server_DirectShow_Message
 //////////////////////////////////////////
 
 class Test_I_AVStream_Server_MediaFoundation_Message
- : public Stream_MediaFramework_MediaFoundation_DataMessageBase_T<struct Test_I_AVStream_Server_MediaFoundation_MessageData,
-                                                                  enum Stream_MessageType>
+ : public Stream_DataMessageBase_2<Test_I_AVStream_Server_MediaFoundation_MessageData_t,
+                                   enum Stream_MessageType,
+                                   int>
 {
-  typedef Stream_MediaFramework_MediaFoundation_DataMessageBase_T<struct Test_I_AVStream_Server_MediaFoundation_MessageData,
-                                                                  enum Stream_MessageType> inherited;
+  typedef Stream_DataMessageBase_2<Test_I_AVStream_Server_MediaFoundation_MessageData_t,
+                                   enum Stream_MessageType,
+                                   int> inherited;
 
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,

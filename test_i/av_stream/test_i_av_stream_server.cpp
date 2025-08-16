@@ -112,7 +112,9 @@ do_printUsage (const std::string& programName_in)
   std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -219,7 +221,9 @@ do_processArguments (int argc_in,
   STREAM_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // initialize results
   std::string path = configuration_path;
@@ -972,12 +976,16 @@ do_work (unsigned int maximumNumberOfConnections_in,
         &directshow_configuration;
       directshow_modulehandler_configuration.connectionConfigurations =
         &directshow_configuration.connectionConfigurations;
+      directshow_modulehandler_configuration.defragmentMode =
+        STREAM_DEFRAGMENT_CONDENSE;
       directshow_modulehandler_configuration.deviceIdentifier.identifier._guid =
         Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false);
       directshow_modulehandler_configuration.deviceIdentifier.identifierDiscriminator =
         Stream_Device_Identifier::GUID;
       directshow_modulehandler_configuration.display =
         Common_UI_Tools::getDefaultDisplay ();
+      directshow_modulehandler_configuration.fileIdentifier.identifier =
+        fileName_in;
       directshow_modulehandler_configuration.filterConfiguration =
         &directshow_configuration.filterConfiguration;
       directshow_modulehandler_configuration.inbound = true;
@@ -991,8 +999,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
         &directshow_configuration.streamConfiguration;
       directshow_modulehandler_configuration.subscriber =
         &directshow_ui_event_handler;
-      directshow_modulehandler_configuration.fileIdentifier.identifier =
-        fileName_in;
+      directshow_modulehandler_configuration.allocatorConfiguration =
+        &allocator_configuration;
 
       directshow_stream_configuration.allocatorConfiguration = &allocator_configuration;
 
@@ -1232,6 +1240,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  directshow_modulehandler_configuration.messageAllocator = allocator_p;
+
   Test_I_AVStream_Server_DirectShow_EventHandler* directshow_event_handler_p =
     NULL;
   Test_I_AVStream_Server_MediaFoundation_EventHandler* mediafoundation_event_handler_p =
@@ -2509,9 +2519,12 @@ ACE_TMAIN (int argc_in,
 #else
   Common_Tools::initialize (false); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR ("av_stream"));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // step1a set defaults
   unsigned int maximum_number_of_connections =
