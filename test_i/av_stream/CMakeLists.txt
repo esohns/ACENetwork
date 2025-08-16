@@ -220,7 +220,7 @@ elseif (WXWIDGETS_USE)
  set (ui_definition_file_2 etc/test_i_server.xrc)
 endif ()
 
-cmake_policy (SET CMP0065 OLD) # do not add flags to export symbols from executables without the ENABLE_EXPORTS target property
+#cmake_policy (SET CMP0065 OLD) # do not add flags to export symbols from executables without the ENABLE_EXPORTS target property
 add_executable (${EXECUTABLE_CLIENT}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE_CLIENT}_EXE_SRCS}

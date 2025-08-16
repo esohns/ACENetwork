@@ -295,7 +295,7 @@ do_process_arguments (int argc_in,
       case 'c':
       {
         configurationFile_out =
-            ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
+          ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
       case 'd':
@@ -318,7 +318,7 @@ do_process_arguments (int argc_in,
       case 'g':
       {
         UIDefinitonFileName_out =
-            ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
+          ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
       case 'l':
@@ -824,10 +824,12 @@ do_work (const std::string& configurationFile_in,
     &configuration_in.connectionConfigurations;
   modulehandler_configuration.messageAllocator = &message_allocator;
   struct HTTP_ParserConfiguration parser_configuration;
+#if defined (_DEBUG)
   parser_configuration.debugParser =
     configuration_in.parserConfiguration.debugParser;
   parser_configuration.debugScanner =
     configuration_in.parserConfiguration.debugScanner;
+#endif // _DEBUG
   modulehandler_configuration.parserConfiguration =
     &parser_configuration;
 //  modulehandler_configuration.statisticReportingInterval =

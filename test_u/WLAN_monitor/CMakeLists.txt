@@ -272,8 +272,13 @@ target_precompile_headers (${EXECUTABLE}
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
-install (FILES etc/wlan_monitor.glade
-         DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
+if (UNIX)
+ install (FILES etc/wlan_monitor.glade
+          DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
+elseif (WIN32)
+ install (FILES etc/wlan_monitor.glade
+          DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
+endif ()
 
 ##########################################
 

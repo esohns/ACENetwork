@@ -349,13 +349,13 @@ if (WIN32)
                  ${LIB_ROOT}/gtk3/bin/libcairo-gobject-2.dll
                  ${LIB_ROOT}/gtk3/bin/libpixman-1-0.dll
                  ${LIB_ROOT}/gtk3/bin/libwinpthread-1.dll
-                 ${LIB_ROOT}/assimp/cmake/bin/Debug/assimp-vc142-mtd.dll
-                 ${LIB_ROOT}/libpng/build/Debug/libpng16d.dll
-                 ${LIB_ROOT}/ffmpeg/bin/swresample-4.dll
-                 ${LIB_ROOT}/ffmpeg/bin/swscale-6.dll
-                 ${LIB_ROOT}/ffmpeg/bin/avformat-59.dll
-                 ${LIB_ROOT}/ffmpeg/bin/avcodec-59.dll
-                 ${LIB_ROOT}/ffmpeg/bin/avutil-57.dll
+                 ${LIB_ROOT}/assimp/cmake/bin/Release/assimp-vc143-mt.dll
+                 ${LIB_ROOT}/libpng/build/Release/libpng16.dll
+                 ${LIB_ROOT}/ffmpeg/libswresample/swresample-5.dll
+                 ${LIB_ROOT}/ffmpeg/libswscale/swscale-8.dll
+                 ${LIB_ROOT}/ffmpeg/libavformat/avformat-61.dll
+                 ${LIB_ROOT}/ffmpeg/libavcodec/avcodec-61.dll
+                 ${LIB_ROOT}/ffmpeg/libavutil/avutil-59.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_MagickCore_.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_MagickWand_.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_bzlib_.dll
@@ -368,14 +368,16 @@ if (WIN32)
                  ${LIB_ROOT}/ImageMagick/CORE_RL_lqr_.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_zlib_.dll
                  ${LIB_ROOT}/libepoxy/bin/epoxy-0.dll
-                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_core_vc_x64_custom.dll
-                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_html_vc_x64_custom.dll
-                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316d_xrc_vc_x64_custom.dll
-                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316d_vc_x64_custom.dll
-                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316d_xml_vc_x64_custom.dll
+                 ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/iconv-2.dll
+                 ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/liblzma.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316_core_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316_html_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316_xrc_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316_vc_x64_custom.dll
+                 ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316_xml_vc_x64_custom.dll
                  ${LIB_ROOT}/openssl/libcrypto-3-x64.dll
                  ${LIB_ROOT}/openssl/libssl-3-x64.dll
-                 ${LIB_ROOT}/zlib/build/Debug/zlibd.dll
+                 ${LIB_ROOT}/zlib/build/Release/zlib.dll
            DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
   install (FILES
            ${LIB_ROOT}/gtk3/share/glib-2.0/schemas/gschemas.compiled

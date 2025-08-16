@@ -246,7 +246,6 @@ if (WIN32)
                 ${ui_definition_file}
                 ${ui_rc_file}
           DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
-#          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
 elseif (UNIX)
   install (FILES
            ${configuration_file}

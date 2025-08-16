@@ -233,8 +233,8 @@ else ()
 endif (DEFINED ENV{LIB_ROOT})
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_MODULES_PATH}")
 #include (UseBackportedModules)
-cmake_policy (SET CMP0026 OLD)
-cmake_policy (SET CMP0053 OLD)
+#cmake_policy (SET CMP0026 OLD)
+#cmake_policy (SET CMP0053 OLD)
 include (CreateLaunchers)
 
 # enable (unit/integration) tests
