@@ -336,9 +336,9 @@ struct Test_I_AVStream_UI_CBData
   {}
 
   struct Test_I_AVStream_Configuration*  configuration;
-  bool                                    isFirst; // first activation ?
+  bool                                   isFirst; // first activation ?
 #if defined (GTK_USE)
-  GdkPixbuf*                              pixelBuffer;
+  GdkPixbuf*                             pixelBuffer;
 #endif // GTK_USE
   struct Test_I_AVStream_UI_ProgressData progressData;
 };

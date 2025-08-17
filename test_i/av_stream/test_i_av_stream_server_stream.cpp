@@ -127,7 +127,12 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, branch_p, index_i);
 
-#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
+#if defined (GTK_USE)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Server_DirectShow_GTK_Display_Module (this,
+                                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
+                  false);
+#elif defined (DIRECTSHOW_BASECLASSES_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_DirectShow_Display_Module (this,
                                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
@@ -252,8 +257,8 @@ error:
 
 void
 Test_I_AVStream_Server_DirectShow_TCPStream::setFormat (IGraphBuilder* builder_in,
-                                            const std::wstring& sourceFilterName_in,
-                                            const struct _AMMediaType& mediaType_in)
+                                                        const std::wstring& sourceFilterName_in,
+                                                        const struct _AMMediaType& mediaType_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::setFormat"));
 

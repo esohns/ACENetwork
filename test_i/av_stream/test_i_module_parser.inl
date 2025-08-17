@@ -122,11 +122,21 @@ Test_I_AVStream_Parser_T<ACE_SYNCH_USE,
 
   // initialize message
   DataMessageType* message_p = static_cast<DataMessageType*> (message_block_p);
-  typename DataMessageType::DATA_T& message_data_container_r =
-    const_cast<typename DataMessageType::DATA_T&> (message_p->getR ());
-  typename DataMessageType::DATA_T::DATA_T& message_data_r =
-    const_cast<typename DataMessageType::DATA_T::DATA_T&> (message_data_container_r.getR ());
-  message_data_r.header = inherited::header_;
+
+  typename DataMessageType::DATA_T::DATA_T* data_p = NULL;
+  ACE_NEW_NORETURN (data_p,
+                    typename DataMessageType::DATA_T::DATA_T ());
+  ACE_ASSERT (data_p);
+  data_p->header = inherited::header_;
+
+  typename DataMessageType::DATA_T* container_p = NULL;
+  ACE_NEW_NORETURN (container_p,
+                    typename DataMessageType::DATA_T (data_p, true));
+  ACE_ASSERT (container_p);
+
+  message_p->initialize (container_p,
+                         message_p->sessionId (),
+                         NULL);
 
   // push downstream
   int result = inherited::put_next (message_block_p, NULL);

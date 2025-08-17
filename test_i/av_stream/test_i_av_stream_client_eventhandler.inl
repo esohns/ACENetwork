@@ -200,20 +200,20 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
-  if (message_in.getMediaType () == STREAM_MEDIATYPE_AUDIO)
-    return;
-
 #if defined (GTK_USE)
   guint event_source_id = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->progressData.transferred += message_in.total_length ();
-    event_source_id = g_idle_add (idle_update_video_display_cb,
-                                  CBData_);
-    if (!event_source_id)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
-    //else
-      //  CBData_->eventSourceIds.insert (event_source_id);
+    if (message_in.getMediaType () == STREAM_MEDIATYPE_VIDEO)
+    {
+      event_source_id = g_idle_add (idle_update_video_display_cb,
+                                    CBData_);
+      if (!event_source_id)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
+      //else
+        //  CBData_->eventSourceIds.insert (event_source_id);
+    } // end IF
     state_r.eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
 #endif // GTK_USE

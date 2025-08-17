@@ -3971,19 +3971,26 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-    { ACE_ASSERT (!(*directshow_modulehandler_iterator).second.second->window.win32_hwnd);
+    {
+#if defined (GTK_USE)
+      (*directshow_modulehandler_iterator).second.second->window.gdk_window =
+        window_p;
+      (*directshow_modulehandler_iterator).second.second->window.type =
+        Common_UI_Window::TYPE_GTK;
+#else
       (*directshow_modulehandler_iterator).second.second->window.win32_hwnd =
         gdk_win32_window_get_impl_hwnd (window_p);
       (*directshow_modulehandler_iterator).second.second->window.type =
         Common_UI_Window::TYPE_WIN32;
+#endif // GTK_USE
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
-    { ACE_ASSERT (!(*mediafoundation_modulehandler_iterator).second.second->window.gdk_window);
-      (*mediafoundation_modulehandler_iterator).second.second->window.gdk_window =
-        window_p;
+    { ACE_ASSERT (!(*mediafoundation_modulehandler_iterator).second.second->window.win32_hwnd);
+      (*mediafoundation_modulehandler_iterator).second.second->window.win32_hwnd =
+        gdk_win32_window_get_impl_hwnd (window_p);
       (*mediafoundation_modulehandler_iterator).second.second->window.type =
-        Common_UI_Window::TYPE_GTK;
+        Common_UI_Window::TYPE_WIN32;
       break;
     }
     default:
@@ -4637,7 +4644,7 @@ idle_update_video_display_cb (gpointer userData_in)
 
   gdk_window_invalidate_rect (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)),
                               NULL,
-                              false);
+                              FALSE);
 
   return G_SOURCE_REMOVE;
 }

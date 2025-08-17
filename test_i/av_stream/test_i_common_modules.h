@@ -678,6 +678,28 @@ typedef Stream_Miscellaneous_Distributor_WriterTask_T<ACE_MT_SYNCH,
 //                                                Test_I_AVStream_Client_DirectShow_SessionData,
 //                                                Test_I_AVStream_Client_DirectShow_SessionData_t> Test_I_AVStream_Client_DirectShow_Direct3D_Display;
 
+#if defined (GTK_SUPPORT)
+typedef Stream_Module_Vis_GTK_Cairo_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
+                                      Stream_ControlMessage_t,
+                                      Test_I_AVStream_Client_DirectShow_Message,
+                                      Test_I_AVStream_Client_DirectShow_SessionMessage,
+                                      Test_I_AVStream_Client_DirectShow_StreamSessionData,
+                                      Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                                      struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Client_DirectShow_GTK_Display;
+
+typedef Stream_Module_Vis_GTK_Cairo_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
+                                      Stream_ControlMessage_t,
+                                      Test_I_AVStream_Server_DirectShow_Message,
+                                      Test_I_AVStream_Server_DirectShow_SessionMessage,
+                                      Test_I_AVStream_Server_DirectShow_StreamSessionData,
+                                      Test_I_AVStream_Server_DirectShow_StreamSessionData_t,
+                                      struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_DirectShow_GTK_Display;
+#endif // GTK_SUPPORT
+
 struct Test_I_AVStream_Client_DirectShow_FilterConfiguration
  : Stream_MediaFramework_DirectShow_FilterConfiguration
 {
@@ -875,17 +897,6 @@ typedef Test_I_Stream_Module_EventHandler_T<struct Stream_ModuleConfiguration,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-typedef Stream_Vis_Target_Direct3D_T<ACE_MT_SYNCH,
-                                     Common_TimePolicy_t,
-                                     struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
-                                     Stream_ControlMessage_t,
-                                     Test_I_AVStream_Server_DirectShow_Message,
-                                     Test_I_AVStream_Server_DirectShow_SessionMessage,
-                                     Test_I_AVStream_Server_DirectShow_StreamSessionData,
-                                     Test_I_AVStream_Server_DirectShow_StreamSessionData_t,
-                                     struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_Direct3D_Display;
-
-#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
                                    struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
@@ -893,6 +904,17 @@ typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
                                    Test_I_AVStream_Server_DirectShow_Message,
                                    Test_I_AVStream_Server_DirectShow_SessionMessage> Test_I_AVStream_Server_DirectShow_Defragment;
 
+//typedef Stream_Vis_Target_Direct3D_T<ACE_MT_SYNCH,
+//                                     Common_TimePolicy_t,
+//                                     struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
+//                                     Stream_ControlMessage_t,
+//                                     Test_I_AVStream_Server_DirectShow_Message,
+//                                     Test_I_AVStream_Server_DirectShow_SessionMessage,
+//                                     Test_I_AVStream_Server_DirectShow_StreamSessionData,
+//                                     Test_I_AVStream_Server_DirectShow_StreamSessionData_t,
+//                                     struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_Direct3D_Display;
+
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 typedef Stream_MediaFramework_DirectShow_Source_Filter_T<Test_I_AVStream_Server_DirectShow_Message,
                                                          struct Test_I_AVStream_Server_DirectShow_FilterConfiguration,
                                                          struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Test_I_AVStream_Server_DirectShowFilter_t;
@@ -912,6 +934,7 @@ typedef Stream_Vis_Target_DirectShow_T<ACE_MT_SYNCH,
                                        Test_I_AVStream_Server_DirectShowFilter_t,
                                        struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_DirectShow_Display;
 #endif // DIRECTSHOW_BASECLASSES_SUPPORT
+
 typedef Stream_Vis_Target_MediaFoundation_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,
                                             struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration,
@@ -1391,12 +1414,28 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionDat
                               Stream_INotify_t,                                                    // stream notification interface type
                               Test_I_AVStream_Server_DirectShow_Defragment);                       // writer type
 
+//DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                 // session data type
+//                              enum Stream_SessionMessageType,                                      // session event type
+//                              struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+//                              libacestream_default_vis_direct3d_module_name_string,
+//                              Stream_INotify_t,                                                    // stream notification interface type
+//                              Test_I_AVStream_Server_Direct3D_Display);                            // writer type
+#if defined (GTK_SUPPORT)
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                      // session event type
+                              struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_vis_gtk_cairo_module_name_string,
+                              Stream_INotify_t,                                                    // stream notification interface type
+                              Test_I_AVStream_Client_DirectShow_GTK_Display);                      // writer type
+
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                 // session data type
                               enum Stream_SessionMessageType,                                      // session event type
                               struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
-                              libacestream_default_vis_direct3d_module_name_string,
+                              libacestream_default_vis_gtk_cairo_module_name_string,
                               Stream_INotify_t,                                                    // stream notification interface type
-                              Test_I_AVStream_Server_Direct3D_Display);                            // writer type
+                              Test_I_AVStream_Server_DirectShow_GTK_Display);                      // writer type
+#endif // GTK_SUPPORT
+
 #if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                             // session event type

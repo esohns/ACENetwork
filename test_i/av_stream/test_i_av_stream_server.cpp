@@ -1143,8 +1143,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      directshow_modulehandler_iterator =
-        directShowCBData_in.configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+      //directshow_modulehandler_iterator =
+      //  directShowCBData_in.configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_ASSERT (directshow_modulehandler_iterator != directShowCBData_in.configuration->streamConfiguration.end ());
       result =
         do_initialize_directshow (directshow_stream_configuration.format.audio,

@@ -79,7 +79,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
 
   sessionData_ = &const_cast<SessionDataType&> (sessionData_in);
 
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->progressData.transferred = 0;
@@ -92,7 +92,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
       state_r.eventSourceIds.insert (event_source_id);
     state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
   } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
 }
 
 template <typename SessionDataType,
@@ -122,7 +122,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_SUPPORT
 
-#if defined (GTK_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     event_source_id = g_idle_add (idle_end_target_UI_cb,
@@ -134,7 +134,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
       state_r.eventSourceIds.insert (event_source_id);
     state_r.eventStack.push (COMMON_UI_EVENT_STOPPED);
   } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
 
   if (sessionData_)
     sessionData_ = NULL;
@@ -168,20 +168,28 @@ Test_I_Server_EventHandler_T<SessionDataType,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_SUPPORT
 
-#if defined (GTK_SUPPORT)
+  const typename MessageType::DATA_T& message_data_container_r = message_in.getR ();
+  const typename MessageType::DATA_T::DATA_T& message_data_r =
+    message_data_container_r.getR ();
+
+#if defined (GTK_USE)
   guint event_source_id = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->progressData.transferred += message_in.total_length ();
-    event_source_id = g_idle_add (idle_update_video_display_cb,
-                                  CBData_);
-    if (!event_source_id)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
-    //else
-    //  CBData_->UIState.eventSourceIds.insert (event_source_id);
+
+    if (message_data_r.header.type == AVSTREAM_MESSAGE_VIDEO)
+    {
+      event_source_id = g_idle_add (idle_update_video_display_cb,
+                                    CBData_);
+      if (!event_source_id)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
+      //else
+      //  CBData_->UIState.eventSourceIds.insert (event_source_id);
+    } // end IF
     state_r.eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
-#endif // GTK_SUPPORT
+#endif // GTK_USE
 }
 
 template <typename SessionDataType,
