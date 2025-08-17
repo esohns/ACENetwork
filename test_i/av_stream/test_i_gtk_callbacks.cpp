@@ -947,19 +947,32 @@ load_rates (IAMStreamConfig* IAMStreamConfig_in,
   } // end FOR
 
   GtkTreeIter iterator;
+  std::ostringstream converter;
+  guint frame_rate = 0;
   for (std::set<std::pair<unsigned int, unsigned int> >::const_iterator iterator_2 = frame_rates.begin ();
        iterator_2 != frame_rates.end ();
        ++iterator_2)
   {
+    frame_rate =
+        (((*iterator_2).first == 1) ? (*iterator_2).second
+                                    : static_cast<guint> (static_cast<float> ((*iterator_2).second) /
+                                                          static_cast<float> ((*iterator_2).first)));
+
+    converter.clear ();
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter << frame_rate;
+
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
-                        0, (*iterator_2).first,
-                        1, (*iterator_2).second,
+                        0, converter.str ().c_str (),
+                        1, (*iterator_2).first,
+                        2, (*iterator_2).second,
                         -1);
   } // end FOR
 
   return true;
 }
+
 bool
 //load_rates (IMFSourceReader* IMFSourceReader_in,
 load_rates (IMFMediaSource* IMFMediaSource_in,
@@ -1088,14 +1101,26 @@ load_rates (IMFMediaSource* IMFMediaSource_in,
   } // end IF
 
   GtkTreeIter iterator;
+  std::ostringstream converter;
+  guint frame_rate = 0;
   for (std::set<std::pair<unsigned int, unsigned int> >::const_iterator iterator_2 = frame_rates.begin ();
        iterator_2 != frame_rates.end ();
        ++iterator_2)
   {
+    frame_rate =
+        (((*iterator_2).first == 1) ? (*iterator_2).second
+                                    : static_cast<guint> (static_cast<float> ((*iterator_2).second) /
+                                                          static_cast<float> ((*iterator_2).first)));
+
+    converter.clear ();
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter << frame_rate;
+
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
-                        0, (*iterator_2).first,
-                        1, (*iterator_2).second,
+                        0, converter.str ().c_str (),
+                        1, (*iterator_2).first,
+                        2, (*iterator_2).second,
                         -1);
   } // end FOR
 
@@ -1308,6 +1333,7 @@ load_rates (int fd_in,
 continue_:
   GtkTreeIter iterator;
   guint frame_rate = 0;
+  std::ostringstream converter;
   for (std::set<struct v4l2_fract, less_fract>::const_iterator iterator_2 = frame_intervals.begin ();
        iterator_2 != frame_intervals.end ();
        ++iterator_2)
@@ -1316,9 +1342,13 @@ continue_:
         (((*iterator_2).numerator == 1) ? (*iterator_2).denominator
                                         : static_cast<guint> (static_cast<float> ((*iterator_2).denominator) /
                                                               static_cast<float> ((*iterator_2).numerator)));
+    converter.clear ();
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter << frame_rate;
+
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
-                        0, frame_rate,
+                        0, converter.str ().c_str (),
                         1, (*iterator_2).numerator,
                         2, (*iterator_2).denominator,
                         -1);
@@ -2863,16 +2893,23 @@ idle_initialize_source_UI_cb (gpointer userData_in)
       (*iterator_3).second.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4 != (*iterator_3).second.end ());
 
+#if defined (GTK_USE)
   ACE_ASSERT (!(*iterator_4).second.second->window.gdk_window);
   (*iterator_4).second.second->window.gdk_window = window_p;
   (*iterator_4).second.second->window.type = Common_UI_Window::TYPE_GTK;
+#else
+  ACE_ASSERT (!(*iterator_4).second.second->window.x11_window);
+  (*iterator_4).second.second->window.gdk_window =
+      gdk_x11_window_get_xid (window_p);
+  (*iterator_4).second.second->window.type = Common_UI_Window::TYPE_X11;
+#endif // GTK_USE
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("drawing area window handle: %@\n"),
               window_p));
 
   GtkAllocation allocation;
-  ACE_OS::memset (&allocation, 0, sizeof (allocation));
+  ACE_OS::memset (&allocation, 0, sizeof (GtkAllocation));
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -7795,7 +7832,7 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
-                                      0);
+                                      2);
     g_value_unset (&value);
   } // end IF
 } // combobox_resolution_changed_cb
@@ -7902,11 +7939,11 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
 #endif // GTK_CHECK_VERSION (2,30,0)
   gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                             &iterator_3,
-                            0, &value);
+                            1, &value);
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
   gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                             &iterator_3,
-                            1, &value_2);
+                            2, &value_2);
   ACE_ASSERT (G_VALUE_TYPE (&value_2) == G_TYPE_UINT);
   unsigned int frame_rate = g_value_get_uint (&value);
   g_value_unset (&value);

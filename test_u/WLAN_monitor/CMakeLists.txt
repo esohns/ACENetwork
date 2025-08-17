@@ -173,6 +173,10 @@ if (DHCLIENT_USE)
 endif (DHCLIENT_USE)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 
+if (UNIX)
+ target_link_options (${EXECUTABLE} PUBLIC "-rdynamic")
+endif (UNIX)
+
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})

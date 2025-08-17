@@ -21,8 +21,6 @@
 #ifndef NET_DEFINES_H
 #define NET_DEFINES_H
 
-#include "ace/config-lite.h"
-
 // interface
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM (0x0602) // _WIN32_WINNT_WIN8

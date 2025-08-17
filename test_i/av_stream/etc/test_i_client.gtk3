@@ -106,13 +106,15 @@
       <column type="gchararray"/>
       <!-- column-name GUID -->
       <column type="gchararray"/>
+      <!-- column-name v4l format -->
+      <column type="guint"/>
     </columns>
   </object>
   <object class="GtkListStore" id="liststore_rate">
     <columns>
       <!-- column-name text -->
-      <column type="guint"/>
-      <!-- column-name interval -->
+      <column type="gchararray"/>
+      <!-- column-name numerator -->
       <column type="guint"/>
       <!-- column-name denominator -->
       <column type="guint"/>

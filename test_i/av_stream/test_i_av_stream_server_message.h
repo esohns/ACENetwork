@@ -72,6 +72,7 @@ class Test_I_AVStream_Server_DirectShow_Message
   inline virtual ~Test_I_AVStream_Server_DirectShow_Message () {}
 
   // overrides from ACE_Message_Block
+  virtual ACE_Message_Block* clone (ACE_Message_Block::Message_Flags = 0) const;
   // --> create a "shallow" copy that references the same buffer
   // *NOTE*: uses the allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
@@ -122,6 +123,7 @@ class Test_I_AVStream_Server_MediaFoundation_Message
   inline virtual ~Test_I_AVStream_Server_MediaFoundation_Message () {}
 
   // overrides from ACE_Message_Block
+  virtual ACE_Message_Block* clone (ACE_Message_Block::Message_Flags = 0) const;
   // --> create a "shallow" copy of ourselves that references the same packet
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
@@ -149,11 +151,11 @@ class Test_I_AVStream_Server_MediaFoundation_Message
 };
 #else
 class Test_I_AVStream_Server_Message
- : public Stream_DataMessageBase_T<Test_I_AVStream_Server_MessageData_t,
+ : public Stream_DataMessageBase_2<Test_I_AVStream_Server_MessageData_t,
                                    enum Stream_MessageType,
                                    int>
 {
-  typedef Stream_DataMessageBase_T<Test_I_AVStream_Server_MessageData_t,
+  typedef Stream_DataMessageBase_2<Test_I_AVStream_Server_MessageData_t,
                                    enum Stream_MessageType,
                                    int> inherited;
 
@@ -170,6 +172,7 @@ class Test_I_AVStream_Server_Message
   inline virtual ~Test_I_AVStream_Server_Message () {}
 
   // overrides from ACE_Message_Block
+  virtual ACE_Message_Block* clone (ACE_Message_Block::Message_Flags = 0) const;
   // --> create a "shallow" copy of ourselves that references the same packet
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;

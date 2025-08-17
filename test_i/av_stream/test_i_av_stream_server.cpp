@@ -128,8 +128,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string gtk_rc_file = path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
@@ -158,8 +156,11 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 #endif
+  std::string default_network_interface_string;
+  default_network_interface_string =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING] : network interface [\"")
-            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
+            << default_network_interface_string
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   // *TODO*: this doesn't really make sense (yet)
@@ -227,8 +228,6 @@ do_processArguments (int argc_in,
 
   // initialize results
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   gtkRcFile_out = path;
   gtkRcFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtkRcFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
@@ -243,7 +242,7 @@ do_processArguments (int argc_in,
   mediaFramework_out = STREAM_LIB_DEFAULT_MEDIAFRAMEWORK;
 #endif // ACE_WIN32 || ACE_WIN64
   netWorkInterface_out =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   useLoopBack_out = false;
   listeningPortNumber_out = TEST_I_DEFAULT_PORT;
   useReactor_out =
@@ -977,7 +976,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       directshow_modulehandler_configuration.connectionConfigurations =
         &directshow_configuration.connectionConfigurations;
       directshow_modulehandler_configuration.defragmentMode =
-        STREAM_DEFRAGMENT_CONDENSE;
+        STREAM_DEFRAGMENT_CLONE;
       directshow_modulehandler_configuration.deviceIdentifier.identifier._guid =
         Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false);
       directshow_modulehandler_configuration.deviceIdentifier.identifierDiscriminator =
@@ -1075,10 +1074,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
   modulehandler_configuration.configuration = &configuration;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
-  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_DEFRAGMENT;
+  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CLONE;
   modulehandler_configuration.deviceIdentifier.identifier =
     Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
                                                      SND_PCM_STREAM_PLAYBACK);
+  if (modulehandler_configuration.deviceIdentifier.identifier.empty ())
+    modulehandler_configuration.deviceIdentifier.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
   modulehandler_configuration.inbound = true;
 
   //modulehandler_configuration.connectionManager = connection_manager_p;
@@ -1093,7 +1095,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //modulehandler_configuration.format.fmt.pix.sizeimage = 230400;
   //modulehandler_configuration.format.fmt.pix.width = 320;
   modulehandler_configuration.outputFormat.format =
-      AV_PIX_FMT_RGB24;
+      AV_PIX_FMT_RGB32;
   modulehandler_configuration.outputFormat.resolution.height =
       STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
   modulehandler_configuration.outputFormat.resolution.width =
@@ -1115,7 +1117,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   stream_configuration.format.audio.rate = STREAM_LIB_ALSA_DEFAULT_SAMPLE_RATE;
   stream_configuration.format.audio.channels = STREAM_LIB_ALSA_DEFAULT_CHANNELS;
 
-  stream_configuration.format.video.format.pixelformat = V4L2_PIX_FMT_RGB24;
+  stream_configuration.format.video.format.pixelformat = V4L2_PIX_FMT_RGB32;
   stream_configuration.format.video.format.height =
       STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
   stream_configuration.format.video.format.width =
@@ -1645,7 +1647,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end SWITCH
 #else
   allocator_configuration.defaultBufferSize =
-    (STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT * STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH * 3) +
+    (STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT * STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH * 4) +
     sizeof (struct acestream_av_stream_header);
 
   stream_configuration.cloneModule = true;
@@ -2530,8 +2532,6 @@ ACE_TMAIN (int argc_in,
   unsigned int maximum_number_of_connections =
     TEST_I_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string gtk_rc_file = path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
@@ -2546,7 +2546,7 @@ ACE_TMAIN (int argc_in,
     STREAM_LIB_DEFAULT_MEDIAFRAMEWORK;
 #endif // ACE_WIN32 || ACE_WIN64
   std::string network_interface =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   bool use_loopback = false;
   unsigned short listening_port_number = TEST_I_DEFAULT_PORT;
   bool use_reactor =

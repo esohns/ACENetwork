@@ -1132,7 +1132,11 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
 
-  if ((*iterator).second.second->window)
+#if defined (GTK_USE)
+  if ((*iterator).second.second->window.gdk_window)
+#else
+  if ((*iterator).second.second->window.x11_window)
+#endif // GTK_USE
   {
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_ALSA_V4L_Distributor_Module (this,
@@ -1150,7 +1154,11 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
   ACE_ASSERT (inherited::configuration_->configuration_->module_2);
   layout_inout->append (inherited::configuration_->configuration_->module_2, NULL, 0);
 
-  if ((*iterator).second.second->window)
+#if defined (GTK_USE)
+  if ((*iterator).second.second->window.gdk_window)
+#else
+  if ((*iterator).second.second->window.x11_window)
+#endif // GTK_USE
   {
     module_p = NULL;
     ACE_NEW_RETURN (module_p,

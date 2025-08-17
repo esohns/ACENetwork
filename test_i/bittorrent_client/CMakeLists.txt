@@ -165,6 +165,10 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
+if (UNIX)
+ target_link_options (${EXECUTABLE} PUBLIC "-rdynamic")
+endif (UNIX)
+
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
@@ -284,6 +288,10 @@ add_dependencies (${EXECUTABLE_GUI} ACEStream)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
+
+if (UNIX)
+ target_link_options (${EXECUTABLE_GUI} PUBLIC "-rdynamic")
+endif (UNIX)
 
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 

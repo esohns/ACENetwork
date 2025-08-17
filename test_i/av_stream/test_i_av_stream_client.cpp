@@ -42,7 +42,6 @@
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
-#include "ace/Synch.h"
 #include "ace/Version.h"
 
 #if defined (HAVE_CONFIG_H)
@@ -135,9 +134,14 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
 #else
+  std::string audio_device_identifier_string =
+    Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
+                                                     SND_PCM_STREAM_CAPTURE);
+  if (audio_device_identifier_string.empty ())
+    audio_device_identifier_string =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-a [STRING] : audio device [\"")
-            << Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
-                                                                SND_PCM_STREAM_CAPTURE)
+            << audio_device_identifier_string
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::string video_device_file = ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
@@ -149,9 +153,12 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-e          : Gtk .rc file [\"\"] {\"\": no GUI}")
+  std::string gtk_rc_file = path;
+  gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-e          : Gtk .rc file [\"")
+            << gtk_rc_file
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   // *TODO*: implement logic to query the hardware for potential formats and use
   //         the most applicable one.
@@ -160,7 +167,7 @@ do_printUsage (const std::string& programName_in)
   //         behaviour: note how the receiver needs to know (or dynamically
   //         deduce) the correct transformation
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-f          : send uncompressed video [")
-            << false
+            << true
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::string UI_file = path;
@@ -259,9 +266,13 @@ do_processArguments (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
 #else
-  audioDeviceIdentifier_out.identifier =
+  std::string audio_device_identifier_string =
     Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
                                                      SND_PCM_STREAM_CAPTURE);
+  if (audio_device_identifier_string.empty ())
+    audio_device_identifier_string =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
+  audioDeviceIdentifier_out.identifier = audio_device_identifier_string;
   videoDeviceIdentifier_out.identifier =
       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
   videoDeviceIdentifier_out.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -269,11 +280,9 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEFAULT_VIDEO_DEVICE);
 #endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  //gtkRcFile_out = path;
-  //gtkRcFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //gtkRcFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
+  gtkRcFile_out = path;
+  gtkRcFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  gtkRcFile_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
   useUncompressedFormat_out = false;
   std::string default_interface_string =
     Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
@@ -1194,7 +1203,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   stream_configuration.module = &event_handler_module;
   stream_configuration.module_2 = &streamer_module;
   modulehandler_configuration.outputFormat.format =
-    Stream_MediaFramework_Tools::v4lFormatToffmpegFormat (V4L2_PIX_FMT_RGB24);
+    Stream_MediaFramework_Tools::v4lFormatToffmpegFormat (V4L2_PIX_FMT_RGB32);
   modulehandler_configuration.outputFormat.resolution.height =
     stream_configuration.format.video.format.height;
   modulehandler_configuration.outputFormat.resolution.width =
@@ -2228,6 +2237,9 @@ ACE_TMAIN (int argc_in,
   audio_device_identifier.identifier =
     Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
                                                      SND_PCM_STREAM_CAPTURE);
+  if (audio_device_identifier.identifier.empty ())
+    audio_device_identifier.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
   video_device_identifier.identifier =
     ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEVICE_DIRECTORY);
   video_device_identifier.identifier += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -2235,12 +2247,9 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_DEFAULT_VIDEO_DEVICE);
 #endif // ACE_WIN32 || ACE_WIN64
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  std::string gtk_rc_filename;
-  //std::string gtk_rc_filename = path;
-  //gtk_rc_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //gtk_rc_filename += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
+  std::string gtk_rc_filename = path;
+  gtk_rc_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  gtk_rc_filename += ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_GTK_RC_FILE);
   bool use_uncompressed_format = false;
   std::string gtk_glade_filename = path;
   gtk_glade_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;

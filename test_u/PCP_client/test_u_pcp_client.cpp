@@ -157,7 +157,7 @@ do_printUsage (const std::string& programName_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n[[STRING]]: interface identifier [\"")
-            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
+            << Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -240,7 +240,7 @@ do_processArguments (int argc_in,
 #endif // _WIN32_WINNT_VISTA
 #else
   interfaceIdentifier_out =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
   //useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   //sendRequestOnOffer_out = TEST_U_DEFAULT_PCP_SEND_REQUEST_ON_OFFER;
@@ -1164,7 +1164,8 @@ ACE_TMAIN (int argc_in,
   std::string interface_identifier;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
-  std::string interface_identifier;
+  std::string interface_identifier =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
   //bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   //bool send_request_on_offer =

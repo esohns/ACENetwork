@@ -134,6 +134,10 @@ add_dependencies (${EXECUTABLE} ACEStream_Statistic)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
+if (UNIX)
+ target_link_options (${EXECUTABLE} PUBLIC "-rdynamic")
+endif (UNIX)
+
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
 # set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS -nostartfiles)
