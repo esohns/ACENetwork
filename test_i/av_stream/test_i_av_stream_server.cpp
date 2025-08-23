@@ -101,7 +101,7 @@ const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("AVStream");
 // *TODO*: unneeded (from client), remove ASAP
 const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Video");
 const char stream_name_string_3[] =
-  ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING);
+  ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING);
 
 void
 do_printUsage (const std::string& programName_in)

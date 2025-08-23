@@ -175,6 +175,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Client)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_FTP)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
 

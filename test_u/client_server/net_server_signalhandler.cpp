@@ -189,3 +189,152 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
                                                false);                                    // don't block
   } // end IF
 }
+
+//////////////////////////////////////////
+
+Server_SignalHandler_2::Server_SignalHandler_2 ()
+ : inherited (this) // event handler handle
+{
+  NETWORK_TRACE (ACE_TEXT ("Server_SignalHandler_2::Server_SignalHandler_2"));
+
+}
+
+void
+Server_SignalHandler_2::handle (const struct Common_Signal& signal_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Server_SignalHandler_2::handle"));
+
+  int result = -1;
+  bool shutdown = false;
+  bool report = false;
+  switch (signal_in.signal)
+  {
+// *PORTABILITY*: on Windows SIGHUP/SIGQUIT are not defined
+// --> use SIGINT (2) and/or SIGTERM (15) instead...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    case SIGHUP:
+    case SIGQUIT:
+#endif // ACE_WIN32 || ACE_WIN64
+    case SIGINT:
+    case SIGTERM:
+    {
+      //ACE_DEBUG((LM_DEBUG,
+      //           ACE_TEXT("shutting down...\n")));
+
+      // shutdown
+      shutdown = true;
+
+      break;
+    }
+// *PORTABILITY*: on Windows SIGUSRx are not defined
+// --> use SIGBREAK (21) instead...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    case SIGBREAK:
+#else
+    case SIGUSR1:
+#endif // ACE_WIN32 || ACE_WIN64
+    {
+      // dump statistic
+      report = true;
+
+      break;
+    }
+    // ignore all of these
+    case SIGCHLD:
+      return;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("received invalid/unknown signal: %u [%S], returning\n"),
+                  signal_in.signal, signal_in.signal));
+      return;
+    }
+  } // end SWITCH
+
+  // -------------------------------------
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->dispatchState);
+
+  typename Test_U_TCPConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+    NULL;
+  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
+    NULL;
+
+  // report ?
+  if (report)
+  { ACE_ASSERT (inherited::configuration_->statisticReportingHandler);
+    try {
+      inherited::configuration_->statisticReportingHandler->report ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Common_IStatistic::report(), returning\n")));
+      return;
+    }
+  } // end IF
+
+  // ...shutdown ?
+  if (shutdown)
+  {
+    // stop everything, i.e.
+    // - leave event loop(s) handling signals, sockets, (maintenance) timers,
+    //   exception handlers, ...
+    // - activation timers (connection attempts, ...)
+    // [- UI dispatch]
+
+    // step1: stop listening
+    ACE_ASSERT (inherited::configuration_->asynchTCPStream);
+    inherited::configuration_->asynchTCPStream->stop (true,   // wait for completion ?
+                                                      false,  // recurse upstream ?
+                                                      false); // high-priority ?
+    inherited::configuration_->TCPStream->stop (true,   // wait for completion ?
+                                                false,  // recurse upstream ?
+                                                false); // high-priority ?
+#if defined (SSL_SUPPORT)
+    ACE_ASSERT (inherited::configuration_->SSLStream);
+    inherited::configuration_->SSLStream->stop (true,   // wait for completion ?
+                                                false,  // recurse upstream ?
+                                                false); // high-priority ?
+ #endif // SSL_SUPPORT
+    //ACE_ASSERT (inherited::configuration_->asynchUDPStream);
+    //inherited::configuration_->asynchUDPStream->stop (true,   // wait for completion ?
+    //                                                  false,  // recurse upstream ?
+    //                                                  false); // high-priority ?
+    //ACE_ASSERT (inherited::configuration_->UDPStream);
+    //inherited::configuration_->UDPStream->stop (true,   // wait for completion ?
+    //                                            false,  // recurse upstream ?
+    //                                            false); // high-priority ?
+
+    // step2: stop timer
+    if (inherited::configuration_->statisticReportingTimerId >= 0)
+    {
+      const void* act_p = NULL;
+      result =
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (inherited::configuration_->statisticReportingTimerId,
+                                                              &act_p);
+      if (result <= 0)
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", returning\n"),
+                    inherited::configuration_->statisticReportingTimerId));
+      } // end IF
+      inherited::configuration_->statisticReportingTimerId = -1;
+    } // end IF
+
+    // step3: stop accepting connections, abort open connections
+    iconnection_manager_p = TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ();
+    ACE_ASSERT (iconnection_manager_p);
+    iconnection_manager_2 = TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+    ACE_ASSERT (iconnection_manager_2);
+
+    iconnection_manager_p->stop (false, true);
+    iconnection_manager_p->abort ();
+    iconnection_manager_2->stop (false, true);
+    iconnection_manager_2->abort ();
+
+    // step4: stop reactor (&& proactor, if applicable)
+    Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+                                               false,                                     // don't block
+                                               false);
+  } // end IF
+}

@@ -297,6 +297,7 @@ target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ACEStream_Statistic)
 target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ACEStream_Visualization)
 
 target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${PROJECT_NAME}_Test_I)
 
@@ -644,6 +645,7 @@ target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ACEStream_Statistic)
 target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ACEStream_Visualization)
 
 target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${PROJECT_NAME}_Test_I)
 

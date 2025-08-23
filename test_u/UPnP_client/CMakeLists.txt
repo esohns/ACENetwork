@@ -21,8 +21,6 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-add_definitions (-DCOMMON_HAS_DLL)
-add_definitions (-DCOMMON_UI_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -33,7 +31,6 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
-add_definitions (-DACESTREAM_HAS_DLL)
 
 if (LIBXML2_SUPPORT)
  include_directories (${LIBXML2_INCLUDE_DIRS})
@@ -177,6 +174,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Client)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_SSDP)
+target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_U)
 

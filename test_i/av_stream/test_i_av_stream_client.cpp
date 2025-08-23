@@ -106,7 +106,7 @@
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Audio");
 const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Video");
 const char stream_name_string_3[] =
-    ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING);
+    ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING);
 
 void
 do_printUsage (const std::string& programName_in)
@@ -1069,7 +1069,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       directshow_stream_configuration_3.initialize (module_configuration,
                                                     directshow_modulehandler_configuration_3,
                                                     directshow_stream_configuration_4);
-      directShowCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING),
+      directShowCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING),
                                                                                       directshow_stream_configuration_3));
 
       break;
@@ -1131,7 +1131,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       mediafoundation_stream_configuration_3.initialize (module_configuration,
                                                          mediafoundation_modulehandler_configuration_3,
                                                          mediafoundation_stream_configuration_4);
-      mediaFoundationCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING),
+      mediaFoundationCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING),
                                                                                            mediafoundation_stream_configuration_3));
       //mediafoundation_stream_iterator =
       //  mediaFoundationCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
@@ -1434,7 +1434,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
       directshow_stream_iterator =
-        directShowCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
+        directShowCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING));
       ACE_ASSERT (directshow_stream_iterator != directShowCBData_in.configuration->streamConfigurations.end ());
 
       directshow_tcp_connection_configuration.allocatorConfiguration = allocator_configuration_p;
@@ -1455,7 +1455,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
       mediafoundation_stream_iterator =
-        mediaFoundationCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
+        mediaFoundationCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING));
       ACE_ASSERT (mediafoundation_stream_iterator != mediaFoundationCBData_in.configuration->streamConfigurations.end ());
 
       mediafoundation_tcp_connection_configuration.allocatorConfiguration = allocator_configuration_p;

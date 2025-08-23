@@ -44,18 +44,15 @@
 #include "net_client_stream_common.h"
 
 // forward declarations
-//typedef Stream_ControlMessage_T<enum Stream_ControlType,
-//                                enum Stream_ControlMessageType,
-//                                struct Common_Parser_FlexAllocatorConfiguration> Stream_ControlMessage_t;
 class Test_U_SessionMessage;
 
-extern const char stream_name_string_[];
+extern const char stream_name_io_string_[];
 
 template <typename ConnectionManagerType>
 class Test_U_Stream_T
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_,
+                                        stream_name_io_string_,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -75,7 +72,7 @@ class Test_U_Stream_T
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_name_string_,
+                                        stream_name_io_string_,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,

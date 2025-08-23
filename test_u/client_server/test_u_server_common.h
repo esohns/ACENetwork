@@ -56,6 +56,7 @@
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "net_client_stream_common.h"
+#include "net_server_stream_common.h"
 
 // forward declarations
 class Test_U_SessionMessage;
@@ -103,7 +104,6 @@ struct Server_Configuration
 #endif // SSL_SUPPORT
    , TCPListener (NULL)
    , UDPConnector (NULL)
-   //, listenerConfiguration ()
    , signalHandlerConfiguration ()
   {}
 
@@ -112,7 +112,64 @@ struct Server_Configuration
 #endif // SSL_SUPPORT
   Test_U_ITCPListener_t*                   TCPListener;
   Test_U_IUDPConnector_t*                  UDPConnector;
-  //Server_ListenerConfiguration_t           listenerConfiguration;
+
+  struct Server_SignalHandlerConfiguration signalHandlerConfiguration;
+};
+
+//////////////////////////////////////////
+
+struct Server_SignalHandlerConfiguration_2
+ : Common_SignalHandlerConfiguration
+{
+  Server_SignalHandlerConfiguration_2 ()
+   : Common_SignalHandlerConfiguration ()
+   , asynchTCPStream (NULL)
+   , TCPStream (NULL)
+#if defined (SSL_SUPPORT)
+   , SSLStream (NULL)
+#endif // SSL_SUPPORT
+   //, asynchUDPStream (NULL)
+   //, UDPStream (NULL)
+   , statisticReportingHandler (NULL)
+   , statisticReportingTimerId (-1)
+  {}
+
+  Test_U_Server_Asynch_TCP_Stream_2* asynchTCPStream;
+  Test_U_Server_TCP_Stream_2*        TCPStream;
+#if defined (SSL_SUPPORT)
+  Test_U_Server_SSL_Stream_2*        SSLStream;
+#endif // SSL_SUPPORT
+
+  //Test_U_Server_Asynch_UDP_Stream_2* asynchUDPStream;
+  //Test_U_Server_UDP_Stream_2*        UDPStream;
+
+  Net_IStreamStatisticHandler_t*     statisticReportingHandler;
+  long                               statisticReportingTimerId;
+};
+
+struct Server_Configuration_2
+ : ClientServer_Configuration
+{
+  Server_Configuration_2 ()
+   : ClientServer_Configuration ()
+   , asynchTCPStream (NULL)
+   , TCPStream (NULL)
+#if defined (SSL_SUPPORT)
+   , SSLStream (NULL)
+#endif // SSL_SUPPORT
+   //, asynchUDPStream (NULL)
+   //, UDPStream (NULL)
+   , signalHandlerConfiguration ()
+  {}
+
+  Test_U_Server_Asynch_TCP_Stream_2*      asynchTCPStream;
+  Test_U_Server_TCP_Stream_2*             TCPStream;
+#if defined (SSL_SUPPORT)
+  Test_U_Server_SSL_Stream_2*             SSLStream;
+#endif // SSL_SUPPORT
+
+  //Test_U_Server_Asynch_UDP_Stream_2*      asynchUDPStream;
+  //Test_U_Server_UDP_Stream_2*             UDPStream;
 
   struct Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };

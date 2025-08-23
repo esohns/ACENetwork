@@ -45,4 +45,23 @@ class Server_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler& operator= (const Server_SignalHandler&))
 };
 
+//////////////////////////////////////////
+
+class Server_SignalHandler_2
+ : public Common_SignalHandler_T<struct Server_SignalHandlerConfiguration_2>
+{
+  typedef Common_SignalHandler_T<struct Server_SignalHandlerConfiguration_2> inherited;
+
+ public:
+  Server_SignalHandler_2 ();
+  inline virtual ~Server_SignalHandler_2 () {}
+
+  // implement Common_ISignal
+  virtual void handle (const struct Common_Signal&); // signal
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler_2 (const Server_SignalHandler_2&))
+  ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler_2& operator= (const Server_SignalHandler_2&))
+};
+
 #endif

@@ -151,11 +151,6 @@ class Net_StreamConnectionBase_T
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
 
  protected:
-  // convenient types
-  typedef Net_IConnector_T<AddressType,
-                           ConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
-
   // *NOTE*: if there is no default ctor, this will not compile
   inline Net_StreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   Net_StreamConnectionBase_T (bool); // managed ?
@@ -288,9 +283,6 @@ class Net_AsynchStreamConnectionBase_T
 
  protected:
   typedef HandlerType HANDLER_T;
-  typedef Net_IConnector_T<AddressType,
-                           ConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
 
   // *NOTE*: if there is no default ctor, this will not compile
   inline Net_AsynchStreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }

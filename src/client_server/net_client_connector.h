@@ -36,7 +36,8 @@
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
-//#include "net_udpconnection_base.h"
+
+#include "net_server_listener_base.h"
 
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T
@@ -96,9 +97,10 @@ class Net_Client_Connector_T
   Net_Client_Connector_T (bool = true); // managed ?
   virtual ~Net_Client_Connector_T ();
 
-  // implement Net_Client_IConnector_T
+  // implement Net_IConnector_T
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return true; }
+  inline virtual void disconnect (ACE_HANDLE) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   virtual ACE_HANDLE connect (const AddressType&);
@@ -157,9 +159,12 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                              Net_UDPSocketConfiguration_t,
                              StreamType,
                              UserDataType>
- : public Net_IConnector_T<ACE_INET_Addr,
+ : public Net_Server_Listener_Base
+ , public Net_IConnector_T<ACE_INET_Addr,
                            ConfigurationType>
 {
+  typedef Net_Server_Listener_Base inherited2;
+
  public:
   typedef ACE_INET_Addr ADDRESS_T;
   typedef ConfigurationType CONFIGURATION_T;
@@ -193,9 +198,10 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   Net_Client_Connector_T (bool = true); // managed ?
   inline virtual ~Net_Client_Connector_T () {}
 
-  // implement Net_Client_IConnector_T
+  // implement Net_IConnector_T
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; }
   inline virtual bool useReactor () const { return true; }
+  virtual void disconnect (ACE_HANDLE) const;
   // *NOTE*: handlers retrieve the configuration object with get ()
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
@@ -313,6 +319,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   // implement Net_IConnector_T
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; }
   inline virtual bool useReactor () const { return true; }
+  inline virtual void disconnect (ACE_HANDLE) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   // *NOTE*: handlers retrieve the configuration object with get ()
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }

@@ -35,6 +35,9 @@
 #include "net_server_common.h"
 #include "net_client_connector.h"
 #include "net_server_listener.h"
+#if defined (SSL_SUPPORT)
+#include "net_server_ssl_listener.h"
+#endif // SSL_SUPPORT
 
 #include "test_u_connection_common.h"
 #include "test_u_stream.h"
@@ -56,13 +59,13 @@ typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
                               struct Net_UserData> Server_TCP_Listener_t;
 #if defined (SSL_SUPPORT)
-typedef Net_Server_Listener_T<Test_U_SSLConnection,
-                              ACE_SSL_SOCK_Acceptor,
-                              ACE_INET_Addr,
-                              Test_U_TCPConnectionConfiguration,
-                              struct Net_StreamConnectionState,
-                              Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
-                              struct Net_UserData> Server_SSL_Listener_t;
+typedef Net_Server_SSL_Listener_T<Test_U_SSLConnection,
+                                  ACE_SSL_SOCK_Acceptor,
+                                  ACE_INET_Addr,
+                                  Test_U_TCPConnectionConfiguration,
+                                  struct Net_StreamConnectionState,
+                                  Test_U_Stream_T<Test_U_TCPConnectionManager_t>,
+                                  struct Net_UserData> Server_SSL_Listener_t;
 #endif // SSL_SUPPORT
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,

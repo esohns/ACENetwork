@@ -47,6 +47,7 @@ Net_Server_Listener_T<HandlerType,
                       UserDataType>::Net_Server_Listener_T ()
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
+ , inherited2 ()
  , configuration_ (NULL)
  , hasChanged_ (false)
  , isInitialized_ (false)
@@ -219,12 +220,12 @@ Net_Server_Listener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-    inherited::open (configuration_->socketConfiguration.address,  // local address
-                     ACE_Reactor::instance (),                     // reactor handle
-                     ACE_NONBLOCK,                                 // flags (use non-blocking sockets)
-                     //0,                                          // flags (default is blocking sockets)
-                     1,                                            // always accept all pending connections
-                     1);                                           // (try to) re-use address
+    inherited::open (configuration_->socketConfiguration.address, // local address
+                     ACE_Reactor::instance (),                    // reactor handle
+                     ACE_NONBLOCK,                                // flags (use non-blocking sockets)
+                     //0,                                         // flags (default is blocking sockets)
+                     1,                                           // always accept all pending connections
+                     1);                                          // (try to) re-use address
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -335,6 +336,38 @@ Net_Server_Listener_T<HandlerType,
                       ConfigurationType,
                       StateType,
                       StreamType,
+                      UserDataType>::disconnect (ACE_HANDLE handle_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::disconnect"));
+
+  ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_);
+  for (SUBSCRIBERS_CONST_ITERATOR_T iterator = subscribers_.begin ();
+       iterator != subscribers_.end ();
+       iterator++)
+  {
+    try {
+      (*iterator)->disconnect (handle_in);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("exception caught from subscriber, continuing\n")));
+    }
+  } // end FOR
+}
+
+template <typename HandlerType,
+          typename AcceptorType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename UserDataType>
+void
+Net_Server_Listener_T<HandlerType,
+                      AcceptorType,
+                      AddressType,
+                      ConfigurationType,
+                      StateType,
+                      StreamType,
                       UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::dump_state"));
@@ -404,33 +437,6 @@ Net_Server_Listener_T<HandlerType,
                       ConfigurationType,
                       StateType,
                       StreamType,
-                      UserDataType>::accept_svc_handler (HandlerType* handler_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::accept_svc_handler"));
-
-  ACE_ASSERT (handler_in);
-
-  //Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = handler_in;
-  //ilinklayer_p->set (NET_ROLE_SERVER);
-  handler_in->set (NET_ROLE_SERVER);
-
-  return inherited::accept_svc_handler (handler_in);
-}
-
-template <typename HandlerType,
-          typename AcceptorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StreamType,
-          typename UserDataType>
-int
-Net_Server_Listener_T<HandlerType,
-                      AcceptorType,
-                      AddressType,
-                      ConfigurationType,
-                      StateType,
-                      StreamType,
                       UserDataType>::activate_svc_handler (HandlerType* svc_handler)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::activate_svc_handler"));
@@ -459,6 +465,20 @@ Net_Server_Listener_T<HandlerType,
     // The connection was already made; so this close is a "normal" close
     // operation.
     svc_handler->close (NORMAL_CLOSE_OPERATION);
+  else if (result == 0)
+  { ACE_GUARD_RETURN (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_, -1);
+    for (SUBSCRIBERS_ITERATOR_T iterator = subscribers_.begin ();
+         iterator != subscribers_.end ();
+         iterator++)
+    {
+      try {
+        (*iterator)->connect (svc_handler->peer ().get_handle ());
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("exception caught from subscriber, continuing\n")));
+      }
+    } // end FOR
+  } // end ELSE IF | lock scope
 
   return result;
 }

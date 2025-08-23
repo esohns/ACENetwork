@@ -40,6 +40,8 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
  : inherited (1,    // initial count
               true) // delete on zero ?
  , configuration_ (NULL)
+ , connector_ (NULL)
+ , listener_ (NULL)
  , state_ ()
  , isManaged_ (managed_in)
  , isRegistered_ (false)
@@ -221,6 +223,17 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
               this, state_.handle,
               manager_p->count ()));
 #endif // ACE_WIN32 || ACE_WIN64
+
+  if (connector_ || listener_)
+  {
+    // notify the (UDP-) connector (server-side only !)
+    if (connector_)
+      connector_->disconnect (state_.handle);
+
+    // notify the listener (server-side only !)
+    if (listener_)
+      listener_->disconnect (state_.handle);
+  } // end IF
 }
 
 template <ACE_SYNCH_DECL,

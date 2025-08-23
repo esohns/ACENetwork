@@ -182,6 +182,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
           ACE_ASSERT (ilistener_p);
           configuration_p =
               &const_cast<ConfigurationType&> (ilistener_p->getR ());
+
+          inherited2::listener_ = ilistener_p;
           break;
         }
         default:
@@ -204,6 +206,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       Net_UDPSocketConfiguration_t* socket_configuration_p =
         (Net_UDPSocketConfiguration_t*)&configuration_p->socketConfiguration;
       is_udp_write_only_b = socket_configuration_p->writeOnly;
+
+      if (!is_udp_write_only_b) // server-side ?
+        inherited2::connector_ = iconnector_p;
       break;
     }
     default:
@@ -349,7 +354,13 @@ error:
                   true); // high priority ?
   } // end IF
   if (handle_manager)
+  {
+    // *NOTE*: do not notify any listener/connectors in this case
+    inherited2::connector_ = NULL;
+    inherited2::listener_ = NULL;
+
     inherited2::deregister ();
+  } // end IF
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
     inherited2::state_.handle = ACE_INVALID_HANDLE;
@@ -1226,8 +1237,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   //         server-side: arg_in is a handle to the listener
   ConfigurationType* configuration_p = NULL;
   HandlerConfigurationType* socket_handler_configuration_p = NULL;
-  const ICONNECTOR_T* iconnector_p = NULL;
-  const ILISTENER_T* ilistener_p = NULL;
+  ICONNECTOR_T* iconnector_p = NULL;
+  ILISTENER_T* ilistener_p = NULL;
   switch (this->transportLayer ())
   {
     case NET_TRANSPORTLAYER_TCP:
@@ -1237,7 +1248,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       {
         case NET_ROLE_CLIENT:
         {
-          iconnector_p = static_cast<const ICONNECTOR_T*> (act_in);
+          iconnector_p = static_cast<ICONNECTOR_T*> (const_cast<void*> (act_in));
           ACE_ASSERT (iconnector_p);
           configuration_p =
             &const_cast<ConfigurationType&> (iconnector_p->getR ());
@@ -1245,10 +1256,12 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         }
         case NET_ROLE_SERVER:
         {
-          ilistener_p = static_cast<const ILISTENER_T*> (act_in);
+          ilistener_p = static_cast<ILISTENER_T*> (const_cast<void*> (act_in));
           ACE_ASSERT (ilistener_p);
           configuration_p =
             &const_cast<ConfigurationType&> (ilistener_p->getR ());
+
+          inherited2::listener_ = ilistener_p;
           break;
         }
         default:
@@ -1265,10 +1278,18 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
     case NET_TRANSPORTLAYER_UDP:
     {
-      iconnector_p = static_cast<const ICONNECTOR_T*> (act_in);
+      iconnector_p = static_cast<ICONNECTOR_T*> (const_cast<void*> (act_in));
       ACE_ASSERT (iconnector_p);
       configuration_p =
         &const_cast<ConfigurationType&> (iconnector_p->getR ());
+
+      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->getR ());
+      Net_UDPSocketConfiguration_t* socket_configuration_p =
+        (Net_UDPSocketConfiguration_t*)&configuration_p->socketConfiguration;
+      bool is_udp_write_only_b = socket_configuration_p->writeOnly;
+
+      if (!is_udp_write_only_b) // server-side ?
+        inherited2::connector_ = iconnector_p;
       break;
     }
     default:
@@ -1469,7 +1490,13 @@ error:
                   true,  // wait for upstream (if any) ?
                   true); // high priority ?
   if (handle_manager)
+  {
+    // *NOTE*: do not notify any listener/connectors in this case
+    inherited2::connector_ = NULL;
+    inherited2::listener_ = NULL;
+
     inherited2::deregister ();
+  } // end IF
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock);
     inherited2::state_.handle = ACE_INVALID_HANDLE;

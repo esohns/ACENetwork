@@ -36,6 +36,8 @@
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
 
+#include "net_server_listener_base.h"
+
 template <typename HandlerType,
           ////////////////////////////////
           typename AddressType,
@@ -92,6 +94,7 @@ class Net_Client_AsynchConnector_T
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return false; }
+  inline virtual void disconnect (ACE_HANDLE) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   virtual ACE_HANDLE connect (const AddressType&);
   virtual void abort ();
   virtual int wait (ACE_HANDLE,                                    // connect handle
@@ -170,10 +173,12 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    StreamType,
                                    UserDataType>
  : public ACE_Asynch_Connector<HandlerType>
+ , public Net_Server_Listener_Base
  , public Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType>
 {
   typedef ACE_Asynch_Connector<HandlerType> inherited;
+  typedef Net_Server_Listener_Base inherited2;
 
  public:
   typedef ACE_INET_Addr ADDRESS_T;
@@ -214,6 +219,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; }
   inline virtual bool useReactor () const { return false; }
+  virtual void disconnect (ACE_HANDLE) const;
   // *NOTE*: UDP is a datagram-based protocol. The Berkeley (datagram) socket
   //         API is essentially stateless from a user-space perspective (send/
   //         recv only) and thus does not translate to a client/server role
@@ -320,6 +326,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; }
   inline virtual bool useReactor () const { return false; }
+  inline virtual void disconnect (ACE_HANDLE) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
   inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual int wait (ACE_HANDLE, const ACE_Time_Value& = ACE_Time_Value::zero) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) } // block : (relative-) timeout

@@ -45,6 +45,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           UserDataType>::Net_Server_SSL_Listener_T ()
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
+ , inherited2 ()
  , configuration_ (NULL)
  , hasChanged_ (false)
  , isInitialized_ (false)
@@ -198,32 +199,31 @@ Net_Server_SSL_Listener_T<HandlerType,
   } // end IF
 
   // not running --> start listening
-  // *TODO*: remove type inferences
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  if (unlikely (configuration_->useLoopBackDevice))
+
+  // *TODO*: remove type inferences
+  if (unlikely (configuration_->socketConfiguration.useLoopBackDevice))
   {
     result =
-      configuration_->address.set (configuration_->address.get_port_number (), // port
-                                   // *PORTABILITY*: disambiguate this under Windows
-                                   // *TODO*: bind to specific interface/address ?
-                                   ACE_LOCALHOST,                                                                             // hostname
-                                   1,                                                                                         // encode ?
-                                   AF_INET);                                                                                  // address family
+      configuration_->socketConfiguration.address.set (configuration_->socketConfiguration.address.get_port_number (), // port
+                                                       INADDR_LOOPBACK,                                                // IP address
+                                                       1,                                                              // encode ?
+                                                       0);                                                             // map ?
     if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to AddressType::set(): \"%m\", aborting\n")));
       return false;
     } // end IF
   } // end IF
   result =
-      inherited::open (configuration_->address,  // local address
-                       ACE_Reactor::instance (), // reactor handle
-                       ACE_NONBLOCK,             // flags (use non-blocking sockets)
-                       //0,                      // flags (*NOTE*: default is blocking sockets)
-                       1,                        // accept all pending connections
-                       1);                       // try to re-use address
+    inherited::open (configuration_->socketConfiguration.address, // local address
+                     ACE_Reactor::instance (),                    // reactor handle
+                     ACE_NONBLOCK,                                // flags (use non-blocking sockets)
+                     //0,                                         // flags (*NOTE*: default is blocking sockets)
+                     1,                                           // accept all pending connections
+                     1);                                          // try to re-use address
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -235,12 +235,12 @@ Net_Server_SSL_Listener_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
   isListening_ = true;
@@ -309,6 +309,38 @@ Net_Server_SSL_Listener_T<HandlerType,
   isInitialized_ = true;
 
   return true;
+}
+
+template <typename HandlerType,
+          typename AcceptorType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename UserDataType>
+void
+Net_Server_SSL_Listener_T<HandlerType,
+                          AcceptorType,
+                          AddressType,
+                          ConfigurationType,
+                          StateType,
+                          StreamType,
+                          UserDataType>::disconnect (ACE_HANDLE handle_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::disconnect"));
+
+  ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_);
+  for (SUBSCRIBERS_CONST_ITERATOR_T iterator = subscribers_.begin ();
+       iterator != subscribers_.end ();
+       iterator++)
+  {
+    try {
+      (*iterator)->disconnect (handle_in);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("exception caught from subscriber, continuing\n")));
+    }
+  } // end FOR
 }
 
 template <typename HandlerType,
@@ -421,6 +453,20 @@ Net_Server_SSL_Listener_T<HandlerType,
     // The connection was already made; so this close is a "normal" close
     // operation.
     svc_handler->close (NORMAL_CLOSE_OPERATION);
+  else if (result == 0)
+  { ACE_GUARD_RETURN (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_, -1);
+    for (SUBSCRIBERS_ITERATOR_T iterator = subscribers_.begin ();
+         iterator != subscribers_.end ();
+         iterator++)
+    {
+      try {
+        (*iterator)->connect (svc_handler->peer ().get_handle ());
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("exception caught from subscriber, continuing\n")));
+      }
+    } // end FOR
+  } // end ELSE IF | lock scope
 
   return result;
 }

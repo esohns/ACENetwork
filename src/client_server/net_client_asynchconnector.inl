@@ -765,6 +765,38 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename StreamType,
           typename UserDataType>
+void
+Net_Client_AsynchConnector_T<HandlerType,
+                             ACE_INET_Addr,
+                             ConfigurationType,
+                             StateType,
+                             StatisticContainerType,
+                             Net_UDPSocketConfiguration_t,
+                             StreamType,
+                             UserDataType>::disconnect (ACE_HANDLE handle_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::disconnect"));
+
+  ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_);
+  for (SUBSCRIBERS_CONST_ITERATOR_T iterator = subscribers_.begin ();
+       iterator != subscribers_.end ();
+       iterator++)
+  {
+    try {
+      (*iterator)->disconnect (handle_in);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("exception caught from subscriber, continuing\n")));
+    }
+  } // end FOR
+}
+
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType>
 ACE_HANDLE
 Net_Client_AsynchConnector_T<HandlerType,
                              ACE_INET_Addr,
@@ -793,8 +825,9 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // pre-initialize the connection handler
   Net_ILinkLayer_T<Net_UDPSocketConfiguration_t>* ilinklayer_p = handler_p;
-  ilinklayer_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_SERVER
-                                                            : NET_ROLE_CLIENT);
+  enum Net_ClientServerRole role_e =
+    Net_Common_Tools::isLocal (address_in) ? NET_ROLE_SERVER : NET_ROLE_CLIENT;
+  ilinklayer_p->set (role_e);
 
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
@@ -812,6 +845,21 @@ Net_Client_AsynchConnector_T<HandlerType,
                 ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     handler_p->decrease ();
     return ACE_INVALID_HANDLE;
+  } // end IF
+
+  if (role_e == NET_ROLE_SERVER)
+  { ACE_GUARD_RETURN (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_, ACE_INVALID_HANDLE);
+    for (SUBSCRIBERS_CONST_ITERATOR_T iterator = subscribers_.begin ();
+         iterator != subscribers_.end ();
+         iterator++)
+    {
+      try {
+        (*iterator)->connect (handler_p->handle ());
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("exception caught from subscriber, continuing\n")));
+      }
+    } // end FOR
   } // end IF
 
   return handler_p->handle ();

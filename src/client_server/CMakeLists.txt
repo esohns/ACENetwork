@@ -178,7 +178,9 @@ set (source_files_server
      net_server_defines.h
      net_server_listener.cpp
      net_server_listener.h
-     net_server_listener.inl)
+     net_server_listener.inl
+     net_server_listener_base.cpp
+     net_server_listener_base.h)
 if (SSL_SUPPORT)
  set (source_files_server
       net_server_ssl_listener.cpp
@@ -232,6 +234,7 @@ install (FILES
          net_server_defines.h
          net_server_listener.h
          net_server_listener.inl
+         net_server_listener_base.h
          net_server_ssl_listener.h
          net_server_ssl_listener.inl
          DESTINATION include)

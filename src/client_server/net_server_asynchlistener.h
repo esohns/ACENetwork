@@ -30,6 +30,8 @@
 
 #include "net_ilistener.h"
 
+#include "net_server_listener_base.h"
+
 template <typename HandlerType,
           ////////////////////////////////
           typename AddressType,
@@ -41,9 +43,11 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
+ , public Net_Server_Listener_Base
  , public Net_IListener_T<ConfigurationType>
 {
   typedef ACE_Asynch_Acceptor<HandlerType> inherited;
+  typedef Net_Server_Listener_Base inherited2;
 
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Server_AsynchListener_T<HandlerType,
@@ -56,6 +60,7 @@ class Net_Server_AsynchListener_T
 
  public:
   // convenient types
+  typedef ConfigurationType CONFIGURATION_T;
   typedef ACE_Singleton<Net_Server_AsynchListener_T<HandlerType,
                                                     AddressType,
                                                     ConfigurationType,
@@ -86,6 +91,7 @@ class Net_Server_AsynchListener_T
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   virtual bool initialize (const ConfigurationType&); // configuration
   inline virtual bool useReactor () const { return false; }
+  virtual void disconnect (ACE_HANDLE) const;
 
   inline bool isInitialized () const { return isInitialized_; }
 

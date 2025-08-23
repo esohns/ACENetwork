@@ -28,6 +28,8 @@
 
 #include "net_ilistener.h"
 
+#include "net_server_listener_base.h"
+
 template <typename HandlerType,
           typename AcceptorType,
           ////////////////////////////////
@@ -41,10 +43,12 @@ template <typename HandlerType,
 class Net_Server_SSL_Listener_T
  : public ACE_Acceptor<HandlerType,
                        AcceptorType>
+ , public Net_Server_Listener_Base
  , public Net_IListener_T<ConfigurationType>
 {
   typedef ACE_Acceptor<HandlerType,
                        AcceptorType> inherited;
+  typedef Net_Server_Listener_Base inherited2;
 
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Server_SSL_Listener_T<HandlerType,
@@ -54,10 +58,11 @@ class Net_Server_SSL_Listener_T
                                                        StateType,
                                                        StreamType,
                                                        UserDataType>,
-                             ACE_SYNCH_RECURSIVE_MUTEX>;
+                             ACE_SYNCH_MUTEX>;
 
  public:
   // convenient types
+  typedef ConfigurationType CONFIGURATION_T;
   typedef ACE_Singleton<Net_Server_SSL_Listener_T<HandlerType,
                                                   AcceptorType,
                                                   AddressType,
@@ -65,7 +70,7 @@ class Net_Server_SSL_Listener_T
                                                   StateType,
                                                   StreamType,
                                                   UserDataType>,
-                        ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
+                        ACE_SYNCH_MUTEX> SINGLETON_T;
 
   bool isInitialized () const;
 
@@ -82,9 +87,10 @@ class Net_Server_SSL_Listener_T
   virtual void stop (bool = true,   // N/A
                      bool = false); // N/A
 
-  inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *configuration_; }
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
   virtual bool initialize (const ConfigurationType&);
   inline virtual bool useReactor () const { return true; }
+  virtual void disconnect (ACE_HANDLE) const;
 
   // implement Common_IDumpState
   virtual void dump_state () const;

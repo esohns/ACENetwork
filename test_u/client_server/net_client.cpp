@@ -94,7 +94,6 @@
 #include "test_u_stream.h"
 #include "test_u_eventhandler.h"
 #include "test_u_message.h"
-#include "test_u_module_eventhandler.h"
 #include "test_u_sessionmessage.h"
 
 #include "net_client_common.h"
@@ -113,7 +112,7 @@ struct random_data random_data;
 char random_state_buffer[BUFSIZ];
 #endif // ACE_WIN32 || ACE_WIN64
 
-const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetClientStream");
+const char stream_name_io_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetIOStream");
 
 void
 do_printUsage (const std::string& programName_in)

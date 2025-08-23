@@ -30,6 +30,8 @@
 #include "net_connection_manager.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
+#include "net_iconnector.h"
+#include "net_ilistener.h"
 
 // forward declarations
 class ACE_Message_Block;
@@ -54,9 +56,6 @@ class Net_ConnectionBase_T
  public:
   // convenient types
   typedef Common_ReferenceCounter_T<ACE_SYNCH_USE> REFERENCECOUNTER_T;
-//  typedef Net_IConnection_T<AddressType,
-//                            StateType,
-//                            StatisticContainerType> ICONNECTION_T;
   typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
                                    AddressType,
                                    ConfigurationType,
@@ -86,6 +85,10 @@ class Net_ConnectionBase_T
   // missing: waitForCompletion
 
  protected:
+  // convenient types
+  typedef Net_IConnector_T<AddressType, ConfigurationType> ICONNECTOR_T;
+  typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
+    
   // *NOTE*: if there is no default ctor, this will not compile
   inline Net_ConnectionBase_T () : inherited (1, true) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   Net_ConnectionBase_T (bool); // managed ?
@@ -98,6 +101,8 @@ class Net_ConnectionBase_T
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
   ConfigurationType* configuration_;
+  ICONNECTOR_T*      connector_; // the connector (if any (--> SERVER_ROLE))
+  ILISTENER_T*       listener_; // the listener (if any (--> SERVER_ROLE))
   StateType          state_;
 
   bool               isManaged_;

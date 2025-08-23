@@ -58,6 +58,9 @@ class Net_IConnector_T
   typedef ConfigurationType CONFIGURATION_T;
   typedef Net_IAsynchConnector_T<AddressType,
                                  ConfigurationType> IASYNCH_CONNECTOR_T;
+
+  // *NOTE*: notifies disconnects to the (UDP-) connector (server-side only !)
+  virtual void disconnect (ACE_HANDLE) const = 0;
 };
 
 template <typename AddressType,

@@ -76,8 +76,6 @@ set (${EXECUTABLE_SOURCE}_SRCS
      test_u_eventhandler.inl
      test_u_message.cpp
      test_u_message.h
-     test_u_module_eventhandler.cpp
-     test_u_module_eventhandler.h
      test_u_module_headerparser.cpp
      test_u_module_headerparser.h
      test_u_module_protocolhandler.cpp
@@ -145,6 +143,7 @@ target_link_libraries (${EXECUTABLE_SOURCE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE_SOURCE} PUBLIC ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_SOURCE} PUBLIC ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_SOURCE} PUBLIC ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE_SOURCE} PUBLIC ${PROJECT_NAME}_Test_U)
 
@@ -184,8 +183,6 @@ set (${EXECUTABLE_TARGET}_SRCS
      test_u_eventhandler.cpp
      test_u_eventhandler.h
      test_u_eventhandler.inl
-     test_u_module_eventhandler.cpp
-     test_u_module_eventhandler.h
      test_u_module_headerparser.cpp
      test_u_module_headerparser.h
      test_u_module_protocolhandler.cpp
@@ -231,7 +228,6 @@ if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE_TARGET} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
-#add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_TARGET} Common)
 add_dependencies (${EXECUTABLE_TARGET} CommonLog)
 add_dependencies (${EXECUTABLE_TARGET} CommonSignal)
@@ -283,6 +279,129 @@ if (UNIX)
           DESTINATION "etc/${PROJECT_NAME}/client_server" COMPONENT config)
 elseif (WIN32)
  install (FILES etc/net_server.glade
+          DESTINATION "etc/client_server" COMPONENT config)
+endif ()
+
+########### next target ###############
+set (EXECUTABLE_TARGET_2 server_2)
+set (${EXECUTABLE_TARGET_2}_SRCS
+     net_client_server_defines.h
+     net_client_timeouthandler.cpp
+     net_client_timeouthandler.h
+     net_server_2.cpp
+     net_server_listener_common.h
+     net_server_signalhandler.cpp
+     net_server_signalhandler.h
+     net_server_stream_common.h
+     stdafx.h
+     test_u_common_modules.h
+     test_u_configuration.h
+     test_u_connection_common.h
+     test_u_connection_manager_common.h
+     test_u_message.cpp
+     test_u_message.h
+     test_u_eventhandler.cpp
+     test_u_eventhandler_2.cpp
+     test_u_eventhandler_2.h
+     test_u_module_headerparser.cpp
+     test_u_module_headerparser.h
+     test_u_module_protocolhandler.cpp
+     test_u_module_protocolhandler.h
+     test_u_server_common.h
+     test_u_sessionmessage.cpp
+     test_u_sessionmessage.h
+     test_u_stream.cpp
+     test_u_stream.h
+     test_u_stream.inl
+     test_u_stream_2.cpp
+     test_u_stream_2.h
+     test_u_stream_2.inl
+     test_u_tcpconnection.cpp
+     test_u_tcpconnection.h
+     test_u_udpconnection.cpp
+     test_u_udpconnection.h)
+if (GTK_SUPPORT)
+ set (${EXECUTABLE_TARGET_2}_SRCS
+      ${${EXECUTABLE_TARGET_2}_SRCS}
+      test_u_callbacks_2.cpp
+      test_u_callbacks_2.h)
+endif (GTK_SUPPORT)
+#if (WXWIDGETS_SUPPORT)
+# set (${EXECUTABLE_TARGET_2}_SRCS
+#      ${${EXECUTABLE_TARGET_2}_SRCS}
+#       net_server_wxui.cpp
+#       net_server_wxui.h
+#       net_server_wxui_callbacks.cpp
+#      net_server_wxui_base.cpp
+#      net_server_wxui_base.h)
+#endif (WXWIDGETS_SUPPORT)
+#if (WXWIDGETS_USE)
+# list (ADD_ITEM ${EXECUTABLE_TARGET_2}_SRCS net_server_wxui.cpp)
+# list (ADD_ITEM ${EXECUTABLE_TARGET_2}_SRCS net_server_wxui.h)
+# list (ADD_ITEM ${EXECUTABLE_TARGET_2}_SRCS net_server_wxui_callbacks.cpp)
+# list (REMOVE_ITEM ${EXECUTABLE_TARGET_2}_SRCS net_server_2.cpp)
+#endif (WXWIDGETS_USE)
+
+add_executable (${EXECUTABLE_TARGET_2}
+                EXCLUDE_FROM_ALL
+                ${${EXECUTABLE_TARGET_2}_SRCS}
+                etc/net_server_2.gtk3)
+set_property (TARGET ${EXECUTABLE_TARGET_2} PROPERTY FOLDER "test_u")
+if (WIN32 AND NOT BUILD_TEST_U)
+ set_target_properties (${EXECUTABLE_TARGET_2} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
+endif ()
+
+add_dependencies (${EXECUTABLE_TARGET_2} Common)
+add_dependencies (${EXECUTABLE_TARGET_2} CommonLog)
+add_dependencies (${EXECUTABLE_TARGET_2} CommonSignal)
+add_dependencies (${EXECUTABLE_TARGET_2} CommonTimer)
+
+add_dependencies (${EXECUTABLE_TARGET_2} ACEStream)
+
+add_dependencies (${EXECUTABLE_TARGET_2} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE_TARGET_2} ${PROJECT_NAME}_Server)
+
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+if (UNIX)
+ target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC X11)
+endif (UNIX)
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ${SSL_LIBRARIES})
+endif (SSL_SUPPORT)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ${ACE_LIBRARY})
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ${ACE_SSL_LIBRARY})
+endif (SSL_SUPPORT)
+
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC Common)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC CommonEvent)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC CommonLog)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC CommonSignal)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC CommonTimer)
+
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ACEStream)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ACEStream_Miscellaneous)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ACEStream_Network)
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ACEStream_Statistic)
+
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ${PROJECT_NAME})
+
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ${PROJECT_NAME}_Server)
+
+target_link_libraries (${EXECUTABLE_TARGET_2} PUBLIC ${PROJECT_NAME}_Test_U)
+
+# add PCH
+target_precompile_headers (${EXECUTABLE_TARGET_2}
+                           REUSE_FROM ${EXECUTABLE_SOURCE})
+
+install (TARGETS ${EXECUTABLE_TARGET_2}
+         EXPORT ${PROJECT_NAME}Targets
+         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
+if (UNIX)
+ install (FILES etc/net_server_2.gtk3
+          DESTINATION "etc/${PROJECT_NAME}/client_server" COMPONENT config)
+elseif (WIN32)
+ install (FILES etc/net_server_2.gtk3
           DESTINATION "etc/client_server" COMPONENT config)
 endif ()
 
@@ -352,6 +471,18 @@ if (UNIX)
                                               /usr/local/lib
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/client_server
                          ENVIRONMENT foo=bar)
+ create_target_launcher (${EXECUTABLE_TARGET_2}
+                         ARGS "-l -t"
+#                         FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
+                                              ${PROJECT_SOURCE_DIR}/modules/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              /usr/local/lib
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/client_server
+                         ENVIRONMENT foo=bar)
 elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
@@ -378,6 +509,15 @@ elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_TARGET}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  create_target_launcher (${EXECUTABLE_TARGET}
+                         COMMAND ${COMMAND}
+                         ARGS "-l -t"
+#                        FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/client_server
+                         ENVIRONMENT foo=bar)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_TARGET_2}.exe" COMMAND)
+ string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
+ create_target_launcher (${EXECUTABLE_TARGET_2}
                          COMMAND ${COMMAND}
                          ARGS "-l -t"
 #                        FORWARD_ARGS

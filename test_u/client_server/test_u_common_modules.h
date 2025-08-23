@@ -29,9 +29,10 @@
 
 #include "stream_streammodule_base.h"
 
+#include "stream_misc_messagehandler.h"
+
 #include "stream_stat_statistic_report.h"
 
-//#include "net_module_sockethandler.h"
 #include "net_remote_comm.h"
 
 #include "test_u_common.h"
@@ -44,27 +45,6 @@ class Test_U_Message;
 class Test_U_SessionMessage;
 
 // declare module(s)
-//typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
-//                                      Stream_ControlMessage_t,
-//                                      Test_U_Message,
-//                                      Test_U_SessionMessage,
-//                                      struct ClientServer_ModuleHandlerConfiguration,
-//                                      enum Stream_ControlType,
-//                                      enum Stream_SessionMessageType,
-//                                      struct Test_U_StreamState,
-//                                      struct Test_U_StreamSessionData,
-//                                      Test_U_StreamSessionData_t,
-//                                      Net_Statistic_t,
-//                                      Common_Timer_Manager_t,
-//                                      Net_Remote_Comm::MessageHeader,
-//                                      struct Test_U_UserData> Test_U_Module_SocketHandler;
-//DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
-//                              enum Stream_SessionMessageType,                 // session event type
-//                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
-//                              libacenetwork_default_tcp_sockethandler_module_name_string,
-//                              Stream_INotify_t,                               // stream notification interface type
-//                              Test_U_Module_SocketHandler);             // writer type
-
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct ClientServer_ModuleHandlerConfiguration,
@@ -95,5 +75,22 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session
                           Test_U_Module_StatisticReport_ReaderTask_t, // reader type
                           Test_U_Module_StatisticReport_WriterTask_t, // writer type
                           Test_U_Module_StatisticReport);             // name
+
+typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                       Common_TimePolicy_t,
+                                       struct ClientServer_ModuleHandlerConfiguration,
+                                       Stream_ControlMessage_t,
+                                       Test_U_Message,
+                                       Test_U_SessionMessage,
+                                       struct Test_U_StreamSessionData,
+                                       struct Stream_UserData> Test_U_Module_EventHandler;
+
+// declare module
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,                // session data type
+                              enum Stream_SessionMessageType,                 // session event type
+                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_misc_messagehandler_module_name_string,
+                              Stream_INotify_t,                               // stream notification interface type
+                              Test_U_Module_EventHandler);                    // writer type
 
 #endif

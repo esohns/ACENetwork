@@ -101,7 +101,7 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const typename inherited::CO
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_name_string_)));
+                ACE_TEXT (stream_name_io_string_)));
     goto error;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -119,14 +119,12 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const typename inherited::CO
 
   // ******************* Socket Handler ************************
   module_p =
-    //const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                //ACE_TEXT (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
+                ACE_TEXT (stream_name_io_string_),
                 ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
       goto error;
   } // end IF
@@ -154,7 +152,7 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const typename inherited::CO
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_name_string_)));
+                  ACE_TEXT (stream_name_io_string_)));
       goto error;
     } // end IF
 
@@ -186,7 +184,8 @@ Test_U_Stream_T<ConnectionManagerType>::ping ()
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, returning\n"),
+                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, returning\n"),
+                ACE_TEXT (stream_name_io_string_),
                 ACE_TEXT (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME)));
     return;
   } // end IF
@@ -195,7 +194,8 @@ Test_U_Stream_T<ConnectionManagerType>::ping ()
   if (!itimer_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Common_ITimerHandler>(0x%@) failed, returning\n"),
+                ACE_TEXT ("%s: dynamic_cast<Common_ITimerHandler>(0x%@) failed, returning\n"),
+                ACE_TEXT (stream_name_io_string_),
                 module_p->writer ()));
     return;
   } // end IF

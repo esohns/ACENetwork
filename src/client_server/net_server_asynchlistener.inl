@@ -56,6 +56,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             StreamType,
                             UserDataType>::Net_Server_AsynchListener_T ()
  : inherited ()
+ , inherited2 ()
  , configuration_ (NULL)
  , isInitialized_ (false)
  , isListening_ (false)
@@ -233,6 +234,36 @@ Net_Server_AsynchListener_T<HandlerType,
   isInitialized_ = true;
 
   return true;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StreamType,
+          typename UserDataType>
+void
+Net_Server_AsynchListener_T<HandlerType,
+                            AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StreamType,
+                            UserDataType>::disconnect (ACE_HANDLE handle_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::disconnect"));
+
+  ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_);
+  for (SUBSCRIBERS_CONST_ITERATOR_T iterator = subscribers_.begin ();
+       iterator != subscribers_.end ();
+       iterator++)
+  {
+    try {
+      (*iterator)->disconnect (handle_in);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("exception caught from subscriber, continuing\n")));
+    }
+  } // end FOR
 }
 
 template <typename HandlerType,
@@ -696,7 +727,6 @@ Net_Server_AsynchListener_T<HandlerType,
                             local_address);
 
     // *EDIT*: set role
-//    Net_ILinkLayer_T<Net_TCPSocketConfiguration_t>* ilinklayer_p = ;
     handler_p->set (NET_ROLE_SERVER);
 
     // Pass the ACT
@@ -724,6 +754,20 @@ Net_Server_AsynchListener_T<HandlerType,
               (result.error () != ECANCELED)))
 #endif // ACE_WIN32
     this->accept (this->bytes_to_read (), result.act ());
+
+  { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, inherited2::lock_);
+    for (SUBSCRIBERS_ITERATOR_T iterator = subscribers_.begin ();
+         iterator != subscribers_.end ();
+         iterator++)
+    {
+      try {
+        (*iterator)->connect (result.accept_handle ());
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("exception caught from subscriber, continuing\n")));
+      }
+    } // end FOR
+  } // end lock scope
 }
 
 template <typename HandlerType,

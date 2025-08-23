@@ -21,11 +21,20 @@
 #ifndef NET_ILISTENER_H
 #define NET_ILISTENER_H
 
+#include "ace/config-macros.h"
+
 #include "common_idumpstate.h"
 #include "common_iget.h"
 #include "common_iinitialize.h"
 
 #include "common_itask.h"
+
+class Net_IConnectionState
+{
+ public:
+  virtual void connect (ACE_HANDLE) = 0;
+  virtual void disconnect (ACE_HANDLE) = 0;
+};
 
 template <typename ConfigurationType> // connection-
 class Net_IListener_T
@@ -37,6 +46,9 @@ class Net_IListener_T
  public:
   // *TODO*: remove ASAP
   virtual bool useReactor () const = 0; // ? : is asynch --> uses proactor
+
+  // *NOTE*: notifies disconnects to the listener (server-side only !)
+  virtual void disconnect (ACE_HANDLE) const = 0;
 };
 
 #endif

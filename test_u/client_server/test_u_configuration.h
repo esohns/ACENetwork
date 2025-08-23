@@ -23,7 +23,6 @@
 
 #include <list>
 
-#include "ace/config-lite.h"
 #include "ace/INET_Addr.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -92,20 +91,20 @@ struct ClientServer_ModuleHandlerConfiguration
 {
   ClientServer_ModuleHandlerConfiguration ()
    : Test_U_ModuleHandlerConfiguration ()
-   //, printProgressDot (false)
+   , listenerConfiguration (NULL) // server_2-
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
-   //, sessionData (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   }
 
-  struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
-  ClientServer_StreamConfiguration_t*  streamConfiguration;
-  Test_U_ISessionNotify_t*             subscriber;
-  Test_U_Subscribers_t*                subscribers;
+  struct Net_ConnectionConfigurationBase* listenerConfiguration;
+  struct Test_U_ProtocolConfiguration*    protocolConfiguration; // protocol handler
+  ClientServer_StreamConfiguration_t*     streamConfiguration;
+  Test_U_ISessionNotify_t*                subscriber;
+  Test_U_Subscribers_t*                   subscribers;
 };
 
 struct ClientServer_Configuration
@@ -124,6 +123,7 @@ struct ClientServer_Configuration
    , allocatorConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
+   , streamConfiguration_2 () // server_2-stream-
    , protocolConfiguration ()
   {}
 
@@ -132,6 +132,7 @@ struct ClientServer_Configuration
   Net_ConnectionConfigurations_t                  connectionConfigurations;
   // **************************** stream data **********************************
   ClientServer_StreamConfiguration_t              streamConfiguration;
+  ClientServer_StreamConfiguration_t              streamConfiguration_2;
   // *************************** protocol data *********************************
   struct Test_U_ProtocolConfiguration             protocolConfiguration;
 };
