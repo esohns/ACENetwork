@@ -160,7 +160,19 @@ Net_Server_Listener_T<HandlerType,
     hasChanged_ = false;
 
     if (isSuspended_)
-      stop (true, true);
+    {
+      result = inherited::resume ();
+      if (unlikely (result == -1))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", aborting\n")));
+        return false;
+      } // end IF
+      // ACE_DEBUG ((LM_DEBUG,
+      //             ACE_TEXT ("resumed listening...\n")));
+
+      isSuspended_ = false;
+    } // end IF
 
     if (isOpen_)
     {
@@ -264,7 +276,7 @@ Net_Server_Listener_T<HandlerType,
                       ConfigurationType,
                       StateType,
                       StreamType,
-                      UserDataType>::stop (bool,
+                      UserDataType>::stop (bool close_in,
                                            bool)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::stop"));
@@ -274,25 +286,42 @@ Net_Server_Listener_T<HandlerType,
     return; // nothing to do
   ACE_ASSERT (isOpen_);
 
-  int result = inherited::suspend ();
-  if (unlikely (result == -1))
+  int result = -1;
+  if (close_in)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
-    return;
+    result = inherited::close ();
+    if (unlikely (result == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
+      isOpen_ = false;
+      isListening_ = false;
+      return;
+    } // end IF
+    isOpen_ = false;
   } // end IF
-  isSuspended_ = true;
+  else
+  {
+    result = inherited::suspend ();
+    if (unlikely (result == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
+      return;
+    } // end IF
+    isSuspended_ = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: suspended listening: %s\n"),
-              inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address, false, false).c_str ())));
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%@: suspended listening: %s\n"),
+                inherited::get_handle (),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address, false, false).c_str ())));
 #else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: suspended listening: %s\n"),
-              inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address, false, false).c_str ())));
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: suspended listening: %s\n"),
+                inherited::get_handle (),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.address, false, false).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
+  } // end ELSE
 
   isListening_ = false;
 }

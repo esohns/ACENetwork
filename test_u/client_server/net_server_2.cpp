@@ -92,6 +92,7 @@
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_stream.h"
+#include "test_u_eventhandler.h"
 #include "test_u_eventhandler_2.h"
 
 #include "net_server_common.h"
@@ -542,7 +543,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Test_U_Server_Asynch_UDP_Stream_2 asynch_udp_stream;
   Test_U_Server_UDP_Stream_2 udp_stream;
 
-  Test_U_EventHandler_2 ui_event_handler (&CBData_in);
+  Test_U_EventHandler_t ui_event_handler (&CBData_in);
+  Test_U_EventHandler_2 ui_event_handler_2 (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_U_Module_EventHandler_Module event_handler_2 (NULL,
@@ -611,6 +613,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_2.listenerConfiguration =
     &connection_configuration;
+  modulehandler_configuration_2.subscriber = &ui_event_handler_2;
   stream_configuration_2 = stream_configuration;
   stream_configuration_2.module = &event_handler_2;
   configuration_in.streamConfiguration_2.initialize (module_configuration,

@@ -634,11 +634,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 #if defined (SSL_SUPPORT)
   Client_SSL_Connector_t ssl_connector (true);
 
+  std::string module_name =
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      module_name,
                                                       false); // data
-  filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
+  filename_string += ACE_DIRECTORY_SEPARATOR_STR_A;
   filename_string +=
     ACE_TEXT_ALWAYS_CHAR (NET_PROTOCOL_DEFAULT_SSL_TRUSTED_CAS_FILENAME_STRING);
 
