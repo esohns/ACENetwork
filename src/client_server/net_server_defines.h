@@ -21,9 +21,6 @@
 #ifndef NET_SERVER_DEFINES_H
 #define NET_SERVER_DEFINES_H
 
-// *** trace log ***
-#define NET_SERVER_LOG_FILENAME_PREFIX                         "net_server"
-
 // - WARNING: current implementation cannot support numbers that have
 //   more than 7 digits !!!
 // - WARNING: current implementation cannot support 0 !!!

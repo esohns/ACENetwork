@@ -123,7 +123,8 @@ struct ClientServer_Configuration
    , allocatorConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
-   , streamConfiguration_2 () // server_2-stream-
+   , streamConfiguration_2 ()
+   , streamConfiguration_3 ()
    , protocolConfiguration ()
   {}
 
@@ -131,8 +132,9 @@ struct ClientServer_Configuration
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t                  connectionConfigurations;
   // **************************** stream data **********************************
-  ClientServer_StreamConfiguration_t              streamConfiguration;
-  ClientServer_StreamConfiguration_t              streamConfiguration_2;
+  ClientServer_StreamConfiguration_t              streamConfiguration; // connection io-
+  ClientServer_StreamConfiguration_t              streamConfiguration_2; // server tcp|ssl
+  ClientServer_StreamConfiguration_t              streamConfiguration_3; // server udp
   // *************************** protocol data *********************************
   struct Test_U_ProtocolConfiguration             protocolConfiguration;
 };

@@ -143,8 +143,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   bool handle_manager = false;
   bool handle_stream = false;
   AddressType local_SAP;
-  ICONNECTOR_T* iconnector_p = NULL;
-  ILISTENER_T* ilistener_p = NULL;
+  typename inherited2::ICONNECTOR_T* iconnector_p = NULL;
+  typename inherited2::ILISTENER_T* ilistener_p = NULL;
   AddressType peer_SAP;
   enum Net_TransportLayerType transport_layer_e = this->transportLayer ();
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
@@ -170,7 +170,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       {
         case NET_ROLE_CLIENT:
         {
-          iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
+          iconnector_p =
+              static_cast<typename inherited2::ICONNECTOR_T*> (arg_in);
           ACE_ASSERT (iconnector_p);
           configuration_p =
               &const_cast<ConfigurationType&> (iconnector_p->getR ());
@@ -178,7 +179,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
         }
         case NET_ROLE_SERVER:
         {
-          ilistener_p = static_cast<ILISTENER_T*> (arg_in);
+          ilistener_p = static_cast<typename inherited2::ILISTENER_T*> (arg_in);
           ACE_ASSERT (ilistener_p);
           configuration_p =
               &const_cast<ConfigurationType&> (ilistener_p->getR ());
@@ -199,7 +200,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     }
     case NET_TRANSPORTLAYER_UDP:
     {
-      iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
+      iconnector_p = static_cast<typename inherited2::ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
       configuration_p =
         &const_cast<ConfigurationType&> (iconnector_p->getR ());
@@ -1237,8 +1238,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   //         server-side: arg_in is a handle to the listener
   ConfigurationType* configuration_p = NULL;
   HandlerConfigurationType* socket_handler_configuration_p = NULL;
-  ICONNECTOR_T* iconnector_p = NULL;
-  ILISTENER_T* ilistener_p = NULL;
+  typename inherited2::ICONNECTOR_T* iconnector_p = NULL;
+  typename inherited2::ILISTENER_T* ilistener_p = NULL;
   switch (this->transportLayer ())
   {
     case NET_TRANSPORTLAYER_TCP:
@@ -1248,7 +1249,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       {
         case NET_ROLE_CLIENT:
         {
-          iconnector_p = static_cast<ICONNECTOR_T*> (const_cast<void*> (act_in));
+          iconnector_p =
+              static_cast<typename inherited2::ICONNECTOR_T*> (const_cast<void*> (act_in));
           ACE_ASSERT (iconnector_p);
           configuration_p =
             &const_cast<ConfigurationType&> (iconnector_p->getR ());
@@ -1256,7 +1258,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         }
         case NET_ROLE_SERVER:
         {
-          ilistener_p = static_cast<ILISTENER_T*> (const_cast<void*> (act_in));
+          ilistener_p =
+              static_cast<typename inherited2::ILISTENER_T*> (const_cast<void*> (act_in));
           ACE_ASSERT (ilistener_p);
           configuration_p =
             &const_cast<ConfigurationType&> (ilistener_p->getR ());
@@ -1278,7 +1281,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
     case NET_TRANSPORTLAYER_UDP:
     {
-      iconnector_p = static_cast<ICONNECTOR_T*> (const_cast<void*> (act_in));
+      iconnector_p =
+          static_cast<typename inherited2::ICONNECTOR_T*> (const_cast<void*> (act_in));
       ACE_ASSERT (iconnector_p);
       configuration_p =
         &const_cast<ConfigurationType&> (iconnector_p->getR ());

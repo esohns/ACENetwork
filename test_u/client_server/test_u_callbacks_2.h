@@ -31,6 +31,8 @@ gboolean idle_update_info_display_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
 gboolean idle_end_session_cb (gpointer);
+gboolean idle_start_session_2_cb (gpointer);
+gboolean idle_end_session_2_cb (gpointer);
 
 //////////////////////////////////////////
 
@@ -47,13 +49,13 @@ gboolean idle_initialize_server_UI_cb (gpointer);
 extern "C"
 {
 #endif /* __cplusplus */
-G_MODULE_EXPORT gint button_connect_clicked_cb (GtkWidget*, gpointer);
+//G_MODULE_EXPORT gint button_connect_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_close_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_close_all_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint togglebutton_test_toggled_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint radiobutton_mode_toggled_cb (GtkWidget*, gpointer);
+//G_MODULE_EXPORT gint togglebutton_test_toggled_cb (GtkWidget*, gpointer);
+//G_MODULE_EXPORT gint radiobutton_mode_toggled_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint radiobutton_protocol_toggled_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT gint button_ping_clicked_cb (GtkWidget*, gpointer);
+//G_MODULE_EXPORT gint button_ping_clicked_cb (GtkWidget*, gpointer);
 
 /////////////////////////////////////////
 

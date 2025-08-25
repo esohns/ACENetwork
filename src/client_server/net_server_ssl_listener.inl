@@ -158,7 +158,19 @@ Net_Server_SSL_Listener_T<HandlerType,
     hasChanged_ = false;
 
     if (isSuspended_)
-      stop (true, true);
+    {
+      result = inherited::resume ();
+      if (unlikely (result == -1))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", aborting\n")));
+        return false;
+      } // end IF
+      // ACE_DEBUG ((LM_DEBUG,
+      //             ACE_TEXT ("resumed listening...\n")));
+
+      isSuspended_ = false;
+    } // end IF
 
     if (isOpen_)
     {
@@ -304,8 +316,10 @@ Net_Server_SSL_Listener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::initialize"));
 
+  // bool has_changed_b =
+  //   configuration_ != &const_cast<ConfigurationType&> (configuration_in);
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
-  hasChanged_ = true;
+  hasChanged_ = true;//has_changed_b;
   isInitialized_ = true;
 
   return true;

@@ -38,8 +38,15 @@
 #define NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL         1 // ms
 
 // *** UI ***
+#if defined (GTK2_USE)
 #define NET_CLIENT_UI_FILE                              "net_client.glade"
 #define NET_SERVER_UI_FILE                              "net_server.glade"
+#define NET_SERVER_2_UI_FILE                            "net_server.glade"
+#elif defined (GTK3_USE)
+#define NET_CLIENT_UI_FILE                              "net_client.gtk3"
+#define NET_SERVER_UI_FILE                              "net_server.gtk3"
+#define NET_SERVER_2_UI_FILE                            "net_server_2.gtk3"
+#endif // GTK2_USE || GTK3_USE
 
 // -----------------------------------------------------------------------------
 

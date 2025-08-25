@@ -932,9 +932,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
     return;
   } // end IF
 
+  std::string module_name =
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      module_name,
                                                       false); // data
   filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
   filename_string +=
@@ -1328,8 +1330,8 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-        Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                     ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX));
+      Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                    Common_File_Tools::basename (ACE_TEXT_ALWAYS_CHAR (argv_in[0]), true));
   if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]),    // program name
                                      log_file_name,                 // log file name
                                      true,                          // log to syslog ?

@@ -30,6 +30,7 @@
 
 #include "common_defines.h"
 #include "common_file_tools.h"
+#include "common_string_tools.h"
 
 #include "common_log_tools.h"
 
@@ -49,11 +50,13 @@ Net_Server_Common_Tools::selector (const dirent* dirEntry_in)
 
   // *IMPORTANT NOTE*: select only files following the naming schema for
   //                   log files: "<PREFIX>[_<NUMBER>]<SUFFIX>"
+  static std::string prefix_string =
+    Common_File_Tools::cropExtension (Common_File_Tools::executable);
 
   // sanity check --> prefix ok ?
   if (likely (ACE_OS::strncmp (dirEntry_in->d_name,
-                               ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX),
-                               ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX)))))
+                               ACE_TEXT_ALWAYS_CHAR (prefix_string.c_str ()),
+                               ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (prefix_string.c_str ())))))
     return 0;
 
   return 1;
@@ -170,6 +173,8 @@ fallback:
   std::stringstream converter;
   std::string old_FQ_file_name, new_FQ_file_name;
   unsigned int index = Net_Server_Common_Tools::maximumNumberOfLogFiles_ - 1;
+  std::string prefix_string =
+    Common_File_Tools::cropExtension (Common_File_Tools::executable);
   for (int i = entries.length () - 1;
        i >= 0;
        i--)
@@ -241,7 +246,7 @@ fallback:
 
     new_FQ_file_name = directory;
     new_FQ_file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX);
+    new_FQ_file_name += prefix_string;
     new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR ("_");
 
     converter.clear ();
@@ -277,8 +282,8 @@ fallback:
   if (found_current)
   {
     new_FQ_file_name = directory;
-    new_FQ_file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-    new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX);
+    new_FQ_file_name += ACE_DIRECTORY_SEPARATOR_STR_A;
+    new_FQ_file_name += prefix_string;
     new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR ("_1");
     new_FQ_file_name += ACE_TEXT_ALWAYS_CHAR (COMMON_LOG_FILENAME_SUFFIX);
 

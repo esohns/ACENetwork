@@ -71,7 +71,8 @@ Test_U_EventHandler_T<CallbackDataType>::start (Stream_SessionId_t sessionId_in,
   } // end IF
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.eventStack.push (COMMON_UI_EVENT_CONNECT);
+  //  state_r.eventStack.push (COMMON_UI_EVENT_CONNECT);
+    state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 #endif // GTK_USE
 }
@@ -124,7 +125,7 @@ Test_U_EventHandler_T<CallbackDataType>::end (Stream_SessionId_t sessionId_in)
 
 #if defined (GTK_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    //state_r.eventSourceIds.insert (event_source_id);
+    state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 #endif // GTK_USE
 }
@@ -178,7 +179,7 @@ Test_U_EventHandler_T<CallbackDataType>::notify (Stream_SessionId_t sessionId_in
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_CONNECT:
-      //event_e = COMMON_UI_EVENT_CONNECT;
+      event_e = COMMON_UI_EVENT_CONNECT;
       break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
       event_e = COMMON_UI_EVENT_DISCONNECT;

@@ -43,9 +43,7 @@ typedef Test_U_Stream_2<Server_TCP_Listener_t> Test_U_Server_TCP_Stream_2;
 typedef Test_U_Stream_2<Server_SSL_Listener_t> Test_U_Server_SSL_Stream_2;
 #endif // SSL_SUPPORT
 
-// *TODO*: Server_UDP_AsynchConnector_t && Server_UDP_Connector_t must define
-//          SINGLETON_T typedefs first
-//typedef Test_U_Stream_2<Server_UDP_AsynchConnector_t> Test_U_Server_Asynch_UDP_Stream_2;
-//typedef Test_U_Stream_2<Server_UDP_Connector_t> Test_U_Server_UDP_Stream_2;
+typedef Test_U_Stream_2<Server_UDP_AsynchConnector_t> Test_U_Server_Asynch_UDP_Stream_2;
+typedef Test_U_Stream_2<Server_UDP_Connector_t> Test_U_Server_UDP_Stream_2;
 
 #endif

@@ -893,47 +893,33 @@ Net_AsynchUDPSocketHandler_T<SocketType,
         //(error != ERROR_INVALID_NETNAME) &&     // 1214: most probable reason: socket not connect()ed to a valid address
         //(error != ERROR_INVALID_USER_BUFFER) && // 1784: too many outstanding asynchronous I/O requests | message exceeded SO_MAX_MSG_SIZE
         (error != ECONNRESET))                  // 10054
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@, address: %s): \"%s\", aborting\n"),
                   result_in.handle (),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress, false, false).c_str ()),
                   ACE_TEXT (Common_Error_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
 #else
-    if ((error != EBADF) && // 9 : Linux (local close())
-        (error != EPIPE))   // 32:
+    if ((error != EBADF) &&      // 9 : Linux (local close())
+        (error != EPIPE) &&      // 32:
+        (error != ECONNREFUSED)) // 111: failed to deliver
 //        (error != EDESTADDRREQ) // 89:
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: %d, address: %s): \"%s\", aborting\n"),
                   result_in.handle (),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress, false, false).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif // ACE_WIN32 || ACE_WIN64
+      close_b = true;
+    } // end IF
   } // end IF
 
   switch (static_cast<int> (result_in.bytes_transferred ()))
   {
     case -1:
     case 0:
-    {
-      //ACE_ASSERT (!result_in.success ());
-      //      error = result_in.error ();
-//      if ((error != ECONNRESET) &&
-//          (error != EPIPE)      &&
-//          (error != EBADF)) // 9 happens on Linux (local close())
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
-//                    result_in.handle (),
-//                    ACE::sock_error (static_cast<int> (error))));
-//#else
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
-//                    result_in.handle (),
-//                    ACE_TEXT (ACE_OS::strerror (error))));
-//#endif
-      close_b = true;
-      break;
-    }
+      break; // error (see above)
     // *** GOOD CASES ***
     default:
     {
@@ -949,7 +935,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
         // *TODO*: this is broken
         ACE_ASSERT (false);
         result = this->handle_output (result_in.handle ());
-        if (result == -1)
+        if (unlikely (result == -1))
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_ERROR,
@@ -971,7 +957,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   result_in.message_block ()->release ();
 
   if (unlikely (close_b))
-    cancel ();
+    abort ();
 
   counter_.decrease ();
 }
@@ -1794,7 +1780,7 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::handle_write_dgram"));
 
   int result = -1;
-  bool close = false;
+  bool close_b = false;
 
   // sanity check
   if (unlikely (!result_in.success ()))
@@ -1805,45 +1791,31 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
         //(error != ERROR_INVALID_NETNAME) &&     // 1214: most probable reason: socket not connect()ed to a valid address
         //(error != ERROR_INVALID_USER_BUFFER) && // 1784
         (error != ECONNRESET))                  // 10054
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@, address: %s): \"%s\", aborting\n"),
                   result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
                   ACE_TEXT (Common_Error_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
 #else
-    if ((error != EBADF) && // 9 : Linux (local close())
-        (error != EPIPE))   // 32:
+    if ((error != EBADF) &&      // 9 : Linux (local close())
+        (error != EPIPE) &&      // 32:
+        (error != ECONNREFUSED)) // 111: failed to deliver
 //        (error != EDESTADDRREQ) // 89:
+    {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: %d, address: %s): \"%s\", aborting\n"),
                   result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif // ACE_WIN32 || ACE_WIN64
+      close_b = true;
+    } // end IF
   } // end IF
 
   switch (static_cast<int> (result_in.bytes_transferred ()))
   {
     case -1:
     case 0:
-    {
-      //ACE_ASSERT (!result_in.success ());
-      //      error = result_in.error ();
-//      if ((error != ECONNRESET) &&
-//          (error != EPIPE)      &&
-//          (error != EBADF)) // 9 happens on Linux (local close())
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
-//                    result_in.handle (),
-//                    ACE::sock_error (static_cast<int> (error))));
-//#else
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
-//                    result_in.handle (),
-//                    ACE_TEXT (ACE_OS::strerror (error))));
-//#endif
-      close = true;
-      break;
-    }
+      break; // error (see above)
     // *** GOOD CASES ***
     default:
     {
@@ -1861,7 +1833,7 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
         // *TODO*: this is broken
         ACE_ASSERT (false);
         result = this->handle_output (result_in.handle ());
-        if (result == -1)
+        if (unlikely (result == -1))
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_ERROR,
@@ -1872,7 +1844,7 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
                       ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_output(%d): \"%m\", aborting\n"),
                       result_in.handle ()));
 #endif // ACE_WIN32 || ACE_WIN64
-          close = true;
+          close_b = true;
         } // end IF
       } // end IF
 
@@ -1882,8 +1854,8 @@ Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
 
   result_in.message_block ()->release ();
 
-  if (unlikely (close))
-    cancel ();
+  if (unlikely (close_b))
+    abort ();
 
   counter_.decrease ();
 }

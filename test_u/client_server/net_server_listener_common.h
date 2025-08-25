@@ -96,4 +96,9 @@ typedef ACE_Singleton<Server_SSL_Listener_t,
                       ACE_SYNCH_MUTEX> SERVER_SSL_LISTENER_SINGLETON;
 #endif // SSL_SUPPORT
 
+typedef ACE_Singleton<Server_UDP_AsynchConnector_t,
+                      ACE_SYNCH_MUTEX> SERVER_ASYNCH_UDP_CONNECTOR_SINGLETON;
+typedef ACE_Singleton<Server_UDP_Connector_t,
+                      ACE_SYNCH_MUTEX> SERVER_UDP_CONNECTOR_SINGLETON;
+
 #endif

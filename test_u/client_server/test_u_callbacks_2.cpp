@@ -176,224 +176,14 @@ idle_update_info_display_cb (gpointer userData_in)
 //////////////////////////////////////////
 
 gboolean
-idle_initialize_client_UI_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_initialize_client_UI_cb"));
-
-  struct Client_UI_CBData* data_p =
-    static_cast<struct Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-  struct Client_Configuration* configuration_p =
-    static_cast<struct Client_Configuration*> (data_p->configuration);
-  ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->timeoutHandler);
-
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  // step1: initialize dialog window(s)
-  GtkWidget* dialog_p =
-    GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_MAIN_NAME)));
-  ACE_ASSERT (dialog_p);
-  //  GtkWidget* image_icon_p = gtk_image_new_from_file (path.c_str ());
-  //  ACE_ASSERT (image_icon_p);
-  //  gtk_window_set_icon (GTK_WINDOW (dialog_p),
-  //                       gtk_image_get_pixbuf (GTK_IMAGE (image_icon_p)));
-  //GdkWindow* dialog_window_p = gtk_widget_get_window (dialog_p);
-  //gtk_window_set_title (,
-  //                      caption.c_str ());
-
-  //  GtkWidget* about_dialog_p =
-  //    GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-  //                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_DIALOG_ABOUT_NAME)));
-  //  ACE_ASSERT (about_dialog_p);
-
-  // step2: initialize info view
-  GtkSpinButton* spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_range (spin_button_p,
-                             0.0,
-                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
-
-  spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_range (spin_button_p,
-                             0.0,
-                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
-  spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_range (spin_button_p,
-                             0.0,
-                             static_cast<gdouble> (std::numeric_limits<ACE_UINT32>::max ()));
-
-  // step3: initialize options
-  std::string radio_button_name;
-  switch (configuration_p->timeoutHandler->mode ())
-  {
-    case Client_TimeoutHandler::ACTION_NORMAL:
-      radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME);
-      break;
-    case Client_TimeoutHandler::ACTION_ALTERNATING:
-      radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME);
-      break;
-    case Client_TimeoutHandler::ACTION_STRESS:
-      radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME);
-      break;
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("unknown/invalid mode (was: %d), aborting\n"),
-                  configuration_p->timeoutHandler->mode ()));
-      return G_SOURCE_REMOVE;
-    }
-  } // end SWITCH
-  GtkRadioButton* radiobutton_p =
-    GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                              radio_button_name.c_str ()));
-  ACE_ASSERT (radiobutton_p);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
-
-#if defined (SSL_SUPPORT)
-#if defined (SSL_SUPPORT)
-#else
-  radiobutton_p =
-      GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME)));
-    ACE_ASSERT (radiobutton_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (radiobutton_p), FALSE);
-#endif // SSL_SUPPORT
-#endif // SSL_SUPPORT
-
-  switch (configuration_p->timeoutHandler->protocol ())
-  {
-    case NET_TRANSPORTLAYER_TCP:
-      radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_TCP_NAME);
-      break;
-    case NET_TRANSPORTLAYER_UDP:
-      radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_UDP_NAME);
-      break;
-    case NET_TRANSPORTLAYER_SSL:
-      radio_button_name =
-        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME);
-      break;
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("unknown/invalid protocol (was: %d), aborting\n"),
-                  configuration_p->timeoutHandler->protocol ()));
-      return G_SOURCE_REMOVE;
-    }
-  } // end SWITCH
-  radiobutton_p =
-    GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                              radio_button_name.c_str ()));
-  ACE_ASSERT (radiobutton_p);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (radiobutton_p), TRUE);
-
-  spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_range (spin_button_p,
-                             0.0,
-                             std::numeric_limits<ACE_UINT32>::max ());
-  unsigned int ping_interval =
-    data_p->configuration->protocolConfiguration.pingInterval.msec ();
-  gtk_spin_button_set_value (spin_button_p,
-    static_cast<gdouble> (ping_interval));
-
-  GtkProgressBar* progress_bar_p =
-    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PROGRESSBAR_NAME)));
-  ACE_ASSERT (progress_bar_p);
-  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
-  gint width, height;
-  gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
-  gtk_progress_bar_set_pulse_step (progress_bar_p,
-                                   1.0 / static_cast<double> (width));
-
-  // step5: initialize updates
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-    // schedule asynchronous updates of the info view
-    guint event_source_id =
-      g_timeout_add (NET_UI_GTK_EVENT_RESOLUTION,
-                     idle_update_info_display_cb,
-                     userData_in);
-    if (event_source_id > 0)
-      data_p->UIState->eventSourceIds.insert (event_source_id);
-    else
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
-      return G_SOURCE_REMOVE;
-    } // end ELSE
-  } // end lock scope
-
-  // step6: disable some functions ?
-  GtkButton* button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_CLOSE_NAME)));
-  ACE_ASSERT (button_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
-  button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_CLOSEALL_NAME)));
-  ACE_ASSERT (button_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
-  button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_BUTTON_PING_NAME)));
-  ACE_ASSERT (button_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
-
-  // step7: (auto-)connect signals/slots
-  // *NOTE*: glade_xml_signal_autoconnect does not work reliably
-  //glade_xml_signal_autoconnect(userData_out.xml);
-  gtk_builder_connect_signals ((*iterator).second.second,
-                               userData_in);
-
-  // step6a: connect default signals
-  gulong result =
-    g_signal_connect (dialog_p,
-                      ACE_TEXT_ALWAYS_CHAR ("destroy"),
-                      G_CALLBACK (gtk_widget_destroyed),
-                      NULL);
-  ACE_ASSERT (result);
-
-  // step9: draw main dialog
-  gtk_widget_show_all (dialog_p);
-
-  return G_SOURCE_REMOVE;
-}
-
-gboolean
 idle_start_session_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_start_session_cb"));
 
-  struct Test_U_GTK_CBData* data_p =
-    static_cast<struct Test_U_GTK_CBData*> (userData_in);
-
   // sanity check(s)
+  struct ClientServer_UI_CBData* data_p =
+    static_cast<struct ClientServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
-  // synch access
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
 
 //  int result = -1;
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -458,7 +248,7 @@ idle_end_session_cb (gpointer userData_in)
       return FALSE;
     }
   } // end SWITCH
-  bool idle_b = !number_of_connections;
+  bool idle_b = (number_of_connections == 0);
 
   // sanity check(s)
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -484,6 +274,33 @@ idle_end_session_cb (gpointer userData_in)
   if (button_p) // client only
     gtk_widget_set_sensitive (GTK_WIDGET (button_p),
                               !idle_b);
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_start_session_2_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_start_session_2_cb"));
+
+  // sanity check(s)
+  struct ClientServer_UI_CBData* data_p =
+    static_cast<struct ClientServer_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_end_session_2_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_2_cb"));
+
+  // sanity check(s)
+  struct ClientServer_UI_CBData* data_p =
+    static_cast<struct ClientServer_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
 
   return G_SOURCE_REMOVE;
 }
@@ -557,14 +374,12 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 
   GtkRadioButton* radiobutton_p = NULL;
 #if defined (SSL_SUPPORT)
-#if defined (SSL_SUPPORT)
 #else
   radiobutton_p =
       GTK_RADIO_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_RADIOBUTTON_SSL_NAME)));
     ACE_ASSERT (radiobutton_p);
     gtk_widget_set_sensitive (GTK_WIDGET (radiobutton_p), FALSE);
-#endif // SSL_SUPPORT
 #endif // SSL_SUPPORT
 
   std::string radio_button_name;
@@ -795,34 +610,6 @@ extern "C"
 {
 #endif /* __cplusplus */
 gint
-button_connect_clicked_cb (GtkWidget* widget_in,
-                           gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::button_connect_clicked_cb"));
-
-  int result = -1;
-
-  ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (userData_in);
-
-// *PORTABILITY*: on Windows SIGUSRx are not defined
-// --> use SIGBREAK (21) and SIGTERM (15) instead...
-  int signal = 0;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  signal = SIGBREAK;
-#else
-  signal = SIGUSR1;
-#endif // ACE_WIN32 || ACE_WIN64
-  result = ACE_OS::raise (signal);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::raise(%S): \"%m\", continuing\n"),
-                signal));
-
-  return FALSE;
-} // button_connect_clicked_cb
-
-gint
 button_close_clicked_cb (GtkWidget* widget_in,
                          gpointer userData_in)
 {
@@ -863,297 +650,10 @@ button_close_all_clicked_cb (GtkWidget* widget_in,
 } // button_close_all_clicked_cb
 
 gint
-button_ping_clicked_cb (GtkWidget* widget_in,
-                        gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::button_ping_clicked_cb"));
-
-  ACE_UNUSED_ARG (widget_in);
-  struct Client_UI_CBData* data_p =
-    static_cast<struct Client_UI_CBData*> (userData_in);
-
-  // sanity check(s)
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-
-  unsigned int number_of_connections = 0;
-  switch (data_p->configuration->protocolConfiguration.transportLayer)
-  {
-    case NET_TRANSPORTLAYER_TCP:
-    case NET_TRANSPORTLAYER_SSL:
-    {
-      number_of_connections =
-        TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
-      break;
-    }
-    case NET_TRANSPORTLAYER_UDP:
-    {
-      number_of_connections =
-        TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->count ();
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                  data_p->configuration->protocolConfiguration.transportLayer));
-      return FALSE;
-    }
-  } // end SWITCH
-  // sanity check
-  if (!number_of_connections)
-    return FALSE;
-
-  // grab a (random) connection handler
-  int index = 0;
-  // *PORTABILITY*: outside glibc, this is not very portable
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  index = ((::random () % number_of_connections) + 1);
-#else
-  // *NOTE*: use ACE_OS::rand_r() for improved thread safety !
-  //results_out.push_back((ACE_OS::rand() % range_in) + 1);
-  unsigned int usecs = static_cast<unsigned int> (COMMON_TIME_NOW.usec ());
-  index = ((ACE_OS::rand_r (&usecs) % number_of_connections) + 1);
-#endif
-
-  Net_IPing* iping_p = NULL;
-  Test_U_TCPConnectionManager_t::ICONNECTION_T* connection_base_p = NULL;
-  Test_U_UDPConnectionManager_t::ICONNECTION_T* connection_base_2 = NULL;
-  switch (data_p->configuration->protocolConfiguration.transportLayer)
-  {
-    case NET_TRANSPORTLAYER_TCP:
-    case NET_TRANSPORTLAYER_SSL:
-    {
-      connection_base_p =
-        TEST_U_TCPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
-      iping_p = dynamic_cast<Net_IPing*> (connection_base_p);
-      break;
-    }
-    case NET_TRANSPORTLAYER_UDP:
-    {
-      connection_base_2 =
-        TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
-      iping_p = dynamic_cast<Net_IPing*> (connection_base_2);
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                  data_p->configuration->protocolConfiguration.transportLayer));
-      return FALSE;
-    }
-  } // end SWITCH
-  if (iping_p)
-    try {
-      iping_p->ping ();
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
-      return FALSE;
-    }
-
-  switch (data_p->configuration->protocolConfiguration.transportLayer)
-  {
-    case NET_TRANSPORTLAYER_TCP:
-    case NET_TRANSPORTLAYER_SSL:
-    {
-      if (connection_base_p)
-          connection_base_p->decrease ();
-      break;
-    }
-    case NET_TRANSPORTLAYER_UDP:
-    { 
-      if (connection_base_2)
-        connection_base_2->decrease ();
-      break;
-    }
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
-                  data_p->configuration->protocolConfiguration.transportLayer));
-      return FALSE;
-    }
-  } // end SWITCH
-
-  return FALSE;
-} // button_ping_clicked_cb
-
-gint
-togglebutton_test_toggled_cb (GtkWidget* widget_in,
-                              gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::togglebutton_test_toggled_cb"));
-
-  int result = -1;
-
-  ACE_UNUSED_ARG (widget_in);
-
-  // sanity check(s)
-  struct Client_UI_CBData* data_p =
-    static_cast<struct Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-  struct Client_Configuration* configuration_p =
-    static_cast<struct Client_Configuration*> (data_p->configuration);
-  ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->timeoutHandler);
-//  Common_UI_GTK_BuildersIterator_t iterator =
-//    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  // schedule action interval timer ?
-  if (configuration_p->signalHandlerConfiguration.actionTimerId == -1)
-  {
-    ACE_Time_Value interval = ACE_Time_Value::max_time;
-    switch (configuration_p->timeoutHandler->mode ())
-    {
-      case Client_TimeoutHandler::ActionModeType::ACTION_ALTERNATING:
-      {
-        interval.set ((NET_CLIENT_DEFAULT_TEST_ALTERNATING_INTERVAL / 1000),
-                      ((NET_CLIENT_DEFAULT_TEST_ALTERNATING_INTERVAL % 1000) * 1000));
-        break;
-      }
-      case Client_TimeoutHandler::ActionModeType::ACTION_NORMAL:
-      {
-        interval.set ((NET_CLIENT_DEFAULT_TEST_NORMAL_INTERVAL / 1000),
-                      ((NET_CLIENT_DEFAULT_TEST_NORMAL_INTERVAL % 1000) * 1000));
-        break;
-      }
-      case Client_TimeoutHandler::ActionModeType::ACTION_STRESS:
-      {
-        interval.set ((NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL / 1000),
-                      ((NET_CLIENT_DEFAULT_TEST_STRESS_INTERVAL % 1000) * 1000));
-        break;
-      }
-      default:
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown action mode (was: %d), aborting\n"),
-                    configuration_p->timeoutHandler->mode ()));
-        return FALSE;
-      }
-    } // end SWITCH
-    configuration_p->signalHandlerConfiguration.actionTimerId =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (configuration_p->timeoutHandler, // event handler handle
-                                                                  NULL,                                  // asynchronous completion token
-                                                                  ACE_Time_Value::zero,                  // first wakeup time
-                                                                  interval);                             // interval
-    if (configuration_p->signalHandlerConfiguration.actionTimerId == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to schedule action timer: \"%m\", aborting\n")));
-      return FALSE;
-    } // end IF
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("scheduled action timer (id: %d, interval: %#T)\n"),
-                configuration_p->signalHandlerConfiguration.actionTimerId,
-                &interval));
-  } // end IF
-  else
-  {
-    const void* act_p = NULL;
-    result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (configuration_p->signalHandlerConfiguration.actionTimerId,
-                                                                &act_p);
-    if (result <= 0)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                  configuration_p->signalHandlerConfiguration.actionTimerId));
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("cancelled action timer (id: %d)\n"),
-                configuration_p->signalHandlerConfiguration.actionTimerId));
-    configuration_p->signalHandlerConfiguration.actionTimerId = -1;
-  } // end ELSE
-
-  // toggle button image/label
-  bool is_active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in));
-  gtk_button_set_label (GTK_BUTTON (widget_in),
-                        (is_active ? GTK_STOCK_MEDIA_STOP
-                                   : GTK_STOCK_MEDIA_PLAY));
-
-  return FALSE;
-}
-
-gint
-radiobutton_mode_toggled_cb (GtkWidget* widget_in,
-                             gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::radiobutton_mode_toggled_cb"));
-
-  int result = -1;
-
-  struct Client_UI_CBData* data_p =
-    static_cast<struct Client_UI_CBData*> (userData_in);
-
-  // sanity check(s)
-  ACE_ASSERT (widget_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-  struct Client_Configuration* configuration_p =
-    static_cast<struct Client_Configuration*> (data_p->configuration);
-  ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->timeoutHandler);
-
-  // step0: activated ?
-  GtkToggleButton* toggle_button_p = GTK_TOGGLE_BUTTON (widget_in);
-  ACE_ASSERT (toggle_button_p);
-  if (!gtk_toggle_button_get_active (toggle_button_p))
-    return FALSE;
-
-  enum Client_TimeoutHandler::ActionModeType mode =
-    Client_TimeoutHandler::ACTION_INVALID;
-  GtkButton* button_p = GTK_BUTTON (widget_in);
-  ACE_ASSERT (button_p);
-  const gchar* label_text_p = gtk_button_get_label (button_p);
-  result =
-    ACE_OS::strcmp (label_text_p,
-                   ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_LABEL));
-  if (result == 0)
-    mode = Client_TimeoutHandler::ACTION_NORMAL;
-  else
-  {
-    result =
-      ACE_OS::strcmp (label_text_p,
-                      ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_LABEL));
-    if (result == 0)
-      mode = Client_TimeoutHandler::ACTION_ALTERNATING;
-    else
-    {
-      result =
-        ACE_OS::strcmp (label_text_p,
-                        ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_LABEL));
-      if (result == 0)
-        mode = Client_TimeoutHandler::ACTION_STRESS;
-      else
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown mode (was: \"%s\"), aborting\n"),
-                    ACE_TEXT (label_text_p)));
-        return TRUE; // propagate
-      } // end ELSE
-    } // end ELSE
-  } // end ELSE
-
-  try {
-    configuration_p->timeoutHandler->mode (mode);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_Client_TimeoutHandler::mode(), aborting\n")));
-    return TRUE; // propagate
-  }
-
-  return FALSE;
-}
-
-gint
 radiobutton_protocol_toggled_cb (GtkWidget* widget_in,
                                  gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::radiobutton_protocol_toggled_cb"));
-
-//  int result = -1;
 
   struct ClientServer_UI_CBData* data_p =
     static_cast<struct ClientServer_UI_CBData*> (userData_in);
@@ -1217,50 +717,53 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     static_cast<struct Server_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  struct Server_Configuration* configuration_p =
-    static_cast<struct Server_Configuration*> (data_p->configuration);
+  struct Server_Configuration_2* configuration_p =
+    static_cast<struct Server_Configuration_2*> (data_p->configuration);
   ACE_ASSERT (configuration_p);
-
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
-  Test_U_UDPConnectionConfiguration* connection_configuration_p = NULL;
+  // Test_U_UDPConnectionConfiguration* connection_configuration_p = NULL;
   Net_ConnectionConfigurationsIterator_t iterator_2;
   bool is_active_b =
     gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget_in));
+  bool use_reactor_b =
+    configuration_p->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR;
   if (is_active_b)
   {
     ACE_thread_t thread_id = 0;
     switch (data_p->configuration->protocolConfiguration.transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
-      { ACE_ASSERT (configuration_p->TCPListener);
-        configuration_p->TCPListener->start (NULL);
+      {
+        if (use_reactor_b)
+        { ACE_ASSERT (configuration_p->TCPStream);
+          configuration_p->TCPStream->start ();
+        } // end IF
+        else
+        { ACE_ASSERT (configuration_p->asynchTCPStream);
+          configuration_p->asynchTCPStream->start ();
+        } // end ELSE
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
-      { ACE_ASSERT (configuration_p->UDPConnector);
-        iterator_2 =
-          data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
-        ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-        connection_configuration_p =
-          static_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
-        ACE_ASSERT (connection_configuration_p);
-        ACE_HANDLE handle_h =
-          configuration_p->UDPConnector->connect (connection_configuration_p->socketConfiguration.listenAddress);
-        ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("connected to %s\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->socketConfiguration.listenAddress).c_str ())));
+      {
+        if (use_reactor_b)
+        { ACE_ASSERT (configuration_p->UDPStream);
+          configuration_p->UDPStream->start ();
+        } // end IF
+        else
+        { ACE_ASSERT (configuration_p->asynchUDPStream);
+          configuration_p->asynchUDPStream->start ();
+        } // end ELSE
         break;
       }
       case NET_TRANSPORTLAYER_SSL:
       {
 #if defined (SSL_SUPPORT)
-        ACE_ASSERT (configuration_p->SSLListener);
-        configuration_p->SSLListener->start (NULL);
+        ACE_ASSERT (configuration_p->SSLStream);
+        configuration_p->SSLStream->start ();
 #endif // SSL_SUPPORT
         break;
       }
@@ -1279,39 +782,54 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
     switch (data_p->configuration->protocolConfiguration.transportLayer)
     {
       case NET_TRANSPORTLAYER_TCP:
-      { ACE_ASSERT (configuration_p->TCPListener);
-        configuration_p->TCPListener->stop ();
+      {
+        if (use_reactor_b)
+        { ACE_ASSERT (configuration_p->TCPStream);
+          configuration_p->TCPStream->stop ();
+        } // end IF
+        else
+        { ACE_ASSERT (configuration_p->asynchTCPStream);
+          configuration_p->asynchTCPStream->stop ();
+        } // end ELSE
         break;
       }
       case NET_TRANSPORTLAYER_UDP:
       {
-        iterator_2 =
-          data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
-        ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-        connection_configuration_p =
-          static_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
-        ACE_ASSERT (connection_configuration_p);
-        typename Test_U_UDPConnectionManager_t::INTERFACE_T* connection_manager_p =
-          TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
-        ACE_ASSERT (connection_manager_p);
-        typename Test_U_UDPConnectionManager_t::ICONNECTION_T* connection_p =
-          connection_manager_p->get (connection_configuration_p->socketConfiguration.listenAddress,
-                                     false);
-        if (connection_p)
-        {
-          connection_p->abort ();
-          connection_p->decrease (); connection_p = NULL;
-          ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("disconnected from %s\n"),
-                      ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->socketConfiguration.listenAddress).c_str ())));
+        if (use_reactor_b)
+        { ACE_ASSERT (configuration_p->UDPStream);
+          configuration_p->UDPStream->stop ();
         } // end IF
+        else
+        { ACE_ASSERT (configuration_p->asynchUDPStream);
+          configuration_p->asynchUDPStream->stop ();
+        } // end ELSE
+        // iterator_2 =
+        //   data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("UDP"));
+        // ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+        // connection_configuration_p =
+        //   static_cast<Test_U_UDPConnectionConfiguration*> ((*iterator_2).second);
+        // ACE_ASSERT (connection_configuration_p);
+        // typename Test_U_UDPConnectionManager_t::INTERFACE_T* connection_manager_p =
+        //   TEST_U_UDPCONNECTIONMANAGER_SINGLETON::instance ();
+        // ACE_ASSERT (connection_manager_p);
+        // typename Test_U_UDPConnectionManager_t::ICONNECTION_T* connection_p =
+        //   connection_manager_p->get (connection_configuration_p->socketConfiguration.listenAddress,
+        //                              false);
+        // if (connection_p)
+        // {
+        //   connection_p->abort ();
+        //   connection_p->decrease (); connection_p = NULL;
+        //   ACE_DEBUG ((LM_DEBUG,
+        //               ACE_TEXT ("disconnected from %s\n"),
+        //               ACE_TEXT (Net_Common_Tools::IPAddressToString (connection_configuration_p->socketConfiguration.listenAddress).c_str ())));
+        // } // end IF
         break;
       }
       case NET_TRANSPORTLAYER_SSL:
       {
 #if defined (SSL_SUPPORT)
-        ACE_ASSERT (configuration_p->SSLListener);
-        configuration_p->SSLListener->stop ();
+        ACE_ASSERT (configuration_p->SSLStream);
+        configuration_p->SSLStream->stop ();
 #endif // SSL_SUPPORT
         break;
       }

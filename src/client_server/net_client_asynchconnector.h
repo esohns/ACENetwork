@@ -24,6 +24,7 @@
 #include "ace/Asynch_Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
@@ -176,9 +177,21 @@ class Net_Client_AsynchConnector_T<HandlerType,
  , public Net_Server_Listener_Base
  , public Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType>
+ , public Common_ITask
 {
   typedef ACE_Asynch_Connector<HandlerType> inherited;
   typedef Net_Server_Listener_Base inherited2;
+
+  // singleton needs access to the ctor/dtors
+  //friend class ACE_Singleton<Net_Client_AsynchConnector_T<HandlerType,
+  //                                                        ACE_INET_Addr,
+  //                                                        ConfigurationType,
+  //                                                        StateType,
+  //                                                        StatisticContainerType,
+  //                                                        Net_UDPSocketConfiguration_t,
+  //                                                        StreamType,
+  //                                                        UserDataType>,
+  //                           ACE_SYNCH_MUTEX>;
 
  public:
   typedef ACE_INET_Addr ADDRESS_T;
@@ -208,6 +221,15 @@ class Net_Client_AsynchConnector_T<HandlerType,
   typedef Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType> ICONNECTOR_T;
   typedef ICONNECTOR_T IASYNCH_CONNECTOR_T;
+  typedef ACE_Singleton<Net_Client_AsynchConnector_T<HandlerType,
+                                                     ACE_INET_Addr,
+                                                     ConfigurationType,
+                                                     StateType,
+                                                     StatisticContainerType,
+                                                     Net_UDPSocketConfiguration_t,
+                                                     StreamType,
+                                                     UserDataType>,
+                        ACE_SYNCH_MUTEX> SINGLETON_T;
 
   Net_Client_AsynchConnector_T (bool = true); // managed ?
   inline virtual ~Net_Client_AsynchConnector_T () {}
@@ -236,19 +258,32 @@ class Net_Client_AsynchConnector_T<HandlerType,
   inline virtual int wait (ACE_HANDLE handle_in, const ACE_Time_Value& timeout_in = ACE_Time_Value::zero) { ACE_UNUSED_ARG (timeout_in); return ((handle_in != ACE_INVALID_HANDLE) ? 0 : -1); } // block : (relative-) timeout
   inline virtual void onConnect (ACE_HANDLE, int) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
+  // implement Common_ITask
+  inline void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual bool isRunning () const { return true; }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  virtual bool start (ACE_Time_Value* = NULL); // N/A
+  virtual void stop (bool = true,   // N/A
+                     bool = false); // N/A
+  inline virtual void wait (bool = true) const {}
+  inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
  protected:
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
   ConfigurationType*  configuration_; // connection-
+  ACE_HANDLE          handle_;
   bool                managed_;
   ACE_INET_Addr       SAP_;
 
  private:
   // convenient types
   typedef Net_ITransportLayer_T<Net_UDPSocketConfiguration_t> ITRANSPORTLAYER_T;
+  typedef ACE_Singleton<CONNECTION_MANAGER_T, ACE_SYNCH_MUTEX> CONNECTION_MANAGER_SINGLETON_T;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
+  //ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 

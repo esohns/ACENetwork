@@ -302,7 +302,7 @@ if (BUILD_TEST_U)
  add_subdirectory (UPnP_client)
  add_subdirectory (WLAN_monitor)
 
- add_dependencies (test_u client server http_decoder wlan_monitor)
+ add_dependencies (test_u client server server_2 http_decoder wlan_monitor)
  add_dependencies (test_u dhcp_client file_server pcp_client upnp_client)
  if (GEOIP2_SUPPORT)
   add_dependencies (test_u geoip2_client)

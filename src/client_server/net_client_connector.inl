@@ -304,6 +304,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        UserDataType>::Net_Client_Connector_T (bool managed_in)
  : inherited2 ()
  , configuration_ (NULL)
+ , handle_ (ACE_INVALID_HANDLE)
  , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
@@ -344,6 +345,10 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                   ACE_TEXT ("exception caught from subscriber, continuing\n")));
     }
   } // end FOR
+
+  // ACE_DEBUG ((LM_DEBUG,
+  //             ACE_TEXT ("%d: discconnected\n"),
+  //             handle_in));
 }
 
 template <ACE_SYNCH_DECL,
@@ -411,6 +416,99 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   } // end IF
 
   return handler_p->get_handle ();
+}
+
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
+          typename ConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType>
+bool
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
+                       ConnectorType,
+                       ACE_INET_Addr,
+                       ConfigurationType,
+                       StateType,
+                       StatisticContainerType,
+                       Net_UDPSocketConfiguration_t,
+                       StreamType,
+                       UserDataType>::start (ACE_Time_Value*)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::start"));
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (handle_ == ACE_INVALID_HANDLE);
+
+  handle_ = connect (configuration_->socketConfiguration.listenAddress);
+  if (likely (handle_ != ACE_INVALID_HANDLE))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%@: connected to %s\n"),
+                handle_,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.listenAddress).c_str ())));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: connected to %s\n"),
+                handle_,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketConfiguration.listenAddress).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+
+  return handle_ != ACE_INVALID_HANDLE;
+}
+
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
+          typename ConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StreamType,
+          typename UserDataType>
+void
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
+                       ConnectorType,
+                       ACE_INET_Addr,
+                       ConfigurationType,
+                       StateType,
+                       StatisticContainerType,
+                       Net_UDPSocketConfiguration_t,
+                       StreamType,
+                       UserDataType>::stop (bool,
+                                            bool)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::stop"));
+
+  if (likely (handle_ != ACE_INVALID_HANDLE))
+  {
+    typename CONNECTION_MANAGER_T::INTERFACE_T* connection_manager_p =
+      CONNECTION_MANAGER_SINGLETON_T::instance ();
+    ACE_ASSERT (connection_manager_p);
+    typename CONNECTION_MANAGER_T::ICONNECTION_T* connection_p =
+      // connection_manager_p->get (configuration_->socketConfiguration.listenAddress,
+      //                            false);
+    connection_manager_p->get (handle_);
+    if (likely (connection_p))
+    {
+      connection_p->abort ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%@: discconnected\n"),
+                  handle_));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: discconnected\n"),
+                  handle_));
+#endif // ACE_WIN32 || ACE_WIN64
+      connection_p->decrease (); connection_p = NULL;
+    } // end IF
+    handle_ = ACE_INVALID_HANDLE;
+  } // end IF
 }
 
 template <ACE_SYNCH_DECL,

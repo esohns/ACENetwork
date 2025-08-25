@@ -1236,7 +1236,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   stream_configuration_4.initialize (module_configuration,
                                      modulehandler_configuration_3,
                                      stream_configuration_2);
-  CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING),
+  CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING),
                                                             stream_configuration_4));
 //  stream_iterator =
 //    CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));

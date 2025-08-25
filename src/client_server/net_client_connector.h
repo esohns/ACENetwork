@@ -24,6 +24,7 @@
 #include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Time_Value.h"
 
@@ -162,8 +163,22 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
  : public Net_Server_Listener_Base
  , public Net_IConnector_T<ACE_INET_Addr,
                            ConfigurationType>
+ , public Common_ITask
 {
   typedef Net_Server_Listener_Base inherited2;
+
+  // singleton needs access to the ctor/dtors
+  //friend class ACE_Singleton<Net_Client_Connector_T<ACE_SYNCH_USE,
+  //                                                  HandlerType,
+  //                                                  ConnectorType,
+  //                                                  ACE_INET_Addr,
+  //                                                  ConfigurationType,
+  //                                                  StateType,
+  //                                                  StatisticContainerType,
+  //                                                  Net_UDPSocketConfiguration_t,
+  //                                                  StreamType,
+  //                                                  UserDataType>,
+  //                           ACE_SYNCH_MUTEX>;
 
  public:
   typedef ACE_INET_Addr ADDRESS_T;
@@ -178,7 +193,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                    UserDataType> CONNECTION_MANAGER_T;
 
   typedef Net_IConnection_T<ACE_INET_Addr,
-                            //ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
   typedef HandlerType CONNECTION_T;
@@ -194,6 +208,17 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType> IASYNCH_CONNECTOR_T;
+  typedef ACE_Singleton<Net_Client_Connector_T<ACE_SYNCH_USE,
+                                               HandlerType,
+                                               ConnectorType,
+                                               ACE_INET_Addr,
+                                               ConfigurationType,
+                                               StateType,
+                                               StatisticContainerType,
+                                               Net_UDPSocketConfiguration_t,
+                                               StreamType,
+                                               UserDataType>,
+                        ACE_SYNCH_MUTEX> SINGLETON_T;
 
   Net_Client_Connector_T (bool = true); // managed ?
   inline virtual ~Net_Client_Connector_T () {}
@@ -207,6 +232,17 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; }
   // specialize (part of) Net_IConnector_T
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
+
+  // implement Common_ITask
+  inline void idle () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual bool isRunning () const { return true; }
+  inline virtual bool isShuttingDown () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  virtual bool start (ACE_Time_Value* = NULL); // N/A
+  virtual void stop (bool = true,   // N/A
+                     bool = false); // N/A
+  inline virtual void wait (bool = true) const {}
+  inline virtual void pause () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void resume () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  protected:
   virtual void initialize_svc_handler (ACE_HANDLE,
@@ -245,8 +281,9 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                  Net_UDPSocketConfiguration_t,
                                  StreamType,
                                  UserDataType> OWN_TYPE_T;
+  typedef ACE_Singleton<CONNECTION_MANAGER_T, ACE_SYNCH_MUTEX> CONNECTION_MANAGER_SINGLETON_T;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
+  //ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
@@ -254,6 +291,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef Net_ITransportLayer_T<Net_UDPSocketConfiguration_t> ITRANSPORTLAYER_T;
 
   ConfigurationType* configuration_; // connection-
+  ACE_HANDLE         handle_;
   bool               managed_;
 };
 

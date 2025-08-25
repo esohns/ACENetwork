@@ -128,8 +128,8 @@ struct Server_SignalHandlerConfiguration_2
 #if defined (SSL_SUPPORT)
    , SSLStream (NULL)
 #endif // SSL_SUPPORT
-   //, asynchUDPStream (NULL)
-   //, UDPStream (NULL)
+   , asynchUDPStream (NULL)
+   , UDPStream (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
   {}
@@ -140,8 +140,8 @@ struct Server_SignalHandlerConfiguration_2
   Test_U_Server_SSL_Stream_2*        SSLStream;
 #endif // SSL_SUPPORT
 
-  //Test_U_Server_Asynch_UDP_Stream_2* asynchUDPStream;
-  //Test_U_Server_UDP_Stream_2*        UDPStream;
+  Test_U_Server_Asynch_UDP_Stream_2* asynchUDPStream;
+  Test_U_Server_UDP_Stream_2*        UDPStream;
 
   Net_IStreamStatisticHandler_t*     statisticReportingHandler;
   long                               statisticReportingTimerId;
@@ -157,8 +157,8 @@ struct Server_Configuration_2
 #if defined (SSL_SUPPORT)
    , SSLStream (NULL)
 #endif // SSL_SUPPORT
-   //, asynchUDPStream (NULL)
-   //, UDPStream (NULL)
+   , asynchUDPStream (NULL)
+   , UDPStream (NULL)
    , signalHandlerConfiguration ()
   {}
 
@@ -168,8 +168,8 @@ struct Server_Configuration_2
   Test_U_Server_SSL_Stream_2*             SSLStream;
 #endif // SSL_SUPPORT
 
-  //Test_U_Server_Asynch_UDP_Stream_2*      asynchUDPStream;
-  //Test_U_Server_UDP_Stream_2*             UDPStream;
+  Test_U_Server_Asynch_UDP_Stream_2*      asynchUDPStream;
+  Test_U_Server_UDP_Stream_2*             UDPStream;
 
   struct Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };

@@ -137,7 +137,7 @@ do_printUsage (const std::string& programName_in)
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_2_UI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g[[STRING]] : UI definition file [\"")
             << UI_file_path
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
@@ -248,7 +248,7 @@ do_processArguments (const int& argc_in,
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_2_UI_FILE);
   pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS / 1000,
                         (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS % 1000) * 1000);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
@@ -539,8 +539,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (SSL_SUPPORT)
   Test_U_Server_SSL_Stream_2 ssl_stream;
 #endif // SSL_SUPPORT
-  //Test_U_Server_Asynch_UDP_Stream_2 asynch_udp_stream;
-  //Test_U_Server_UDP_Stream_2 udp_stream;
+  Test_U_Server_Asynch_UDP_Stream_2 asynch_udp_stream;
+  Test_U_Server_UDP_Stream_2 udp_stream;
 
   Test_U_EventHandler_2 ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
@@ -567,9 +567,16 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration_in.protocolConfiguration.transportLayer = protocol_in;
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
-  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
-  struct Test_U_StreamConfiguration stream_configuration;
-  struct Test_U_StreamConfiguration stream_configuration_2;
+  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration; // connection-
+  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration_2; // server tcp|ssl;
+  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration_3; // server udp;
+  struct Test_U_StreamConfiguration stream_configuration; // connection io-
+  struct Test_U_StreamConfiguration stream_configuration_2; // server tcp|ssl
+  struct Test_U_StreamConfiguration stream_configuration_3; // server udp
+
+  Test_U_TCPConnectionConfiguration connection_configuration;
+  Test_U_UDPConnectionConfiguration connection_configuration_2;
+
   stream_configuration.allocatorConfiguration =
       &configuration_in.allocatorConfiguration;
   stream_configuration.cloneModule = !(UIDefinitionFile_in.empty ());
@@ -599,15 +606,27 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                    modulehandler_configuration,
                                                    stream_configuration);
 
+  modulehandler_configuration_2 = modulehandler_configuration;
+  modulehandler_configuration_2.concurrency =
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
+  modulehandler_configuration_2.listenerConfiguration =
+    &connection_configuration;
   stream_configuration_2 = stream_configuration;
   stream_configuration_2.module = &event_handler_2;
   configuration_in.streamConfiguration_2.initialize (module_configuration,
-                                                     modulehandler_configuration,
+                                                     modulehandler_configuration_2,
                                                      stream_configuration_2);
 
+  modulehandler_configuration_3 = modulehandler_configuration_2;
+  modulehandler_configuration_3.listenerConfiguration =
+      &connection_configuration_2;
+  stream_configuration_3 = stream_configuration;
+  stream_configuration_3.module = &event_handler_2;
+  configuration_in.streamConfiguration_3.initialize (module_configuration,
+                                                     modulehandler_configuration_3,
+                                                     stream_configuration_3);
+
   // ********************** connection configuration data **********************
-  Test_U_TCPConnectionConfiguration connection_configuration;
-  Test_U_UDPConnectionConfiguration connection_configuration_2;
   Net_ConnectionConfigurationsIterator_t iterator, iterator_2;
   Test_U_TCPConnectionConfiguration* connection_configuration_p = NULL;
   Test_U_UDPConnectionConfiguration* connection_configuration_p_2 = NULL;
@@ -725,8 +744,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (SSL_SUPPORT)
   configuration_in.SSLStream = &ssl_stream;
 #endif // SSL_SUPPORT
-  //configuration_in.asynchUDPStream = &asynch_udp_stream;
-  //configuration_in.UDPStream = &udp_stream;
+  configuration_in.asynchUDPStream = &asynch_udp_stream;
+  configuration_in.UDPStream = &udp_stream;
 
   struct Server_SignalHandlerConfiguration_2 signal_handler_configuration;
   signal_handler_configuration.asynchTCPStream = &asynch_tcp_stream;
@@ -734,8 +753,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (SSL_SUPPORT)
   signal_handler_configuration.SSLStream = &ssl_stream;
 #endif // SSL_SUPPORT
-  //signal_handler_configuration.asynchUDPStream = &asynch_udp_stream;
-  //signal_handler_configuration.UDPStream = &udp_stream;
+  signal_handler_configuration.asynchUDPStream = &asynch_udp_stream;
+  signal_handler_configuration.UDPStream = &udp_stream;
 
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
@@ -907,72 +926,76 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                                              1);
   } // end ELSE
 
-  Server_Asynch_TCP_Listener_t* asynch_tcp_listener_p =
-    SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
-  Server_TCP_Listener_t* tcp_listener_p =
-    SERVER_TCP_LISTENER_SINGLETON::instance ();
+//   Server_Asynch_TCP_Listener_t* asynch_tcp_listener_p =
+//     SERVER_ASYNCH_TCP_LISTENER_SINGLETON::instance ();
+//   Server_TCP_Listener_t* tcp_listener_p =
+//     SERVER_TCP_LISTENER_SINGLETON::instance ();
+// #if defined (SSL_SUPPORT)
+//   Server_SSL_Listener_t* ssl_listener_p =
+//     SERVER_SSL_LISTENER_SINGLETON::instance ();
+// #endif // SSL_SUPPORT
+//   ACE_ASSERT (asynch_tcp_listener_p);
+//   if (!asynch_tcp_listener_p->initialize (*connection_configuration_p))
+//   {
+//     ACE_DEBUG ((LM_ERROR,
+//                 ACE_TEXT ("failed to initialize asynchronous TCP listener, returning\n")));
+
+//     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+//                                                true); // wait ?
+
+//     if (!UIDefinitionFile_in.empty ())
+// #if defined (GTK_USE)
+//       gtk_manager_p->stop (true, true);
+// #else
+//       ;
+// #endif // GTK_USE
+//     Common_Timer_Tools::finalize ();
+//     return;
+//   } // end IF
+//   ACE_ASSERT (tcp_listener_p);
+//   if (!tcp_listener_p->initialize (*connection_configuration_p))
+//   {
+//     ACE_DEBUG ((LM_ERROR,
+//                 ACE_TEXT ("failed to initialize TCP listener, returning\n")));
+
+//     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+//                                                true); // wait ?
+
+//     if (!UIDefinitionFile_in.empty ())
+// #if defined (GTK_USE)
+//       gtk_manager_p->stop (true, true);
+// #else
+//       ;
+// #endif // GTK_USE
+//     Common_Timer_Tools::finalize ();
+//     return;
+//   } // end IF
+// #if defined (SSL_SUPPORT)
+//   ACE_ASSERT (ssl_listener_p);
+//   if (!ssl_listener_p->initialize (*connection_configuration_p))
+//   {
+//     ACE_DEBUG ((LM_ERROR,
+//                 ACE_TEXT ("failed to initialize SSL listener, returning\n")));
+
+//     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+//                                                true); // wait ?
+//     if (!UIDefinitionFile_in.empty ())
+// #if defined (GTK_USE)
+//       gtk_manager_p->stop (true, true);
+// #else
+//       ;
+// #endif // GTK_USE
+//     Common_Timer_Tools::finalize ();
+//     return;
+//   } // end IF
+// #endif // SSL_SUPPORT
+
 #if defined (SSL_SUPPORT)
-  Server_SSL_Listener_t* ssl_listener_p =
-    SERVER_SSL_LISTENER_SINGLETON::instance ();
-#endif // SSL_SUPPORT
-  ACE_ASSERT (asynch_tcp_listener_p);
-  if (!asynch_tcp_listener_p->initialize (*connection_configuration_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize asynchronous TCP listener, returning\n")));
-
-    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
-
-    if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-      gtk_manager_p->stop (true, true);
-#else
-      ;
-#endif // GTK_USE
-    Common_Timer_Tools::finalize ();
-    return;
-  } // end IF
-  ACE_ASSERT (tcp_listener_p);
-  if (!tcp_listener_p->initialize (*connection_configuration_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize TCP listener, returning\n")));
-
-    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
-
-    if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-      gtk_manager_p->stop (true, true);
-#else
-      ;
-#endif // GTK_USE
-    Common_Timer_Tools::finalize ();
-    return;
-  } // end IF
-#if defined (SSL_SUPPORT)
-  ACE_ASSERT (ssl_listener_p);
-  if (!ssl_listener_p->initialize (*connection_configuration_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize SSL listener, returning\n")));
-
-    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
-    if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-      gtk_manager_p->stop (true, true);
-#else
-      ;
-#endif // GTK_USE
-    Common_Timer_Tools::finalize ();
-    return;
-  } // end IF
-
+  std::string module_name =
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                      ACE_TEXT_ALWAYS_CHAR (""),
+                                                      module_name,
                                                       false); // data
   filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
   filename_string +=
@@ -1002,40 +1025,40 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-  Server_UDP_AsynchConnector_t udp_asynch_connector (true);
-  if (!udp_asynch_connector.initialize (*connection_configuration_p_2))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize asynchronous UDP connector, returning\n")));
+//   Server_UDP_AsynchConnector_t udp_asynch_connector (true);
+//   if (!udp_asynch_connector.initialize (*connection_configuration_p_2))
+//   {
+//     ACE_DEBUG ((LM_ERROR,
+//                 ACE_TEXT ("failed to initialize asynchronous UDP connector, returning\n")));
 
-    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
-    if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-      gtk_manager_p->stop (true, true);
-#else
-      ;
-#endif // GTK_USE
-    Common_Timer_Tools::finalize ();
-    return;
-  } // end IF
-  Server_UDP_Connector_t udp_connector (true);
-  if (!udp_connector.initialize (*connection_configuration_p_2))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize UDP connector, returning\n")));
+//     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+//                                                true); // wait ?
+//     if (!UIDefinitionFile_in.empty ())
+// #if defined (GTK_USE)
+//       gtk_manager_p->stop (true, true);
+// #else
+//       ;
+// #endif // GTK_USE
+//     Common_Timer_Tools::finalize ();
+//     return;
+//   } // end IF
+//   Server_UDP_Connector_t udp_connector (true);
+//   if (!udp_connector.initialize (*connection_configuration_p_2))
+//   {
+//     ACE_DEBUG ((LM_ERROR,
+//                 ACE_TEXT ("failed to initialize UDP connector, returning\n")));
 
-    Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
-    if (!UIDefinitionFile_in.empty ())
-#if defined (GTK_USE)
-      gtk_manager_p->stop (true, true);
-#else
-      ;
-#endif // GTK_USE
-    Common_Timer_Tools::finalize ();
-    return;
-  } // end IF
+//     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+//                                                true); // wait ?
+//     if (!UIDefinitionFile_in.empty ())
+// #if defined (GTK_USE)
+//       gtk_manager_p->stop (true, true);
+// #else
+//       ;
+// #endif // GTK_USE
+//     Common_Timer_Tools::finalize ();
+//     return;
+//   } // end IF
 
   // start stream(s) processing
   asynch_tcp_stream.initialize (configuration_in.streamConfiguration_2);
@@ -1043,8 +1066,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #if defined (SSL_SUPPORT)
   ssl_stream.initialize (configuration_in.streamConfiguration_2);
 #endif // SSL_SUPPORT
-  //asynch_udp_stream.initialize (configuration_in.streamConfiguration_2);
-  //udp_stream.initialize (configuration_in.streamConfiguration_2);
+  asynch_udp_stream.initialize (configuration_in.streamConfiguration_3);
+  udp_stream.initialize (configuration_in.streamConfiguration_3);
   if (useReactor_in)
   {
     switch (protocol_in)
@@ -1053,12 +1076,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
         tcp_stream.start ();
         break;
       case NET_TRANSPORTLAYER_UDP:
-        //udp_stream.start ();
+        udp_stream.start ();
         break;
       case NET_TRANSPORTLAYER_SSL:
 #if defined (SSL_SUPPORT)
         ssl_stream.start ();
 #endif // SSL_SUPPORT
+        break;
+      default:
         break;
     } // end SWITCH
   } // end IF
@@ -1070,12 +1095,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
         asynch_tcp_stream.start ();
         break;
       case NET_TRANSPORTLAYER_UDP:
-        //asynch_udp_stream.start ();
+        asynch_udp_stream.start ();
         break;
       case NET_TRANSPORTLAYER_SSL:
 #if defined (SSL_SUPPORT)
         //asynch_ssl_stream.start ();
 #endif // SSL_SUPPORT
+        break;
+      default:
         break;
     } // end SWITCH
   } // end ELSE
@@ -1221,7 +1248,7 @@ ACE_TMAIN (int argc_in,
   path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string UI_file_path = path;
   UI_file_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
+  UI_file_path += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_2_UI_FILE);
   ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS / 1000,
                                 (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL_MS % 1000) * 1000);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
@@ -1330,8 +1357,8 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-        Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                     ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX));
+      Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                   Common_File_Tools::basename (ACE_TEXT_ALWAYS_CHAR (argv_in[0]), true));
   if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]),    // program name
                                      log_file_name,                 // log file name
                                      true,                          // log to syslog ?

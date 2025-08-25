@@ -62,7 +62,7 @@ Test_U_EventHandler_2::start (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
 
 #if defined (GTK_USE)
-  guint event_source_id = g_idle_add (idle_start_session_cb,
+  guint event_source_id = g_idle_add (idle_start_session_2_cb,
                                       CBData_);
   if (!event_source_id)
   {
@@ -72,7 +72,8 @@ Test_U_EventHandler_2::start (Stream_SessionId_t sessionId_in,
   } // end IF
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.eventStack.push (COMMON_UI_EVENT_CONNECT);
+    //state_r.eventStack.push (COMMON_UI_EVENT_CONNECT);
+    state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 #endif // GTK_USE
 }
@@ -111,7 +112,7 @@ Test_U_EventHandler_2::end (Stream_SessionId_t sessionId_in)
   //sessionData_ = NULL;
 
 #if defined (GTK_USE)
-  guint event_source_id = g_idle_add (idle_end_session_cb,
+  guint event_source_id = g_idle_add (idle_end_session_2_cb,
                                       CBData_);
   if (!event_source_id)
   {
@@ -123,7 +124,7 @@ Test_U_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 
 #if defined (GTK_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    //state_r.eventSourceIds.insert (event_source_id);
+    state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 #endif // GTK_USE
 }
@@ -146,7 +147,7 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 
 #if defined (GTK_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+    //state_r.eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
 #endif // GTK_USE
 }
@@ -175,15 +176,15 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_CONNECT:
-      event_e = COMMON_UI_EVENT_CONNECT;
+      //event_e = COMMON_UI_EVENT_CONNECT;
       break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
-      event_e = COMMON_UI_EVENT_DISCONNECT;
+      //event_e = COMMON_UI_EVENT_DISCONNECT;
       break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
-      event_e = COMMON_UI_EVENT_STATISTIC;
+      //event_e = COMMON_UI_EVENT_STATISTIC;
 #if defined (GTK_USE)
-      CBData_->progressData.statistic = session_data_r.statistic;
+      //CBData_->progressData.statistic = session_data_r.statistic;
 #endif // GTK_USE
       break;
     default:
@@ -197,7 +198,7 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 
 #if defined (GTK_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.eventStack.push (event_e);
+    //state_r.eventStack.push (event_e);
   } // end lock scope
 #endif // GTK_USE
 }
