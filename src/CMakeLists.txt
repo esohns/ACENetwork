@@ -9,6 +9,9 @@ include (SSLConfig)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/dbus/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/dbus/scripts")
 include (dbus)
 
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/wlan/scripts")
+include (PreMonitorImplementation)
+
 include (ACE)
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
