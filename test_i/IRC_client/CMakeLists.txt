@@ -426,12 +426,18 @@ elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE_GUI}.exe" COMMAND_GUI)
  string (REPLACE "\\" "\\\\" COMMAND_GUI ${COMMAND_GUI})
  file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIB_PATH)
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+ endif (GTK_SUPPORT)
+ if (WXWIDGETS_SUPPORT)
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
+ endif (WXWIDGETS_SUPPORT)
  file (TO_CMAKE_PATH ${ACE_LIB_DIR} ACE_LIB_PATH)
- file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}
                            ${ACE_LIB_PATH}
-                           ${GTK_PATH})
+                           ${GTK_PATH}
+                           ${WXWIDGETS_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
                          ARGS "-a irc.eu.dal.net -l -n -N testeee -t"
