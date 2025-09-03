@@ -69,6 +69,7 @@
 #endif // GTK_SUPPORT
 
 #include "test_u_connection_common.h"
+#include "test_u_connection_stream.h"
 #include "test_u_defines.h"
 
 struct DHCPClient_MessageData
@@ -86,47 +87,6 @@ struct DHCPClient_MessageData
 };
 typedef Stream_DataBase_T<struct DHCPClient_MessageData> DHCPClient_MessageData_t;
 
-struct DHCP_ConnectionState;
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          //DHCPClient_ConnectionConfiguration,
-                          struct DHCP_ConnectionState,
-                          DHCP_Statistic_t> DHCPClient_IConnection_t;
-struct DHCPClient_SessionData
- : Test_U_StreamSessionData
-{
-  DHCPClient_SessionData ()
-   : Test_U_StreamSessionData ()
-   , connection (NULL) // inbound
-   , targetFileName ()
-   , serverAddress (static_cast<u_short> (0),
-                    static_cast<ACE_UINT32> (INADDR_ANY))
-   , timeStamp (ACE_Time_Value::zero)
-   , xid (0)
-   //, userData (NULL)
-  {}
-  struct DHCPClient_SessionData& operator= (const struct DHCPClient_SessionData& rhs_in)
-  {
-    Test_U_StreamSessionData::operator= (rhs_in);
-
-    connection = (connection ? connection : rhs_in.connection);
-    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
-                                              : targetFileName);
-
-    return *this;
-  }
-
-//  DHCPClient_IConnection_t* broadcastConnection; // DISCOVER/REQUEST/INFORM
-  DHCPClient_IConnection_t* connection;          // RELEASE
-  std::string               targetFileName;      // file writer module
-
-  ACE_INET_Addr             serverAddress;
-  ACE_Time_Value            timeStamp;           // lease timeout
-  ACE_UINT32                xid;                 // session id
-
-  //struct Stream_UserData*   userData;
-};
-typedef Stream_SessionData_T<struct DHCPClient_SessionData> DHCPClient_SessionData_t;
-
 class Test_U_Message;
 class Test_U_SessionMessage;
 typedef Stream_ISessionDataNotify_T<struct DHCPClient_SessionData,
@@ -135,16 +95,6 @@ typedef Stream_ISessionDataNotify_T<struct DHCPClient_SessionData,
                                     Test_U_SessionMessage> DHCPClient_ISessionNotify_t;
 typedef std::list<DHCPClient_ISessionNotify_t*> DHCPClient_Subscribers_t;
 typedef DHCPClient_Subscribers_t::const_iterator DHCPClient_SubscribersIterator_t;
-
-//typedef Net_IConnectionManager_T<ACE_INET_Addr,
-//                                 DHCPClient_ConnectionConfiguration_t,
-//                                 struct DHCP_ConnectionState,
-//                                 DHCP_Statistic_t,
-//                                 Test_U_UserData> DHCPClient_IConnectionManager_t;
-
-//typedef Stream_ControlMessage_T<enum Stream_ControlType,
-//                                enum Stream_ControlMessageType,
-//                                struct DHCP_AllocatorConfiguration> DHCPClient_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           struct DHCP_AllocatorConfiguration,
@@ -193,20 +143,6 @@ struct DHCPClient_StreamConfiguration
   //struct Net_UserData* userData;
 };
 
-struct DHCPClient_StreamState
- : Test_U_StreamState
-{
-  DHCPClient_StreamState ()
-   : Test_U_StreamState ()
-   , sessionData (NULL)
-   , userData (NULL)
-  {}
-
-  struct DHCPClient_SessionData* sessionData;
-
-  struct Stream_UserData*        userData;
-};
-
 struct DHCPClient_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
@@ -243,6 +179,10 @@ struct DHCPClient_Configuration
    , parserConfiguration ()
    , streamConfiguration ()
    , protocolConfiguration ()
+   , connector (true)
+   , asynchConnector (true)
+   , connectorBcast (true)
+   , asynchConnectorBcast (true)
    , broadcastHandle (ACE_INVALID_HANDLE)
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , handle (ACE_INVALID_HANDLE)
@@ -267,7 +207,10 @@ struct DHCPClient_Configuration
   // *************************** protocol data *********************************
   struct DHCP_ProtocolConfiguration            protocolConfiguration;
   // *************************** listener data *********************************
-//  struct DHCPClient_ListenerConfiguration        listenerConfiguration;
+  DHCPClient_InboundConnector_t                connector;
+  DHCPClient_InboundAsynchConnector_t          asynchConnector;
+  DHCPClient_InboundConnectorBcast_t           connectorBcast;
+  DHCPClient_InboundAsynchConnectorBcast_t     asynchConnectorBcast;
 
   ACE_HANDLE                                   broadcastHandle; // listen handle (broadcast)
   enum Common_EventDispatchType                dispatch;

@@ -35,14 +35,29 @@
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 
-#include "test_u_dhcp_client_common.h"
+//#include "test_u_dhcp_client_common.h"
 #include "test_u_message.h"
+#include "test_u_session_message.h"
 
 // forward declarations
 class Stream_IAllocator;
-class Test_U_SessionMessage;
+//class Test_U_SessionMessage;
 
 extern const char stream_name_string_[];
+
+struct DHCPClient_StreamState
+ : Test_U_StreamState
+{
+  DHCPClient_StreamState ()
+   : Test_U_StreamState ()
+   , sessionData (NULL)
+   , userData (NULL)
+  {}
+
+  struct DHCPClient_SessionData* sessionData;
+
+  struct Stream_UserData*        userData;
+};
 
 class Test_U_InboundConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,

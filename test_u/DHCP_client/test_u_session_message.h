@@ -38,6 +38,47 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
+struct DHCP_ConnectionState;
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          //DHCPClient_ConnectionConfiguration,
+                          struct DHCP_ConnectionState,
+                          DHCP_Statistic_t> DHCPClient_IConnection_t;
+struct DHCPClient_SessionData
+ : Test_U_StreamSessionData
+{
+  DHCPClient_SessionData ()
+   : Test_U_StreamSessionData ()
+   , connection (NULL) // inbound
+   , targetFileName ()
+   , serverAddress (static_cast<u_short> (0),
+                    static_cast<ACE_UINT32> (INADDR_ANY))
+   , timeStamp (ACE_Time_Value::zero)
+   , xid (0)
+   //, userData (NULL)
+  {}
+  struct DHCPClient_SessionData& operator= (const struct DHCPClient_SessionData& rhs_in)
+  {
+    Test_U_StreamSessionData::operator= (rhs_in);
+
+    connection = (connection ? connection : rhs_in.connection);
+    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
+                                              : targetFileName);
+
+    return *this;
+  }
+
+//  DHCPClient_IConnection_t* broadcastConnection; // DISCOVER/REQUEST/INFORM
+  DHCPClient_IConnection_t* connection;          // RELEASE
+  std::string               targetFileName;      // file writer module
+
+  ACE_INET_Addr             serverAddress;
+  ACE_Time_Value            timeStamp;           // lease timeout
+  ACE_UINT32                xid;                 // session id
+
+  //struct Stream_UserData*   userData;
+};
+typedef Stream_SessionData_T<struct DHCPClient_SessionData> DHCPClient_SessionData_t;
+
 class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<//struct DHCP_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,

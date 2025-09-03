@@ -1927,10 +1927,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     DHCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
-    DHCPClient_InboundConnector_t connector (true);
-    DHCPClient_InboundAsynchConnector_t asynch_connector (true);
-    DHCPClient_InboundConnectorBcast_t connector_bcast (true);
-    DHCPClient_InboundAsynchConnectorBcast_t asynch_connector_bcast (true);
     Net_ConnectionConfigurationsIterator_t iterator_3 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
@@ -1941,7 +1937,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->handle =
-          Net_Client_Common_Tools::connect (connector,
+          Net_Client_Common_Tools::connect (data_p->configuration->connector,
                                             *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                             user_data_s,
                                             static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1949,7 +1945,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                             false);
     else
       data_p->configuration->handle =
-          Net_Client_Common_Tools::connect (asynch_connector,
+          Net_Client_Common_Tools::connect (data_p->configuration->asynchConnector,
                                             *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                             user_data_s,
                                             static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1977,7 +1973,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->broadcastHandle =
-          Net_Client_Common_Tools::connect (connector_bcast,
+          Net_Client_Common_Tools::connect (data_p->configuration->connectorBcast,
                                             *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second),
                                             user_data_s,
                                             static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second)->socketConfiguration.listenAddress,
@@ -1985,7 +1981,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                             false);
     else
       data_p->configuration->broadcastHandle =
-          Net_Client_Common_Tools::connect (asynch_connector_bcast,
+          Net_Client_Common_Tools::connect (data_p->configuration->asynchConnectorBcast,
                                             *static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second),
                                             user_data_s,
                                             static_cast<DHCPClient_ConnectionConfiguration*> ((*iterator_4).second)->socketConfiguration.listenAddress,
