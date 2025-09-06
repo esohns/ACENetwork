@@ -53,9 +53,11 @@ struct FileServer_SessionData
   FileServer_SessionData ()
    : Test_U_StreamSessionData ()
    , connection (NULL)
+   , sourceFileName ()
   {}
 
   FileServer_TCPIConnection_t* connection;
+  std::string                  sourceFileName;
 };
 typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 
