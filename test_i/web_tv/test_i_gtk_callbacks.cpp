@@ -2235,7 +2235,7 @@ continue_3:
       return;
     } // end IF
     data_p->AVStream->start ();
-    data_p->streamSessionId = data_p->AVStream->getR_2 ().getR ().sessionId;
+    data_p->streamSessionId = data_p->AVStream->getR_2 ().sessionId;
 
     // step3: connect to peers
     if ((data_p->currentAudioStream == -1) ||

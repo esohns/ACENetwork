@@ -27,8 +27,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
@@ -37,8 +36,7 @@ POP_Stream_T<StreamStateType,
               StatisticContainerType,
               StatisticHandlerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType>::POP_Stream_T ()
@@ -63,8 +61,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
@@ -74,8 +71,7 @@ POP_Stream_T<StreamStateType,
               StatisticContainerType,
               StatisticHandlerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType>::load (Stream_ILayout* layout_inout,
@@ -98,8 +94,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
@@ -109,8 +104,7 @@ POP_Stream_T<StreamStateType,
               StatisticContainerType,
               StatisticHandlerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
@@ -121,7 +115,12 @@ POP_Stream_T<StreamStateType,
   ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!inherited::isRunning ());
   ACE_ASSERT (configuration_in.configuration_);
-  //ACE_ASSERT (configuration_in.configuration_->messageAllocator);
+
+  SessionManagerType* session_manager_p =
+    SessionManagerType::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   if (!inherited::initialize (configuration_in))
@@ -130,14 +129,13 @@ POP_Stream_T<StreamStateType,
                 ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
     return false;
   } // end IF
-  ACE_ASSERT (inherited::sessionData_);
 
   // things to be done here:
   // - create modules (done for the ones "owned" by the stream itself)
   // - initialize modules
   // - push them onto the stream (tail-first) !
-  SessionDataType& session_data_r =
-      const_cast<SessionDataType&> (inherited::sessionData_->getR ());
+  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR ());
   //session_data_r.sessionId = configuration_in.configuration_->sessionId;
 
 //  int result = -1;
@@ -158,21 +156,6 @@ POP_Stream_T<StreamStateType,
                 ACE_TEXT ("dynamic_cast<POP_Module_Parser_T*> failed, aborting\n")));
     return false;
   } // end IF
-  parser_impl_p->setP (&(inherited::state_));
-
-  // enqueue the module...
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  marshal_.arg (inherited::sessionData_);
-  //result = inherited::push (&marshal_);
-  //if (result == -1)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_Stream::push() module: \"%s\", aborting\n"),
-  //              marshal_.name ()));
-  //  return false;
-  //} // end IF
 
   // set (session) message allocator
   // *TODO*: clean this up ! --> sanity check
@@ -189,8 +172,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
@@ -200,8 +182,7 @@ POP_Stream_T<StreamStateType,
               StatisticContainerType,
               StatisticHandlerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType>::collect (StatisticContainerType& data_out)
@@ -226,8 +207,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
@@ -237,8 +217,7 @@ POP_Stream_T<StreamStateType,
               StatisticContainerType,
               StatisticHandlerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType>::report () const

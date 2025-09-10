@@ -3213,8 +3213,6 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   const typename ISTREAM_CONNECTION_T::STREAM_T* stream_p =
     NULL;
-  const typename ISTREAM_CONNECTION_T::STREAM_T::SESSION_DATA_CONTAINER_T* session_data_container_p =
-    NULL;
   const typename ISTREAM_CONNECTION_T::STREAM_T::SESSION_DATA_T* session_data_p =
     NULL;
   struct BitTorrent_PeerMessageData* data_p = NULL;
@@ -3289,8 +3287,7 @@ continue_:
 
 continue_2:
   stream_p = &connection_out->stream ();
-  session_data_container_p = &stream_p->getR_2 ();
-  session_data_p = &session_data_container_p->getR ();
+  session_data_p = &stream_p->getR_2 ();
   ACE_ASSERT (session_data_p->sessionId);
 
   // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)

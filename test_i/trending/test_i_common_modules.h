@@ -28,6 +28,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+// #include "stream_session_manager.h"
 #include "stream_streammodule_base.h"
 
 #include "stream_dec_zip_decoder.h"
@@ -50,6 +51,13 @@
 #include "test_i_trending_common.h"
 #include "test_i_trending_connection_common.h"
 
+// typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+//                                  enum Stream_SessionMessageType,
+//                                  struct Stream_SessionManager_Configuration,
+//                                  struct Test_I_Trending_SessionData,
+//                                  struct Stream_Statistic,
+//                                  struct Stream_UserData> Test_I_SessionManager_t;
+
 // declare module(s)
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      Stream_ControlMessage_t,
@@ -59,9 +67,8 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct Test_I_Trending_StreamState,
-                                     struct Test_I_Trending_SessionData,
-                                     Test_I_Trending_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_I_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      Test_I_Trending_InetConnectionManager_t,
@@ -74,9 +81,8 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct Test_I_Trending_StreamState,
-                                     struct Test_I_Trending_SessionData,
-                                     Test_I_Trending_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_I_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      Test_I_Trending_InetConnectionManager_t,
@@ -105,9 +111,8 @@ typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
                               enum Stream_ControlType,
                               enum Stream_SessionMessageType,
                               struct Test_I_Trending_StreamState,
-                              struct Test_I_Trending_SessionData,
-                              Test_I_Trending_SessionData_t,
                               struct Stream_Statistic,
+                              Test_I_SessionManager_t,
                               Common_Timer_Manager_t,
                               struct Stream_UserData> Test_I_HTTPParser;
 DATASTREAM_MODULE_DUPLEX (struct Test_I_Trending_SessionData,                // session data type

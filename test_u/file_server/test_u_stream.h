@@ -33,6 +33,7 @@
 #include "stream_base.h"
 #include "stream_common.h"
 #include "stream_session_data.h"
+#include "stream_session_manager.h"
 #include "stream_statemachine_control.h"
 
 #include "stream_net_io_stream.h"
@@ -50,13 +51,21 @@ struct FileServer_SessionData;
 typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 class Test_U_SessionMessage;
 class FileServer_TCPConnectionConfiguration;
+class FileServer_UDPConnectionConfiguration;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct FileServer_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_U_SessionManager_t;
+
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FileServer_TCPConnectionConfiguration,
                                  struct Net_StreamConnectionState,
                                  Net_StreamStatistic_t,
                                  struct Net_UserData> FileServer_TCPConnectionManager_t;
-class FileServer_UDPConnectionConfiguration;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FileServer_UDPConnectionConfiguration,
@@ -78,8 +87,7 @@ class Test_U_Stream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct FileServer_ModuleHandlerConfiguration,
-                                        struct FileServer_SessionData,
-                                        FileServer_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -98,8 +106,7 @@ class Test_U_Stream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct FileServer_ModuleHandlerConfiguration,
-                                        struct FileServer_SessionData,
-                                        FileServer_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -141,8 +148,7 @@ class Test_U_UDPStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct FileServer_ModuleHandlerConfiguration,
-                                        struct FileServer_SessionData,
-                                        FileServer_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -161,8 +167,7 @@ class Test_U_UDPStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct FileServer_ModuleHandlerConfiguration,
-                                        struct FileServer_SessionData,
-                                        FileServer_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,

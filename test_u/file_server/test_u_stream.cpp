@@ -106,11 +106,14 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
     dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
   ACE_ASSERT ((*iterator).second.second->outboundQueue);
 
-//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-//  struct FileServer_SessionData* session_data_p = NULL;
-  Test_U_Module_Net_Writer_t* net_io_impl_p = NULL;
+  struct FileServer_SessionData* session_data_p = NULL;
+  Test_U_SessionManager_t* session_manager_p =
+    Test_U_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -127,35 +130,14 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
 
-//  session_data_p =
-//      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
+ session_data_p =
+   &const_cast<struct FileServer_SessionData&> (session_manager_p->getR ());
   //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
-
-  // ******************* Socket Handler ************************
-  module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetIO")));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("NetIO")));
-    goto error;
-  } // end IF
-  net_io_impl_p =
-    static_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
-  net_io_impl_p->setP (&(inherited::state_));
-
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
@@ -250,17 +232,18 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
 
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_U_SessionManager_t* session_manager_p =
+    Test_U_SessionManager_t::SINGLETON_T::instance ();
 
-  // update configuration
-//  inherited::CONFIGURATION_T::ITERATOR_T iterator =
-//    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-//  ACE_ASSERT (iterator != const_cast<inherited::CONFIGURATION_T&> (configuration_in).end ());
-  //(*iterator).second.second->stream = this;
+  // sanity check(s)
+  ACE_ASSERT (iterator != const_cast<inherited::CONFIGURATION_T&> (configuration_in).end ());
+  ACE_ASSERT (session_manager_p);
 
-//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-//  struct FileServer_SessionData* session_data_p = NULL;
+  struct FileServer_SessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
   Test_U_FileReaderH* file_source_impl_p = NULL;
 
@@ -279,42 +262,15 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
 
-//  session_data_p =
-//      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
+  //(*iterator).second.second->stream = this;
+  session_data_p =
+    &const_cast<struct FileServer_SessionData&> (session_manager_p->getR ());
   //session_data_p->sessionId = configuration_in.sessionId;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
-
-  // ******************* File Reader ************************
-  module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SOURCE_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT (STREAM_FILE_SOURCE_DEFAULT_NAME_STRING)));
-    goto error;
-  } // end IF
-  file_source_impl_p =
-    dynamic_cast<Test_U_FileReaderH*> (module_p->writer ());
-  if (!file_source_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Test_U_FileReaderH> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    goto error;
-  } // end IF
-  file_source_impl_p->setP (&(inherited::state_));
-
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (configuration_in.configuration_->notificationStrategy))

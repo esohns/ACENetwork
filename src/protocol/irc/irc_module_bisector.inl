@@ -44,9 +44,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -58,9 +57,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::IRC_Module_Bisector_T (ISTREAM_T* stream_in)
  : inherited (stream_in)
@@ -90,9 +88,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -104,9 +101,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::~IRC_Module_Bisector_T ()
 {
@@ -130,9 +126,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 bool
@@ -145,9 +140,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::initialize (const ConfigurationType& configuration_in,
                                                  Stream_IAllocator* allocator_in)
@@ -215,9 +209,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 void
@@ -230,9 +223,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                         bool& passMessageDownstream_out)
@@ -457,9 +449,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 void
@@ -472,9 +463,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                            bool& passMessageDownstream_out)
@@ -495,11 +485,10 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      // retain session ID for reporting
-      const SessionDataContainerType& session_data_container_r =
-          message_inout->getR ();
-      const SessionDataType& session_data_r =
-          session_data_container_r.getR ();
+      const typename SessionMessageType::DATA_T& session_data_container_r =
+        message_inout->getR ();
+      const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        session_data_container_r.getR ();
       // sanity check(s)
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->sessionData);
@@ -508,9 +497,6 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
         inherited::streamState_->sessionData->sessionId =
           session_data_r.sessionId;
       } // end lock scope
-
-      //// start profile timer
-      //profile_.start ();
 
       break;
     }
@@ -562,9 +548,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 bool
@@ -577,9 +562,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::collect (StatisticContainerType& data_out)
 {
@@ -607,102 +591,6 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
   return true;
 }
 
-//template <ACE_SYNCH_DECL,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//void
-//IRC_Module_Bisector_T<ACE_SYNCH_USE,
-//                      TaskSynchType,
-//                      TimePolicyType,
-//                      SessionMessageType,
-//                      ProtocolMessageType,
-//                      ConfigurationType,
-//                      StreamStateType,
-//                      SessionDataType,
-//                      SessionDataContainerType,
-//                      StatisticContainerType>::report () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::report"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return);
-//}
-
-//template <ACE_SYNCH_DECL,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//bool
-//IRC_Module_Bisector_T<ACE_SYNCH_USE,
-//                      TaskSynchType,
-//                      TimePolicyType,
-//                      SessionMessageType,
-//                      ProtocolMessageType,
-//                      ConfigurationType,
-//                      StreamStateType,
-//                      SessionDataType,
-//                      SessionDataContainerType,
-//                      StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::putStatisticMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::configuration_);
-//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-//
-////  // step1: initialize session data
-////  IRC_StreamSessionData* session_data_p = NULL;
-////  ACE_NEW_NORETURN (session_data_p,
-////                    IRC_StreamSessionData ());
-////  if (!session_data_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-////    return false;
-////  } // end IF
-////  //ACE_OS::memset (data_p, 0, sizeof (IRC_SessionData));
-//  SessionDataType& session_data_r =
-//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-//  session_data_r.currentStatistic = statisticData_in;
-//
-////  // step2: allocate session data container
-////  IRC_StreamSessionData_t* session_data_container_p = NULL;
-////  // *NOTE*: fire-and-forget stream_session_data_p
-////  ACE_NEW_NORETURN (session_data_container_p,
-////                    IRC_StreamSessionData_t (stream_session_data_p,
-////                                                    true));
-////  if (!session_data_container_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//
-////    // clean up
-////    delete stream_session_data_p;
-//
-////    return false;
-////  } // end IF
-//
-//  // step3: send the data downstream...
-//  // *NOTE*: fire-and-forget session_data_container_p
-//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-//                                       *inherited::sessionData_,
-//                                       inherited::configuration_->streamConfiguration->messageAllocator);
-//}
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
@@ -712,9 +600,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 bool
@@ -727,9 +614,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::scan_begin (char* data_in,
                                                  size_t length_in)
@@ -777,9 +663,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           typename UserDataType>
 void
@@ -792,9 +677,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
                       StatisticContainerType,
+                      SessionManagerType,
                       TimerManagerType,
                       UserDataType>::scan_end ()
 {

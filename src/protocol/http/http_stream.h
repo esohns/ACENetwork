@@ -58,8 +58,7 @@ template <typename StreamStateType,
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
@@ -79,8 +78,7 @@ class HTTP_Stream_T
                                         StatisticContainerType,
                                         TimerManagerType,
                                         ModuleHandlerConfigurationType,
-                                        SessionDataType,
-                                        SessionDataContainerType,
+                                        SessionManagerType,
                                         ControlMessageType,
                                         DataMessageType,
                                         SessionMessageType,
@@ -99,8 +97,7 @@ class HTTP_Stream_T
                                         StatisticContainerType,
                                         TimerManagerType,
                                         ModuleHandlerConfigurationType,
-                                        SessionDataType,
-                                        SessionDataContainerType,
+                                        SessionManagerType,
                                         ControlMessageType,
                                         DataMessageType,
                                         SessionMessageType,
@@ -137,7 +134,7 @@ class HTTP_Stream_T
                                SessionMessageType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,
+                                typename SessionMessageType::DATA_T::DATA_T,
                                 enum Stream_SessionMessageType,
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
@@ -155,8 +152,8 @@ class HTTP_Stream_T
                                                         HTTP_Method_t,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_READER_T;
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                         Common_TimePolicy_t,
                                                         ModuleHandlerConfigurationType,
@@ -166,11 +163,11 @@ class HTTP_Stream_T
                                                         HTTP_Method_t,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_WRITER_T;
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,
+                                typename SessionMessageType::DATA_T::DATA_T,
                                 enum Stream_SessionMessageType,
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,

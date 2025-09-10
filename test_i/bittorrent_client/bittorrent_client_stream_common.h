@@ -113,7 +113,12 @@ typedef BitTorrent_Client_IPeerSubscribers_t::const_iterator BitTorrent_Client_I
 typedef std::list<BitTorrent_Client_ITrackerNotify_t*> BitTorrent_Client_ITrackerSubscribers_t;
 typedef BitTorrent_Client_ITrackerSubscribers_t::const_iterator BitTorrent_Client_ITrackerSubscribersIterator_t;
 
-//struct Net_UserData;
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct BitTorrent_Client_PeerSessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> BitTorrent_Client_PeerSession_Manager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  BitTorrent_Client_PeerConnectionConfiguration,
@@ -125,8 +130,7 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
                                 struct Stream_Statistic,
                                 Common_Timer_Manager_t,
                                 struct BitTorrent_Client_PeerModuleHandlerConfiguration,
-                                struct BitTorrent_Client_PeerSessionData,
-                                BitTorrent_Client_PeerSessionData_t,
+                                BitTorrent_Client_PeerSession_Manager_t,
                                 Stream_ControlMessage_t,
                                 BitTorrent_Client_PeerMessage_t,
                                 BitTorrent_Client_PeerSessionMessage_t,
@@ -137,6 +141,12 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
                                 BitTorrent_Client_PeerConnection_Manager_t,
                                 struct Stream_UserData> BitTorrent_Client_PeerStream_t;
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct BitTorrent_Client_TrackerSessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> BitTorrent_Client_TrackerSession_Manager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  BitTorrent_Client_TrackerConnectionConfiguration,
@@ -148,8 +158,7 @@ typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_TrackerStreamState,
                                    struct Stream_Statistic,
                                    Common_Timer_Manager_t,
                                    struct BitTorrent_Client_TrackerModuleHandlerConfiguration,
-                                   struct BitTorrent_Client_TrackerSessionData,
-                                   BitTorrent_Client_TrackerSessionData_t,
+                                   BitTorrent_Client_TrackerSession_Manager_t,
                                    Stream_ControlMessage_t,
                                    BitTorrent_Client_TrackerMessage_t,
                                    BitTorrent_Client_TrackerSessionMessage_t,

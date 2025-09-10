@@ -73,36 +73,6 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
 
-struct PCP_ConnectionState;
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          //PCPClient_ConnectionConfiguration,
-                          struct PCP_ConnectionState,
-                          PCP_Statistic_t> PCPClient_IConnection_t;
-struct PCPClient_SessionData
- : Test_U_StreamSessionData
-{
-  PCPClient_SessionData ()
-   : Test_U_StreamSessionData ()
-   , connection (NULL) // outbound
-   //, userData (NULL)
-  {}
-  struct PCPClient_SessionData& operator= (const struct PCPClient_SessionData& rhs_in)
-  {
-    Test_U_StreamSessionData::operator= (rhs_in);
-
-    connection = (connection ? connection : rhs_in.connection);
-    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
-                                              : targetFileName);
-    return *this;
-  }
-
-  PCPClient_IConnection_t* connection;          // RELEASE
-  std::string              targetFileName;      // file writer module
-
-  //struct Stream_UserData*   userData;
-};
-typedef Stream_SessionData_T<struct PCPClient_SessionData> PCPClient_SessionData_t;
-
 class Test_U_Message;
 class Test_U_SessionMessage;
 typedef Stream_ISessionDataNotify_T<struct PCPClient_SessionData,

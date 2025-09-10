@@ -128,24 +128,22 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename StatisticContainerType>
 POP_Module_ParserH_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
+                     TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
+                     ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
+                     StreamStateType,
+                     SessionManagerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      StatisticContainerType>::POP_Module_ParserH_T (ISTREAM_T* stream_in)
+                     StatisticContainerType>::POP_Module_ParserH_T (ISTREAM_T* stream_in)
 #else
-                      StatisticContainerType>::POP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
+                     StatisticContainerType>::POP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
 {
@@ -162,22 +160,20 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename StatisticContainerType>
 void
 POP_Module_ParserH_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::record (struct POP_Record*& record_inout)
+                     TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
+                     ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
+                     StreamStateType,
+                     SessionManagerType,
+                     StatisticContainerType>::record (struct POP_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("POP_Module_ParserH_T::record"));
 
@@ -229,22 +225,20 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename StatisticContainerType>
 bool
 POP_Module_ParserH_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::collect (StatisticContainerType& data_out)
+                     TimePolicyType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
+                     ConfigurationType,
+                     StreamControlType,
+                     StreamNotificationType,
+                     StreamStateType,
+                     SessionManagerType,
+                     StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("POP_Module_ParserH_T::collect"));
 
@@ -266,30 +260,3 @@ POP_Module_ParserH_T<ACE_SYNCH_USE,
 
   return true;
 }
-
-//template <ACE_SYNCH_USE,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType>
-//void
-//POP_Module_ParserH_T<ACE_SYNCH_USE,
-//                     TaskSynchType,
-//                     TimePolicyType,
-//                     SessionMessageType,
-//                     ProtocolMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType>::report () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("POP_Module_ParserH_T::report"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return);
-//}

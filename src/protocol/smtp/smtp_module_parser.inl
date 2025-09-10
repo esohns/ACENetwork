@@ -128,8 +128,7 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename StatisticContainerType>
 SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -140,8 +139,7 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
+                      SessionManagerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                       StatisticContainerType>::SMTP_Module_ParserH_T (ISTREAM_T* stream_in)
 #else
@@ -162,8 +160,7 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename StatisticContainerType>
 void
 SMTP_Module_ParserH_T<ACE_SYNCH_USE,
@@ -175,8 +172,7 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
+                      SessionManagerType,
                       StatisticContainerType>::record (struct SMTP_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::record"));
@@ -229,8 +225,7 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename StatisticContainerType>
 bool
 SMTP_Module_ParserH_T<ACE_SYNCH_USE,
@@ -242,8 +237,7 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamControlType,
                       StreamNotificationType,
                       StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
+                      SessionManagerType,
                       StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::collect"));
@@ -266,30 +260,3 @@ SMTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   return true;
 }
-
-//template <ACE_SYNCH_USE,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType>
-//void
-//SMTP_Module_ParserH_T<ACE_SYNCH_USE,
-//                     TaskSynchType,
-//                     TimePolicyType,
-//                     SessionMessageType,
-//                     ProtocolMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType>::report () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_ParserH_T::report"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return);
-//}

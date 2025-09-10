@@ -53,12 +53,11 @@ template <typename StreamStateType,
           typename ConfigurationType,
           ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
@@ -74,8 +73,7 @@ class DHCP_Stream_T
                         ConfigurationType,
                         StatisticContainerType,
                         ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
+                        SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType>
@@ -90,8 +88,7 @@ class DHCP_Stream_T
                         ConfigurationType,
                         StatisticContainerType,
                         ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
+                        SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType> inherited;
@@ -143,10 +140,9 @@ class DHCP_Stream_T
                                 int,
                                 enum Stream_SessionMessageType,
                                 StreamStateType,
-                                SessionDataType,
-                                SessionDataContainerType,
                                 StatisticContainerType,
-                                StatisticHandlerType> PARSER_T;
+                                SessionManagerType,
+                                TimerManagerType> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
   //                              struct Stream_ModuleConfiguration,
@@ -160,7 +156,7 @@ class DHCP_Stream_T
   //                                       PARSER_T> MODULE_PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,                   // session data type
+                                typename SessionMessageType::DATA_T::DATA_T, // session data type
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
@@ -177,9 +173,9 @@ class DHCP_Stream_T
                                                         SessionMessageType,
                                                         DHCP_MessageType_t,
                                                         DHCP_Statistic_t,
-                                                        StatisticHandlerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_READER_T;
+                                                        TimerManagerType,
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                         Common_TimePolicy_t,
                                                         ModuleHandlerConfigurationType,
@@ -188,12 +184,12 @@ class DHCP_Stream_T
                                                         SessionMessageType,
                                                         DHCP_MessageType_t,
                                                         DHCP_Statistic_t,
-                                                        StatisticHandlerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_WRITER_T;
+                                                        TimerManagerType,
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,                   // session data type
+                                typename SessionMessageType::DATA_T::DATA_T, // session data type
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,

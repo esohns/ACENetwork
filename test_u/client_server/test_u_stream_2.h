@@ -31,6 +31,7 @@
 
 #include "stream_common.h"
 #include "stream_control_message.h"
+#include "stream_session_manager.h"
 #include "stream_statemachine_control.h"
 
 #include "stream_net_server_stream.h"
@@ -45,6 +46,13 @@
 
 // forward declarations
 class Test_U_SessionMessage;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct Test_U_StreamSessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_U_SessionManager_t;
 
 extern const char stream_name_server_string_[];
 
@@ -61,6 +69,7 @@ class Test_U_Stream_2
                                             struct Stream_Statistic,
                                             Common_Timer_Manager_t,
                                             struct ClientServer_ModuleHandlerConfiguration,
+                                            Test_U_SessionManager_t,
                                             Stream_ControlMessage_t,
                                             Test_U_Message,
                                             Test_U_SessionMessage,
@@ -78,6 +87,7 @@ class Test_U_Stream_2
                                             struct Stream_Statistic,
                                             Common_Timer_Manager_t,
                                             struct ClientServer_ModuleHandlerConfiguration,
+                                            Test_U_SessionManager_t,
                                             Stream_ControlMessage_t,
                                             Test_U_Message,
                                             Test_U_SessionMessage,

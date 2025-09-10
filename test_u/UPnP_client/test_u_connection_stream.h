@@ -29,18 +29,26 @@
 #include "common_time_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_io_stream.h"
 
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 
-#include "test_u_upnp_client_common.h"
 #include "test_u_message.h"
+#include "test_u_session_message.h"
+#include "test_u_upnp_client_common.h"
 
 // forward declarations
-class Stream_IAllocator;
-class Test_U_SessionMessage;
+// class Test_U_SessionMessage;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct UPnP_Client_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_U_SessionManager_t;
 
 extern const char stream_name_string_[];
 
@@ -56,8 +64,7 @@ class Test_U_InboundSSDPConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct UPnP_Client_ModuleHandlerConfiguration,
-                                        struct UPnP_Client_SessionData, // session data
-                                        UPnP_Client_SessionData_t,      // session data container (reference counted)
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -76,8 +83,7 @@ class Test_U_InboundSSDPConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct UPnP_Client_ModuleHandlerConfiguration,
-                                        struct UPnP_Client_SessionData,
-                                        UPnP_Client_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -112,8 +118,7 @@ class Test_U_OutboundSSDPConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct UPnP_Client_ModuleHandlerConfiguration,
-                                        struct UPnP_Client_SessionData, // session data
-                                        UPnP_Client_SessionData_t,      // session data container (reference counted)
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -132,8 +137,7 @@ class Test_U_OutboundSSDPConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct UPnP_Client_ModuleHandlerConfiguration,
-                                        struct UPnP_Client_SessionData,
-                                        UPnP_Client_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -168,8 +172,7 @@ class Test_U_HTTP_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct UPnP_Client_ModuleHandlerConfiguration,
-                                        struct UPnP_Client_SessionData, // session data
-                                        UPnP_Client_SessionData_t,      // session data container (reference counted)
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -188,8 +191,7 @@ class Test_U_HTTP_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct UPnP_Client_ModuleHandlerConfiguration,
-                                        struct UPnP_Client_SessionData,
-                                        UPnP_Client_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,

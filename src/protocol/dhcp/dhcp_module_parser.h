@@ -108,11 +108,9 @@ template <ACE_SYNCH_DECL,
           typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
-          ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 class DHCP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -123,10 +121,9 @@ class DHCP_Module_ParserH_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      SessionManagerType,
+                                      TimerManagerType,
                                       struct Stream_UserData>
 {
   typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
@@ -138,10 +135,9 @@ class DHCP_Module_ParserH_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      SessionManagerType,
+                                      TimerManagerType,
                                       struct Stream_UserData> inherited;
 
  public:
@@ -161,10 +157,9 @@ class DHCP_Module_ParserH_T
                                     StreamControlType,
                                     StreamNotificationType,
                                     StreamStateType,
-                                    SessionDataType,
-                                    SessionDataContainerType,
                                     StatisticContainerType,
-                                    StatisticHandlerType,
+                                    SessionManagerType,
+                                    TimerManagerType,
                                     struct Stream_UserData>::initialize;
 
   // override (part of) Stream_IModuleHandler_T

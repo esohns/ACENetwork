@@ -136,12 +136,20 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
-extern const char stream_name_string_[];
-
 struct FileServer_SessionData;
 typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 class Test_U_Message;
 class Test_U_SessionMessage;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct FileServer_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_U_SessionManager_t;
+
+extern const char stream_name_string_[];
+
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       stream_name_string_,
@@ -153,8 +161,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
                                       struct FileServer_ModuleHandlerConfiguration,
-                                      struct FileServer_SessionData,
-                                      FileServer_SessionData_t,
+                                      Test_U_SessionManager_t,
                                       Stream_ControlMessage_t,
                                       Test_U_Message,
                                       Test_U_SessionMessage,
@@ -172,8 +179,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
                                       struct FileServer_ModuleHandlerConfiguration,
-                                      struct FileServer_SessionData,
-                                      FileServer_SessionData_t,
+                                      Test_U_SessionManager_t,
                                       Stream_ControlMessage_t,
                                       Test_U_Message,
                                       Test_U_SessionMessage,

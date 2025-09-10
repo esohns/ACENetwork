@@ -100,8 +100,7 @@ template <ACE_SYNCH_DECL,
           typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
+          typename SessionManagerType,
           ////////////////////////////////
           typename StatisticContainerType>
 class SMTP_Module_ParserH_T
@@ -114,9 +113,8 @@ class SMTP_Module_ParserH_T
                                   StreamControlType,
                                   StreamNotificationType,
                                   StreamStateType,
-                                  SessionDataType,
-                                  SessionDataContainerType,
                                   StatisticContainerType,
+                                  SessionManagerType,
                                   Common_Timer_Manager_t,
                                   struct Stream_UserData,
                                   SMTP_ParserDriver_T<SessionMessageType> >
@@ -130,9 +128,8 @@ class SMTP_Module_ParserH_T
                                    StreamControlType,
                                    StreamNotificationType,
                                    StreamStateType,
-                                   SessionDataType,
-                                   SessionDataContainerType,
                                    StatisticContainerType,
+                                   SessionManagerType,
                                    Common_Timer_Manager_t,
                                    struct Stream_UserData,
                                    SMTP_ParserDriver_T<SessionMessageType> > inherited;
@@ -157,9 +154,8 @@ class SMTP_Module_ParserH_T
                                 StreamControlType,
                                 StreamNotificationType,
                                 StreamStateType,
-                                SessionDataType,
-                                SessionDataContainerType,
                                 StatisticContainerType,
+                                SessionManagerType,
                                 Common_Timer_Manager_t,
                                 struct Stream_UserData,
                                 SMTP_ParserDriver_T<SessionMessageType> >::initialize;

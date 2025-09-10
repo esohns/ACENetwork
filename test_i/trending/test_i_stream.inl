@@ -116,6 +116,14 @@ Test_I_Trending_Stream_T<ConnectorType>::initialize (const Test_I_Trending_Strea
 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<Test_I_Trending_StreamConfiguration_t&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   if (inherited::isInitialized_)
   {
@@ -139,16 +147,11 @@ Test_I_Trending_Stream_T<ConnectorType>::initialize (const Test_I_Trending_Strea
   const_cast<Test_I_Trending_StreamConfiguration_t&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
-  struct Test_I_Trending_SessionData& session_data_r =
-      const_cast<struct Test_I_Trending_SessionData&> (inherited::sessionData_->getR ());
-  // *TODO*: remove type inferences
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
-      const_cast<Test_I_Trending_StreamConfiguration_t&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
-  session_data_r.targetFileName = (*iterator).second.second->fileIdentifier.identifier;
 
-  // ---------------------------------------------------------------------------
+  struct Test_I_Trending_SessionData& session_data_r =
+    const_cast<struct Test_I_Trending_SessionData&> (session_manager_p->getR ());
+  // *TODO*: remove type inferences
+  session_data_r.targetFileName = (*iterator).second.second->fileIdentifier.identifier;
 
   // ---------------------------------------------------------------------------
 
@@ -185,12 +188,15 @@ Test_I_Trending_Stream_T<ConnectorType>::collect (struct Stream_Statistic& data_
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Trending_Stream_T::collect"));
 
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+
   // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
+  ACE_ASSERT (session_manager_p);
 
   int result = -1;
   Test_I_Trending_SessionData& session_data_r =
-      const_cast<Test_I_Trending_SessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_Trending_SessionData&> (session_manager_p->getR ());
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));

@@ -778,8 +778,6 @@ BitTorrent_Control_T<SessionAsynchType,
 
   const typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T* stream_p =
     NULL;
-  const typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::SESSION_DATA_CONTAINER_T* session_data_container_p =
-    NULL;
   const typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::SESSION_DATA_T* session_data_p =
     NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
@@ -864,8 +862,7 @@ allocate:
   } // end IF
 
   stream_p = &connection_out->stream ();
-  session_data_container_p = &stream_p->getR_2 ();
-  session_data_p = &session_data_container_p->getR ();
+  session_data_p = &stream_p->getR_2 ();
 
   // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
   message_out->initialize (data_container_p,

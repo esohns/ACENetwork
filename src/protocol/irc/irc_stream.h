@@ -61,8 +61,7 @@ template <typename StreamStateType,
           ///////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
@@ -83,8 +82,7 @@ class IRC_Stream_T
                                         StatisticContainerType,
                                         TimerManagerType,
                                         ModuleHandlerConfigurationType,
-                                        SessionDataType,
-                                        SessionDataContainerType,
+                                        SessionManagerType,
                                         ControlMessageType,
                                         DataMessageType,
                                         SessionMessageType,
@@ -103,8 +101,7 @@ class IRC_Stream_T
                                         StatisticContainerType,
                                         TimerManagerType,
                                         ModuleHandlerConfigurationType,
-                                        SessionDataType,
-                                        SessionDataContainerType,
+                                        SessionManagerType,
                                         ControlMessageType,
                                         DataMessageType,
                                         SessionMessageType,
@@ -146,14 +143,13 @@ class IRC_Stream_T
                                 enum Stream_ControlType,
                                 enum Stream_SessionMessageType,
                                 StreamStateType,
-                                SessionDataType,
-                                SessionDataContainerType,
                                 StatisticContainerType,
+                                SessionManagerType,
                                 TimerManagerType,
                                 UserDataType> BISECTOR_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,                // session data type
+                                typename SessionMessageType::DATA_T::DATA_T, // session data type
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
@@ -170,7 +166,7 @@ class IRC_Stream_T
                               SessionMessageType> PARSER_T;
   typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         SessionDataType,                // session data type
+                                         typename SessionMessageType::DATA_T::DATA_T, // session data type
                                          enum Stream_SessionMessageType, // session event type
                                          struct Stream_ModuleConfiguration,
                                          ModuleHandlerConfigurationType,
@@ -187,8 +183,8 @@ class IRC_Stream_T
                                                         IRC_CommandType_t,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_READER_T;
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                         Common_TimePolicy_t,
                                                         ModuleHandlerConfigurationType,
@@ -198,11 +194,11 @@ class IRC_Stream_T
                                                         IRC_CommandType_t,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_WRITER_T;
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,                // session data type
+                                typename SessionMessageType::DATA_T::DATA_T, // session data type
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,

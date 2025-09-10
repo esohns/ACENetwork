@@ -300,11 +300,18 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   Test_I_WebTV_SessionData_3* session_data_p = NULL;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_3* session_manager_p =
+    Test_I_SessionManager_3::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      false;
+    false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
@@ -316,26 +323,25 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   session_data_p =
-      &const_cast<Test_I_WebTV_SessionData_3&> (inherited::sessionData_->getR ());
-  iterator =
-      const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+    &const_cast<Test_I_WebTV_SessionData_3&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
+  ACE_ASSERT (session_data_p->formats.empty ());
   session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
-  if (!(*iterator).second.second->targetFileName.empty ())
-  {
-    Stream_Module_t* module_p =
-      const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("QueueSource_2"),
-                                                     false,
-                                                     false));
-    ACE_ASSERT (module_p);
-    module_p->arg (inherited::sessionData_);
-  } // end IF
+
+  // if (!(*iterator).second.second->targetFileName.empty ())
+  // {
+  //   Stream_Module_t* module_p =
+  //     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("QueueSource_2"),
+  //                                                    false,
+  //                                                    false));
+  //   ACE_ASSERT (module_p);
+  //   module_p->arg (inherited::sessionData_);
+  // } // end IF
 
   // ---------------------------------------------------------------------------
 
@@ -423,7 +429,14 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   Test_I_WebTV_SessionData_3* session_data_p = NULL;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_3* session_manager_p =
+    Test_I_SessionManager_3::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -439,17 +452,13 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
-  session_data_p =
-      &const_cast<Test_I_WebTV_SessionData_3&> (inherited::sessionData_->getR ());
-  iterator =
-      const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
-  // *TODO*: remove type inferences
-  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
-  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
 
-  // ---------------------------------------------------------------------------
+  session_data_p =
+    &const_cast<Test_I_WebTV_SessionData_3&> (session_manager_p->getR ());
+  // *TODO*: remove type inferences
+  ACE_ASSERT (session_data_p->formats.empty ());
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
 
@@ -462,10 +471,10 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
       goto failed;
     } // end IF
 
-     // -------------------------------------------------------------
+  // ---------------------------------------------------------------------------
 
-     // set (session) message allocator
-     //inherited::allocator_ = configuration_in.messageAllocator;
+  // set (session) message allocator
+  //inherited::allocator_ = configuration_in.messageAllocator;
 
   inherited::isInitialized_ = true;
 

@@ -133,10 +133,9 @@ template <ACE_SYNCH_DECL,
           typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
-          ////////////////////////////////
           typename StatisticContainerType,
+          ////////////////////////////////
+          typename SessionManagerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
           typename UserDataType>
@@ -150,9 +149,8 @@ class HTTP_Module_ParserH_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
+                                      SessionManagerType,
                                       TimerManagerType,
                                       UserDataType>
  , public HTTP_ParserDriver_T<ACE_SYNCH_USE,
@@ -168,9 +166,8 @@ class HTTP_Module_ParserH_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
+                                      SessionManagerType,
                                       TimerManagerType,
                                       UserDataType> inherited;
   typedef HTTP_ParserDriver_T<ACE_SYNCH_USE,
@@ -191,9 +188,8 @@ class HTTP_Module_ParserH_T
                                     StreamControlType,
                                     StreamNotificationType,
                                     StreamStateType,
-                                    SessionDataType,
-                                    SessionDataContainerType,
                                     StatisticContainerType,
+                                    SessionManagerType,
                                     TimerManagerType,
                                     UserDataType>::setP;
 

@@ -29,6 +29,7 @@
 #include "common_time_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_io_stream.h"
 
@@ -39,8 +40,14 @@
 #include "test_u_message.h"
 
 // forward declarations
-class Stream_IAllocator;
 class Test_U_SessionMessage;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct PCPClient_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_U_SessionManager_t;
 
 extern const char stream_name_string_[];
 
@@ -56,8 +63,7 @@ class Test_U_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct PCPClient_ModuleHandlerConfiguration,
-                                        struct PCPClient_SessionData, // session data
-                                        PCPClient_SessionData_t,      // session data container (reference counted)
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -76,8 +82,7 @@ class Test_U_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct PCPClient_ModuleHandlerConfiguration,
-                                        struct PCPClient_SessionData,
-                                        PCPClient_SessionData_t,
+                                        Test_U_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
@@ -90,7 +95,7 @@ class Test_U_ConnectionStream
   inline virtual ~Test_U_ConnectionStream () { inherited::shutdown (); }
 
 //  using inherited::getR_2;
-  inline virtual const PCPClient_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
+  // inline virtual const PCPClient_SessionData_t& getR_2 () const { ACE_ASSERT (inherited::sessionData_); return *inherited::sessionData_; }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: layout

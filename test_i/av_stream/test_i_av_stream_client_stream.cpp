@@ -240,13 +240,17 @@ Test_I_AVStream_Client_ALSA_Stream::initialize (const typename inherited::CONFIG
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_Stream::initialize"));
 
-  //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
+  Test_I_Client_ALSA_V4L_SessionManager_t* session_manager_p =
+    Test_I_Client_ALSA_V4L_SessionManager_t::SINGLETON_T::instance ();
 
-     // allocate a new session state, reset stream
+  // sanity check(s)
+  ACE_ASSERT (session_manager_p);
+
+  // allocate a new session state, reset stream
   const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t&> (configuration_in).configuration_->setupPipeline =
-      false;
+    false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
@@ -258,9 +262,9 @@ Test_I_AVStream_Client_ALSA_Stream::initialize (const typename inherited::CONFIG
   const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t&> (configuration_in).configuration_->setupPipeline =
       setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   Test_I_AVStream_Client_ALSA_V4L_StreamSessionData& session_data_r =
-      const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
 //  typename Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator =
 //      const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));

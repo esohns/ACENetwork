@@ -106,10 +106,8 @@ template <ACE_SYNCH_DECL,
           typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
-          ////////////////////////////////
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType>
 class DHCP_Module_DiscoverH_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
@@ -121,9 +119,8 @@ class DHCP_Module_DiscoverH_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
+                                      SessionManagerType,
                                       TimerManagerType,
                                       struct Stream_UserData>
 {
@@ -136,9 +133,8 @@ class DHCP_Module_DiscoverH_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
+                                      SessionManagerType,
                                       TimerManagerType,
                                       struct Stream_UserData> inherited;
 

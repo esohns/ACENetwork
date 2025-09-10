@@ -796,9 +796,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType>
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -809,9 +808,8 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamControlType,
                         StreamNotificationType,
                         StreamStateType,
-                        SessionDataType,
-                        SessionDataContainerType,
                         StatisticContainerType,
+                        SessionManagerType,
                         TimerManagerType>::DHCP_Module_DiscoverH_T (typename inherited::ISTREAM_T* stream_in,
                                                                     bool autoStart_in,
                                                                     bool generateSessionMessages_in)
@@ -834,9 +832,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType>
 bool
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
@@ -848,9 +845,8 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamControlType,
                         StreamNotificationType,
                         StreamStateType,
-                        SessionDataType,
-                        SessionDataContainerType,
                         StatisticContainerType,
+                        SessionManagerType,
                         TimerManagerType>::initialize (const ConfigurationType& configuration_in,
                                                            Stream_IAllocator* allocator_in)
 {
@@ -878,9 +874,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType>
 void
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
@@ -892,11 +887,10 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamControlType,
                         StreamNotificationType,
                         StreamStateType,
-                        SessionDataType,
-                        SessionDataContainerType,
                         StatisticContainerType,
+                        SessionManagerType,
                         TimerManagerType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                  bool& passMessageDownstream_out)
+                                                              bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleDataMessage"));
 
@@ -913,9 +907,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType>
 void
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
@@ -927,9 +920,8 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamControlType,
                         StreamNotificationType,
                         StreamStateType,
-                        SessionDataType,
-                        SessionDataContainerType,
                         StatisticContainerType,
+                        SessionManagerType,
                         TimerManagerType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                      bool& passMessageDownstream_out)
 {
@@ -943,17 +935,15 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session ID for reporting
-      const SessionDataContainerType& session_data_container_r =
-          message_inout->getR ();
-      const SessionDataType& session_data_r = session_data_container_r.getR ();
+      const typename SessionMessageType::DATA_T& session_data_container_r =
+        message_inout->getR ();
+      const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        session_data_container_r.getR ();
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->sessionData);
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
       inherited::streamState_->sessionData->sessionId =
-          session_data_r.sessionId;
-
-      // start profile timer...
-      //profile_.start ();
+        session_data_r.sessionId;
 
       break;
     }
@@ -972,9 +962,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType>
 bool
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
@@ -986,9 +975,8 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamControlType,
                         StreamNotificationType,
                         StreamStateType,
-                        SessionDataType,
-                        SessionDataContainerType,
                         StatisticContainerType,
+                        SessionManagerType,
                         TimerManagerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::collect"));

@@ -1248,13 +1248,10 @@ allocate:
   state_r.timeStamp = COMMON_TIME_NOW;
   state_r.xid = DHCP_record.xid;
 
-  Test_U_InboundConnectionStream& stream_r =
-      const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const DHCPClient_SessionData_t* session_data_container_p =
-    &stream_r.getR_2 ();
-  ACE_ASSERT (session_data_container_p);
+  // Test_U_InboundConnectionStream& stream_r =
+  //     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   struct DHCPClient_SessionData& session_data_r =
-      const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR ());
   session_data_r.timeStamp = state_r.timeStamp;
   session_data_r.xid = DHCP_record.xid;
 
@@ -1262,8 +1259,8 @@ allocate:
   iconnection_p->decrease (); iconnection_p = NULL;
 
   iconnection_p =
-      iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
-                                  true);
+    iconnection_manager_p->get (NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
+                                true);
   if (!iconnection_p)
   {
     // *NOTE*: most probable reason, the interface IP address has changed
@@ -1316,13 +1313,8 @@ action_inform_activate_cb (GtkAction* action_in,
   struct DHCP_ConnectionState& state_r =
     const_cast<struct DHCP_ConnectionState&> (istream_connection_2->state ());
 
-  Test_U_InboundConnectionStream& stream_r =
-    const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const DHCPClient_SessionData_t* session_data_container_p =
-      &stream_r.getR_2 ();
-  ACE_ASSERT (session_data_container_p);
   struct DHCPClient_SessionData& session_data_r =
-    const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR ());
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;
@@ -1476,13 +1468,13 @@ action_request_activate_cb (GtkAction* action_in,
   DHCP_ConnectionState& state_r =
     const_cast<DHCP_ConnectionState&> (istream_connection_2->state ());
 
-  Test_U_InboundConnectionStream& stream_r =
-    const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const DHCPClient_SessionData_t* session_data_container_p =
-      &stream_r.getR_2 ();
-  ACE_ASSERT (session_data_container_p);
+  // Test_U_InboundConnectionStream& stream_r =
+  //   const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
+  // const DHCPClient_SessionData_t* session_data_container_p =
+  //     &stream_r.getR_2 ();
+  // ACE_ASSERT (session_data_container_p);
   struct DHCPClient_SessionData& session_data_r =
-    const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR ());
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;
@@ -1605,13 +1597,13 @@ action_release_activate_cb (GtkAction* action_in,
   DHCP_ConnectionState& state_r =
     const_cast<DHCP_ConnectionState&> (istream_connection_2->state ());
 
-  Test_U_InboundConnectionStream& stream_r =
-    const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const DHCPClient_SessionData_t* session_data_container_p =
-    &stream_r.getR_2 ();
-  ACE_ASSERT (session_data_container_p);
+  // Test_U_InboundConnectionStream& stream_r =
+  //   const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
+  // const DHCPClient_SessionData_t* session_data_container_p =
+  //   &stream_r.getR_2 ();
+  // ACE_ASSERT (session_data_container_p);
   struct DHCPClient_SessionData& session_data_r =
-    const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR ());
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;

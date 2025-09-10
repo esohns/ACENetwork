@@ -41,6 +41,37 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType>
 class Stream_MessageAllocatorHeapBase_T;
 
+struct Test_I_WebTV_SessionData
+ : Test_I_StreamSessionData
+{
+  Test_I_WebTV_SessionData ()
+   : Test_I_StreamSessionData ()
+   //, address (static_cast<u_short> (0),
+   //           static_cast<ACE_UINT32> (INADDR_NONE))
+   , connection (NULL)
+   , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   //, targetFileName ()
+  {}
+
+  struct Test_I_WebTV_SessionData& operator= (const struct Test_I_WebTV_SessionData& rhs_in)
+  {
+    Test_I_StreamSessionData::operator= (rhs_in);
+
+    //address = rhs_in.address;
+    connection = (connection ? connection : rhs_in.connection);
+    //targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
+    //                                          : targetFileName);
+
+    return *this;
+  }
+
+  //ACE_INET_Addr                                address;
+  Test_I_IConnection_t*                        connection;
+  enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
+  //std::string                                  targetFileName; // file writer module
+};
+typedef Stream_SessionData_T<struct Test_I_WebTV_SessionData> Test_I_WebTV_SessionData_t;
+
 class Test_I_SessionMessage
  : public Stream_SessionMessageBase_T<enum Stream_SessionMessageType,
                                       Test_I_WebTV_SessionData_t,
@@ -132,6 +163,56 @@ class Test_I_SessionMessage
 //};
 
 //////////////////////////////////////////
+
+struct Test_I_WebTV_StreamState_3;
+class Test_I_WebTV_SessionData_3
+ : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+#if defined (FFMPEG_SUPPORT)
+                                        struct Stream_MediaFramework_FFMPEG_MediaType,
+#endif // FFMPEG_SUPPORT
+                                        struct Test_I_WebTV_StreamState_3,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_WebTV_SessionData_3 ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+#if defined (FFMPEG_SUPPORT)
+                                   struct Stream_MediaFramework_FFMPEG_MediaType,
+#endif // FFMPEG_SUPPORT
+                                   struct Test_I_WebTV_StreamState_3,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+   , address (static_cast<u_short> (0),
+              static_cast<ACE_UINT32> (INADDR_ANY))
+   , connection (NULL)
+   , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   , targetFileName ()
+  {}
+
+  Test_I_WebTV_SessionData_3& operator= (const Test_I_WebTV_SessionData_3& rhs_in)
+  {
+    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+#if defined (FFMPEG_SUPPORT)
+                                  struct Stream_MediaFramework_FFMPEG_MediaType,
+#endif // FFMPEG_SUPPORT
+                                  struct Test_I_WebTV_StreamState_3,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator= (rhs_in);
+
+    connection = (connection ? connection : rhs_in.connection);
+    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
+                                              : targetFileName);
+
+    return *this;
+  }
+
+  ACE_INET_Addr                             address;
+  Test_I_IConnection_t*                     connection;
+  enum Stream_Decoder_CompressionFormatType format; // HTTP parser module
+  std::string                               targetFileName; // file writer module
+};
+typedef Stream_SessionData_T<Test_I_WebTV_SessionData_3> Test_I_WebTV_SessionData_3_t;
 
 class Test_I_SessionMessage_3
  : public Stream_SessionMessageBase_T<enum Stream_SessionMessageType,

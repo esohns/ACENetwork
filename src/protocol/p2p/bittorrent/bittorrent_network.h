@@ -31,6 +31,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 
 #include "net_asynch_tcpsockethandler.h"
 #include "net_common.h"
@@ -208,6 +209,12 @@ struct BitTorrent_PeerState
   struct BitTorrent_PeerStatus       status;
 };
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct BitTorrent_PeerSessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> BitTorrent_PeerSession_Manager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  BitTorrent_PeerConnectionConfiguration,
@@ -220,8 +227,7 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_PeerStreamState,
                                 struct Stream_Statistic,
                                 Common_Timer_Manager_t,
                                 struct BitTorrent_PeerModuleHandlerConfiguration,
-                                struct BitTorrent_PeerSessionData,
-                                BitTorrent_PeerSessionData_t,
+                                BitTorrent_PeerSession_Manager_t,
                                 Stream_ControlMessage_t,
                                 BitTorrent_Message_t,
                                 BitTorrent_PeerSessionMessage_t,

@@ -277,8 +277,7 @@ class Test_I_AVStream_Client_ALSA_Stream
                         struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                        Test_I_Client_ALSA_V4L_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_ALSA_V4L_Message,
                         Test_I_AVStream_Client_ALSA_V4L_SessionMessage>
@@ -293,8 +292,7 @@ class Test_I_AVStream_Client_ALSA_Stream
                         struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                        Test_I_Client_ALSA_V4L_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_ALSA_V4L_Message,
                         Test_I_AVStream_Client_ALSA_V4L_SessionMessage> inherited;
@@ -328,8 +326,7 @@ class Test_I_AVStream_Client_V4L_Stream_T
                         struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                        Test_I_Client_ALSA_V4L_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_ALSA_V4L_Message,
                         Test_I_AVStream_Client_ALSA_V4L_SessionMessage>
@@ -344,8 +341,7 @@ class Test_I_AVStream_Client_V4L_Stream_T
                         struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
-                        Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                        Test_I_Client_ALSA_V4L_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_ALSA_V4L_Message,
                         Test_I_AVStream_Client_ALSA_V4L_SessionMessage> inherited;

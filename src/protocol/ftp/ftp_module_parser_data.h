@@ -103,10 +103,9 @@ template <ACE_SYNCH_DECL,
           typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
+          typename StatisticContainerType,
           ////////////////////////////////
-          typename StatisticContainerType>
+          typename SessionManagerType>
 class FTP_Module_Parser_DataH_T
  : public Stream_Module_ParserH_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -117,9 +116,8 @@ class FTP_Module_Parser_DataH_T
                                   StreamControlType,
                                   StreamNotificationType,
                                   StreamStateType,
-                                  SessionDataType,
-                                  SessionDataContainerType,
                                   StatisticContainerType,
+                                  SessionManagerType,
                                   Common_Timer_Manager_t,
                                   struct Stream_UserData,
                                   FTP_ParserDataDriver_T<SessionMessageType> >
@@ -133,9 +131,8 @@ class FTP_Module_Parser_DataH_T
                                    StreamControlType,
                                    StreamNotificationType,
                                    StreamStateType,
-                                   SessionDataType,
-                                   SessionDataContainerType,
                                    StatisticContainerType,
+                                   SessionManagerType,
                                    Common_Timer_Manager_t,
                                    struct Stream_UserData,
                                    FTP_ParserDataDriver_T<SessionMessageType> > inherited;
@@ -155,9 +152,8 @@ class FTP_Module_Parser_DataH_T
                                 StreamControlType,
                                 StreamNotificationType,
                                 StreamStateType,
-                                SessionDataType,
-                                SessionDataContainerType,
                                 StatisticContainerType,
+                                SessionManagerType,
                                 Common_Timer_Manager_t,
                                 struct Stream_UserData,
                                 FTP_ParserDataDriver_T<SessionMessageType> >::initialize;

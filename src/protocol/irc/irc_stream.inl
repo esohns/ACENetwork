@@ -31,8 +31,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -43,8 +42,7 @@ IRC_Stream_T<StreamStateType,
              StatisticContainerType,
              TimerManagerType,
              ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
+             SessionManagerType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
@@ -61,8 +59,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -74,8 +71,7 @@ IRC_Stream_T<StreamStateType,
              StatisticContainerType,
              TimerManagerType,
              ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
+             SessionManagerType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
@@ -94,8 +90,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -107,8 +102,7 @@ IRC_Stream_T<StreamStateType,
              StatisticContainerType,
              TimerManagerType,
              ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
+             SessionManagerType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
@@ -121,13 +115,12 @@ IRC_Stream_T<StreamStateType,
   // sanity check(s)
   ACE_ASSERT (configuration_in.configuration_);
   ACE_ASSERT (!inherited::isRunning ());
+  SessionManagerType* session_manager_p =
+    SessionManagerType::SINGLETON_T::instance ();
+  ACE_ASSERT (session_manager_p);
 
-//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-//  SessionDataType* session_data_p = NULL;
-  typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
-  BISECTOR_T* bisector_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -145,45 +138,12 @@ IRC_Stream_T<StreamStateType,
     setup_pipeline;
   reset_setup_pipeline = false;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
   // things to be done here:
   // - create modules (done for the ones "owned" by the stream itself)
   // - initialize modules
   // - push them onto the stream (tail-first) !
 //  session_data_p =
 //      &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
-
-  // ---------------------------------------------------------------------------
-
-  // ******************* Marshal ************************
-  module_p =
-    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
-                ACE_TEXT (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
-    goto error;
-  } // end IF
-
-  bisector_impl_p = dynamic_cast<BISECTOR_T*> (module_p->writer ());
-  if (!bisector_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<IRC_Module_Bisector_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
-    goto error;
-  } // end IF
-  bisector_impl_p->setP (&(inherited::state_));
-
-  // enqueue the module
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
 
   // ---------------------------------------------------------------------------
 
@@ -213,8 +173,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -226,8 +185,7 @@ IRC_Stream_T<StreamStateType,
              StatisticContainerType,
              TimerManagerType,
              ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
+             SessionManagerType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
@@ -237,11 +195,13 @@ IRC_Stream_T<StreamStateType,
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::collect"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
+  SessionManagerType* session_manager_p =
+    SessionManagerType::SINGLETON_T::instance ();
+  ACE_ASSERT (session_manager_p);
 
   int result = -1;
-  SessionDataType& session_data_r =
-    const_cast<SessionDataType&> (inherited::sessionData_->getR ());
+  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR ());
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
   if (!module_p)

@@ -42,6 +42,7 @@
 #include "stream_configuration.h"
 #include "stream_control_message.h"
 #include "stream_session_data.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_io_stream.h"
 
@@ -142,7 +143,7 @@ struct Net_StreamConnectionState;
 struct Test_I_AVStream_Server_ConnectionConfiguration;
 struct Net_StreamConnectionState;
 struct Test_I_AVStream_Server_ModuleHandlerConfiguration;
-class Test_I_AVStream_Server_SessionData;
+class Test_I_AVStream_Server_StreamSessionData;
 struct Test_I_AVStream_Server_SocketHandlerConfiguration;
 class Test_I_AVStream_Server_TCPStream;
 class Test_I_AVStream_Server_UDPStream;
@@ -151,7 +152,7 @@ class Test_I_AVStream_Server_SessionMessage;
 struct Test_I_AVStream_Server_StreamConfiguration;
 struct Test_I_AVStream_Server_StreamState;
 
-typedef Stream_SessionData_T<Test_I_AVStream_Server_SessionData> Test_I_AVStream_Server_SessionData_t;
+typedef Stream_SessionData_T<Test_I_AVStream_Server_StreamSessionData> Test_I_AVStream_Server_StreamSessionData_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -408,6 +409,13 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Test_I_AVStream_Client_MediaFoundation_UDPConnectionManager_t,
                                       struct Stream_UserData> Test_I_AVStream_Client_MediaFoundation_Net_UDPStream_t;
 #else
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_Client_ALSA_V4L_SessionManager_t;
+
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       stream_name_string_3,
@@ -419,8 +427,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
                                       struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
-                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                      Test_I_Client_ALSA_V4L_SessionManager_t,
                                       Stream_ControlMessage_t,
                                       Test_I_AVStream_Client_ALSA_V4L_Message,
                                       Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
@@ -438,8 +445,7 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       struct Stream_Statistic,
                                       Common_Timer_Manager_t,
                                       struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
-                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                      Test_I_Client_ALSA_V4L_SessionManager_t,
                                       Stream_ControlMessage_t,
                                       Test_I_AVStream_Client_ALSA_V4L_Message,
                                       Test_I_AVStream_Client_ALSA_V4L_SessionMessage,

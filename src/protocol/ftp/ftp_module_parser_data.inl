@@ -283,9 +283,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename SessionManagerType>
 FTP_Module_Parser_DataH_T<ACE_SYNCH_USE,
                           TimePolicyType,
                           ControlMessageType,
@@ -295,9 +294,8 @@ FTP_Module_Parser_DataH_T<ACE_SYNCH_USE,
                           StreamControlType,
                           StreamNotificationType,
                           StreamStateType,
-                          SessionDataType,
-                          SessionDataContainerType,
-                          StatisticContainerType>::FTP_Module_Parser_DataH_T (typename inherited::ISTREAM_T* stream_in)
+                          StatisticContainerType,
+                          SessionManagerType>::FTP_Module_Parser_DataH_T (typename inherited::ISTREAM_T* stream_in)
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_DataH_T::FTP_Module_Parser_DataH_T"));
@@ -313,9 +311,8 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename SessionManagerType>
 bool
 FTP_Module_Parser_DataH_T<ACE_SYNCH_USE,
                           TimePolicyType,
@@ -326,9 +323,8 @@ FTP_Module_Parser_DataH_T<ACE_SYNCH_USE,
                           StreamControlType,
                           StreamNotificationType,
                           StreamStateType,
-                          SessionDataType,
-                          SessionDataContainerType,
-                          StatisticContainerType>::collect (StatisticContainerType& data_out)
+                          StatisticContainerType,
+                          SessionManagerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_DataH_T::collect"));
 
@@ -350,30 +346,3 @@ FTP_Module_Parser_DataH_T<ACE_SYNCH_USE,
 
   return true;
 }
-
-//template <ACE_SYNCH_USE,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType>
-//void
-//FTP_Module_Parser_DataH_T<ACE_SYNCH_USE,
-//                     TaskSynchType,
-//                     TimePolicyType,
-//                     SessionMessageType,
-//                     ProtocolMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType>::report () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_DataH_T::report"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return);
-//}

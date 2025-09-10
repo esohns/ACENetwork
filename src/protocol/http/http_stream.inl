@@ -31,8 +31,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -43,8 +42,7 @@ HTTP_Stream_T<StreamStateType,
               StatisticContainerType,
               TimerManagerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType,
@@ -61,8 +59,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -74,8 +71,7 @@ HTTP_Stream_T<StreamStateType,
               StatisticContainerType,
               TimerManagerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType,
@@ -112,8 +108,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -125,8 +120,7 @@ HTTP_Stream_T<StreamStateType,
               StatisticContainerType,
               TimerManagerType,
               ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
+              SessionManagerType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType,
@@ -173,25 +167,6 @@ HTTP_Stream_T<StreamStateType,
 //    &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
 
   // ---------------------------------------------------------------------------
-
-  // ******************* Marshal ************************
-  module_p =
-      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
-  ACE_ASSERT (module_p);
-  writer_impl_p = dynamic_cast<typename inherited::WRITER_T*> (module_p->writer ());
-  if (!writer_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T*> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
-    goto error;
-  } // end IF
-  writer_impl_p->setP (&(inherited::state_));
-
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (NULL))

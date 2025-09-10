@@ -1096,13 +1096,13 @@ allocate:
     state_r.timeStamp = COMMON_TIME_NOW;
     state_r.xid = DHCP_record.xid;
 
-    Test_U_OutboundConnectionStream& stream_r =
-        const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
-    const DHCPClient_SessionData_t* session_data_container_p =
-        &stream_r.getR_2 ();
-    ACE_ASSERT (session_data_container_p);
+    // Test_U_OutboundConnectionStream& stream_r =
+    //     const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
+    // const DHCPClient_SessionData_t* session_data_container_p =
+    //     &stream_r.getR_2 ();
+    // ACE_ASSERT (session_data_container_p);
     struct DHCPClient_SessionData& session_data_r =
-        const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+      const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR ());
     session_data_r.timeStamp = state_r.timeStamp;
     session_data_r.xid = DHCP_record.xid;
 

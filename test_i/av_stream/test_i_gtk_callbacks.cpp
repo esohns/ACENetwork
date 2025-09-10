@@ -1940,10 +1940,8 @@ stream_processing_function (void* arg_in)
         result_2 =
           thread_data_p->CBData->videoStream->initialize ((*stream_iterator).second);
 
-        const Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t* session_data_container_p =
-          &thread_data_p->CBData->videoStream->getR_2 ();
         session_data_p =
-          &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_data_container_p->getR ());
+          &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (thread_data_p->CBData->videoStream->getR_2 ());
 #endif // ACE_WIN32 || ACE_WIN64
         break;
       }
@@ -2009,10 +2007,8 @@ stream_processing_function (void* arg_in)
         result_2 =
           thread_data_p->CBData->UDPStream->initialize ((*stream_iterator).second);
 
-        const Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t* session_data_container_p =
-          &thread_data_p->CBData->UDPStream->getR_2 ();
         session_data_p =
-          &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_data_container_p->getR ());
+          &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (thread_data_p->CBData->UDPStream->getR_2 ());
 #endif // ACE_WIN32 || ACE_WIN64
         break;
       }

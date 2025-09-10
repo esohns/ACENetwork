@@ -147,8 +147,6 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   typename inherited2::ILISTENER_T* ilistener_p = NULL;
   AddressType peer_SAP;
   enum Net_TransportLayerType transport_layer_e = this->transportLayer ();
-  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-    NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   ConfigurationType* configuration_p = NULL;
   bool is_udp_write_only_b = false;
@@ -295,10 +293,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // step3b: update session data
   // *TODO*: remove type inferences
-  session_data_container_p = &stream_.getR_2 ();
-  ACE_ASSERT (session_data_container_p);
   session_data_p =
-    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
+    &const_cast<typename StreamType::SESSION_DATA_T&> (stream_.getR_2 ());
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *(session_data_p->lock), -1);
     session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
@@ -1356,8 +1352,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   bool handle_manager = false;
   bool handle_stream = false;
   enum Net_TransportLayerType transport_layer_e = this->transportLayer ();
-  const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-    NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   AddressType local_SAP, peer_SAP;
   bool is_udp_write_only_b = false;
@@ -1443,10 +1437,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end IF
 
   // step3b: update session data
-  // *TODO*: remove type inferences
-  session_data_container_p = &stream_.getR_2 ();
   session_data_p =
-    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
+    &const_cast<typename StreamType::SESSION_DATA_T&> (stream_.getR_2 ());
+  // *TODO*: remove type inferences
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
     session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,

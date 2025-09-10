@@ -27,7 +27,7 @@
 #include "stream_common.h"
 #include "stream_session_message_base.h"
 
-#include "test_u_upnp_client_common.h"
+// #include "test_u_upnp_client_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
@@ -37,6 +37,35 @@ template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          //UPnP_Client_ConnectionConfiguration,
+                          struct HTTP_ConnectionState,
+                          HTTP_Statistic_t> UPnP_Client_IConnection_t;
+struct UPnP_Client_SessionData
+ : Test_U_StreamSessionData
+{
+  UPnP_Client_SessionData ()
+   : Test_U_StreamSessionData ()
+   , connection (NULL) // outbound
+   , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   , parserContext (NULL)
+  {}
+
+  struct UPnP_Client_SessionData& operator= (const struct UPnP_Client_SessionData& rhs_in)
+  {
+    Test_U_StreamSessionData::operator= (rhs_in);
+
+    format = rhs_in.format;
+    connection = (connection ? connection : rhs_in.connection);
+    return *this;
+  }
+
+  UPnP_Client_IConnection_t*                           connection; // RELEASE
+  enum Stream_Decoder_CompressionFormatType            format;
+  struct Stream_Module_XMLParser_SAXParserContextBase* parserContext;
+};
+typedef Stream_SessionData_T<struct UPnP_Client_SessionData> UPnP_Client_SessionData_t;
 
 class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<enum Stream_SessionMessageType,

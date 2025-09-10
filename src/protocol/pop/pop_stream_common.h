@@ -27,6 +27,7 @@
 #include "stream_configuration.h"
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_common.h"
 
@@ -80,13 +81,19 @@ struct POP_StreamState
   struct POP_Stream_SessionData* sessionData;
 };
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct POP_Stream_SessionData,
+                                 POP_Statistic_t,
+                                 struct Stream_UserData> POP_SessionManager_t;
+
 typedef POP_Stream_T<struct POP_StreamState,
                       struct POP_StreamConfiguration,
                       POP_Statistic_t,
                       POP_StatisticHandler_t,
                       struct POP_ModuleHandlerConfiguration,
-                      struct POP_Stream_SessionData,
-                      POP_Stream_SessionData_t,
+                      POP_SessionManager_t,
                       Stream_ControlMessage_t,
                       POP_Message_t,
                       POP_SessionMessage_t> POP_Stream_t;

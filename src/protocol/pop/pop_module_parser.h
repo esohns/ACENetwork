@@ -101,8 +101,7 @@ template <ACE_SYNCH_DECL,
           typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
+          typename SessionManagerType,
           ////////////////////////////////
           typename StatisticContainerType>
 class POP_Module_ParserH_T
@@ -115,9 +114,8 @@ class POP_Module_ParserH_T
                                   StreamControlType,
                                   StreamNotificationType,
                                   StreamStateType,
-                                  SessionDataType,
-                                  SessionDataContainerType,
                                   StatisticContainerType,
+                                  SessionManagerType,
                                   Common_Timer_Manager_t,
                                   struct Stream_UserData,
                                   POP_ParserDriver_T<SessionMessageType> >
@@ -131,9 +129,8 @@ class POP_Module_ParserH_T
                                    StreamControlType,
                                    StreamNotificationType,
                                    StreamStateType,
-                                   SessionDataType,
-                                   SessionDataContainerType,
                                    StatisticContainerType,
+                                   SessionManagerType,
                                    Common_Timer_Manager_t,
                                    struct Stream_UserData,
                                    POP_ParserDriver_T<SessionMessageType> > inherited;
@@ -159,9 +156,8 @@ class POP_Module_ParserH_T
                                 StreamControlType,
                                 StreamNotificationType,
                                 StreamStateType,
-                                SessionDataType,
-                                SessionDataContainerType,
                                 StatisticContainerType,
+                                SessionManagerType,
                                 Common_Timer_Manager_t,
                                 struct Stream_UserData,
                                 POP_ParserDriver_T<SessionMessageType> >::initialize;

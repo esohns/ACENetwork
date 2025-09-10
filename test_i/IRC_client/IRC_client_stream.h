@@ -40,6 +40,7 @@
 #include "irc_stream_common.h"
 
 #include "IRC_client_sessionmessage.h"
+#include "IRC_client_common_modules.h"
 
 // forward declarations
 struct IRC_Client_StreamState;
@@ -47,7 +48,7 @@ struct IRC_Client_StreamConfiguration;
 struct IRC_Client_ModuleHandlerConfiguration;
 struct IRC_Client_SessionData;
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
-//class IRC_Client_SessionMessage;
+// class IRC_Client_SessionMessage;
 struct Net_UserData;
 
 //extern const char stream_name_string_[];
@@ -88,8 +89,7 @@ class IRC_Client_Stream_T
                        struct Stream_Statistic,
                        TimerManagerType,
                        struct IRC_Client_ModuleHandlerConfiguration,
-                       struct IRC_Client_SessionData,
-                       IRC_Client_SessionData_t,
+                       IRC_Client_SessionManager_t,
                        Stream_ControlMessage_t,
                        IRC_Message,
                        IRC_Client_SessionMessage,
@@ -101,8 +101,7 @@ class IRC_Client_Stream_T
                        struct Stream_Statistic,
                        TimerManagerType,
                        struct IRC_Client_ModuleHandlerConfiguration,
-                       struct IRC_Client_SessionData,
-                       IRC_Client_SessionData_t,
+                       IRC_Client_SessionManager_t,
                        Stream_ControlMessage_t,
                        IRC_Message,
                        IRC_Client_SessionMessage,

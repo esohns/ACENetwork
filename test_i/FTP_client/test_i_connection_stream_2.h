@@ -27,18 +27,26 @@
 #include "common_time_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_io_stream.h"
 
 #include "test_i_common.h"
 
 #include "test_i_connection_manager_common.h"
-#include "test_i_ftp_client_common.h"
+// #include "test_i_ftp_client_common.h"
 #include "test_i_message.h"
+#include "test_i_session_message.h"
 
 // forward declarations
-class Stream_IAllocator;
-class Test_I_SessionMessage;
+// class Test_I_SessionMessage;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct FTP_Client_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_t;
 
 extern const char data_connection_stream_name_string_[];
 
@@ -54,8 +62,7 @@ class Test_I_ConnectionStream_2
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct FTP_Client_ModuleHandlerConfiguration,
-                                        struct FTP_Client_SessionData, // session data
-                                        FTP_Client_SessionData_t,      // session data container (reference counted)
+                                        Test_I_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage,
@@ -74,8 +81,7 @@ class Test_I_ConnectionStream_2
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct FTP_Client_ModuleHandlerConfiguration,
-                                        struct FTP_Client_SessionData,
-                                        FTP_Client_SessionData_t,
+                                        Test_I_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage,

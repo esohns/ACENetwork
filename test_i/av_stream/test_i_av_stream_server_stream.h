@@ -347,6 +347,13 @@ class Test_I_AVStream_Server_MediaFoundation_UDPStream
   ULONG            referenceCount_;
 };
 #else
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 Test_I_AVStream_Server_StreamSessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_Server_SessionManager_t;
+
 class Test_I_AVStream_Server_TCPStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -359,8 +366,7 @@ class Test_I_AVStream_Server_TCPStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-                                        Test_I_AVStream_Server_StreamSessionData,
-                                        Test_I_AVStream_Server_StreamSessionData_t,
+                                        Test_I_Server_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_AVStream_Server_Message,
                                         Test_I_AVStream_Server_SessionMessage,
@@ -379,8 +385,7 @@ class Test_I_AVStream_Server_TCPStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-                                        Test_I_AVStream_Server_StreamSessionData,
-                                        Test_I_AVStream_Server_StreamSessionData_t,
+                                        Test_I_Server_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_AVStream_Server_Message,
                                         Test_I_AVStream_Server_SessionMessage,
@@ -411,6 +416,7 @@ class Test_I_AVStream_Server_TCPStream
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Server_TCPStream (const Test_I_AVStream_Server_TCPStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Server_TCPStream& operator= (const Test_I_AVStream_Server_TCPStream&))
 };
+
 class Test_I_AVStream_Server_UDPStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -423,8 +429,7 @@ class Test_I_AVStream_Server_UDPStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-                                        Test_I_AVStream_Server_StreamSessionData,
-                                        Test_I_AVStream_Server_StreamSessionData_t,
+                                        Test_I_Server_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_AVStream_Server_Message,
                                         Test_I_AVStream_Server_SessionMessage,
@@ -443,8 +448,7 @@ class Test_I_AVStream_Server_UDPStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-                                        Test_I_AVStream_Server_StreamSessionData,
-                                        Test_I_AVStream_Server_StreamSessionData_t,
+                                        Test_I_Server_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_AVStream_Server_Message,
                                         Test_I_AVStream_Server_SessionMessage,

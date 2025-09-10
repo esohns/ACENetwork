@@ -33,17 +33,85 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "test_i_av_stream_common.h"
-#include "test_i_av_stream_server_common.h"
+// #include "test_i_av_stream_server_common.h"
+#include "test_i_av_stream_server_session_message.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
+// #if defined (ACE_WIN32) || defined (ACE_WIN64)
+// class Test_I_AVStream_Server_DirectShow_SessionMessage;
+// class Test_I_AVStream_Server_MediaFoundation_SessionMessage;
+// #else
+// class Test_I_AVStream_Server_SessionMessage;
+// #endif // ACE_WIN32 || ACE_WIN64
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-class Test_I_AVStream_Server_DirectShow_SessionMessage;
-class Test_I_AVStream_Server_MediaFoundation_SessionMessage;
+struct Test_I_AVStream_Server_DirectShow_MessageData
+{
+  Test_I_AVStream_Server_DirectShow_MessageData ()
+   : header ()
+   , sample (NULL)
+   , sampleTime (0.0)
+  {}
+
+  Test_I_AVStream_Server_DirectShow_MessageData
+  operator+= (const struct Test_I_AVStream_Server_DirectShow_MessageData& rhs_in)
+  {
+    header = rhs_in.header;
+    ACE_ASSERT (!sample);
+    sample = rhs_in.sample;
+    sampleTime = rhs_in.sampleTime;
+
+    return *this;
+  }
+
+  struct acestream_av_stream_header header;
+  IMediaSample*                     sample;
+  double                            sampleTime;
+};
+
+struct Test_I_AVStream_Server_MediaFoundation_MessageData
+{
+  Test_I_AVStream_Server_MediaFoundation_MessageData ()
+   : header ()
+   , sample (NULL)
+   , sampleTime (0)
+  {}
+
+  Test_I_AVStream_Server_MediaFoundation_MessageData
+  operator+= (const struct Test_I_AVStream_Server_MediaFoundation_MessageData& rhs_in)
+  {
+    header = rhs_in.header;
+    ACE_ASSERT (!sample);
+    sample = rhs_in.sample;
+    sampleTime = rhs_in.sampleTime;
+
+    return *this;
+  }
+
+  struct acestream_av_stream_header header;
+  IMFMediaBuffer*                   sample;
+  LONGLONG                          sampleTime;
+};
 #else
-class Test_I_AVStream_Server_SessionMessage;
+struct Test_I_AVStream_Server_MessageData
+{
+  Test_I_AVStream_Server_MessageData ()
+   : header ()
+  {}
+
+  Test_I_AVStream_Server_MessageData& operator+= (const Test_I_AVStream_Server_MessageData& rhs_in)
+  {
+    header = rhs_in.header;
+
+    return *this;
+  }
+
+  struct acestream_av_stream_header header;
+};
+typedef Stream_DataBase_T<struct Test_I_AVStream_Server_MessageData> Test_I_AVStream_Server_MessageData_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

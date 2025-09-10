@@ -88,12 +88,13 @@ extern "C"
 #include "test_i_stream_common.h"
 
 #include "test_i_connection_common.h"
+#include "test_i_session_message.h"
 
 // forward declarations
 class Stream_IAllocator;
 class Test_I_Message;
-class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
+// class Test_I_SessionMessage;
+// class Test_I_SessionMessage_2;
 //struct Test_I_URLStreamLoad_ConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           //Test_I_URLStreamLoad_ConnectionConfiguration_t,
@@ -118,36 +119,6 @@ struct Test_I_URLStreamLoad_MessageData
 
   struct M3U_Playlist* M3UPlaylist;
 };
-
-struct Test_I_URLStreamLoad_SessionData
- : Test_I_StreamSessionData
-{
-  Test_I_URLStreamLoad_SessionData ()
-   : Test_I_StreamSessionData ()
-   , address (static_cast<u_short> (0),
-              static_cast<ACE_UINT32> (INADDR_ANY))
-   , connection (NULL)
-   , format (STREAM_COMPRESSION_FORMAT_INVALID)
-   , targetFileName ()
-  {}
-
-  struct Test_I_URLStreamLoad_SessionData& operator= (const struct Test_I_URLStreamLoad_SessionData& rhs_in)
-  {
-    Test_I_StreamSessionData::operator= (rhs_in);
-
-    connection = (connection ? connection : rhs_in.connection);
-    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
-                                              : targetFileName);
-
-    return *this;
-  }
-
-  ACE_INET_Addr                                address;
-  Test_I_IConnection_t*                        connection;
-  enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
-  std::string                                  targetFileName; // file writer module
-};
-typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData> Test_I_URLStreamLoad_SessionData_t;
 
 typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData,
                                     enum Stream_SessionMessageType,
@@ -206,67 +177,6 @@ struct Test_I_URLStreamLoad_StreamState
 };
 
 //////////////////////////////////////////
-
-struct Test_I_URLStreamLoad_StreamState_2;
-struct Test_I_URLStreamLoad_SessionData_2
- : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                 struct _AMMediaType,
-#else
-#if defined (FFMPEG_SUPPORT)
-                                 struct Stream_MediaFramework_FFMPEG_VideoMediaType,
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-                                 struct Test_I_URLStreamLoad_StreamState_2,
-                                 struct Stream_Statistic,
-                                 struct Stream_UserData>
-{
-  Test_I_URLStreamLoad_SessionData_2 ()
-   : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                   struct _AMMediaType,
-#else
-#if defined (FFMPEG_SUPPORT)
-                                   struct Stream_MediaFramework_FFMPEG_VideoMediaType,
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-                                   struct Test_I_URLStreamLoad_StreamState_2,
-                                   struct Stream_Statistic,
-                                   struct Stream_UserData> ()
-   , address (static_cast<u_short> (0),
-              static_cast<ACE_UINT32> (INADDR_ANY))
-   , connection (NULL)
-   , format (STREAM_COMPRESSION_FORMAT_INVALID)
-   , targetFileName ()
-  {}
-
-  struct Test_I_URLStreamLoad_SessionData_2& operator= (const struct Test_I_URLStreamLoad_SessionData_2& rhs_in)
-  {
-    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                  struct _AMMediaType,
-#else
-#if defined (FFMPEG_SUPPORT)
-                                  struct Stream_MediaFramework_FFMPEG_VideoMediaType,
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-                                  struct Test_I_URLStreamLoad_StreamState_2,
-                                  struct Stream_Statistic,
-                                  struct Stream_UserData>::operator= (rhs_in);
-
-    connection = (connection ? connection : rhs_in.connection);
-    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
-                                              : targetFileName);
-
-    return *this;
-  }
-
-  ACE_INET_Addr                                address;
-  Test_I_IConnection_t*                        connection;
-  enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
-  std::string                                  targetFileName; // file writer module
-};
-typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData_2> Test_I_URLStreamLoad_SessionData_2_t;
 
 typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData_2,
                                     enum Stream_SessionMessageType,

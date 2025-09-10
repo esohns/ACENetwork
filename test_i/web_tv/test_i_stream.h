@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Test_I_AVStream_H
-#define Test_I_AVStream_H
+#ifndef Test_I_Stream_H
+#define Test_I_Stream_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -28,12 +28,20 @@
 
 #include "stream_base.h"
 #include "stream_common.h"
+#include "stream_session_manager.h"
 
 #include "test_i_common.h"
 
 // forward declarations
 class Test_I_Message;
 class Test_I_SessionMessage_3;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct Test_I_WebTV_SessionData_3,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_3;
 
 extern const char stream_name_string_4a[];
 extern const char stream_name_string_4b[];
@@ -49,8 +57,7 @@ class Test_I_AVStream
                         struct Test_I_WebTV_StreamConfiguration_3,
                         struct Stream_Statistic,
                         struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                        Test_I_WebTV_SessionData_3, // session data
-                        Test_I_WebTV_SessionData_3_t, // session data container (reference counted)
+                        Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
                         Test_I_SessionMessage_3>
@@ -65,8 +72,7 @@ class Test_I_AVStream
                         struct Test_I_WebTV_StreamConfiguration_3,
                         struct Stream_Statistic,
                         struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                        Test_I_WebTV_SessionData_3, // session data
-                        Test_I_WebTV_SessionData_3_t, // session data container (reference counted)
+                        Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
                         Test_I_SessionMessage_3> inherited;
@@ -100,8 +106,7 @@ class Test_I_AudioStream
                         struct Test_I_WebTV_StreamConfiguration_3,
                         struct Stream_Statistic,
                         struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                        Test_I_WebTV_SessionData_3, // session data
-                        Test_I_WebTV_SessionData_3_t, // session data container (reference counted)
+                        Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
                         Test_I_SessionMessage_3>
@@ -116,8 +121,7 @@ class Test_I_AudioStream
                         struct Test_I_WebTV_StreamConfiguration_3,
                         struct Stream_Statistic,
                         struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                        Test_I_WebTV_SessionData_3, // session data
-                        Test_I_WebTV_SessionData_3_t, // session data container (reference counted)
+                        Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
                         Test_I_SessionMessage_3> inherited;

@@ -27,6 +27,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 #include "stream_stat_statistic_report.h"
 
 #include "irc_common.h"
@@ -37,6 +38,13 @@
 #include "irc_record.h"
 
 #include "IRC_client_stream_common.h"
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct IRC_Client_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> IRC_Client_SessionManager_t;
 
 typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,
@@ -54,9 +62,8 @@ typedef IRC_Module_Bisector_T<ACE_MT_SYNCH,
                               enum Stream_ControlType,
                               enum Stream_SessionMessageType,
                               struct IRC_Client_StreamState,
-                              struct IRC_Client_SessionData,
-                              IRC_Client_SessionData_t,
                               struct Stream_Statistic,
+                              IRC_Client_SessionManager_t,
                               Common_Timer_Manager_t,
                               struct Stream_UserData> IRC_Client_Module_Bisector_t;
 

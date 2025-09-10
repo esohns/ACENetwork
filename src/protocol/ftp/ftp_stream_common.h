@@ -27,6 +27,7 @@
 #include "stream_configuration.h"
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_common.h"
 
@@ -84,13 +85,19 @@ struct FTP_StreamState
   struct FTP_Stream_SessionData* sessionData;
 };
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct FTP_Stream_SessionData,
+                                 FTP_Statistic_t,
+                                 struct Stream_UserData> FTP_SessionManager_t;
+
 typedef FTP_Stream_T<struct FTP_StreamState,
                      struct FTP_StreamConfiguration,
                      FTP_Statistic_t,
                      FTP_StatisticHandler_t,
                      struct FTP_ModuleHandlerConfiguration,
-                     struct FTP_Stream_SessionData,
-                     FTP_Stream_SessionData_t,
+                     FTP_SessionManager_t,
                      Stream_ControlMessage_t,
                      FTP_Message_t,
                      FTP_SessionMessage_t> FTP_Stream_t;

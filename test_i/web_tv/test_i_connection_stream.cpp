@@ -110,6 +110,11 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   bool reset_setup_pipeline = false;
 //  struct Test_I_WebTV_SessionData* session_data_p = NULL;
 //  inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -126,7 +131,7 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
 //  session_data_p =
 //    &const_cast<struct Test_I_WebTV_SessionData&> (inherited::sessionData_->getR ());
 //  iterator =

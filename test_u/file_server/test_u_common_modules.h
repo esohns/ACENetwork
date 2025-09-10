@@ -28,6 +28,7 @@
 #include "common_time_common.h"
 #include "common_timer_manager_common.h"
 
+#include "stream_session_manager.h"
 #include "stream_streammodule_base.h"
 
 #include "stream_dec_mpeg_ts_decoder.h"
@@ -51,6 +52,13 @@
 class Test_U_Message;
 class Test_U_SessionMessage;
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct FileServer_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_U_SessionManager_t;
+
 // declare module(s)
 typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Stream_ControlMessage_t,
@@ -60,9 +68,8 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct FileServer_StreamState,
-                                     struct FileServer_SessionData,
-                                     FileServer_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_U_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      FileServer_TCPConnectionManager_t,
@@ -75,9 +82,8 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct FileServer_StreamState,
-                                     struct FileServer_SessionData,
-                                     FileServer_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_U_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      FileServer_TCPConnectionManager_t,
@@ -183,9 +189,8 @@ typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
                                     enum Stream_ControlType,
                                     enum Stream_SessionMessageType,
                                     struct FileServer_StreamState,
-                                    struct FileServer_SessionData,
-                                    FileServer_SessionData_t,
                                     struct Stream_Statistic,
+                                    Test_U_SessionManager_t,
                                     Common_Timer_Manager_t,
                                     struct Stream_UserData> Test_U_FileReaderH;
 //DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type

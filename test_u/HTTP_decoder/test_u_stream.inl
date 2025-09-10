@@ -126,6 +126,11 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
+  Test_U_SessionManager_t* session_manager_p =
+    Test_U_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -142,9 +147,9 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   struct Test_U_HTTPDecoder_SessionData& session_data_r =
-      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
+    const_cast<struct Test_U_HTTPDecoder_SessionData&> (session_manager_p->getR ());
   //session_data_r.sessionId = configuration_in.sessionId;
   // *TODO*: remove type inferences
   //session_data_r.targetFileName =
@@ -184,46 +189,46 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   session_data_r.targetFileName = (*iterator).second.second->targetFileName;
 
   // ******************* IO ************************
-  module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
-    goto error;
-  } // end IF
-  IOWriter_impl_p = dynamic_cast<WRITER_T*> (module_p->writer ());
-  if (!IOWriter_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    goto error;
-  } // end IF
-  IOWriter_impl_p->setP (&(inherited::state_));
+  // module_p =
+  //   const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
+  // if (!module_p)
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //               ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
+  //               ACE_TEXT (stream_name_string_),
+  //               ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
+  //   goto error;
+  // } // end IF
+  // IOWriter_impl_p = dynamic_cast<WRITER_T*> (module_p->writer ());
+  // if (!IOWriter_impl_p)
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //               ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
+  //               ACE_TEXT (stream_name_string_)));
+  //   goto error;
+  // } // end IF
+  // IOWriter_impl_p->setP (&(inherited::state_));
 
-  IOReader_impl_p = dynamic_cast<READER_T*> (module_p->reader ());
-  if (!IOReader_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOReader_T> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    goto error;
-  } // end IF
-  if (!IOReader_impl_p->initialize (*((*iterator).second.second)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s/%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                module_p->name ()));
-    goto error;
-  } // end IF
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
+  // IOReader_impl_p = dynamic_cast<READER_T*> (module_p->reader ());
+  // if (!IOReader_impl_p)
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //               ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOReader_T> failed, aborting\n"),
+  //               ACE_TEXT (stream_name_string_)));
+  //   goto error;
+  // } // end IF
+  // if (!IOReader_impl_p->initialize (*((*iterator).second.second)))
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //               ACE_TEXT ("%s/%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
+  //               ACE_TEXT (stream_name_string_),
+  //               module_p->name ()));
+  //   goto error;
+  // } // end IF
+  // // *NOTE*: push()ing the module will open() it
+  // //         --> set the argument that is passed along (head module expects a
+  // //             handle to the session data)
+  // module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup ())

@@ -61,8 +61,7 @@ template <typename StreamStateType,
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
@@ -87,8 +86,7 @@ class BitTorrent_PeerStream_T
                                         StatisticContainerType,
                                         TimerManagerType,
                                         ModuleHandlerConfigurationType,
-                                        SessionDataType,
-                                        SessionDataContainerType,
+                                        SessionManagerType,
                                         ControlMessageType,
                                         DataMessageType,
                                         SessionMessageType,
@@ -107,8 +105,7 @@ class BitTorrent_PeerStream_T
                                         StatisticContainerType,
                                         TimerManagerType,
                                         ModuleHandlerConfigurationType,
-                                        SessionDataType,
-                                        SessionDataContainerType,
+                                        SessionManagerType,
                                         ControlMessageType,
                                         DataMessageType,
                                         SessionMessageType,
@@ -139,8 +136,7 @@ class BitTorrent_PeerStream_T
                                   StatisticContainerType,
                                   TimerManagerType,
                                   ModuleHandlerConfigurationType,
-                                  SessionDataType,
-                                  SessionDataContainerType,
+                                  SessionManagerType,
                                   ControlMessageType,
                                   DataMessageType,
                                   SessionMessageType,
@@ -175,7 +171,7 @@ class BitTorrent_PeerStream_T
                                          UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,                // session data type
+                                typename SessionMessageType::DATA_T::DATA_T, // session data type
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
@@ -202,8 +198,8 @@ class BitTorrent_PeerStream_T
                                                         enum BitTorrent_MessageType,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_READER_T;
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                         Common_TimePolicy_t,
                                                         ModuleHandlerConfigurationType,
@@ -213,11 +209,11 @@ class BitTorrent_PeerStream_T
                                                         enum BitTorrent_MessageType,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        SessionDataType,
-                                                        SessionDataContainerType> STATISTIC_WRITER_T;
+                                                        typename SessionMessageType::DATA_T::DATA_T,
+                                                        typename SessionMessageType::DATA_T> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                SessionDataType,                   // session data type
+                                typename SessionMessageType::DATA_T::DATA_T, // session data type
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,

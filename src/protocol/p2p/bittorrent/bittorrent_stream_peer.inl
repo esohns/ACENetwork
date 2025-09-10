@@ -31,8 +31,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -47,8 +46,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         StatisticContainerType,
                         TimerManagerType,
                         ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
+                        SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType,
@@ -69,8 +67,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -86,8 +83,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         StatisticContainerType,
                         TimerManagerType,
                         ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
+                        SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType,
@@ -134,8 +130,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -151,8 +146,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         StatisticContainerType,
                         TimerManagerType,
                         ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
+                        SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType,
@@ -171,10 +165,14 @@ BitTorrent_PeerStream_T<StreamStateType,
   ACE_ASSERT (!inherited::isRunning ());
   ACE_ASSERT (configuration_in.configuration_);
 
-  SessionDataType* session_data_p = NULL;
-
+  typename SessionMessageType::DATA_T::DATA_T* session_data_p = NULL;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
+  SessionManagerType* session_manager_p =
+    SessionManagerType::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -192,12 +190,8 @@ BitTorrent_PeerStream_T<StreamStateType,
     setup_pipeline;
   reset_setup_pipeline = false;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
   session_data_p =
-    &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
-  ACE_ASSERT (session_data_p);
+    &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR ());
   session_data_p->stream = this;
 
   // ---------------------------------------------------------------------------
@@ -228,8 +222,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
+          typename SessionManagerType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -245,8 +238,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         StatisticContainerType,
                         TimerManagerType,
                         ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
+                        SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType,

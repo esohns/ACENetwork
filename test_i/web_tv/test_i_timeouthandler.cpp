@@ -203,7 +203,7 @@ allocate:
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
   message_p->initialize (message_data_p,
-                         stream_r.getR_2 ().getR ().sessionId,
+                         stream_r.getR_2 ().sessionId,
                          NULL);
 
   message_block_p = message_p;

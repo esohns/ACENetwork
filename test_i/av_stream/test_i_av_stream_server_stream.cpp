@@ -1286,16 +1286,23 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
 
 bool
 Test_I_AVStream_Server_TCPStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
-                                     ACE_HANDLE handle_in)
+                                              ACE_HANDLE handle_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
 
-//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_Server_SessionManager_t* session_manager_p =
+    Test_I_Server_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -1313,17 +1320,11 @@ Test_I_AVStream_Server_TCPStream::initialize (const typename inherited::CONFIGUR
       setup_pipeline;
   reset_setup_pipeline = false;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
   Test_I_AVStream_Server_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Server_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Server_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
-  session_data_r.lock = &(inherited::sessionDataLock_);
-  inherited::state_.sessionData = &session_data_r;
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
-      const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+  // session_data_r.lock = &(inherited::sessionDataLock_);
+  // inherited::state_.sessionData = &session_data_r;
   ACE_ASSERT (session_data_r.formats.empty ());
   session_data_r.formats.push_back (configuration_in.configuration_->format);
   //  session_data_r.sessionId = (*iterator).second.second->sessionId;
@@ -1430,13 +1431,20 @@ Test_I_AVStream_Server_UDPStream::initialize (const typename inherited::CONFIGUR
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
 
-//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_Server_SessionManager_t* session_manager_p =
+    Test_I_Server_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      false;
+    false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
                               handle_in))
@@ -1450,17 +1458,11 @@ Test_I_AVStream_Server_UDPStream::initialize (const typename inherited::CONFIGUR
       setup_pipeline;
   reset_setup_pipeline = false;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
   Test_I_AVStream_Server_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Server_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Server_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
-  session_data_r.lock = &(inherited::sessionDataLock_);
-  inherited::state_.sessionData = &session_data_r;
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
-      const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+  // session_data_r.lock = &(inherited::sessionDataLock_);
+  // inherited::state_.sessionData = &session_data_r;
   ACE_ASSERT (session_data_r.formats.empty ());
   session_data_r.formats.push_back (configuration_in.configuration_->format);
   //  session_data_r.sessionId = (*iterator).second.second->sessionId;

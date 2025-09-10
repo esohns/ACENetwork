@@ -27,6 +27,7 @@
 #include "stream_configuration.h"
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_common.h"
 
@@ -80,13 +81,19 @@ struct SMTP_StreamState
   struct SMTP_Stream_SessionData* sessionData;
 };
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct SMTP_Stream_SessionData,
+                                 SMTP_Statistic_t,
+                                 struct Stream_UserData> SMTP_SessionManager_t;
+
 typedef SMTP_Stream_T<struct SMTP_StreamState,
                       struct SMTP_StreamConfiguration,
                       SMTP_Statistic_t,
                       SMTP_StatisticHandler_t,
                       struct SMTP_ModuleHandlerConfiguration,
-                      struct SMTP_Stream_SessionData,
-                      SMTP_Stream_SessionData_t,
+                      SMTP_SessionManager_t,
                       Stream_ControlMessage_t,
                       SMTP_Message_t,
                       SMTP_SessionMessage_t> SMTP_Stream_t;

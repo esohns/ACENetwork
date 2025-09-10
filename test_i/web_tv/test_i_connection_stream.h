@@ -31,6 +31,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_io_stream.h"
 
@@ -43,6 +44,19 @@
 class Stream_IAllocator;
 class Test_I_SessionMessage;
 class Test_I_SessionMessage_3;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct Test_I_WebTV_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_t;
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct Test_I_WebTV_SessionData_3,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_3;
 
 extern const char stream_name_string_[];
 extern const char stream_name_string_3[];
@@ -59,8 +73,7 @@ class Test_I_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_WebTV_ModuleHandlerConfiguration,
-                                        struct Test_I_WebTV_SessionData,
-                                        Test_I_WebTV_SessionData_t,
+                                        Test_I_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage,
@@ -79,8 +92,7 @@ class Test_I_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_WebTV_ModuleHandlerConfiguration,
-                                        struct Test_I_WebTV_SessionData,
-                                        Test_I_WebTV_SessionData_t,
+                                        Test_I_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage,
@@ -119,8 +131,7 @@ class Test_I_ConnectionStream_3
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                                        Test_I_WebTV_SessionData_3,
-                                        Test_I_WebTV_SessionData_3_t,
+                                        Test_I_SessionManager_3,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage_3,
@@ -139,8 +150,7 @@ class Test_I_ConnectionStream_3
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                                        Test_I_WebTV_SessionData_3,
-                                        Test_I_WebTV_SessionData_3_t,
+                                        Test_I_SessionManager_3,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage_3,

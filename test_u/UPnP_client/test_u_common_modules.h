@@ -28,6 +28,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 #include "stream_streammodule_base.h"
 
 #include "stream_module_xmlparser.h"
@@ -55,6 +56,12 @@
 // forward declarations
 class Test_U_SessionMessage;
 class Test_U_Message;
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct UPnP_Client_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_U_SessionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  UPnP_Client_SSDP_ConnectionConfiguration,
@@ -71,9 +78,8 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct UPnP_Client_StreamState,
-                                     struct UPnP_Client_SessionData,
-                                     UPnP_Client_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_U_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      UPnP_Client_SSDP_ConnectionManager_t,
@@ -86,9 +92,8 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct UPnP_Client_StreamState,
-                                     struct UPnP_Client_SessionData,
-                                     UPnP_Client_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_U_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      UPnP_Client_SSDP_ConnectionManager_t,
@@ -102,9 +107,8 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct UPnP_Client_StreamState,
-                                     struct UPnP_Client_SessionData,
-                                     UPnP_Client_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_U_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      UPnP_Client_HTTP_ConnectionManager_t,
@@ -117,9 +121,8 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct UPnP_Client_StreamState,
-                                     struct UPnP_Client_SessionData,
-                                     UPnP_Client_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_U_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      UPnP_Client_HTTP_ConnectionManager_t,

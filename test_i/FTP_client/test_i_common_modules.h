@@ -28,6 +28,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 #include "stream_streammodule_base.h"
 
 #include "stream_misc_messagehandler.h"
@@ -50,6 +51,13 @@
 // forward declarations
 class Test_I_SessionMessage;
 class Test_I_Message;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct FTP_Client_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  FTP_Client_ConnectionConfiguration,
@@ -66,9 +74,8 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct FTP_Client_StreamState,
-                                     struct FTP_Client_SessionData,
-                                     FTP_Client_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_I_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      FTP_Client_ConnectionManager_t,
@@ -81,9 +88,8 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct FTP_Client_StreamState,
-                                     struct FTP_Client_SessionData,
-                                     FTP_Client_SessionData_t,
                                      struct Stream_Statistic,
+                                     Test_I_SessionManager_t,
                                      Common_Timer_Manager_t,
                                      ACE_INET_Addr,
                                      FTP_Client_ConnectionManager_t,

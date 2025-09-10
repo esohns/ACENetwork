@@ -31,6 +31,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 
 #include "stream_net_io_stream.h"
 
@@ -43,6 +44,19 @@
 class Stream_IAllocator;
 class Test_I_SessionMessage;
 class Test_I_SessionMessage_2;
+
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct Test_I_URLStreamLoad_SessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_t;
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct Test_I_URLStreamLoad_SessionData_2,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_2;
 
 extern const char stream_name_string_[];
 
@@ -58,8 +72,7 @@ class Test_I_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                                        struct Test_I_URLStreamLoad_SessionData,
-                                        Test_I_URLStreamLoad_SessionData_t,
+                                        Test_I_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage,
@@ -78,8 +91,7 @@ class Test_I_ConnectionStream
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                                        struct Test_I_URLStreamLoad_SessionData,
-                                        Test_I_URLStreamLoad_SessionData_t,
+                                        Test_I_SessionManager_t,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage,
@@ -121,8 +133,7 @@ class Test_I_ConnectionStream_2
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
-                                        struct Test_I_URLStreamLoad_SessionData_2,
-                                        Test_I_URLStreamLoad_SessionData_2_t,
+                                        Test_I_SessionManager_2,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage_2,
@@ -141,8 +152,7 @@ class Test_I_ConnectionStream_2
                                         struct Stream_Statistic,
                                         Common_Timer_Manager_t,
                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
-                                        struct Test_I_URLStreamLoad_SessionData_2,
-                                        Test_I_URLStreamLoad_SessionData_2_t,
+                                        Test_I_SessionManager_2,
                                         Stream_ControlMessage_t,
                                         Test_I_Message,
                                         Test_I_SessionMessage_2,

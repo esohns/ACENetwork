@@ -27,13 +27,14 @@
 
 #include "pcp_message.h"
 
-#include "test_u_pcp_client_common.h"
+// #include "test_u_pcp_client_common.h"
+#include "test_u_session_message.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-class Test_U_SessionMessage;
+// class Test_U_SessionMessage;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,

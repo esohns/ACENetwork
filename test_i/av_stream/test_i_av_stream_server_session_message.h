@@ -25,10 +25,11 @@
 #include "ace/Message_Block.h"
 
 #include "stream_common.h"
+#include "stream_control_message.h"
 #include "stream_session_message_base.h"
 #include "stream_messageallocatorheap_base.h"
 
-#include "test_i_av_stream_server_common.h"
+// #include "test_i_av_stream_server_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
@@ -42,6 +43,123 @@ class Test_I_AVStream_Server_Message;
 //          typename ControlMessageType,
 //          typename DataMessageType,
 //          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+class Test_I_AVStream_Server_DirectShow_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_DirectShow_StreamSessionData,
+                                        struct Stream_MediaFramework_DirectShow_AudioVideoFormat,
+                                        struct Test_I_AVStream_Server_DirectShow_StreamState,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_AVStream_Server_DirectShow_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_DirectShow_StreamSessionData,
+                                   struct Stream_MediaFramework_DirectShow_AudioVideoFormat,
+                                   struct Test_I_AVStream_Server_DirectShow_StreamState,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+   , connection (NULL)
+   , targetFileName ()
+   , windowController (NULL)
+  {}
+
+  Test_I_AVStream_Server_DirectShow_StreamSessionData& operator+= (const Test_I_AVStream_Server_DirectShow_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionDataMediaBase_T<struct Test_I_AVStream_DirectShow_StreamSessionData,
+                                  struct Stream_MediaFramework_DirectShow_AudioVideoFormat,
+                                  struct Test_I_AVStream_Server_DirectShow_StreamState,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+
+    connection = ((connection == NULL) ? rhs_in.connection : connection);
+
+    return *this;
+  }
+
+  Net_IINETConnection_t* connection;
+  std::string            targetFileName;
+  IVideoWindow*          windowController;
+};
+typedef Stream_SessionData_T<Test_I_AVStream_Server_DirectShow_StreamSessionData> Test_I_AVStream_Server_DirectShow_StreamSessionData_t;
+
+class Test_I_AVStream_Server_MediaFoundation_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_MediaFoundation_StreamSessionData,
+                                        struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat,
+                                        struct Test_I_AVStream_Server_MediaFoundation_StreamState,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_AVStream_Server_MediaFoundation_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_MediaFoundation_StreamSessionData,
+                                   struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat,
+                                   struct Test_I_AVStream_Server_MediaFoundation_StreamState,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+   , connection (NULL)
+   , outputFormat (NULL)
+   , sourceFormat (NULL)
+  {}
+
+  Test_I_AVStream_Server_MediaFoundation_StreamSessionData& operator+= (const Test_I_AVStream_Server_MediaFoundation_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionDataMediaBase_T<struct Test_I_AVStream_MediaFoundation_StreamSessionData,
+                                  struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat,
+                                  struct Test_I_AVStream_Server_MediaFoundation_StreamState,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+
+    connection = ((connection == NULL) ? rhs_in.connection : connection);
+
+    return *this;
+  }
+
+  Net_IINETConnection_t* connection;
+  IMFMediaType*          outputFormat;
+  IMFMediaType*          sourceFormat;
+};
+typedef Stream_SessionData_T<Test_I_AVStream_Server_MediaFoundation_StreamSessionData> Test_I_AVStream_Server_MediaFoundation_StreamSessionData_t;
+#else
+class Test_I_AVStream_Server_StreamSessionData
+ : public Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
+                                        struct Stream_MediaFramework_ALSA_V4L_Format,
+                                        struct Test_I_AVStream_Server_StreamState,
+                                        struct Stream_Statistic,
+                                        struct Stream_UserData>
+{
+ public:
+  Test_I_AVStream_Server_StreamSessionData ()
+   : Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
+                                   struct Stream_MediaFramework_ALSA_V4L_Format,
+                                   struct Test_I_AVStream_Server_StreamState,
+                                   struct Stream_Statistic,
+                                   struct Stream_UserData> ()
+   , connection (NULL)
+  {}
+
+  Test_I_AVStream_Server_StreamSessionData& operator+= (const Test_I_AVStream_Server_StreamSessionData& rhs_in)
+  {
+    // *NOTE*: the idea is to 'merge' the data
+    Stream_SessionDataMediaBase_T<struct Test_I_AVStream_ALSA_V4L_StreamSessionData,
+                                  struct Stream_MediaFramework_ALSA_V4L_Format,
+                                  struct Test_I_AVStream_Server_StreamState,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+
+    connection = ((connection == NULL) ? rhs_in.connection : connection);
+    targetFileName =
+      (targetFileName.empty () ? rhs_in.targetFileName : targetFileName);
+
+    return *this;
+  }
+
+  Net_IINETConnection_t* connection;
+};
+typedef Stream_SessionData_T<Test_I_AVStream_Server_StreamSessionData> Test_I_AVStream_Server_StreamSessionData_t;
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 class Test_I_AVStream_Server_DirectShow_SessionMessage

@@ -27,6 +27,7 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_session_manager.h"
 #include "stream_streammodule_base.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -236,6 +237,13 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                       
 //                          Test_I_StatisticReport_WriterTask_2_t,                    // writer type
 //                          Test_I_StatisticReport_2);                                // name
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct Test_I_WebTV_SessionData_3,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> Test_I_SessionManager_3;
+
 typedef Stream_Module_QueueReader_T<ACE_MT_SYNCH,
                                     Stream_ControlMessage_t,
                                     Test_I_Message,
@@ -244,9 +252,8 @@ typedef Stream_Module_QueueReader_T<ACE_MT_SYNCH,
                                     enum Stream_ControlType,
                                     enum Stream_SessionMessageType,
                                     struct Test_I_WebTV_StreamState_3,
-                                    Test_I_WebTV_SessionData_3,          // session data
-                                    Test_I_WebTV_SessionData_3_t, // session message payload (reference counted)
                                     struct Stream_Statistic,
+                                    Test_I_SessionManager_3,
                                     Common_Timer_Manager_t,
                                     struct Stream_UserData> Test_I_QueueSource;
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                          // session data type

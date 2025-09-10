@@ -85,12 +85,14 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const typename inherited::CO
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
 
-//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-//  struct Test_U_Stream_TSessionData* session_data_p = NULL;
-  Stream_Module_t* module_p = NULL;
-  //Test_U_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
+  struct Test_U_StreamSessionData* session_data_p = NULL;
+  Test_U_SessionManager_t* session_manager_p =
+    Test_U_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -107,45 +109,14 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const typename inherited::CO
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
 
-//  session_data_p =
-//      &const_cast<struct Test_U_Stream_TSessionData&> (inherited::sessionData_->get ());
+ session_data_p =
+   &const_cast<struct Test_U_StreamSessionData&> (session_manager_p->getR ());
   //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
-
-  // ******************* Socket Handler ************************
-  module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_io_string_),
-                ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
-      goto error;
-  } // end IF
-  //socketHandler_impl_p =
-  //  //dynamic_cast<Test_U_Module_TCPSocketHandler*> (module_p->writer ());
-  //  dynamic_cast<inherited::WRITER_T*> (module_p->writer ());
-  //if (!socketHandler_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              //ACE_TEXT ("%s: dynamic_cast<Test_U_Module_TCPSocketHandler> failed, aborting\n"),
-  //              ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-  //              ACE_TEXT (stream_name_string_)));
-  //  goto error;
-  //} // end IF
-  //socketHandler_impl_p->setP (&(inherited::state_));
-  //socketHandler_impl_p->initialize ();
-
-  // *NOTE*: push()ing the module will open() it
-  //         --> set the argument that is passed along (head module expects a
-  //             handle to the session data)
-  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (configuration_in.configuration_->notificationStrategy))

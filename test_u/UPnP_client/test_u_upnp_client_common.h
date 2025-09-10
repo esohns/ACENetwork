@@ -113,34 +113,6 @@ struct UPnP_Client_MessageData
 };
 typedef Stream_DataBase_T<struct UPnP_Client_MessageData> UPnP_Client_MessageData_t;
 
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          //UPnP_Client_ConnectionConfiguration,
-                          struct HTTP_ConnectionState,
-                          HTTP_Statistic_t> UPnP_Client_IConnection_t;
-struct UPnP_Client_SessionData
- : Test_U_StreamSessionData
-{
-  UPnP_Client_SessionData ()
-   : Test_U_StreamSessionData ()
-   , connection (NULL) // outbound
-   , format (STREAM_COMPRESSION_FORMAT_INVALID)
-   , parserContext (NULL)
-  {}
-  struct UPnP_Client_SessionData& operator= (const struct UPnP_Client_SessionData& rhs_in)
-  {
-    Test_U_StreamSessionData::operator= (rhs_in);
-
-    format = rhs_in.format;
-    connection = (connection ? connection : rhs_in.connection);
-    return *this;
-  }
-
-  UPnP_Client_IConnection_t*                           connection; // RELEASE
-  enum Stream_Decoder_CompressionFormatType            format;
-  struct Stream_Module_XMLParser_SAXParserContextBase* parserContext;
-};
-typedef Stream_SessionData_T<struct UPnP_Client_SessionData> UPnP_Client_SessionData_t;
-
 class Test_U_Message;
 class Test_U_SessionMessage;
 typedef Stream_ISessionDataNotify_T<struct UPnP_Client_SessionData,

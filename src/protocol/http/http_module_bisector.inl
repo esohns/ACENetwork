@@ -43,10 +43,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
@@ -56,12 +55,11 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::HTTP_Module_Bisector_T (typename inherited::ISTREAM_T* stream_in,
-                                                                      bool autoStart_in,
-                                                                      bool generateSessionMessages_in)
+                       SessionManagerType,
+                       TimerManagerType>::HTTP_Module_Bisector_T (typename inherited::ISTREAM_T* stream_in,
+                                                                  bool autoStart_in,
+                                                                  bool generateSessionMessages_in)
  : inherited (stream_in,
               autoStart_in,
               generateSessionMessages_in)
@@ -91,10 +89,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
                        ControlMessageType,
@@ -104,10 +101,9 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::~HTTP_Module_Bisector_T ()
+                       SessionManagerType,
+                       TimerManagerType>::~HTTP_Module_Bisector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::~HTTP_Module_Bisector_T"));
 
@@ -129,10 +125,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 bool
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -143,11 +138,10 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::initialize (const ConfigurationType& configuration_in,
-                                                          Stream_IAllocator* allocator_in)
+                       SessionManagerType,
+                       TimerManagerType>::initialize (const ConfigurationType& configuration_in,
+                                                      Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::initialize"));
 
@@ -203,10 +197,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 void
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -217,11 +210,10 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                 bool& passMessageDownstream_out)
+                       SessionManagerType,
+                       TimerManagerType>::handleDataMessage (DataMessageType*& message_inout,
+                                                             bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::handleDataMessage"));
 
@@ -443,10 +435,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 void
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -457,11 +448,10 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                    bool& passMessageDownstream_out)
+                       SessionManagerType,
+                       TimerManagerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::handleSessionMessage"));
 
@@ -475,27 +465,20 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      // retain session ID for reporting
-      const SessionDataContainerType& session_data_container_r =
-          message_inout->get ();
-      const SessionDataType& session_data_r =
+      const typename SessionMessageType::DATA_T& session_data_container_r =
+        message_inout->get ();
+      const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
           session_data_container_r.get ();
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->currentSessionData);
       ACE_Guard<ACE_SYNCH_MUTEX> aGuard (*(inherited::streamState_->currentSessionData->lock));
       inherited::streamState_->currentSessionData->sessionID =
-          session_data_r.sessionID;
-
-      // start profile timer...
-      //profile_.start ();
+        session_data_r.sessionID;
 
       break;
     }
     default:
-    {
-      // don't do anything...
       break;
-    }
   } // end SWITCH
 }
 
@@ -508,10 +491,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 bool
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -522,10 +504,9 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::collect (StatisticContainerType& data_out)
+                       SessionManagerType,
+                       TimerManagerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::collect"));
 
@@ -551,101 +532,6 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
   return true;
 }
 
-//template <typename LockType,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//void
-//HTTP_Module_Bisector_T<LockType,
-//                      TaskSynchType,
-//                      TimePolicyType,
-//                      SessionMessageType,
-//                      ProtocolMessageType,
-//                      ConfigurationType,
-//                      StreamStateType,
-//                      SessionDataType,
-//                      SessionDataContainerType,
-//                      StatisticContainerType>::report () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::report"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return);
-//}
-
-//template <typename LockType,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//bool
-//HTTP_Module_Bisector_T<LockType,
-//                      TaskSynchType,
-//                      TimePolicyType,
-//                      SessionMessageType,
-//                      ProtocolMessageType,
-//                      ConfigurationType,
-//                      StreamStateType,
-//                      SessionDataType,
-//                      SessionDataContainerType,
-//                      StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::putStatisticMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::configuration_.streamConfiguration);
-//
-////  // step1: initialize session data
-////  IRC_StreamSessionData* session_data_p = NULL;
-////  ACE_NEW_NORETURN (session_data_p,
-////                    IRC_StreamSessionData ());
-////  if (!session_data_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-////    return false;
-////  } // end IF
-////  //ACE_OS::memset (data_p, 0, sizeof (IRC_SessionData));
-//  SessionDataType& session_data_r =
-//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-//  session_data_r.currentStatistic = statisticData_in;
-//
-////  // step2: allocate session data container
-////  IRC_StreamSessionData_t* session_data_container_p = NULL;
-////  // *NOTE*: fire-and-forget stream_session_data_p
-////  ACE_NEW_NORETURN (session_data_container_p,
-////                    IRC_StreamSessionData_t (stream_session_data_p,
-////                                                    true));
-////  if (!session_data_container_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//
-////    // clean up
-////    delete stream_session_data_p;
-//
-////    return false;
-////  } // end IF
-//
-//  // step3: send the data downstream...
-//  // *NOTE*: fire-and-forget session_data_container_p
-//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-//                                       *inherited::sessionData_,
-//                                       inherited::configuration_.streamConfiguration->messageAllocator);
-//}
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
@@ -655,10 +541,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 bool
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -669,11 +554,10 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::scan_begin (char* data_in,
-                                                          size_t length_in)
+                       SessionManagerType,
+                       TimerManagerType>::scan_begin (char* data_in,
+                                                      size_t length_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::scan_begin"));
 
@@ -718,10 +602,9 @@ template <ACE_SYNCH_DECL,
           typename StreamControlType,
           typename StreamNotificationType,
           typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType>
+          typename SessionManagerType,
+          typename TimerManagerType>
 void
 HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -732,10 +615,9 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                        StreamControlType,
                        StreamNotificationType,
                        StreamStateType,
-                       SessionDataType,
-                       SessionDataContainerType,
                        StatisticContainerType,
-                       StatisticHandlerType>::scan_end ()
+                       SessionManagerType,
+                       TimerManagerType>::scan_end ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Bisector_T::scan_end"));
 

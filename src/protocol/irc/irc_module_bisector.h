@@ -57,10 +57,8 @@ template <ACE_SYNCH_DECL,
           typename StreamNotificationType,
           typename StreamStateType,
           ////////////////////////////////
-          typename SessionDataType,          // session data
-          typename SessionDataContainerType, // session message payload (reference counted)
-          ////////////////////////////////
           typename StatisticContainerType,
+          typename SessionManagerType,
           typename TimerManagerType,
           ////////////////////////////////
           typename UserDataType>
@@ -74,9 +72,8 @@ class IRC_Module_Bisector_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
+                                      SessionManagerType,
                                       TimerManagerType,
                                       UserDataType>
 {
@@ -99,9 +96,8 @@ class IRC_Module_Bisector_T
                                     StreamControlType,
                                     StreamNotificationType,
                                     StreamStateType,
-                                    SessionDataType,
-                                    SessionDataContainerType,
                                     StatisticContainerType,
+                                    SessionManagerType,
                                     TimerManagerType,
                                     UserDataType>::initialize;
 
@@ -130,9 +126,8 @@ class IRC_Module_Bisector_T
                                       StreamControlType,
                                       StreamNotificationType,
                                       StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
                                       StatisticContainerType,
+                                      SessionManagerType,
                                       TimerManagerType,
                                       UserDataType> inherited;
 
