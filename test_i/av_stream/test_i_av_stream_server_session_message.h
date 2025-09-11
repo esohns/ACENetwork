@@ -21,6 +21,10 @@
 #ifndef TEST_I_AVSTREAM_SERVER_SESSION_MESSAGE_H
 #define TEST_I_AVSTREAM_SERVER_SESSION_MESSAGE_H
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "control.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 
@@ -36,13 +40,9 @@ class ACE_Allocator;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 class Test_I_AVStream_Server_DirectShow_Message;
 class Test_I_AVStream_Server_MediaFoundation_Message;
-#endif
+#else
 class Test_I_AVStream_Server_Message;
-//template <ACE_SYNCH_DECL,
-//          typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 class Test_I_AVStream_Server_DirectShow_StreamSessionData

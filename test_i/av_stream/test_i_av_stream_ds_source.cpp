@@ -45,8 +45,10 @@
 //#include "class_factory.h"
 
 #include "test_i_defines.h"
+
+#include "test_i_av_stream_server_common.h"
 #include "test_i_av_stream_server_message.h"
-#include "test_i_av_stream_server_session_message.h"
+//#include "test_i_av_stream_server_session_message.h"
 
 // Setup data
 const struct REGPINTYPES sudMediaTypes[] =
@@ -150,25 +152,25 @@ const struct _AMOVIESETUP_FILTER sudFilterRegAM2 =
 // *TODO*: these type definitions are useless; this filter is monolythic
 typedef Stream_MediaFramework_DirectShow_Source_Filter_T<Test_I_AVStream_Server_DirectShow_Message,
                                                          struct Test_I_AVStream_Server_DirectShow_FilterConfiguration,
-                                                         struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Stream_MediaFramework_DirectShow_Source_Filter_t;
+                                                         struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Test_I_AVStream_DirectShow_Source_Filter_t;
 typedef Stream_MediaFramework_DirectShow_Asynch_Source_Filter_T<Test_I_AVStream_Server_DirectShow_Message,
                                                                 struct Test_I_AVStream_Server_DirectShow_FilterConfiguration,
-                                                                struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Stream_MediaFramework_DirectShow_Asynch_Source_Filter_t;
+                                                                struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Test_I_AVStream_DirectShow_Asynch_Source_Filter_t;
 
 void WINAPI InitRoutine (BOOL, const CLSID*);
 
 CFactoryTemplate g_Templates[] = {
-  { STREAM_LIB_DIRECTSHOW_FILTER_NAME_SOURCE_L                       // Name.
-  , &CLSID_ACEStream_MediaFramework_Source_Filter                    // CLSID.
-  , Stream_MediaFramework_DirectShow_Source_Filter_t::CreateInstance // Creation function.
-  , InitRoutine                                                      // Initialization function.
-  , &sudFilterRegAM },                                               // Pointer to filter information.
+  { STREAM_LIB_DIRECTSHOW_FILTER_NAME_SOURCE_L                 // Name
+  , &CLSID_ACEStream_MediaFramework_Source_Filter              // CLSID
+  , Test_I_AVStream_DirectShow_Source_Filter_t::CreateInstance // Creation function
+  , InitRoutine                                                // Initialization function
+  , &sudFilterRegAM },                                         // Pointer to filter information
 
-  { STREAM_LIB_DIRECTSHOW_FILTER_NAME_ASYNCH_SOURCE_L                       // Name.
-  , &CLSID_ACEStream_MediaFramework_Asynch_Source_Filter                    // CLSID.
-  , Stream_MediaFramework_DirectShow_Asynch_Source_Filter_t::CreateInstance // Creation function.
-  , InitRoutine                                                             // Initialization function.
-  , &sudFilterRegAM2 }                                                      // Pointer to filter information.
+  { STREAM_LIB_DIRECTSHOW_FILTER_NAME_ASYNCH_SOURCE_L                 // Name
+  , &CLSID_ACEStream_MediaFramework_Asynch_Source_Filter              // CLSID
+  , Test_I_AVStream_DirectShow_Asynch_Source_Filter_t::CreateInstance // Creation function
+  , InitRoutine                                                       // Initialization function
+  , &sudFilterRegAM2 }                                                // Pointer to filter information
 };
 int g_cTemplates = sizeof (g_Templates) / sizeof (g_Templates[0]);
 

@@ -182,12 +182,16 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   std::string log_file_name;
   struct _AMMediaType media_type_s;
   struct Stream_MediaFramework_DirectShow_AudioVideoFormat format_s;
+  Test_I_Client_DirectShow_SessionManager_t* session_manager_p =
+    Test_I_Client_DirectShow_SessionManager_t::SINGLETON_T::instance ();
 
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   iterator_2 =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING));
+
   // sanity check(s)
+  ACE_ASSERT (session_manager_p);
   ACE_ASSERT (iterator != configuration_in.end ());
   ACE_ASSERT (iterator_2 != configuration_in.end ());
 
@@ -471,41 +475,14 @@ continue_:
     setup_pipeline;
   reset_setup_pipeline = false;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
   session_data_p =
-    &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (inherited::sessionData_->getR ());
+    &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
   //(*iterator).second.second->direct3DConfiguration->handle->AddRef ();
   //session_data_p->direct3DDevice =
   //  (*iterator).second.second->direct3DConfiguration->handle;
   //session_data_p->resetToken = reset_token;
   //session_data_p->targetFileName = (*iterator).second.second->targetFileName;
-
-  // ---------------------------------------------------------------------------
-  // step4: initialize module(s)
-
-  // ******************* Camera Source ************************
-  module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_CAM_SOURCE_DIRECTSHOW_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT (STREAM_DEV_CAM_SOURCE_DIRECTSHOW_DEFAULT_NAME_STRING)));
-    return false;
-  } // end IF
-  source_impl_p =
-    dynamic_cast<Test_I_Stream_DirectShow_CamSource*> (module_p->writer ());
-  if (!source_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Test_I_Stream_DirectShow_CamSource> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    return false;
-  } // end IF
 
   // ---------------------------------------------------------------------------
   // step5: update session data
@@ -535,13 +512,6 @@ continue_:
   session_data_p->stream = this;
 
   // ---------------------------------------------------------------------------
-  // step6: initialize head module
-  //source_impl_p->setP (&(inherited::state_));
-  ////fileReader_impl_p->reset ();
-  //// *NOTE*: push()ing the module will open() it
-  ////         --> set the argument that is passed along (head module expects a
-  ////             handle to the session data)
-  //module_p->arg (inherited::sessionData_);
 
   // step7: assemble stream
   if (configuration_in.configuration_->setupPipeline)
@@ -766,6 +736,15 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::initialize"));
 
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_Client_MediaFoundation_SessionManager_t* session_manager_p =
+    Test_I_Client_MediaFoundation_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
+
   // allocate a new session state, reset stream
   bool setup_pipeline =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline;
@@ -784,9 +763,9 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   Test_I_AVStream_Client_MediaFoundation_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (session_manager_p->getR ());
   bool input_mediatype_was_null = false;
   IMFMediaType* media_type_p = NULL;
   struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat format_s;
@@ -799,12 +778,6 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
 
   // ---------------------------------------------------------------------------
 
-  Test_I_Stream_MediaFoundation_CamSource* source_impl_p = NULL;
-  // *TODO*: remove type inference
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
-
   // ******************* Camera Source ************************
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_CAM_SOURCE_MEDIAFOUNDATION_DEFAULT_NAME_STRING)));
@@ -816,7 +789,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
                 ACE_TEXT (STREAM_DEV_CAM_SOURCE_MEDIAFOUNDATION_DEFAULT_NAME_STRING)));
     return false;
   } // end IF
-  source_impl_p =
+  Test_I_Stream_MediaFoundation_CamSource* source_impl_p =
     dynamic_cast<Test_I_Stream_MediaFoundation_CamSource*> (module_p->writer ());
   if (!source_impl_p)
   {
@@ -924,13 +897,11 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
 //    } // end IF
 //  } // end IF
 
-#if defined (_DEBUG)
   if (!input_mediatype_was_null)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: capture format: %s\n"),
                 ACE_TEXT (stream_name_string_),
                 ACE_TEXT (Stream_MediaFramework_MediaFoundation_Tools::toString (configuration_in.configuration_->format.video, true).c_str ())));
-#endif // _DEBUG
 
   ACE_ASSERT (session_data_r.formats.empty ());
   Stream_MediaFramework_MediaFoundation_Tools::copy (configuration_in.configuration_->format,
@@ -958,7 +929,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
   media_type_p = NULL;
   session_data_r.stream = this;
 
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   if (mediaSession_)
   {
     // *TODO*: this crashes in CTopoNode::UnlinkInput ()...
@@ -999,17 +970,10 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
     reference_count = mediaSession_->AddRef ();
     (*iterator).second.second->session = mediaSession_;
   } // end IF
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
   topology_p->Release (); topology_p = NULL;
 
   // -------------------------------------------------------------
-
-  //source_impl_p->setP (&(inherited::state_));
-  ////fileReader_impl_p->reset ();
-  //// *NOTE*: push()ing the module will open() it
-  ////         --> set the argument that is passed along (head module expects a
-  ////             handle to the session data)
-  //module_p->arg (inherited::sessionData_);
 
   if (configuration_in.configuration_->setupPipeline)
     if (!inherited::setup (NULL))
@@ -1061,7 +1025,7 @@ error:
   } // end IF
   Stream_MediaFramework_MediaFoundation_Tools::free (session_data_r.formats);
   session_data_r.direct3DManagerResetToken = 0;
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   if (session_data_r.session)
   {
     session_data_r.session->Release (); session_data_r.session = NULL;
@@ -1070,7 +1034,7 @@ error:
   {
     mediaSession_->Release (); mediaSession_ = NULL;
   } // end IF
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 
   if (COM_initialized)
     CoUninitialize ();

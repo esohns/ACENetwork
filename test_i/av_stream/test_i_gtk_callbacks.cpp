@@ -1900,10 +1900,8 @@ stream_processing_function (void* arg_in)
             result_2 &=
               directshow_thread_data_p->CBData->videoStream->initialize ((*directshow_stream_iterator).second);
 
-            const Test_I_AVStream_Client_DirectShow_StreamSessionData_t* session_data_container_p =
-              &directshow_thread_data_p->CBData->videoStream->getR_2 ();
             session_data_p =
-              &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_data_container_p->getR ());
+              &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (directshow_thread_data_p->CBData->videoStream->getR_2 ());
             break;
           }
           case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1916,10 +1914,8 @@ stream_processing_function (void* arg_in)
             result_2 =
               mediafoundation_thread_data_p->CBData->videoStream->initialize ((*mediafoundation_stream_iterator).second);
 
-            const Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t* session_data_container_p =
-              &mediafoundation_thread_data_p->CBData->videoStream->getR_2 ();
             session_data_p =
-              &const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (session_data_container_p->getR ());
+              &const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (mediafoundation_thread_data_p->CBData->videoStream->getR_2 ());
             break;
           }
           default:
@@ -1974,10 +1970,8 @@ stream_processing_function (void* arg_in)
             result_2 &=
               directshow_thread_data_p->CBData->videoStream->initialize ((*directshow_stream_iterator).second);
 
-            const Test_I_AVStream_Client_DirectShow_StreamSessionData_t* session_data_container_p =
-              &directshow_thread_data_p->CBData->videoStream->getR_2 ();
             session_data_p =
-              &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_data_container_p->getR ());
+              &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (directshow_thread_data_p->CBData->videoStream->getR_2 ());
             break;
           }
           case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1987,10 +1981,9 @@ stream_processing_function (void* arg_in)
             //  mediafoundation_ui_cb_data_p->CBData->UDPStream;
             result_2 =
               mediafoundation_thread_data_p->CBData->UDPStream->initialize ((*mediafoundation_stream_iterator).second);
-            const Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t* session_data_container_p =
-              &mediafoundation_thread_data_p->CBData->UDPStream->getR_2 ();
+
             session_data_p =
-              &const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (session_data_container_p->getR ());
+              &const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (mediafoundation_thread_data_p->CBData->UDPStream->getR_2 ());
             break;
           }
           default:

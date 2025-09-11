@@ -163,8 +163,15 @@ Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& 
   bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   struct Stream_MediaFramework_DirectShow_AudioVideoFormat format_s;
+  Test_I_Server_DirectShow_SessionManager_t* session_manager_p =
+    Test_I_Server_DirectShow_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -181,37 +188,14 @@ Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& 
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   Test_I_AVStream_Server_DirectShow_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Server_DirectShow_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Server_DirectShow_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
-  session_data_r.lock = &(inherited::sessionDataLock_);
-  inherited::state_.sessionData = &session_data_r;
-  iterator =
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+  //session_data_r.lock = &(inherited::sessionDataLock_);
+  //inherited::state_.sessionData = &session_data_r;
 
   // ---------------------------------------------------------------------------
-
-  // ******************* Display Handler ***************************************
-  //Stream_Module_t* module_p =
-  //  const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-  //if (!module_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-  //              ACE_TEXT (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-  //  goto error;
-  //} // end IF
-
-  //Test_I_AVStream_Server_DirectShow_Display* directshow_display_impl_p =
-  //  dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> (module_p->writer ());
-  //if (!directshow_display_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> failed, aborting\n")));
-  //  goto error;
-  //} // end IF
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("source format: %s\n"),
@@ -426,8 +410,15 @@ Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& 
   bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   struct Stream_MediaFramework_DirectShow_AudioVideoFormat format_s;
+  Test_I_Server_DirectShow_SessionManager_t* session_manager_p =
+    Test_I_Server_DirectShow_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -444,37 +435,14 @@ Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& 
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   Test_I_AVStream_Server_DirectShow_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Server_DirectShow_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Server_DirectShow_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
-  session_data_r.lock = &(inherited::sessionDataLock_);
-  inherited::state_.sessionData = &session_data_r;
-  iterator =
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
+  //session_data_r.lock = &(inherited::sessionDataLock_);
+  //inherited::state_.sessionData = &session_data_r;
 
   // ---------------------------------------------------------------------------
-
-  // ******************* Display Handler ***************************************
-  //Stream_Module_t* module_p =
-  //  const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-  //if (!module_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-  //              ACE_TEXT (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)));
-  //  goto error;
-  //} // end IF
-
-  //Test_I_AVStream_Server_DirectShow_Display* directshow_display_impl_p =
-  //  dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> (module_p->writer ());
-  //if (!directshow_display_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Test_I_AVStream_Server_DirectShow_Display*> failed, aborting\n")));
-  //  goto error;
-  //} // end IF
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("source format: %s\n"),
@@ -665,9 +633,16 @@ Test_I_AVStream_Server_MediaFoundation_TCPStream::initialize (const CONFIGURATIO
   bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   std::string url_string = ACE_TEXT_ALWAYS_CHAR (AVSTREAM_TARGET_DEFAULT_SCHEME_HANDLER_URL);
   //url_string += ACE_TEXT_ALWAYS_CHAR ("//test");
+  Test_I_Server_MediaFoundation_SessionManager_t* session_manager_p =
+    Test_I_Server_MediaFoundation_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -684,16 +659,12 @@ Test_I_AVStream_Server_MediaFoundation_TCPStream::initialize (const CONFIGURATIO
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   Test_I_AVStream_Server_MediaFoundation_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Server_MediaFoundation_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Server_MediaFoundation_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
-  session_data_r.lock = &(inherited::sessionDataLock_);
-  inherited::state_.sessionData = &session_data_r;
-  iterator =
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //session_data_r.lock = &(inherited::sessionDataLock_);
+  //inherited::state_.sessionData = &session_data_r;
   ACE_ASSERT ((*iterator).second.second->sourceFormat);
   ACE_ASSERT (!session_data_r.sourceFormat);
 
@@ -706,9 +677,6 @@ Test_I_AVStream_Server_MediaFoundation_TCPStream::initialize (const CONFIGURATIO
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-#else
-  session_data_r.sourceFormat = configuration_p->format;
-#endif // ACE_WIN32 || ACE_WIN64
 
   // ---------------------------------------------------------------------------
 
@@ -1025,8 +993,15 @@ Test_I_AVStream_Server_MediaFoundation_UDPStream::initialize (const CONFIGURATIO
   bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   std::string url_string = ACE_TEXT_ALWAYS_CHAR (AVSTREAM_TARGET_DEFAULT_SCHEME_HANDLER_URL);
+  Test_I_Server_MediaFoundation_SessionManager_t* session_manager_p =
+    Test_I_Server_MediaFoundation_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -1043,16 +1018,12 @@ Test_I_AVStream_Server_MediaFoundation_UDPStream::initialize (const CONFIGURATIO
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
-  ACE_ASSERT (inherited::sessionData_);
+
   Test_I_AVStream_Server_MediaFoundation_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Server_MediaFoundation_StreamSessionData&> (inherited::sessionData_->getR ());
+    const_cast<Test_I_AVStream_Server_MediaFoundation_StreamSessionData&> (session_manager_p->getR ());
   // *TODO*: remove type inferences
-  session_data_r.lock = &(inherited::sessionDataLock_);
-  inherited::state_.sessionData = &session_data_r;
-  iterator =
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.end ());
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //session_data_r.lock = &(inherited::sessionDataLock_);
+  //inherited::state_.sessionData = &session_data_r;
   ACE_ASSERT ((*iterator).second.second->sourceFormat);
   ACE_ASSERT (!session_data_r.sourceFormat);
 
@@ -1065,9 +1036,6 @@ Test_I_AVStream_Server_MediaFoundation_UDPStream::initialize (const CONFIGURATIO
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-#else
-  session_data_r.sourceFormat = configuration_p->format;
-#endif // ACE_WIN32 || ACE_WIN64
 
   // ---------------------------------------------------------------------------
 

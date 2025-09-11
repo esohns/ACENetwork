@@ -101,24 +101,6 @@ template <typename ConfigurationType,
 class Test_I_AVStream_Server_SignalHandler_T;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-struct Test_I_AVStream_Server_DirectShow_FilterConfiguration
- : Stream_MediaFramework_DirectShow_FilterConfiguration
-{
-  Test_I_AVStream_Server_DirectShow_FilterConfiguration ()
-   : Stream_MediaFramework_DirectShow_FilterConfiguration ()
-   //, format (NULL)
-   , module (NULL)
-   , pinConfiguration (NULL)
-  {}
-
-  // *TODO*: specify this as part of the network protocol header/handshake
-  //struct _AMMediaType*                                           format; // handle
-  Stream_Module_t*                                                module; // handle
-  struct Stream_MediaFramework_DirectShow_FilterPinConfiguration* pinConfiguration; // handle
-};
-#endif // ACE_WIN32 || ACE_WIN64
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Server_DirectShow_StreamSessionData,
                                     enum Stream_SessionMessageType,
                                     Test_I_AVStream_Server_DirectShow_Message,
@@ -479,6 +461,22 @@ struct Test_I_AVStream_Server_StreamState
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct Test_I_AVStream_Server_DirectShow_FilterConfiguration
+ : Stream_MediaFramework_DirectShow_FilterConfiguration
+{
+  Test_I_AVStream_Server_DirectShow_FilterConfiguration ()
+   : Stream_MediaFramework_DirectShow_FilterConfiguration ()
+   //, format (NULL)
+   , module (NULL)
+   , pinConfiguration (NULL)
+  {}
+
+  // *TODO*: specify this as part of the network protocol header/handshake
+  //struct _AMMediaType*                                           format; // handle
+  Stream_Module_t*                                                module; // handle
+  struct Stream_MediaFramework_DirectShow_FilterPinConfiguration* pinConfiguration; // handle
+};
+
 struct Test_I_AVStream_Server_DirectShow_Configuration
  : Test_I_AVStream_Configuration
 {

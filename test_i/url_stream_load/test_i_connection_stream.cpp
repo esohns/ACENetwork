@@ -261,6 +261,9 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   struct Test_I_URLStreamLoad_SessionData_2* session_data_p = NULL;
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_2* session_manager_p =
+    Test_I_SessionManager_2::SINGLETON_T::instance ();
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct _AMMediaType media_type_s;
   ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
@@ -283,8 +286,6 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   video_info_header_p->bmiHeader.biBitCount = 24;
   video_info_header_p->bmiHeader.biCompression = BI_RGB;
 #else
-  Test_I_SessionManager_2* session_manager_p =
-    Test_I_SessionManager_2::SINGLETON_T::instance ();
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_VideoMediaType media_type_s;
 #endif // FFMPEG_SUPPORT

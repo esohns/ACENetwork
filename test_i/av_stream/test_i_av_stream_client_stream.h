@@ -67,8 +67,7 @@ class Test_I_AVStream_Client_DirectShow_Audio_Stream
                         struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                        Test_I_Client_DirectShow_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_DirectShow_Message,
                         Test_I_AVStream_Client_DirectShow_SessionMessage>
@@ -83,8 +82,7 @@ class Test_I_AVStream_Client_DirectShow_Audio_Stream
                         struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                        Test_I_Client_DirectShow_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_DirectShow_Message,
                         Test_I_AVStream_Client_DirectShow_SessionMessage> inherited;
@@ -118,8 +116,7 @@ class Test_I_AVStream_Client_DirectShow_Stream_T
                         struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                        Test_I_Client_DirectShow_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_DirectShow_Message,
                         Test_I_AVStream_Client_DirectShow_SessionMessage>
@@ -134,8 +131,7 @@ class Test_I_AVStream_Client_DirectShow_Stream_T
                         struct Test_I_AVStream_Client_DirectShow_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData,
-                        Test_I_AVStream_Client_DirectShow_StreamSessionData_t,
+                        Test_I_Client_DirectShow_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_DirectShow_Message,
                         Test_I_AVStream_Client_DirectShow_SessionMessage> inherited;
@@ -192,8 +188,7 @@ class Test_I_AVStream_Client_MediaFoundation_Stream_T
                         struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
-                        Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
+                        Test_I_Client_MediaFoundation_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_MediaFoundation_Message,
                         Test_I_AVStream_Client_MediaFoundation_SessionMessage>
@@ -209,8 +204,7 @@ class Test_I_AVStream_Client_MediaFoundation_Stream_T
                         struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration,
                         struct Stream_Statistic,
                         struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration,
-                        Test_I_AVStream_Client_MediaFoundation_StreamSessionData,
-                        Test_I_AVStream_Client_MediaFoundation_StreamSessionData_t,
+                        Test_I_Client_MediaFoundation_SessionManager_t,
                         Stream_ControlMessage_t,
                         Test_I_AVStream_Client_MediaFoundation_Message,
                         Test_I_AVStream_Client_MediaFoundation_SessionMessage> inherited;
