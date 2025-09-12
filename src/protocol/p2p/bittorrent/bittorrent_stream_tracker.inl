@@ -177,7 +177,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR ());
+    &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR (inherited::id_));
   session_data_p->stream = this;
 
   // ---------------------------------------------------------------------------

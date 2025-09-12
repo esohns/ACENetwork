@@ -121,7 +121,7 @@ Test_U_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<struct PCPClient_SessionData&> (session_manager_p->getR ());
+    &const_cast<struct PCPClient_SessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;

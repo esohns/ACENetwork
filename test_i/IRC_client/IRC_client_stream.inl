@@ -132,7 +132,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<struct IRC_Client_SessionData&> (session_manager_p->getR ());
+    &const_cast<struct IRC_Client_SessionData&> (session_manager_p->getR (inherited::id_));
   // inherited::state_.sessionData = session_data_p;
   //session_data_p->sessionId = configuration_in.sessionId;
 

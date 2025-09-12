@@ -149,7 +149,7 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   reset_setup_pipeline = false;
 
   struct Test_U_HTTPDecoder_SessionData& session_data_r =
-    const_cast<struct Test_U_HTTPDecoder_SessionData&> (session_manager_p->getR ());
+    const_cast<struct Test_U_HTTPDecoder_SessionData&> (session_manager_p->getR (inherited::id_));
   //session_data_r.sessionId = configuration_in.sessionId;
   // *TODO*: remove type inferences
   //session_data_r.targetFileName =

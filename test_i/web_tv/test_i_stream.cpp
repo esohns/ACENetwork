@@ -325,7 +325,7 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<Test_I_WebTV_SessionData_3&> (session_manager_p->getR ());
+    &const_cast<Test_I_WebTV_SessionData_3&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
   ACE_ASSERT (session_data_p->formats.empty ());
   session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
@@ -454,7 +454,7 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<Test_I_WebTV_SessionData_3&> (session_manager_p->getR ());
+    &const_cast<Test_I_WebTV_SessionData_3&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
   ACE_ASSERT (session_data_p->formats.empty ());
   session_data_p->formats.push_front (configuration_in.configuration_->mediaType);

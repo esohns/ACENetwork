@@ -476,7 +476,7 @@ continue_:
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_manager_p->getR ());
+    &const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
   //(*iterator).second.second->direct3DConfiguration->handle->AddRef ();
   //session_data_p->direct3DDevice =
@@ -765,7 +765,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
   reset_setup_pipeline = false;
 
   Test_I_AVStream_Client_MediaFoundation_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (session_manager_p->getR ());
+    const_cast<Test_I_AVStream_Client_MediaFoundation_StreamSessionData&> (session_manager_p->getR (inherited::id_));
   bool input_mediatype_was_null = false;
   IMFMediaType* media_type_p = NULL;
   struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat format_s;
@@ -1178,7 +1178,7 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
   reset_setup_pipeline = false;
 
   Test_I_AVStream_Client_ALSA_V4L_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_manager_p->getR ());
+    const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
 //  typename Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator =
 //      const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));

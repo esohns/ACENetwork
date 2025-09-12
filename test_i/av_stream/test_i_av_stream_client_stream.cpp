@@ -133,7 +133,7 @@ Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize (const typename inher
   reset_setup_pipeline = false;
 
   Test_I_AVStream_Client_DirectShow_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_manager_p->getR ());
+    const_cast<Test_I_AVStream_Client_DirectShow_StreamSessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
   ACE_ASSERT (session_data_r.formats.empty ());
   Stream_MediaFramework_DirectShow_Tools::copy (configuration_in.configuration_->format,
@@ -269,7 +269,7 @@ Test_I_AVStream_Client_ALSA_Stream::initialize (const typename inherited::CONFIG
   reset_setup_pipeline = false;
 
   Test_I_AVStream_Client_ALSA_V4L_StreamSessionData& session_data_r =
-    const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_manager_p->getR ());
+    const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
 //  typename Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator =
 //      const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));

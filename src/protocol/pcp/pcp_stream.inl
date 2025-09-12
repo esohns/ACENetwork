@@ -131,7 +131,7 @@ PCP_Stream_T<StreamStateType,
   } // end IF
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR ());
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR (inherited::id_));
   session_data_r.sessionID = configuration_in.configuration_.sessionID;
 
 //  int result = -1;

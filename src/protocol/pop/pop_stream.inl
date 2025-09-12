@@ -135,7 +135,7 @@ POP_Stream_T<StreamStateType,
   // - initialize modules
   // - push them onto the stream (tail-first) !
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR ());
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR (inherited::id_));
   //session_data_r.sessionId = configuration_in.configuration_->sessionId;
 
 //  int result = -1;

@@ -128,7 +128,7 @@ FTP_Stream_T<StreamStateType,
   } // end IF
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR ());
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_manager_p->getR (inherited::id_));
   //session_data_r.sessionId = configuration_in.configuration_->sessionId;
 
 //  int result = -1;

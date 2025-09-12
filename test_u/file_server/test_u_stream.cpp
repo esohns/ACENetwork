@@ -132,7 +132,7 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
   reset_setup_pipeline = false;
 
  session_data_p =
-   &const_cast<struct FileServer_SessionData&> (session_manager_p->getR ());
+   &const_cast<struct FileServer_SessionData&> (session_manager_p->getR (inherited::id_));
   //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
@@ -265,7 +265,7 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
 
   //(*iterator).second.second->stream = this;
   session_data_p =
-    &const_cast<struct FileServer_SessionData&> (session_manager_p->getR ());
+    &const_cast<struct FileServer_SessionData&> (session_manager_p->getR (inherited::id_));
   //session_data_p->sessionId = configuration_in.sessionId;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;

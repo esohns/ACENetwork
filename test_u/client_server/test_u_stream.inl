@@ -111,7 +111,7 @@ Test_U_Stream_T<ConnectionManagerType>::initialize (const typename inherited::CO
   reset_setup_pipeline = false;
 
  session_data_p =
-   &const_cast<struct Test_U_StreamSessionData&> (session_manager_p->getR ());
+   &const_cast<struct Test_U_StreamSessionData&> (session_manager_p->getR (inherited::id_));
   //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;

@@ -136,7 +136,7 @@ Test_U_InboundConnectionStream::initialize (const inherited::CONFIGURATION_T& co
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<struct DHCPClient_SessionData&> (session_manager_p->getR ());
+    &const_cast<struct DHCPClient_SessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
@@ -260,7 +260,7 @@ Test_U_OutboundConnectionStream::initialize (const inherited::CONFIGURATION_T& c
   reset_setup_pipeline = false;
 
   session_data_p =
-    &const_cast<struct DHCPClient_SessionData&> (session_manager_p->getR ());
+    &const_cast<struct DHCPClient_SessionData&> (session_manager_p->getR (inherited::id_));
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
