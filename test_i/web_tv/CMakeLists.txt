@@ -1,7 +1,15 @@
 include (ffmpeg)
 include (ImageMagick)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
 include (faad)
+
+if (UNIX)
+ pkg_check_modules (PKG_ALSA REQUIRED alsa)
+
+ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dev/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dev/scripts")
+ include (pipewire)
+endif (UNIX)
 
 #set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 #include (PreXMLImplementation)
@@ -17,7 +25,6 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-add_definitions (-DCOMMON_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -28,7 +35,6 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
-add_definitions (-DSTREAM_HAS_DLL)
 
 if (FFMPEG_SUPPORT)
  include_directories (${ffmpeg_INCLUDE_DIRS})
@@ -40,6 +46,10 @@ if (SSL_SUPPORT)
  include_directories (${SSL_INCLUDE_DIRS})
 endif (SSL_SUPPORT)
 if (UNIX)
+ if (LIBPIPEWIRE_SUPPORT)
+  include_directories (${LIBPIPEWIRE_INCLUDE_DIRS})
+ endif (LIBPIPEWIRE_SUPPORT)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/parser)
@@ -159,6 +169,12 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+
+ target_link_libraries (${EXECUTABLE} PUBLIC ${PKG_ALSA_LIBRARIES})
+
+ if (LIBPIPEWIRE_SUPPORT)
+  target_link_libraries (${EXECUTABLE} PUBLIC ${LIBPIPEWIRE_LIBRARIES})
+ endif (LIBPIPEWIRE_SUPPORT)
 endif (UNIX)
 if (FFMPEG_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${ffmpeg_LIBRARIES})

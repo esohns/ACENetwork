@@ -215,13 +215,15 @@ struct Test_I_WebTV_StreamConfiguration_3
 #if defined (FFMPEG_SUPPORT)
    , mediaType ()
 #endif // FFMPEG_SUPPORT
+   , renderer (STREAM_DEVICE_RENDERER_INVALID)
    , useHardwareDecoder (false)
   {}
 
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType mediaType;
 #endif // FFMPEG_SUPPORT
-  bool useHardwareDecoder;
+  enum Stream_Device_Renderer                   renderer;
+  bool                                          useHardwareDecoder;
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,

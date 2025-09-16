@@ -92,6 +92,8 @@
 #include "stream_dec_defines.h"
 #include "stream_dec_tools.h"
 
+#include "stream_dev_defines.h"
+
 #include "stream_misc_defines.h"
 
 #include "stream_file_sink.h"
@@ -211,6 +213,13 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-w        : use pipewire [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+#endif // ACE_WIN32 || ACE_WIN64
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-z        : use hardware decoder [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -233,6 +242,10 @@ do_process_arguments (int argc_in,
                       bool& traceInformation_out,
                       unsigned int& channel_out,
                       bool& printVersionAndExit_out,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                      bool& usePipewire_out,
+#endif // ACE_WIN32 || ACE_WIN64
                       bool& useHardwareDecoder_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
@@ -271,6 +284,10 @@ do_process_arguments (int argc_in,
   traceInformation_out = false;
   channel_out = 0;
   printVersionAndExit_out = false;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  usePipewire_out = false;
+#endif // ACE_WIN32 || ACE_WIN64
   useHardwareDecoder_out = false;
 
   std::string options_string = ACE_TEXT_ALWAYS_CHAR ("c:df:lrs:tu:vz");
@@ -278,6 +295,10 @@ do_process_arguments (int argc_in,
   options_string += ACE_TEXT_ALWAYS_CHAR ("e:");
 #endif // GTK_SUPPORT
   options_string += ACE_TEXT_ALWAYS_CHAR ("g:");
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  options_string += ACE_TEXT_ALWAYS_CHAR ("w");
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
                                ACE_TEXT (options_string.c_str ()),
@@ -360,6 +381,14 @@ do_process_arguments (int argc_in,
         printVersionAndExit_out = true;
         break;
       }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      case 'w':
+      {
+        usePipewire_out = true;
+        break;
+      }
+#endif // ACE_WIN32 || ACE_WIN64
       case 'z':
       {
         useHardwareDecoder_out = true;
@@ -610,6 +639,10 @@ do_work (const std::string& configurationFile_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
          Test_I_SignalHandler& signalHandler_in,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+         bool usePipewire_in,
+#endif // ACE_WIN32 || ACE_WIN64
          bool useHardwareDecoder_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
@@ -658,9 +691,15 @@ do_work (const std::string& configurationFile_in,
   } // end IF
 
 #if defined (SSL_SUPPORT)
+  std::string module_name_string = ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
+  if (!Common_Error_Tools::inDebugSession ())
+  {
+    module_name_string += ACE_DIRECTORY_SEPARATOR_STR_A;
+    module_name_string += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
+  } // end IF
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                      (Common_Error_Tools::inDebugSession () ? ACE_TEXT_ALWAYS_CHAR ("..") : ACE_TEXT_ALWAYS_CHAR ("..")),
+                                                      module_name_string,
                                                       false); // data
   filename_string += ACE_DIRECTORY_SEPARATOR_CHAR;
   filename_string +=
@@ -1013,7 +1052,7 @@ do_work (const std::string& configurationFile_in,
       waveformatex_p->nSamplesPerSec;
   CoTaskMemFree (waveformatex_p); waveformatex_p = NULL;
 #else
-  modulehandler_configuration_4b.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;
+  modulehandler_configuration_4b.outputFormat.audio.format = AV_SAMPLE_FMT_S16;
   modulehandler_configuration_4b.outputFormat.audio.channels = 2;
   modulehandler_configuration_4b.outputFormat.audio.sampleRate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1048,7 +1087,7 @@ do_work (const std::string& configurationFile_in,
   struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4b; // AV input-
 #if defined (FFMPEG_SUPPORT)
   stream_configuration_4b.mediaType.audio.channels = 2;
-  stream_configuration_4b.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
+  stream_configuration_4b.mediaType.audio.format = AV_SAMPLE_FMT_S16;
   stream_configuration_4b.mediaType.audio.sampleRate = 48000;
   //stream_configuration_4b.mediaType.video.frameRate.num = 30;
 #endif // FFMPEG_SUPPORT
@@ -1056,6 +1095,12 @@ do_work (const std::string& configurationFile_in,
   //stream_configuration_4b.cloneModule = false;
   stream_configuration_4b.module = &event_handler_module_3;
   stream_configuration_4b.printFinalReport = true;
+  stream_configuration_4b.renderer = STREAM_DEV_AUDIO_DEFAULT_RENDERER;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  if (usePipewire_in)
+    stream_configuration_4b.renderer = STREAM_DEVICE_RENDERER_PIPEWIRE;
+#endif // ACE_WIN32 || ACE_WIN64
   stream_configuration_4b.useHardwareDecoder = useHardwareDecoder_in;
   configuration_in.streamConfiguration_4b.initialize (module_configuration,
                                                       modulehandler_configuration_4b,
@@ -1362,6 +1407,10 @@ ACE_TMAIN (int argc_in,
   bool trace_information;
   unsigned int channel_i;
   bool print_version_and_exit;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  bool use_pipewire_b = false;
+#endif // ACE_WIN32 || ACE_WIN64
   bool use_hardware_decoder_b;
 
   struct Test_I_WebTV_Configuration configuration;
@@ -1425,15 +1474,18 @@ ACE_TMAIN (int argc_in,
   Common_Tools::initialize (true,   // COM ?
                             false); // RNG ?
 #else
+#if defined (LIBPIPEWIRE_SUPPORT)
+  pw_init (&argc_in, &argv_in);
+#endif // LIBPIPEWIRE_SUPPORT
   Common_Tools::initialize (false); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   // step1a set defaults
   configuration_path =
-      Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
-                                                        true); // configuration-
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
   configuration_file = configuration_path;
   configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_INI_FILE);
@@ -1479,6 +1531,10 @@ ACE_TMAIN (int argc_in,
                              trace_information,
                              channel_i,
                              print_version_and_exit,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                             use_pipewire_b,
+#endif // ACE_WIN32 || ACE_WIN64
                              use_hardware_decoder_b))
   {
     do_print_usage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
@@ -1641,6 +1697,10 @@ ACE_TMAIN (int argc_in,
            ignored_signal_set,
            previous_signal_actions,
            signal_handler,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+           use_pipewire_b,
+#endif // ACE_WIN32 || ACE_WIN64
            use_hardware_decoder_b);
   timer.stop ();
 
@@ -1707,6 +1767,13 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_mask);
   Common_Log_Tools::finalize ();
   Common_Tools::finalize ();
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (LIBPIPEWIRE_SUPPORT)
+  pw_deinit ();
+#endif // LIBPIPEWIRE_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();

@@ -110,18 +110,21 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   idistributor_p->initialize (branches_a);
   module_p = NULL;
 
-// #if defined (FAAD_SUPPORT)
-//   ACE_NEW_RETURN (module_p,
-//                   Test_I_FAADDecoder_Module (this,
-//                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
-//                   false);
-// #endif // FAAD_SUPPORT
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_AudioDecoder_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
                   false);
 #endif // FFMPEG_SUPPORT
+#else
+#if defined (FAAD_SUPPORT)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_FAADDecoder_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
+                  false);
+#endif // FAAD_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 
@@ -142,19 +145,47 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     module_p = NULL;
   } // end IF
 
+  switch (inherited::configuration_->configuration_->renderer)
+  {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_WASAPIOut_Module (this,
-                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_RENDER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
+    case STREAM_DEVICE_RENDERER_WASAPI:
+    {
+      ACE_NEW_RETURN (module_p,
+                      Test_I_WASAPIOut_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_RENDER_DEFAULT_NAME_STRING)),
+                      false);
+      break;
+    }
 #else
-  ACE_NEW_RETURN (module_p,
-                  Test_I_ALSA_Module (this,
-                                      ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_p, index_i);
+    case STREAM_DEVICE_RENDERER_ALSA:
+    {
+      ACE_NEW_RETURN (module_p,
+                      Test_I_ALSA_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
+                      false);
+      break;
+    }
+    case STREAM_DEVICE_RENDERER_PIPEWIRE:
+    {
+#if defined (LIBPIPEWIRE_SUPPORT)
+      ACE_NEW_RETURN (module_p,
+                      Test_I_Pipewire_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_PIPEWIRE_DEFAULT_NAME_STRING)),
+                      false);
+#endif // LIBPIPEWIRE_SUPPORT
+      break;
+    }
 #endif // ACE_WIN32 || ACE_WIN64
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("%s: invalid/unknown renderer (was: %d), aborting\n"),
+                 ACE_TEXT (stream_name_string_4b),
+                 inherited::configuration_->configuration_->renderer));
+      return false;
+    }
+  } // end SWITCH
+  layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 
   ++index_i;
