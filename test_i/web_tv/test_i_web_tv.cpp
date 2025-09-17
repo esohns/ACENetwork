@@ -1052,7 +1052,7 @@ do_work (const std::string& configurationFile_in,
       waveformatex_p->nSamplesPerSec;
   CoTaskMemFree (waveformatex_p); waveformatex_p = NULL;
 #else
-  modulehandler_configuration_4b.outputFormat.audio.format = AV_SAMPLE_FMT_S16;
+  modulehandler_configuration_4b.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;
   modulehandler_configuration_4b.outputFormat.audio.channels = 2;
   modulehandler_configuration_4b.outputFormat.audio.sampleRate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1087,7 +1087,7 @@ do_work (const std::string& configurationFile_in,
   struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4b; // AV input-
 #if defined (FFMPEG_SUPPORT)
   stream_configuration_4b.mediaType.audio.channels = 2;
-  stream_configuration_4b.mediaType.audio.format = AV_SAMPLE_FMT_S16;
+  stream_configuration_4b.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
   stream_configuration_4b.mediaType.audio.sampleRate = 48000;
   //stream_configuration_4b.mediaType.video.frameRate.num = 30;
 #endif // FFMPEG_SUPPORT
