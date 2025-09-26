@@ -215,8 +215,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   {
     // *NOTE*: Stream_Device_Tools::loadRendererGraph() resets the graph
     //         (see below)
-    if (!Stream_MediaFramework_DirectShow_Tools::reset ((*iterator).second.second->builder,
-                                                        CLSID_VideoInputDeviceCategory))
+    if (!Stream_MediaFramework_DirectShow_Tools::reset ((*iterator).second.second->builder))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::reset(), aborting\n"),
