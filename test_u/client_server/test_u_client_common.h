@@ -32,6 +32,7 @@
 #if defined (GTK_SUPPORT)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
+#define __CGUID_H__
 #include "common_ui_gtk_manager.h"
 #endif // GTK_SUPPORT
 #if defined (WXWIDGETS_SUPPORT)

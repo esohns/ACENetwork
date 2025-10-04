@@ -21,7 +21,7 @@
 #ifndef NET_CLIENT_STREAM_COMMON_H
 #define NET_CLIENT_STREAM_COMMON_H
 
-//#include "common_parser_common.h"
+#include "common_parser_common.h"
 
 #include "stream_common.h"
 #include "stream_configuration.h"

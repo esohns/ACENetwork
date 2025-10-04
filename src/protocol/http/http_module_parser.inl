@@ -903,15 +903,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
         inherited::sessionData_->getR ();
 
-      // retain session ID for reporting
-      ACE_ASSERT (inherited::streamState_);
-      ACE_ASSERT (inherited::streamState_->sessionData);
-      ACE_ASSERT (inherited::streamState_->sessionData->lock);
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
-        inherited::streamState_->sessionData->sessionId =
-          session_data_r.sessionId;
-      } // end lock scope
-
       //// start profile timer
       //profile_.start ();
 

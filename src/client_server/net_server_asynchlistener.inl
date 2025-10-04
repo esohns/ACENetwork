@@ -18,10 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#if defined (_MSC_VER)
-#include <crtdefs.h>
-#endif // _MSC_VER
-
 #include "ace/Default_Constants.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
@@ -33,6 +29,9 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "common.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#define __CGUID_H__
+#endif // ACE_WIN32 || ACE_WIN64
 #include "common_tools.h"
 
 #include "net_common.h"
