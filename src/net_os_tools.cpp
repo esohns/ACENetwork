@@ -1117,7 +1117,9 @@ Net_OS_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIde
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  if (!Common_Process_Tools::id (ACE_TEXT_ALWAYS_CHAR (NET_EXE_NETWORKMANAGER_STRING)))
+  std::vector<pid_t> process_ids_a =
+    Common_Process_Tools::id (ACE_TEXT_ALWAYS_CHAR (NET_EXE_NETWORKMANAGER_STRING));
+  if (process_ids_a.empty ())
     return false; // *TODO*: avoid false negatives
 //  if (!Common_DBus_Tools::isUnitRunning (NULL,
 //                                         COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
