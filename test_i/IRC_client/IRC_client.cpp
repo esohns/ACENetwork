@@ -661,6 +661,9 @@ clean_up:
 void
 do_work (struct IRC_Client_Configuration& configuration_in,
          const ACE_INET_Addr& serverAddress_in,
+#if defined (CURSES_SUPPORT)
+         bool useCursesLibrary_in,
+#endif // CURSES_SUPPORT
          const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -731,6 +734,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   struct IRC_Client_CursesState& state_r =
     const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
 #endif // CURSES_SUPPORT
+  struct Common_UI_State ui_state_s;
 
   // step3: initialize client connector
   IRC_Client_ConnectionConfiguration connection_configuration;
@@ -747,7 +751,12 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   connection_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
 #if defined (CURSES_SUPPORT)
-  connection_configuration.UIState = &state_r;
+  if (useCursesLibrary_in)
+    connection_configuration.UIState = &state_r;
+  else
+    connection_configuration.UIState = &ui_state_s;
+#else
+  connection_configuration.UIState = &ui_state_s;
 #endif // CURSES_SUPPORT
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
@@ -761,13 +770,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   //IRC_Client_ConnectorConfiguration connector_configuration;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-#if defined (CURSES_SUPPORT)
-  IRC_Client_CursesSessionConnector_t connector (true);
-  IRC_Client_AsynchCursesSessionConnector_t asynch_connector (true);
-#else
   IRC_Client_SessionConnector_t connector (true);
   IRC_Client_AsynchSessionConnector_t asynch_connector (true);
-#endif // CURSES_SUPPORT
   IRC_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     connector_p = &connector;
@@ -1360,6 +1364,9 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   do_work (configuration,
            server_address,
+#if defined (CURSES_SUPPORT)
+           use_curses_library,
+#endif // CURSES_SUPPORT
            ACE_Time_Value (statistic_reporting_interval, 0),
            signal_set,
            ignored_signal_set,

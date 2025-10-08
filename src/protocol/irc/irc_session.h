@@ -26,6 +26,7 @@
 #include "ace/Asynch_Connector.h"
 #include "ace/config-macros.h"
 #include "ace/Connector.h"
+#include "ace/FILE_IO.h"
 #include "ace/Global_Macros.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
@@ -49,11 +50,10 @@ template <typename ConnectionType,
           typename ModuleHandlerConfigurationIteratorType,
           ///////////////////////////////
           // *TODO*: remove these ASAP
-          typename UIStateType, // ui state (inherits struct Common_UI_State)
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
-          typename InputHandlerConfigurationType> // *NOTE*: needs to inherit from ACE_FILE_IO
+          typename InputHandlerConfigurationType>
 class IRC_Session_T
  : public ConnectionType
  , public NotificationType
@@ -65,7 +65,6 @@ class IRC_Session_T
                                           MessageType,
                                           SessionMessageType,
                                           ModuleHandlerConfigurationIteratorType,
-                                          UIStateType,
                                           ConnectionConfigurationType,
                                           ConnectionManagerType,
                                           InputHandlerType,
@@ -78,7 +77,6 @@ class IRC_Session_T
                                                  MessageType,
                                                  SessionMessageType,
                                                  ModuleHandlerConfigurationIteratorType,
-                                                 UIStateType,
                                                  ConnectionConfigurationType,
                                                  ConnectionManagerType,
                                                  InputHandlerType,
@@ -113,14 +111,13 @@ class IRC_Session_T
  protected:
   void error (const IRC_Record&);
   void log (const IRC_Record&);
-  void log (const std::string&,  // channel (empty ? server log : channel)
-            const std::string&); // text
+  virtual void log (const std::string&,  // channel (empty ? server log : channel)
+                    const std::string&); // text
 
   bool              close_; // -log file ?
+  ACE_FILE_IO       output_; // log file|output handle
   InputHandlerType* inputHandler_;
-  bool              logToFile_;
   bool              shutDownOnEnd_;
-  UIStateType*      UIState_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Session_T (const IRC_Session_T&))

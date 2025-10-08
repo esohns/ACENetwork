@@ -96,7 +96,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
  : inherited ()
  , inherited2 (this,  // handler
                false) // one-shot ?
- , logToFile_ (BITTORRENT_DEFAULT_SESSION_LOG)
+ //, logToFile_ (BITTORRENT_DEFAULT_SESSION_LOG)
  , peerHandlerModule_ (NULL)
  , trackerHandlerModule_ (NULL)
  , timerId_ (-1)

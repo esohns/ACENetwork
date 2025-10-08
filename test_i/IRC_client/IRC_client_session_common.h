@@ -29,45 +29,13 @@
 
 #include "IRC_client_common.h"
 #include "IRC_client_configuration.h"
-#if defined (CURSES_SUPPORT)
-#include "IRC_client_curses.h"
-#endif // CURSES_SUPPORT
 #include "IRC_client_inputhandler.h"
 #include "IRC_client_network.h"
 #include "IRC_client_session.h"
-//#include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
 
-#if defined (CURSES_SUPPORT)
-typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,
-                             struct IRC_Client_CursesState> IRC_Client_CursesSession_t;
-typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t,
-                             struct IRC_Client_CursesState> IRC_Client_AsynchCursesSession_t;
-
-typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               IRC_Client_CursesSession_t,
-                               ACE_SOCK_CONNECTOR,
-                               ACE_INET_Addr,
-                               IRC_Client_ConnectionConfiguration,
-                               struct IRC_SessionState,
-                               IRC_Statistic_t,
-                               Net_TCPSocketConfiguration_t,
-                               IRC_Client_Stream_t,
-                               struct Net_UserData> IRC_Client_CursesSessionConnector_t;
-typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchCursesSession_t,
-                                     ACE_INET_Addr,
-                                     IRC_Client_ConnectionConfiguration,
-                                     struct IRC_SessionState,
-                                     IRC_Statistic_t,
-                                     Net_TCPSocketConfiguration_t,
-                                     IRC_Client_Stream_t,
-                                     struct Net_UserData> IRC_Client_AsynchCursesSessionConnector_t;
-#endif // CURSES_SUPPORT
-
-typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t,
-                             struct Common_UI_State> IRC_Client_Session_t;
-typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t,
-                             struct Common_UI_State> IRC_Client_AsynchSession_t;
+typedef IRC_Client_Session_T<IRC_Client_TCPConnection_t> IRC_Client_Session_t;
+typedef IRC_Client_Session_T<IRC_Client_AsynchTCPConnection_t> IRC_Client_AsynchSession_t;
 
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                IRC_Client_Session_t,

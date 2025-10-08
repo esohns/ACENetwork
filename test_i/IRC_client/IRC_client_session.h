@@ -46,8 +46,7 @@ typedef Stream_ISessionDataNotify_T<struct IRC_Client_SessionData,
                                     IRC_Message,
                                     IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
 
-template <typename ConnectionType,
-          typename UIStateType>
+template <typename ConnectionType>
 class IRC_Client_Session_T
  : public IRC_Session_T<ConnectionType,
                         struct IRC_Client_SessionData,
@@ -56,17 +55,14 @@ class IRC_Client_Session_T
                         IRC_Message,
                         IRC_Client_SessionMessage,
                         IRC_Client_StreamConfiguration_t::ITERATOR_T,
-                        UIStateType,
                         IRC_Client_ConnectionConfiguration,
                         IRC_Client_Connection_Manager_t,
                         IRC_Client_InputHandler,
                         struct IRC_Client_InputHandlerConfiguration>
 {
- friend class ACE_Connector<IRC_Client_Session_T<ConnectionType,
-                                                 UIStateType>,
+ friend class ACE_Connector<IRC_Client_Session_T<ConnectionType>,
                             ACE_SOCK_CONNECTOR>;
- friend class ACE_Asynch_Connector<IRC_Client_Session_T<ConnectionType,
-                                                        UIStateType> >;
+ friend class ACE_Asynch_Connector<IRC_Client_Session_T<ConnectionType> >;
 
  typedef IRC_Session_T<ConnectionType,
                        struct IRC_Client_SessionData,
@@ -75,7 +71,6 @@ class IRC_Client_Session_T
                        IRC_Message,
                        IRC_Client_SessionMessage,
                        IRC_Client_StreamConfiguration_t::ITERATOR_T,
-                       UIStateType,
                        IRC_Client_ConnectionConfiguration,
                        IRC_Client_Connection_Manager_t,
                        IRC_Client_InputHandler,
@@ -103,8 +98,8 @@ class IRC_Client_Session_T
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Session_T (const IRC_Client_Session_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Session_T& operator= (const IRC_Client_Session_T&))
 
-  void log (const std::string&,  // channel (empty ? server log : channel)
-            const std::string&); // text
+  virtual void log (const std::string&,  // channel (empty ? server log : channel)
+                    const std::string&); // text
 };
 
 // include template definition

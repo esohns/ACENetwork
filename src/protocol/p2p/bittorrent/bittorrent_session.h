@@ -240,7 +240,7 @@ class BitTorrent_Session_T
   // implement Common_ITimerHandler
   virtual void handle (const void*); // asynchronous completion token
 
-  bool                             logToFile_;
+  //bool                             logToFile_;
   PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;
   TRACKER_MESSAGEHANDLER_MODULE_T* trackerHandlerModule_;
   long                             timerId_;
