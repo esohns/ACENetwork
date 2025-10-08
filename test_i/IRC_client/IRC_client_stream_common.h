@@ -82,10 +82,8 @@ struct IRC_Client_StreamState
 {
   IRC_Client_StreamState ()
    : IRC_StreamState ()
-   , sessionData (NULL)
   {}
 
-  struct IRC_Client_SessionData* sessionData;
 };
 
 //struct IRC_Client_ConnectionConfiguration;

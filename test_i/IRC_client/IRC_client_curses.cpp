@@ -194,8 +194,19 @@ continue_:
 
       break;
     }
+    case '\b':
     case KEY_BACKSPACE:
     {
+      ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, false);
+
+      result = wechochar (state_r.input, inputCharacter_in);
+      if (result == ERR)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to wechochar(), continuing\n")));
+
+      if (!state_r.message.empty ())
+        state_r.message.erase (--state_r.message.end ());
+
       break;
     }
     default:

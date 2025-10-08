@@ -38,17 +38,13 @@
 #include "irc_record.h"
 #include "irc_statemachine_registration.h"
 
-//#include "IRC_client_common.h"
-//#include "IRC_client_configuration.h"
 #include "IRC_client_sessionmessage.h"
-//#include "IRC_client_stream_common.h"
 
 // forward declaration(s)
 class ACE_Time_Value;
 class Stream_IAllocator;
 class IRC_Message;
 struct IRC_Client_ModuleHandlerConfiguration;
-//class IRC_Client_SessionMessage;
 struct IRC_Client_SessionData;
 struct IRC_Client_UserData;
 

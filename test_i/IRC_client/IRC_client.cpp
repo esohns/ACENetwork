@@ -710,20 +710,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.streamConfiguration.end ());
 
-  IRC_Client_Module_IRCHandler_Module IRC_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME));
-  IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
-  IRCHandler_impl_p =
-    dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
-  if (!IRCHandler_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
-    return;
-  } // end IF
-  stream_configuration.cloneModule = true;
-  stream_configuration.module = &IRC_handler;
-
   // step2: initialize event dispatch
   configuration_in.dispatchConfiguration.numberOfReactorThreads =
       ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_DEFAULT_NUMBER_OF_CLIENT_DISPATCH_THREADS
@@ -775,8 +761,13 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   //IRC_Client_ConnectorConfiguration connector_configuration;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+#if defined (CURSES_SUPPORT)
+  IRC_Client_CursesSessionConnector_t connector (true);
+  IRC_Client_AsynchCursesSessionConnector_t asynch_connector (true);
+#else
   IRC_Client_SessionConnector_t connector (true);
   IRC_Client_AsynchSessionConnector_t asynch_connector (true);
+#endif // CURSES_SUPPORT
   IRC_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     connector_p = &connector;

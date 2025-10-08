@@ -45,6 +45,9 @@
 #include "irc_tools.h"
 
 #include "IRC_client_configuration.h"
+#if defined (CURSES_SUPPORT)
+#include "IRC_client_curses.h"
+#endif // CURSES_SUPPORT
 
 template <typename ConnectionType,
           typename UIStateType>
@@ -594,13 +597,13 @@ IRC_Client_Session_T<ConnectionType,
             inherited::state_.activeChannel = channel;
             if (inherited::UIState_)
             {
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
               if (!curses_join (channel,
                                 *inherited::UIState_))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_join(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
             } // end IF
 
             break;
@@ -645,13 +648,13 @@ IRC_Client_Session_T<ConnectionType,
             inherited::state_.channelModes.erase (iterator_2);
             if (inherited::UIState_)
             {
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
               if (!curses_part (channel,
                                 *inherited::UIState_))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_part(\"%s\"), continuing\n"),
                             ACE_TEXT (channel.c_str ())));
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
             } // end IF
             break;
           } // end IF
@@ -692,13 +695,13 @@ IRC_Client_Session_T<ConnectionType,
           } // end ELSE
           if (inherited::UIState_)
           {
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
             if (!curses_mode (channel_string,
                               *inherited::UIState_))
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to curses_mode(\"%s\"), continuing\n"),
                           ACE_TEXT (channel_string.c_str ())));
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
           } // end IF
           break;
         }
@@ -817,12 +820,12 @@ IRC_Client_Session_T<ConnectionType,
   {
 //    if (logToFile_)
 //      output_ << messageText_in;
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
     curses_log (channel_in,           // channel
                 messageText_in,       // text
                 *inherited::UIState_, // state
                 true);                // locked access
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
   } // end IF
 //  else
 //    output_ << messageText_in;
