@@ -528,7 +528,7 @@ IRC_Tools::parse (const std::string& inputString_in,
   command_out = IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID;
   parameters_out.clear ();
 
-  std::regex regex (ACE_TEXT_ALWAYS_CHAR ("^(?:/)([[:alpha:]]{1})(?:[[:space:]]+)(?:(.+)(?:[[:space:]]+))*(.*)$"));
+  std::regex regex (ACE_TEXT_ALWAYS_CHAR ("^(?:/)([[:alpha:]]+)(?:[[:space:]]*)(?:(.+)(?:[[:space:]]+))*(.+)?$"));
   std::smatch match_results;
   if (!std::regex_match (inputString_in,
                          match_results,
@@ -1844,10 +1844,32 @@ IRC_Tools::CharToCommand (char char_in)
 
   switch (char_in)
   {
+    case 'a':
+      return IRC_Record::CommandType::AWAY;
+    case 'i':
+      return IRC_Record::CommandType::INVITE;
     case 'j':
       return IRC_Record::CommandType::JOIN;
+    case 'k':
+      return IRC_Record::CommandType::KICK;
+    case 'l':
+      return IRC_Record::CommandType::LIST;
+    case 'm':
+      return IRC_Record::CommandType::PRIVMSG;
+    case 'n':
+      return IRC_Record::CommandType::NOTICE;
+    case 'o':
+      return IRC_Record::CommandType::MODE;
     case 'p':
       return IRC_Record::CommandType::PART;
+    case 'q':
+      return IRC_Record::CommandType::QUIT;
+    case 't':
+      return IRC_Record::CommandType::TOPIC;
+    case 'u':
+      return IRC_Record::CommandType::USERHOST;
+    case 'w':
+      return IRC_Record::CommandType::WHO;
     default:
     {
       ACE_DEBUG ((LM_ERROR,

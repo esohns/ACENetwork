@@ -2180,11 +2180,11 @@ button_send_clicked_cb (GtkWidget* widget_in,
     connection_p->getR ();
   ACE_ASSERT (connection_data_r.controller);
   try {
-    connection_data_r.controller->send (receivers,
-                                        message_string);
+    connection_data_r.controller->privmsg (receivers,
+                                           message_string);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::send(), continuing\n")));
+                ACE_TEXT ("caught exception in IRC_IControl::privmsg(), continuing\n")));
   }
 
   // step4: echo data locally...

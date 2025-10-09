@@ -108,9 +108,11 @@ class IRC_Client_Module_IRCHandler
   virtual void kick (const std::string&,  // channel
                      const std::string&,  // nick
                      const std::string&); // comment
-  virtual void send (const string_list_t&, // receiver(s) [nick/channel]
-                     const std::string&);  // message
-  virtual void who (const std::string&, // name
+  virtual void privmsg (const string_list_t&, // receiver(s) [nick/channel]
+                        const std::string&);  // message
+  virtual void notice (const string_list_t&, // receiver(s) [nick/channel]
+                       const std::string&);  // message
+  virtual void who (const std::string&,       // name
                     bool);              // query ops only ?
   virtual void whois (const std::string&,    // server
                       const string_list_t&); // nickmask(s)

@@ -783,12 +783,12 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
 template <typename ConnectionType>
 void
 IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
-                                              const IRC_Client_SessionMessage& sessionrecord_r)
+                                              const IRC_Client_SessionMessage& sessionrMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
-  ACE_UNUSED_ARG (sessionrecord_r);
+  ACE_UNUSED_ARG (sessionrMessage_in);
 }
 
 template <typename ConnectionType>
@@ -805,7 +805,7 @@ IRC_Client_Session_T<ConnectionType>::log (const std::string& channel_in,
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
 
   if (inherited::CONNECTION_BASE_T::configuration_->logToFile)
-    output_.send (messageText_in.c_str (), messageText_in.size ());
+    inherited::output_.send (messageText_in.c_str (), messageText_in.size ());
 
   switch (inherited::CONNECTION_BASE_T::configuration_->UIState->type)
   {

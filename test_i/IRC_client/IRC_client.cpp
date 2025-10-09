@@ -204,7 +204,7 @@ do_processArguments (int argc_in,
   std::string address_string =
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME);
   address_string += ':';
-  std::stringstream converter;
+  std::ostringstream converter;
   converter << IRC_DEFAULT_SERVER_PORT;
   address_string += converter.str ();
   int result =
@@ -261,7 +261,7 @@ do_processArguments (int argc_in,
       {
         address_string = argumentParser.opt_arg ();
         address_string += ':';
-        std::stringstream converter;
+        std::ostringstream converter;
         converter << IRC_DEFAULT_SERVER_PORT;
         address_string += converter.str ();
         result =
@@ -310,10 +310,9 @@ do_processArguments (int argc_in,
       }
       case 's':
       {
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter.clear ();
-        converter << argumentParser.opt_arg ();
-        converter >> statisticReportingInterval_out;
+        std::istringstream converter_2;
+        converter_2.str (ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ()));
+        converter_2 >> statisticReportingInterval_out;
         break;
       }
       case 't':

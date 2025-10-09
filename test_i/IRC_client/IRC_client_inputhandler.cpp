@@ -218,10 +218,11 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
     receivers.push_front (state_->activeChannel);
   } // end lock scope
   try {
-    configuration_->controller->send (receivers, message_text);
+    configuration_->controller->privmsg (receivers,
+                                         message_text);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in IRC_Client_IIRCControl::send(), aborting\n")));
+                ACE_TEXT ("caught exception in IRC_IControl::privmsg(), aborting\n")));
     return -1;
   }
 

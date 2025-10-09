@@ -853,8 +853,8 @@ IRC_Client_Module_IRCHandler::mode (const std::string& target_in,
   } // end IF
 
   // construct parameter
-  std::string mode_string = (enable_in ? ACE_TEXT_ALWAYS_CHAR("+")
-                                       : ACE_TEXT_ALWAYS_CHAR("-"));
+  std::string mode_string = (enable_in ? ACE_TEXT_ALWAYS_CHAR ("+")
+                                       : ACE_TEXT_ALWAYS_CHAR ("-"));
   mode_string += mode_in;
 
   message_p->parameters_.push_back (target_in);
@@ -874,9 +874,6 @@ IRC_Client_Module_IRCHandler::topic (const std::string& channel_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::topic"));
 
-  // sanity check(s)
-  ACE_ASSERT (!topic_in.empty ());
-
   // step1: initialize TOPIC
   IRC_Record* message_p = allocateMessage (IRC_Record::TOPIC);
   if (!message_p)
@@ -887,7 +884,8 @@ IRC_Client_Module_IRCHandler::topic (const std::string& channel_in,
   } // end IF
 
   message_p->parameters_.push_back (channel_in);
-  message_p->parameters_.push_back (topic_in);
+  if (!topic_in.empty ())
+    message_p->parameters_.push_back (topic_in);
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -908,7 +906,7 @@ IRC_Client_Module_IRCHandler::names (const string_list_t& channels_in)
   } // end IF
 
   // compute range ?
-  if (channels_in.size () > 1)
+  if (!channels_in.empty ())
   {
     list_item_range_t range;
     range.first = 0;
@@ -936,7 +934,7 @@ IRC_Client_Module_IRCHandler::list (const string_list_t& channels_in)
   } // end IF
 
   // compute range ?
-  if (channels_in.size () > 1)
+  if (!channels_in.empty ())
   {
     list_item_range_t range;
     range.first = 0;
@@ -997,17 +995,49 @@ IRC_Client_Module_IRCHandler::kick (const std::string& channel_in,
 }
 
 void
-IRC_Client_Module_IRCHandler::send (const string_list_t& receivers_in,
-                                    const std::string& message_in)
+IRC_Client_Module_IRCHandler::privmsg (const string_list_t& receivers_in,
+                                       const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::send"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::privmsg"));
 
-  // sanity check
-  if (message_in.empty ())
-    return; // nothing to do...
+  // sanity check(s)
+  ACE_ASSERT (!message_in.empty ());
 
   // step1: initialize PRIVMSG
   IRC_Record* message_p = allocateMessage (IRC_Record::PRIVMSG);
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(): \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  // compute range ?
+  if (receivers_in.size () > 1)
+  {
+    list_item_range_t range;
+    range.first = 0;
+    range.second = static_cast<unsigned long> (receivers_in.size () - 1);
+    message_p->parameterRanges_.push_back (range);
+  } // end IF
+  message_p->parameters_ = receivers_in;
+  message_p->parameters_.push_back (message_in);
+
+  // step2: send it upstream
+  sendMessage (message_p);
+}
+
+void
+IRC_Client_Module_IRCHandler::notice (const string_list_t& receivers_in,
+                                      const std::string& message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::notice"));
+
+  // sanity check(s)
+  ACE_ASSERT (!message_in.empty ());
+
+  // step1: initialize NOTICE
+  IRC_Record* message_p = allocateMessage (IRC_Record::NOTICE);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,

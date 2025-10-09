@@ -57,7 +57,9 @@ curses_input (struct Common_UI_Curses_State* state_in,
   {
     case 27: // ESC
     {
-      state_r.finished = true;
+      { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, false);
+        state_r.finished = true;
+      } // end lock scope
 
       // close connection --> closes session --> closes program
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
@@ -87,9 +89,14 @@ curses_input (struct Common_UI_Curses_State* state_in,
                     ACE_TEXT ("failed to top_panel(), continuing\n")));
       update_panels ();
       result = doupdate ();
-      if (result == ERR)
+      if (unlikely (result == ERR))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to doupdate(), continuing\n")));
+
+      // reset focus to input window
+      touchwin (state_r.input);
+      wrefresh (state_r.input);
+
       break;
     }
     case '\r': // Apple
@@ -124,18 +131,40 @@ curses_input (struct Common_UI_Curses_State* state_in,
         // step1: parse commands
         switch (command_e)
         {
+          case IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID:
+            break; // --> send a message to the current channel
+          case IRC_Record::CommandType::QUIT:
+          {
+            std::string reason_string;
+            if (!parameters_a.empty ())
+              reason_string = parameters_a.front ();
+
+            try {
+              state_r.controller->quit (reason_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::quit(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
           case IRC_Record::CommandType::JOIN:
           { ACE_ASSERT (!parameters_a.empty ());
             string_list_t channels_a, keys_a;
             std::string channel_string = parameters_a.front ();
+
             // sanity check(s): has '#' prefix ?
             if (channel_string.find ('#', 0) != 0)
               channel_string.insert (channel_string.begin (), '#');
+
             // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
             // *TODO*: support the CHANNELLEN=xxx "feature" of the server
-            if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
+            if (unlikely (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH))
               channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
+
             channels_a.push_back (channel_string);
+
             try {
               state_r.controller->join (channels_a, keys_a);
             } catch (...) {
@@ -143,12 +172,33 @@ curses_input (struct Common_UI_Curses_State* state_in,
                           ACE_TEXT ("caught exception in IRC_IControl::join(), aborting\n")));
               return false;
             }
+
             goto continue_;
           }
           case IRC_Record::CommandType::PART:
-          { ACE_ASSERT (!parameters_a.empty ());
+          {
             string_list_t channels_a;
-            channels_a.push_back (parameters_a.front ());
+            std::string channel_string;
+            if (parameters_a.empty ())
+            {
+              if (unlikely ((*state_r.activePanel).first.empty ())) // server log active ?
+                goto continue_; // --> ignore command
+              channel_string = (*state_r.activePanel).first;
+            } // end IF
+            else
+              channel_string = parameters_a.front ();
+
+            // sanity check(s): has '#' prefix ?
+            if (channel_string.find ('#', 0) != 0)
+              channel_string.insert (channel_string.begin (), '#');
+
+            // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
+            // *TODO*: support the CHANNELLEN=xxx "feature" of the server
+            if (unlikely (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH))
+              channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
+
+            channels_a.push_back (channel_string);
+
             try {
               state_r.controller->part (channels_a);
             } catch (...) {
@@ -156,18 +206,215 @@ curses_input (struct Common_UI_Curses_State* state_in,
                           ACE_TEXT ("caught exception in IRC_IControl::part(), aborting\n")));
               return false;
             }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::MODE:
+          { ACE_ASSERT (parameters_a.size () >= 3);
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            std::string channel_or_nickname_string = *iterator;
+            std::advance (iterator, 1);
+            ACE_ASSERT (!(*iterator).empty ());
+            char mode_c = (*iterator)[0];
+            std::advance (iterator, 1);
+            ACE_ASSERT (!(*iterator).empty ());
+            std::istringstream converter;
+            converter.str (*iterator);
+            int enable_i;
+            converter >> enable_i;
+            std::advance (iterator, 1);
+            string_list_t additional_parameters_a;
+            std::copy (iterator, parameters_a.cend (), additional_parameters_a.begin ());
+
+            try {
+              state_r.controller->mode (channel_or_nickname_string,
+                                        mode_c,
+                                        (enable_i > 0),
+                                        additional_parameters_a);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::mode(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::TOPIC:
+          {
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            std::string channel_string;
+            if (parameters_a.empty ())
+              channel_string = (*state_r.activePanel).first;
+            else
+              channel_string = *iterator;
+            std::string topic_string;
+            if (!IRC_Tools::isValidChannelName (channel_string))
+            {
+              topic_string = channel_string;
+              channel_string = (*state_r.activePanel).first;
+            } // end IF
+            else if (parameters_a.size () >= 2)
+            {
+              std::advance (iterator, 1);
+              topic_string = *iterator;
+            } // end IF
+
+            try {
+              state_r.controller->topic (channel_string,
+                                         topic_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::topic(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::LIST:
+          {
+            try {
+              state_r.controller->list (parameters_a);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::list(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::INVITE:
+          { ACE_ASSERT (parameters_a.size () >= 2);
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string nickname_string = *iterator;
+            std::advance (iterator, 1);
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string channel_string = *iterator;
+
+            try
+            {
+              state_r.controller->invite (nickname_string,
+                                          channel_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::invite(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::KICK:
+          { ACE_ASSERT (parameters_a.size () >= 2);
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string channel_string = *iterator;
+            std::advance (iterator, 1);
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string client_string = *iterator;
+            std::advance (iterator, 1);
+            std::string comment_string;
+            if (iterator != parameters_a.end () &&
+                !(*iterator).empty ())
+              comment_string = *iterator;
+
+            try
+            {
+              state_r.controller->kick (channel_string,
+                                        client_string,
+                                        comment_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::kick(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::PRIVMSG:
+          { ACE_ASSERT (parameters_a.size () >= 2);
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string target_string = *iterator;
+            string_list_t targets_a;
+            targets_a.push_back (target_string);
+            std::advance (iterator, 1);
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string message_string = *iterator;
+
+            try {
+              state_r.controller->privmsg (targets_a,
+                                           message_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::privmsg(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::NOTICE:
+          { ACE_ASSERT (parameters_a.size () >= 2);
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string target_string = *iterator;
+            string_list_t targets_a;
+            targets_a.push_back (target_string);
+            std::advance (iterator, 1);
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string message_string = *iterator;
+
+            try
+            {
+              state_r.controller->notice (targets_a,
+                                          message_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::notice(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::AWAY:
+          {
+            std::string message_string;
+            if (!parameters_a.empty ())
+              message_string = parameters_a.front ();
+
+            try
+            {
+              state_r.controller->away (message_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::away(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::USERHOST:
+          {
+            try
+            {
+              state_r.controller->userhost (parameters_a);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::userhost(), aborting\n")));
+              return false;
+            }
+
             goto continue_;
           }
           default:
-            break;
+            goto continue_;
         } // end SWITCH
 
         // step2: send the message
         try {
-          state_r.controller->send (state_r.receivers, state_r.message);
+          state_r.controller->privmsg (state_r.receivers, state_r.message);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in IRC_IControl::send(), aborting\n")));
+                      ACE_TEXT ("caught exception in IRC_IControl::privmsg(), aborting\n")));
           return false;
         }
 
@@ -180,15 +427,15 @@ curses_input (struct Common_UI_Curses_State* state_in,
 continue_:
         // step4: clear the input window
         result = wmove (state_r.input, 0, 0); // reset the cursor
-        if (result == ERR)
+        if (unlikely (result == ERR))
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to wmove(), continuing\n")));
         result = wclrtoeol (state_r.input);
-        if (result == ERR)
+        if (unlikely (result == ERR))
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to wclrtoeol(), continuing\n")));
 
-        // step5: clean up
+        // step5: clean up state
         state_r.message.clear ();
       } // end lock scope
 
@@ -200,9 +447,13 @@ continue_:
       ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, false);
 
       result = wechochar (state_r.input, inputCharacter_in);
-      if (result == ERR)
+      if (unlikely (result == ERR))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to wechochar(), continuing\n")));
+      result = wclrtoeol (state_r.input);
+        if (unlikely (result == ERR))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to wclrtoeol(), continuing\n")));
 
       if (!state_r.message.empty ())
         state_r.message.erase (--state_r.message.end ());
@@ -784,8 +1035,8 @@ curses_join (const std::string& channel_in,
   //ACE_ASSERT (panel_p->win);
   WINDOW* window_p =
     //dupwin (panel_p->win);
-      newwin (LINES - 2, COLS,
-              0, 0);
+    newwin (LINES - 2, COLS,
+            0, 0);
   if (!window_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -867,6 +1118,10 @@ curses_join (const std::string& channel_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to doupdate(), continuing\n")));
 
+  // reset focus to input window
+  touchwin (state_in.input);
+  wrefresh (state_in.input);
+
   return (result == 0/*OK*/);
 }
 
@@ -881,7 +1136,7 @@ curses_part (const std::string& channel_in,
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.lock, false);
 
   Common_UI_Curses_PanelsIterator_t iterator =
-      state_in.panels.find (channel_in);
+    state_in.panels.find (channel_in);
   ACE_ASSERT (iterator != state_in.panels.end ());
   WINDOW* window_p = panel_window ((*iterator).second);
   result = del_panel ((*iterator).second);
@@ -912,6 +1167,10 @@ curses_part (const std::string& channel_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to doupdate(), continuing\n")));
 
+  // reset focus to input window
+  touchwin (state_in.input);
+  wrefresh (state_in.input);
+
   return (result == 0/*OK*/);
 }
 
@@ -925,7 +1184,7 @@ curses_mode (const std::string& channel_in,
 
   int result = -1;
   Common_UI_Curses_PanelsIterator_t iterator =
-      state_in.panels.find (channel_in);
+    state_in.panels.find (channel_in);
   ACE_ASSERT (iterator != state_in.panels.end ());
   std::string mode_string;
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock, false);
@@ -952,6 +1211,10 @@ curses_mode (const std::string& channel_in,
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddstr(), continuing\n")));
+
+  // reset focus to input window
+  touchwin (state_in.input);
+  wrefresh (state_in.input);
 
   return (result == 0/*OK*/);
 }
