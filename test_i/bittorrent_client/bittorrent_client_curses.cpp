@@ -157,7 +157,7 @@ curses_log (const std::string& URI_in,
   if (getcury (window_p) + 1 >= getmaxy (window_p))
   {
     result = wmove (window_p,
-                    getmaxy (window_p), 0); // retain sanity
+                    getmaxy (window_p) - 1, 0); // retain sanity
     if (result == ERR)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to wmove(), continuing\n")));

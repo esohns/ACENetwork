@@ -528,7 +528,7 @@ IRC_Tools::parse (const std::string& inputString_in,
   command_out = IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID;
   parameters_out.clear ();
 
-  std::regex regex (ACE_TEXT_ALWAYS_CHAR ("^(?:/)([[:alpha:]]+)(?:[[:space:]]*)(?:(.+)(?:[[:space:]]+))*(.+)?$"));
+  std::regex regex (ACE_TEXT_ALWAYS_CHAR ("^(?:/)([[:alpha:]]+)(?:[[:space:]]*)(?:(?:(?:\"([^\"]*)\")|([^\"]+))[[:space:]]+)*(?:(?:\"([^\"]*)\")|([^\"]+))?$"));
   std::smatch match_results;
   if (!std::regex_match (inputString_in,
                          match_results,

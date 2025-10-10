@@ -644,6 +644,7 @@ IRC_Session_T<ConnectionType,
         case IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
         case IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
+        case IRC_Codes::ERR_BANNEDFROMCHAN:   // 474
         case IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
@@ -657,6 +658,7 @@ IRC_Session_T<ConnectionType,
               (record_r.command_.numeric == IRC_Codes::ERR_NOTREGISTERED)    ||
               (record_r.command_.numeric == IRC_Codes::ERR_ALREADYREGISTRED) ||
               (record_r.command_.numeric == IRC_Codes::ERR_YOUREBANNEDCREEP) ||
+              (record_r.command_.numeric == IRC_Codes::ERR_BANNEDFROMCHAN)   ||
               (record_r.command_.numeric == IRC_Codes::ERR_BADCHANNAME)      ||
               (record_r.command_.numeric == IRC_Codes::ERR_CHANOPRIVSNEEDED) ||
               (record_r.command_.numeric == IRC_Codes::ERR_UMODEUNKNOWNFLAG))

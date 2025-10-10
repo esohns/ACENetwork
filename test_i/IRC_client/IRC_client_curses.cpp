@@ -363,8 +363,7 @@ curses_input (struct Common_UI_Curses_State* state_in,
             ACE_ASSERT (!(*iterator).empty ());
             std::string message_string = *iterator;
 
-            try
-            {
+            try {
               state_r.controller->notice (targets_a,
                                           message_string);
             } catch (...) {
@@ -381,8 +380,7 @@ curses_input (struct Common_UI_Curses_State* state_in,
             if (!parameters_a.empty ())
               message_string = parameters_a.front ();
 
-            try
-            {
+            try {
               state_r.controller->away (message_string);
             } catch (...) {
               ACE_DEBUG ((LM_ERROR,
@@ -394,8 +392,7 @@ curses_input (struct Common_UI_Curses_State* state_in,
           }
           case IRC_Record::CommandType::USERHOST:
           {
-            try
-            {
+            try {
               state_r.controller->userhost (parameters_a);
             } catch (...) {
               ACE_DEBUG ((LM_ERROR,
@@ -665,7 +662,7 @@ curses_init (struct Common_UI_Curses_State* state_in)
   state_r.activePanel = state_r.panels.begin ();
 
   result = wmove (state_r.log,
-                  getcury (state_r.log), 3);
+                  getbegy (state_r.log), 3);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -950,6 +947,7 @@ curses_log (const std::string& channel_in,
 
   int result = ERR;
   WINDOW* window_p = NULL;
+  int cury_i;
 
   if (lockedAccess_in)
   {
@@ -960,10 +958,18 @@ curses_log (const std::string& channel_in,
   } // end IF
 
   Common_UI_Curses_PanelsIterator_t iterator =
-      state_in.panels.find (channel_in);
+    state_in.panels.find (channel_in);
   if (iterator == state_in.panels.end ())
   {
     // not connected yet/not on a channel --> store
+    IRC_Client_CursesMessagesIterator_t iterator_2 =
+      state_in.backLog.find (channel_in);
+    if (iterator_2 != state_in.backLog.end ())
+    {
+      (*iterator_2).second.push_back (text_in);
+      goto release;
+    } // end IF
+    ACE_ASSERT (iterator_2 == state_in.backLog.end ());
     IRC_Client_MessageQueue_t message_queue;
     message_queue.push_front (text_in);
     state_in.backLog.insert (std::make_pair (channel_in, message_queue));
@@ -973,27 +979,52 @@ curses_log (const std::string& channel_in,
 
   window_p = panel_window ((*iterator).second);
   ACE_ASSERT (window_p);
-  if (getcury (window_p) + 1 >= getmaxy (window_p))
+  cury_i = getcury (window_p);
+  if (cury_i == getmaxy (window_p) - 1)
   {
-    result = wmove (window_p,
-                    getmaxy (window_p), 0); // retain sanity
-    if (result == ERR)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to wmove(), continuing\n")));
     result = scroll (window_p);
     if (result == ERR)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to scroll(), continuing\n")));
+    --cury_i;
+    result = wmove (window_p,
+                    cury_i, 1);
+    if (result == ERR)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to wmove(), continuing\n")));
   } // end IF
-  result = wmove (window_p,
-                  getcury (window_p) + 1, 1);
-  if (result == ERR)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to wmove(), continuing\n")));
-  result = waddstr (window_p, text_in.c_str ());
+  ++cury_i;
+  result = waddstr (window_p,
+                    text_in.c_str ());
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddstr(), continuing\n")));
+  result = wclrtoeol (window_p);
+  if (unlikely (result == ERR))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wclrtoeol(), continuing\n")));
+
+  result = box (window_p,
+                0, 0);
+  if (unlikely (result == ERR))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to box(), continuing\n")));
+  result = wmove (window_p,
+                  getbegy (window_p), 3);
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wmove(), continuing\n")));
+  result = waddstr (window_p,
+                    channel_in.empty () ? ACE_TEXT_ALWAYS_CHAR ("server log") : channel_in.c_str ());
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to waddstr(), continuing\n")));
+
+  result = wmove (window_p,
+                  cury_i, 1);
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wmove(), continuing\n")));
 
   // switch to channel, refresh
   state_in.activePanel = iterator;
@@ -1006,6 +1037,10 @@ curses_log (const std::string& channel_in,
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to doupdate(), continuing\n")));
+
+  // reset focus to input window
+  touchwin (state_in.input);
+  wrefresh (state_in.input);
 
 release:
   if (lockedAccess_in)
@@ -1026,21 +1061,13 @@ curses_join (const std::string& channel_in,
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.lock, false);
 
   int result = -1;
-  //Common_UI_Curses_PanelsIterator_t iterator =
-  //    state_in.panels.find (std::string ());
-  //ACE_ASSERT (iterator != state_in.panels.end ());
   PANEL* panel_p = NULL;
-    //(*iterator).second;
-  //ACE_ASSERT (panel_p);
-  //ACE_ASSERT (panel_p->win);
-  WINDOW* window_p =
-    //dupwin (panel_p->win);
-    newwin (LINES - 2, COLS,
-            0, 0);
+  WINDOW* window_p = newwin (LINES - 2, COLS,
+                             0, 0);
   if (!window_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dupwin(), aborting\n")));
+                ACE_TEXT ("failed to newwin(), aborting\n")));
     return false;
   } // end IF
   result = idlok (window_p, TRUE); // hw insert/delete line feature
@@ -1048,22 +1075,14 @@ curses_join (const std::string& channel_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to idlok(), aborting\n")));
-    result = delwin (window_p);
-    if (result == ERR)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(), continuing\n")));
-    return false;
+    goto error;
   } // end IF
   result = scrollok (window_p, TRUE); // scrolling feature
   if (result == ERR)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to scrollok(), aborting\n")));
-    result = delwin (window_p);
-    if (result == ERR)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(), continuing\n")));
-    return false;
+    goto error;
   } // end IF
   immedok (window_p, TRUE);
   wbkgdset (window_p, COLOR_PAIR (IRC_CLIENT_CURSES_COLOR_CHANNEL));
@@ -1072,27 +1091,19 @@ curses_join (const std::string& channel_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to box(), aborting\n")));
-    result = delwin (window_p);
-    if (result == ERR)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(), continuing\n")));
-    return false;
+    goto error;
   } // end IF
   panel_p = new_panel (window_p);
   if (!panel_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to new_panel(), aborting\n")));
-    result = delwin (window_p);
-    if (result == ERR)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to delwin(), continuing\n")));
-    return false;
+    goto error;
   } // end IF
   state_in.panels[channel_in] = panel_p;
 
   result = wmove (window_p,
-                  getcury (window_p), 3);
+                  getbegy (window_p), 3);
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -1122,7 +1133,14 @@ curses_join (const std::string& channel_in,
   touchwin (state_in.input);
   wrefresh (state_in.input);
 
-  return (result == 0/*OK*/);
+  return true;
+
+error:
+  result = delwin (window_p);
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to delwin(), continuing\n")));
+  return false;
 }
 
 bool
@@ -1198,11 +1216,15 @@ curses_mode (const std::string& channel_in,
       mode_string = IRC_Tools::ChannelModeToString ((*iterator_2).second);
     } // end ELSE
   } // end lock scope
+
   WINDOW* window_p = panel_window ((*iterator).second);
   ACE_ASSERT (window_p);
-  result =
-    wmove (window_p,
-           getbegy (window_p), getmaxx (window_p) - (3 + static_cast<int> (mode_string.size ())));
+
+  int cury, curx;
+  getyx (window_p, cury, curx);
+
+  result = wmove (window_p,
+                  getbegy (window_p), getmaxx (window_p) - (3 + static_cast<int> (mode_string.size ())));
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to wmove(), continuing\n")));
@@ -1211,6 +1233,12 @@ curses_mode (const std::string& channel_in,
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddstr(), continuing\n")));
+
+  result = wmove (window_p,
+                  cury, curx);
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wmove(), continuing\n")));
 
   // reset focus to input window
   touchwin (state_in.input);

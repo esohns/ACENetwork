@@ -174,6 +174,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         case IRC_Codes::ERR_NEEDMOREPARAMS:       // 461
         case IRC_Codes::ERR_ALREADYREGISTRED:     // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP:     // 465
+        case IRC_Codes::ERR_BANNEDFROMCHAN:       // 474
         case IRC_Codes::ERR_BADCHANNAME:          // 479
         case IRC_Codes::ERR_CHANOPRIVSNEEDED:     // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG:     // 501
@@ -351,12 +352,12 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
 //                      data_r.parameters_.back().c_str()));
           break;
         }
-#if defined ACE_WIN32 || defined ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #pragma message("applying quirk code for this compiler")
-    case IRC_Record::__QUIRK__ERROR:
+        case IRC_Record::__QUIRK__ERROR:
 #else
         case IRC_Record::ERROR:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         {
 //           ACE_DEBUG((LM_DEBUG,
 //                      ACE_TEXT("[%u]: received \"ERROR\": \"%s\"\n"),
