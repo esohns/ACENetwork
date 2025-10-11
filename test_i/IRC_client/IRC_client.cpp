@@ -496,7 +496,10 @@ connection_setup_function (void* arg_in)
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  struct IRC_Client_CursesState* state_p = NULL;
+#if defined (CURSES_SUPPORT)
+  struct IRC_SessionState* session_state_p = NULL;
+  struct IRC_Client_CursesState* curses_state_p = NULL;
+#endif // CURSES_SUPPORT
 
   // step1: wait for connection ?
   if (thread_data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0)
@@ -526,11 +529,6 @@ connection_setup_function (void* arg_in)
     goto clean_up;
   } // end IF
 
-  // step2: register connection with the server
-  // *NOTE*: this entails a little delay (waiting for the welcome notice...)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registering IRC connection...\n")));
-
   istream_connection_p =
     dynamic_cast<IRC_Client_IStreamConnection_t*> (connection_p);
   if (!istream_connection_p)
@@ -559,6 +557,26 @@ connection_setup_function (void* arg_in)
                 connection_p));
     goto clean_up;
   } // end IF
+
+#if defined (CURSES_SUPPORT)
+  curses_state_p =
+    &const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
+  ACE_ASSERT (!curses_state_p->controller);
+  curses_state_p->controller = icontrol_p;
+  ACE_ASSERT (!curses_state_p->sessionState);
+  session_state_p =
+    &const_cast<struct IRC_SessionState&> (connection_p->state ());
+  curses_state_p->sessionState = session_state_p;
+#endif // CURSES_SUPPORT
+
+  // step2: register connection with the server ?
+  if (!thread_data_p->configuration->protocolConfiguration.registerConnection)
+    goto continue_;
+
+  // *NOTE*: this entails a little delay (waiting for the welcome notice...)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("registering IRC connection...\n")));
+
   try {
     result_2 =
       icontrol_p->registerc (thread_data_p->configuration->protocolConfiguration.loginOptions);
@@ -583,7 +601,7 @@ connection_setup_function (void* arg_in)
     goto clean_up;
   } // end ELSE
   // *NOTE*: this entails a little delay (waiting for connection registration...)
-  delay.set (IRC_MAXIMUM_WELCOME_DELAY, 0);
+  delay.set (IRC_MAXIMUM_WELCOME_DELAY_S, 0);
   // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
   //         clock... --> use standard getimeofday
   deadline = ACE_OS::gettimeofday () + delay;
@@ -607,6 +625,7 @@ connection_setup_function (void* arg_in)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registering IRC connection...DONE\n")));
 
+continue_:
   // step4: join a channel
   channel_string =
     thread_data_p->configuration->protocolConfiguration.loginOptions.channel;
@@ -626,16 +645,6 @@ connection_setup_function (void* arg_in)
                 ACE_TEXT (channel_string.c_str ())));
     goto clean_up;
   }
-
-#if defined (CURSES_SUPPORT)
-  state_p =
-      &const_cast<struct IRC_Client_CursesState&> (COMMON_UI_CURSES_MANAGER_SINGLETON::instance ()->getR ());
-  ACE_ASSERT (!state_p->controller);
-  state_p->controller = icontrol_p;
-  ACE_ASSERT (!state_p->sessionState);
-  state_p->sessionState =
-      &const_cast<struct IRC_SessionState&> (connection_p->state ());
-#endif // CURSES_SUPPORT
 
   // step6: clean up
   connection_p->decrease (); connection_p = NULL;

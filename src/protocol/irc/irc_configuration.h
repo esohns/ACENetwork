@@ -43,21 +43,7 @@
 // forward declarations
 class IRC_Record;
 struct IRC_ModuleHandlerConfiguration;
-//class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
-
-//struct IRC_AllocatorConfiguration
-// : Stream_AllocatorConfiguration
-//{
-//  IRC_AllocatorConfiguration ()
-//   : Stream_AllocatorConfiguration ()
-//  {
-//    defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
-//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-//    //         'flex's yy_scan_buffer() method
-//    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-//  }
-//};
 
 struct IRC_ProtocolConfiguration
 {
@@ -65,11 +51,13 @@ struct IRC_ProtocolConfiguration
    : automaticPong (IRC_STREAM_DEFAULT_AUTOPONG)
    , loginOptions ()
    , printPingDot (IRC_CLIENT_DEFAULT_PRINT_PINGDOT)
+   , registerConnection (false)
   {}
 
   bool                    automaticPong; // automatically answer "ping" messages
   struct IRC_LoginOptions loginOptions;
   bool                    printPingDot;  // print dot '.' (stdlog) for answered PINGs
+  bool                    registerConnection;
 };
 
 struct IRC_StreamConfiguration;
@@ -78,7 +66,6 @@ struct IRC_ModuleHandlerConfiguration
 {
   IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   //, connectionConfigurations (NULL)
    , protocolConfiguration (NULL)
    , printProgressDot (false)
    , streamConfiguration (NULL)
@@ -94,28 +81,20 @@ struct IRC_ModuleHandlerConfiguration
     passive = false;
   }
 
-  //IRC_ConnectionConfigurations_t*   connectionConfigurations;
   struct IRC_ProtocolConfiguration* protocolConfiguration;
   bool                              printProgressDot; // file writer module
   struct IRC_StreamConfiguration*   streamConfiguration;
 };
-//typedef std::map<std::string,
-//                 struct IRC_ModuleHandlerConfiguration> IRC_ModuleHandlerConfigurations_t;
-//typedef IRC_ModuleHandlerConfigurations_t::const_iterator IRC_ModuleHandlerConfigurationsConstIterator_t;
 
 struct IRC_StreamConfiguration
  : Stream_Configuration
 {
   IRC_StreamConfiguration ()
    : Stream_Configuration ()
-   //, moduleConfiguration_2 ()
-   //, moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
   {}
 
-  //struct Stream_ModuleConfiguration moduleConfiguration_2;       // stream module configuration
-  //IRC_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
-  struct IRC_ProtocolConfiguration* protocolConfiguration;       // protocol configuration
+  struct IRC_ProtocolConfiguration* protocolConfiguration; // protocol configuration
 };
 
 #endif

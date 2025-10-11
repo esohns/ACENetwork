@@ -167,9 +167,9 @@ IRC_Session_T<ConnectionType,
 
   // step0a: retrieve controller handle
   const typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T& stream_r =
-      inherited::stream ();
+    inherited::stream ();
   const typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p =
-      NULL;
+    NULL;
   for (typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
        (iterator.next (module_p) != 0);
        iterator.advance ())
@@ -187,8 +187,8 @@ IRC_Session_T<ConnectionType,
 
     return;
   } // end IF
+
   inherited::state_.controller =
-//    dynamic_cast<ControllerType*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
     dynamic_cast<IRC_IControl*> (const_cast<typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
   if (unlikely (!inherited::state_.controller))
   {
@@ -202,10 +202,14 @@ IRC_Session_T<ConnectionType,
     return;
   } // end ELSE
 
-  // step0b: set initial nickname
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->protocolConfiguration);
+
+  inherited::state_.protocolConfiguration =
+    inherited::CONNECTION_BASE_T::configuration_->protocolConfiguration;
+
+  // step0b: set initial nickname
   inherited::state_.nickName =
     inherited::CONNECTION_BASE_T::configuration_->protocolConfiguration->loginOptions.nickname;
 

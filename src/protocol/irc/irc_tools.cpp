@@ -1734,6 +1734,7 @@ IRC_Tools::RecordToString (const IRC_Record& message_in)
         case IRC_Codes::ERR_NOMOTD:           // 422
         case IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
+        case IRC_Codes::ERR_BANNEDFROMCHAN:   // 474
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         {
           result = IRC_Tools::stringify (message_in.parameters_,
@@ -1846,6 +1847,8 @@ IRC_Tools::CharToCommand (char char_in)
   {
     case 'a':
       return IRC_Record::CommandType::AWAY;
+    case 'e':
+      return IRC_Record::CommandType::NAMES;
     case 'i':
       return IRC_Record::CommandType::INVITE;
     case 'j':
@@ -1857,17 +1860,19 @@ IRC_Tools::CharToCommand (char char_in)
     case 'm':
       return IRC_Record::CommandType::PRIVMSG;
     case 'n':
-      return IRC_Record::CommandType::NOTICE;
+      return IRC_Record::CommandType::NICK;
     case 'o':
       return IRC_Record::CommandType::MODE;
     case 'p':
       return IRC_Record::CommandType::PART;
     case 'q':
       return IRC_Record::CommandType::QUIT;
+    case 's':
+      return IRC_Record::CommandType::PASS;
     case 't':
       return IRC_Record::CommandType::TOPIC;
     case 'u':
-      return IRC_Record::CommandType::USERHOST;
+      return IRC_Record::CommandType::USER;
     case 'w':
       return IRC_Record::CommandType::WHO;
     default:

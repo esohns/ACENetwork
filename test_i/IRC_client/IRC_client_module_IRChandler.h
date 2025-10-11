@@ -90,7 +90,12 @@ class IRC_Client_Module_IRCHandler
 //  virtual void subscribe (IRC_Client_IStreamNotify_t*); // new subscriber
 //  virtual void unsubscribe (IRC_Client_IStreamNotify_t*); // existing subscriber
   virtual bool registerc (const struct IRC_LoginOptions&); // login details
+  virtual void pass (const std::string&); // password
   virtual void nick (const std::string&); // nick
+  virtual void user (const std::string&,  // username
+                     const std::string&,  // hostname
+                     const std::string&,  // server name
+                     const std::string&); // real name
   virtual void quit (const std::string&); // reason
   virtual void join (const string_list_t&,  // channel(s)
                      const string_list_t&); // key(s)

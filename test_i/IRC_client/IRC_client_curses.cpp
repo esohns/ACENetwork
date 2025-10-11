@@ -116,7 +116,7 @@ curses_input (struct Common_UI_Curses_State* state_in,
       { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, false);
         // sanity check(s)
         if (state_r.message.empty () ||                                        // --> no data
-            ((*state_r.activePanel).first.empty () &&                          // --> server log
+            ((*state_r.activePanel).first.empty () &&                          // --> server log ?
              (command_e == IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID))) // --> not a command
           break; // nothing to do
         { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.sessionState->lock, false);
@@ -133,6 +133,110 @@ curses_input (struct Common_UI_Curses_State* state_in,
         {
           case IRC_Record::CommandType::IRC_COMMANDTYPE_INVALID:
             break; // --> send a message to the current channel
+          case IRC_Record::CommandType::PASS:
+          {
+            std::string password_string;
+            if (parameters_a.empty ())
+            { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.sessionState->lock, false);
+              password_string = state_r.sessionState->protocolConfiguration->loginOptions.password;
+            } // end IF
+            else
+              password_string = parameters_a.front ();
+            try {
+              state_r.controller->pass (password_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::pass(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::NICK:
+          {
+            std::string nickname_string;
+            if (parameters_a.empty ())
+            { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.sessionState->lock, false);
+              nickname_string = state_r.sessionState->protocolConfiguration->loginOptions.nickname;
+            } // end IF
+            else
+              nickname_string = parameters_a.front ();
+            try {
+              state_r.controller->nick (nickname_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::nick(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
+          case IRC_Record::CommandType::USER:
+          {
+            std::string username_string, hostname_string, servername_string, realname_string;
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            if (iterator != parameters_a.end ())
+            {
+              username_string = *iterator;
+              std::advance (iterator, 1);
+            } // end IF
+            else
+              username_string = state_r.sessionState->protocolConfiguration->loginOptions.user.userName;
+
+            if (iterator != parameters_a.end ())
+            {
+              hostname_string = *iterator;
+              std::advance (iterator, 1);
+            } // end IF
+            else
+            {
+              switch (state_r.sessionState->protocolConfiguration->loginOptions.user.hostName.discriminator)
+              {
+                case IRC_LoginOptions::User::Hostname::STRING:
+                { ACE_ASSERT (state_r.sessionState->protocolConfiguration->loginOptions.user.hostName.string);
+                  hostname_string = *state_r.sessionState->protocolConfiguration->loginOptions.user.hostName.string;
+                  break;
+                }
+                case IRC_LoginOptions::User::Hostname::MODE:
+                {
+                  std::ostringstream converter;
+                  converter << static_cast<unsigned int> (state_r.sessionState->protocolConfiguration->loginOptions.user.hostName.mode);
+                  hostname_string = converter.str ();
+                  break;
+                }
+                default:
+                {
+                  ACE_DEBUG ((LM_ERROR,
+                              ACE_TEXT ("invalid USER <host name> parameter field type (was: %d), aborting\n"),
+                              state_r.sessionState->protocolConfiguration->loginOptions.user.hostName.discriminator));
+                  return false;
+                }
+              } // end SWITCH
+            } // end ELSE
+            if (iterator != parameters_a.end ())
+            {
+              servername_string = *iterator;
+              std::advance (iterator, 1);
+            } // end IF
+            else
+              servername_string = state_r.sessionState->protocolConfiguration->loginOptions.user.serverName;
+            if (iterator != parameters_a.end ())
+              realname_string = *iterator;
+            else
+              realname_string = state_r.sessionState->protocolConfiguration->loginOptions.user.realName;
+            try {
+              state_r.controller->user (username_string,
+                                        hostname_string,
+                                        servername_string,
+                                        realname_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::user(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
           case IRC_Record::CommandType::QUIT:
           {
             std::string reason_string;
@@ -150,9 +254,12 @@ curses_input (struct Common_UI_Curses_State* state_in,
             goto continue_;
           }
           case IRC_Record::CommandType::JOIN:
-          { ACE_ASSERT (!parameters_a.empty ());
-            string_list_t channels_a, keys_a;
-            std::string channel_string = parameters_a.front ();
+          {
+            std::string channel_string;
+            if (!parameters_a.empty ())
+              channel_string = parameters_a.front ();
+            else
+              channel_string = state_r.sessionState->protocolConfiguration->loginOptions.channel;
 
             // sanity check(s): has '#' prefix ?
             if (channel_string.find ('#', 0) != 0)
@@ -163,10 +270,11 @@ curses_input (struct Common_UI_Curses_State* state_in,
             if (unlikely (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH))
               channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
 
+            string_list_t channels_a, keys_a;
             channels_a.push_back (channel_string);
-
             try {
-              state_r.controller->join (channels_a, keys_a);
+              state_r.controller->join (channels_a,
+                                        keys_a);
             } catch (...) {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("caught exception in IRC_IControl::join(), aborting\n")));
@@ -242,9 +350,9 @@ curses_input (struct Common_UI_Curses_State* state_in,
           case IRC_Record::CommandType::TOPIC:
           {
             string_list_const_iterator_t iterator = parameters_a.begin ();
-            std::string channel_string;
-            if (parameters_a.empty ())
-              channel_string = (*state_r.activePanel).first;
+            std::string channel_string = (*state_r.activePanel).first;
+            if (parameters_a.empty () && !channel_string.empty ())
+              channel_string = channel_string;
             else
               channel_string = *iterator;
             std::string topic_string;
@@ -270,10 +378,34 @@ curses_input (struct Common_UI_Curses_State* state_in,
 
             goto continue_;
           }
+          case IRC_Record::CommandType::NAMES:
+          {
+            string_list_t channels_a;
+            std::string channel_string = (*state_r.activePanel).first;
+            if (parameters_a.empty () && !channel_string.empty ())
+              channels_a.push_back (channel_string);
+            else
+              channels_a = parameters_a;
+            try {
+              state_r.controller->names (channels_a);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::names(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
           case IRC_Record::CommandType::LIST:
           {
+            string_list_t channels_a;
+            std::string channel_string = (*state_r.activePanel).first;
+            if (parameters_a.empty () && !channel_string.empty ())
+              channels_a.push_back (channel_string);
+            else
+              channels_a = parameters_a;
             try {
-              state_r.controller->list (parameters_a);
+              state_r.controller->list (channels_a);
             } catch (...) {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("caught exception in IRC_IControl::list(), aborting\n")));
@@ -1019,6 +1151,8 @@ curses_log (const std::string& channel_in,
   if (result == ERR)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddstr(), continuing\n")));
+  curses_mode (channel_in,
+               state_in);
 
   result = wmove (window_p,
                   cury_i, 1);
@@ -1050,6 +1184,23 @@ release:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
   } // end IF
+}
+
+void
+curses_topic (const std::string& channel_in,
+              const std::string& topic_in,
+              struct IRC_Client_CursesState& state_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::curses_topic"));
+
+  std::string message_string =
+    ACE_TEXT_ALWAYS_CHAR ("*** topic for ") + channel_in + ACE_TEXT_ALWAYS_CHAR (" is: \"") + topic_in + ACE_TEXT_ALWAYS_CHAR ("\"");
+
+  // echo to the channel window
+  curses_log (channel_in,
+              message_string,
+              state_in,
+              true);
 }
 
 bool
@@ -1112,6 +1263,12 @@ curses_join (const std::string& channel_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to waddstr(), continuing\n")));
 
+  result = wmove (window_p,
+                  getbegy (window_p) + 1, 1);
+  if (result == ERR)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to wmove(), continuing\n")));
+
   // switch to channel, refresh
   state_in.activePanel = state_in.panels.find (channel_in);
   ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
@@ -1143,7 +1300,7 @@ error:
   return false;
 }
 
-bool
+void
 curses_part (const std::string& channel_in,
              struct IRC_Client_CursesState& state_in)
 {
@@ -1151,7 +1308,7 @@ curses_part (const std::string& channel_in,
 
   int result = ERR;
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.lock, false);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.lock);
 
   Common_UI_Curses_PanelsIterator_t iterator =
     state_in.panels.find (channel_in);
@@ -1169,7 +1326,7 @@ curses_part (const std::string& channel_in,
 
   // show new active channel || server log, refresh
   ACE_ASSERT (state_in.sessionState);
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock, false);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock);
     ACE_ASSERT (state_in.sessionState->activeChannel != channel_in);
     state_in.activePanel =
       state_in.panels.find (state_in.sessionState->activeChannel);
@@ -1188,24 +1345,22 @@ curses_part (const std::string& channel_in,
   // reset focus to input window
   touchwin (state_in.input);
   wrefresh (state_in.input);
-
-  return (result == 0/*OK*/);
 }
 
-bool
+void
 curses_mode (const std::string& channel_in,
              struct IRC_Client_CursesState& state_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_mode"));
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.lock, false);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.lock);
 
   int result = -1;
   Common_UI_Curses_PanelsIterator_t iterator =
     state_in.panels.find (channel_in);
   ACE_ASSERT (iterator != state_in.panels.end ());
   std::string mode_string;
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock, false);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock);
     if (channel_in.empty ())
       mode_string = IRC_Tools::UserModeToString (state_in.sessionState->userModes);
     else
@@ -1243,6 +1398,18 @@ curses_mode (const std::string& channel_in,
   // reset focus to input window
   touchwin (state_in.input);
   wrefresh (state_in.input);
+}
 
-  return (result == 0/*OK*/);
+void
+curses_msg (const std::string& nickname_in,
+            const std::string& message_in,
+            struct IRC_Client_CursesState& state_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::curses_msg"));
+
+  // echo to the local server log
+  curses_log (ACE_TEXT_ALWAYS_CHAR (""),
+              message_in,
+              state_in,
+              true);
 }

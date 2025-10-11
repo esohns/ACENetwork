@@ -96,13 +96,6 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
   const IRC_Record& data_r = message_inout->getR ();
-//   try {
-//     data_r.dump_state ();
-//   } catch (...) {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("caught exception in Common_IDumpState::dump_state(), continuing\n")));
-//   }
-
   switch (data_r.command_.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
@@ -152,6 +145,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         case IRC_Codes::RPL_LISTSTART:            // 321
         case IRC_Codes::RPL_LIST:                 // 322
         case IRC_Codes::RPL_LISTEND:              // 323
+        case IRC_Codes::RPL_NOTOPIC:              // 331
         case IRC_Codes::RPL_TOPIC:                // 332
         case IRC_Codes::RPL_TOPICWHOTIME:         // 333
         case IRC_Codes::RPL_INVITING:             // 341
@@ -196,6 +190,14 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     {
       switch (IRC_Tools::CommandToType (*data_r.command_.string))
       {
+        case IRC_Record::PASS:
+        {
+          //           ACE_DEBUG((LM_DEBUG,
+          //                      ACE_TEXT("[%u]: received \"PASS\": \"%s\"\n"),
+          //                      message_inout->id (),
+          //                      message_inout->getData()->parameters_.back().c_str()));
+          break;
+        }
         case IRC_Record::NICK:
         {
 //           ACE_DEBUG((LM_DEBUG,
@@ -518,15 +520,15 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
     if (!connectionIsAlive_)
     {
-      //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("waiting for connection to initialize...\n")));
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("waiting for connection to initialize...\n")));
 
       // *NOTE*: can happen when trying to register IMMEDIATELY after connecting
       //         --> allow a little delay for:
       //         - connection to establish
-      //         [- the initial NOTICEs to arrive]
+      //         - the initial NOTICEs to arrive
       //         before proceeding...
-      ACE_Time_Value timeout (IRC_MAXIMUM_NOTICE_DELAY, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S, 0);
       // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
       //         clock... --> use standard getimeofday
       ACE_Time_Value deadline = ACE_OS::gettimeofday () + timeout;
@@ -534,9 +536,12 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
       if (result == -1)
       {
         int error = ACE_OS::last_error ();
-        if (error != ETIME)
+        if (unlikely (error != ETIME))
+        {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Thread_Condition::wait(): \"%m\", continuing\n")));
+                      ACE_TEXT ("failed to ACE_Thread_Condition::wait(): \"%m\", aborting\n")));
+          return false;
+        } // end IF
       } // end IF
 
       if (!connectionIsAlive_)
@@ -547,84 +552,62 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
         return false;
       } // end IF
 
-      // *TODO*: wait for NOTICE ?
-      //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("waiting for initial NOTICE\n")));
-
-//       ACE_DEBUG((LM_DEBUG,
-//                  ACE_TEXT("proceeding...\n")));
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("waiting for connection to initialize...DONE\n")));
     } // end IF
   } // end lock scope
+
   // step2: ...is done ?
-//   if (!receivedInitialNotice_)
-//   {
-//     ACE_DEBUG((LM_DEBUG,
-//                ACE_TEXT("waiting for connection\n")));
-//
-//     // *NOTE*: can happen when trying to register IMMEDIATELY after connecting
-//     // --> allow a little delay for the welcome NOTICE to arrive before proceeding
-//     ACE_Time_Value abs_deadline = RPG_COMMON_TIME_POLICY() + ACE_Time_Value(IRC_CLIENT_IRC_MAX_WELCOME_DELAY, 0);
-//     if ((condition_.wait(&abs_deadline) == -1) &&
-//         (ACE_OS::last_error() != ETIME))
-//     {
-//       ACE_DEBUG((LM_ERROR,
-//                   ACE_TEXT("failed to ACE_Thread_Condition::wait(), aborting\n")));
-//
-//       return;
-//     } // end IF
-//
-//     if (!receivedInitialNotice_)
-//     {
-//       ACE_DEBUG((LM_ERROR,
-//                   ACE_TEXT("not (yet ?) connected, aborting\n")));
-//
-//       return;
-//     } // end IF
-//
-//     ACE_DEBUG((LM_DEBUG,
-//                 ACE_TEXT("proceeding\n")));
-//   } // end IF
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
+    if (!receivedInitialNotice_)
+    {
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("waiting for initial NOTICE...\n")));
 
-  // step3a: initialize PASS
-  IRC_Record* message_p = allocateMessage (IRC_Record::PASS);
-  if (!message_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
+      ACE_Time_Value timeout (IRC_MAXIMUM_INITIAL_NOTICE_DELAY_S, 0);
+      // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
+      //         clock... --> use standard getimeofday
+      ACE_Time_Value deadline = ACE_OS::gettimeofday () + timeout;
+      if ((condition_.wait (&deadline) == -1) &&
+          (ACE_OS::last_error () != ETIME))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Thread_Condition::wait(), aborting\n")));
+        return false;
+      } // end IF
 
-  message_p->parameters_.push_back (loginOptions_in.password);
+      if (!receivedInitialNotice_)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("waiting for initial NOTICE...FAILED\n")));
+        return false;
+      } // end IF
 
-  // step3b: send it upstream
-  sendMessage (message_p);
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("waiting for initial NOTICE...DONE\n")));
+    } // end IF
+  } // end lock scope
 
-  // step4: initialize nickname
+  // step3: set password
+  pass (loginOptions_in.password);
+
+  // step4: set nickname
   nick (loginOptions_in.nickname);
 
-  // step5a: initialize user
-  message_p = allocateMessage (IRC_Record::USER);
-  if (!message_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-
-  message_p->parameters_.push_back (loginOptions_in.user.userName);
+  // step5: set user information
+  std::string hostname_string;
   switch (loginOptions_in.user.hostName.discriminator)
   {
     case IRC_LoginOptions::User::Hostname::STRING:
-    {
-      ACE_ASSERT (loginOptions_in.user.hostName.string);
-      message_p->parameters_.push_back (*loginOptions_in.user.hostName.string);
+    { ACE_ASSERT (loginOptions_in.user.hostName.string);
+      hostname_string = *loginOptions_in.user.hostName.string;
       break;
     }
     case IRC_LoginOptions::User::Hostname::MODE:
     {
       std::ostringstream converter;
       converter << static_cast<unsigned int> (loginOptions_in.user.hostName.mode);
-      message_p->parameters_.push_back (std::string (converter.str ()));
+      hostname_string = converter.str ();
       break;
     }
     default:
@@ -632,34 +615,13 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid USER <host name> parameter field type (was: %d), aborting\n"),
                   loginOptions_in.user.hostName.discriminator));
-
-      // clean up
-      message_p->decrease ();
-
       return false;
     }
   } // end SWITCH
-  message_p->parameters_.push_back (loginOptions_in.user.serverName);
-  message_p->parameters_.push_back (loginOptions_in.user.realName);
-
-  // step5b: send it upstream
-  sendMessage (message_p);
-
-//   // step5a: initialize JOIN
-//   IRC_Client_IRCMessage* join_struct = NULL;
-//   ACE_NEW_NORETURN(join_struct,
-//                    IRC_Client_IRCMessage());
-//   ACE_ASSERT(join_struct);
-//   ACE_NEW_NORETURN(join_struct->command.string,
-//                    std::string(IRC_Client_Message::CommandType2String(IRC_Client_IRCMessage::JOIN)));
-//   ACE_ASSERT(join_struct->command.string);
-//   join_struct->command.discriminator = IRC_Client_IRCMessage::Command::STRING;
-// //   std::string channel_name = ACE_TEXT_ALWAYS_CHAR("#");
-// //   channel_name += loginOptions_in.channel;
-//   join_struct->parameters_.push_back(loginOptions_in.channel);
-//
-//   // step5b: send it upstream
-//   sendMessage(join_struct);
+  user (loginOptions_in.user.userName,
+        hostname_string,
+        loginOptions_in.user.serverName,
+        loginOptions_in.user.realName);
 
   return true;
 }
@@ -732,6 +694,26 @@ IRC_Client_Module_IRCHandler::wait (const ACE_Time_Value* timeout_in)
 //}
 
 void
+IRC_Client_Module_IRCHandler::pass (const std::string& password_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::pass"));
+
+  // step1: initialize PASS
+  IRC_Record* message_p = allocateMessage (IRC_Record::PASS);
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(): \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  message_p->parameters_.push_back (password_in);
+
+  // step2: send it upstream
+  sendMessage (message_p);
+}
+
+void
 IRC_Client_Module_IRCHandler::nick (const std::string& nickName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::nick"));
@@ -746,6 +728,32 @@ IRC_Client_Module_IRCHandler::nick (const std::string& nickName_in)
   } // end IF
 
   message_p->parameters_.push_back (nickName_in);
+
+  // step2: send it upstream
+  sendMessage (message_p);
+}
+
+void
+IRC_Client_Module_IRCHandler::user (const std::string& userName_in,
+                                    const std::string& hostName_in,
+                                    const std::string& serverName_in,
+                                    const std::string& realName_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::user"));
+
+  // step1: initialize USER
+  IRC_Record* message_p = allocateMessage (IRC_Record::USER);
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(): \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  message_p->parameters_.push_back (userName_in);
+  message_p->parameters_.push_back (hostName_in);
+  message_p->parameters_.push_back (serverName_in);
+  message_p->parameters_.push_back (realName_in);
 
   // step2: send it upstream
   sendMessage (message_p);

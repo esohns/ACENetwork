@@ -26,9 +26,9 @@
 #define IRC_FRAME_BOUNDARY                      "\r\n"
 #define IRC_FRAME_BOUNDARY_SIZE                 2
 
-#define IRC_MAXIMUM_NOTICE_DELAY                3  // seconds
+#define IRC_MAXIMUM_INITIAL_NOTICE_DELAY_S      3  // seconds
 // *NOTE*: some servers perform DNS address resolution, which can take a while
-#define IRC_MAXIMUM_WELCOME_DELAY               60 // seconds
+#define IRC_MAXIMUM_WELCOME_DELAY_S             60 // seconds
 
 // stream
 // *NOTE*: according to RFC1459, IRC messages SHALL not exceed 512 bytes.

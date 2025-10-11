@@ -53,11 +53,15 @@ struct IRC_ConnectionState
   IRC_ConnectionState ()
    : Net_ConnectionState ()
    , controller (NULL)
+   , protocolConfiguration (NULL)
    , statistic ()
   {}
 
-  IRC_IControl*   controller;
-  IRC_Statistic_t statistic;
+  // *TODO*: remove these two ASAP
+  IRC_IControl*                     controller;
+  struct IRC_ProtocolConfiguration* protocolConfiguration;
+
+  IRC_Statistic_t                   statistic;
 };
 
 typedef string_list_t channels_t;

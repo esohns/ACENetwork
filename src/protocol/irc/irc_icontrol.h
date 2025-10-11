@@ -37,10 +37,15 @@ class IRC_IControl
  public:
   inline virtual ~IRC_IControl () {};
 
-  virtual bool registerc (const IRC_LoginOptions&) = 0; // login details
+  virtual bool registerc (const struct IRC_LoginOptions&) = 0; // login details
 
-  virtual void nick (const std::string&) = 0; // nick
-  virtual void quit (const std::string&) = 0; // reason
+  virtual void pass (const std::string&) = 0;   // pass
+  virtual void nick (const std::string&) = 0;   // nick
+  virtual void user (const std::string&,        // username
+                     const std::string&,        // hostname
+                     const std::string&,        // server name
+                     const std::string&) = 0;   // real name
+  virtual void quit (const std::string&) = 0;   // reason
   virtual void join (const string_list_t&,      // channel(s)
                      const string_list_t&) = 0; // key(s)
   virtual void part (const string_list_t&) = 0; // channel(s)
