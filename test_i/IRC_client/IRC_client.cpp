@@ -173,6 +173,10 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-u         : register connection {")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("}")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v         : print version information and exit {")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("}")
@@ -193,6 +197,7 @@ do_processArguments (int argc_in,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
+                     bool& registerConnection_out,
                      bool& printVersionAndExit_out)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
@@ -238,9 +243,10 @@ do_processArguments (int argc_in,
     (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out = NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   traceInformation_out           = false;
+  registerConnection_out         = false;
   printVersionAndExit_out        = false;
 
-  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("a:c:dlN:rs:tv");
+  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("a:c:dlN:rs:tuv");
 #if defined (CURSES_SUPPORT)
   options_string += ACE_TEXT_ALWAYS_CHAR ("n");
 #endif // CURSES_SUPPORT
@@ -318,6 +324,11 @@ do_processArguments (int argc_in,
       case 't':
       {
         traceInformation_out = true;
+        break;
+      }
+      case 'u':
+      {
+        registerConnection_out = true;
         break;
       }
       case 'v':
@@ -1127,6 +1138,7 @@ ACE_TMAIN (int argc_in,
   unsigned int statistic_reporting_interval  =
     NET_STATISTIC_DEFAULT_REPORTING_INTERVAL_S;
   bool trace_information                     = false;
+  bool register_connection                   = false;
   bool print_version_and_exit                = false;
   if (!do_processArguments (argc_in,
                             argv_in,
@@ -1141,6 +1153,7 @@ ACE_TMAIN (int argc_in,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
+                            register_connection,
                             print_version_and_exit))
   {
     do_printUsage (ACE::basename (argv_in[0]));
@@ -1313,6 +1326,7 @@ ACE_TMAIN (int argc_in,
                                 configuration.protocolConfiguration.loginOptions.user.userName,
                                 configuration.protocolConfiguration.loginOptions.user.realName);
 #endif // ACE_WIN32 || ACE_WIN64
+  configuration.protocolConfiguration.registerConnection = register_connection;
 
   // step7: parse configuration file(s) (if any)
   if (!configuration_file_name.empty ())
@@ -1364,8 +1378,8 @@ ACE_TMAIN (int argc_in,
 
   ///////////////////////////////////////
   configuration.dispatchConfiguration.dispatch =
-      (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
-                   : COMMON_EVENT_DISPATCH_PROACTOR);
+    (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
+                 : COMMON_EVENT_DISPATCH_PROACTOR);
 
   // step8: do work
   ACE_High_Res_Timer timer;

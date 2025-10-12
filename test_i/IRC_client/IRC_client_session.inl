@@ -294,8 +294,7 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
 
             record =
               record_r.parameters_.back ().substr (last_position,
-              (((current_position == std::string::npos) ? record_r.parameters_.back ().size ()
-              : current_position) - last_position));
+                                                   (((current_position == std::string::npos) ? record_r.parameters_.back ().size () : current_position) - last_position));
 
             // check whether the record is empty
             if (!record.empty ())
@@ -387,6 +386,8 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
           converter >> num_members;
           iterator--;
 
+          inherited::state_.channelToNumberOfUsers[*iterator] = num_members;
+
           break;
         }
         case IRC_Codes::RPL_NOTOPIC:          // 331
@@ -456,7 +457,7 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
           break;
         }
         case IRC_Codes::RPL_NAMREPLY:         // 353
-        {
+        { ACE_ASSERT (record_r.parameters_.size () >= 3);
           // bisect (WS-separated) nicknames from the final parameter string
           std::vector<std::string> nicknames_a =
             Common_String_Tools::split (record_r.parameters_.back (),
@@ -465,8 +466,13 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
           // retrieve channel name
           IRC_ParametersIterator_t iterator =
             record_r.parameters_.begin ();
-          ACE_ASSERT (record_r.parameters_.size () >= 3);
           std::advance (iterator, 2);
+
+          string_list_t nicknames_2 (nicknames_a.size ());
+          std::copy (nicknames_a.begin (),
+                     nicknames_a.end (),
+                     nicknames_2.begin ());
+          inherited::state_.channelToNames[*iterator] = nicknames_2;
 
           break;
         }
@@ -590,7 +596,7 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
             } // end IF
             inherited::state_.channels.push_back (channel);
             inherited::state_.channelModes.insert (std::make_pair (channel, 0));
-            inherited::state_.activeChannel = channel;
+            inherited::state_.channel = channel;
 
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
@@ -628,18 +634,16 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
                          inherited::state_.channels.end (),
                          channel);
             if (iterator == inherited::state_.channels.end ())
-            {
               ACE_DEBUG ((LM_WARNING,
                           ACE_TEXT ("not in channel (was: \"%s\"), continuing\n"),
                           ACE_TEXT (channel.c_str ())));
-              break;
-            } // end IF
-            inherited::state_.channels.erase (iterator);
-            if (inherited::state_.activeChannel == channel)
-              inherited::state_.activeChannel.clear ();
-            if (inherited::state_.activeChannel.empty () &&
+            else
+              inherited::state_.channels.erase (iterator);
+            if (inherited::state_.channel == channel)
+              inherited::state_.channel.clear ();
+            if (inherited::state_.channel.empty () &&
                 !inherited::state_.channels.empty ())
-              inherited::state_.activeChannel =
+              inherited::state_.channel =
                 inherited::state_.channels.front ();
             channel_modes_iterator_t iterator_2 =
               inherited::state_.channelModes.find (channel);
@@ -707,8 +711,23 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
           break;
         }
         case IRC_Record::TOPIC:
-        {
-          inherited::log (record_r);
+        { ACE_ASSERT (record_r.parameters_.size () >= 2);
+          IRC_ParametersIterator_t iterator = record_r.parameters_.begin ();
+          std::string channel_string = *iterator;
+          std::advance (iterator, 1);
+          std::string topic_string = *iterator;
+
+          ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+          ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
+          if (inherited::CONNECTION_BASE_T::configuration_->UIState->type == COMMON_UI_FRAMEWORK_CURSES)
+          {
+#if defined (CURSES_SUPPORT)
+            curses_topic (channel_string,
+                          topic_string,
+                          *static_cast<IRC_Client_CursesState*> (inherited::CONNECTION_BASE_T::configuration_->UIState));
+#endif // CURSES_SUPPORT
+          } // end IF
+
           break;
         }
         case IRC_Record::KICK:

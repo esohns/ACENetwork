@@ -121,10 +121,10 @@ curses_input (struct Common_UI_Curses_State* state_in,
           break; // nothing to do
         { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.sessionState->lock, false);
           // sanity check (s)
-          if (!state_r.sessionState->activeChannel.empty ())
+          if (!state_r.sessionState->channel.empty ())
           {
             state_r.receivers.clear ();
-            state_r.receivers.push_front (state_r.sessionState->activeChannel);
+            state_r.receivers.push_front (state_r.sessionState->channel);
           } // end IF
         } // end lock scope
 
@@ -1327,9 +1327,9 @@ curses_part (const std::string& channel_in,
   // show new active channel || server log, refresh
   ACE_ASSERT (state_in.sessionState);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock);
-    ACE_ASSERT (state_in.sessionState->activeChannel != channel_in);
+    ACE_ASSERT (state_in.sessionState->channel != channel_in);
     state_in.activePanel =
-      state_in.panels.find (state_in.sessionState->activeChannel);
+      state_in.panels.find (state_in.sessionState->channel);
   } // end lock scope
   ACE_ASSERT (state_in.activePanel != state_in.panels.end ());
   result = top_panel ((*state_in.activePanel).second);
@@ -1407,8 +1407,13 @@ curses_msg (const std::string& nickname_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_msg"));
 
-  // echo to the local server log
-  curses_log (ACE_TEXT_ALWAYS_CHAR (""),
+  // echo to the active channel
+  std::string channel_string;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_in.sessionState->lock);
+    channel_string = state_in.sessionState->channel;
+  } // end lock scope
+
+  curses_log (channel_string,
               message_in,
               state_in,
               true);

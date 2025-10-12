@@ -69,12 +69,16 @@ typedef channels_t::iterator channels_iterator_t;
 typedef channels_t::const_iterator channels_const_iterator_t;
 typedef std::map<std::string, IRC_ChannelModes_t> channel_modes_t;
 typedef channel_modes_t::iterator channel_modes_iterator_t;
+typedef std::map<std::string, ACE_UINT16> channel_to_number_of_users_t;
+typedef channel_to_number_of_users_t::iterator channel_to_number_of_users_iterator_t;
+typedef std::map<std::string, string_list_t> channel_to_names_t;
+typedef channel_to_names_t::iterator channel_to_names_iterator_t;
 struct IRC_SessionState
  : IRC_ConnectionState
 {
   IRC_SessionState ()
    : IRC_ConnectionState ()
-   , activeChannel ()
+   , channel ()
    , away (false)
    , channels ()
    , channelModes ()
@@ -83,14 +87,16 @@ struct IRC_SessionState
    , userModes ()
   {}
 
-  // *TODO*: remove this
-  std::string     activeChannel;
-  bool            away;
-  channels_t      channels;
-  channel_modes_t channelModes;
-  bool            isFirstMessage;
-  std::string     nickName;
-  IRC_UserModes_t userModes;
+  std::string                  channel;
+  bool                         away;
+  channels_t                   channels;
+  channel_modes_t              channelModes;
+  bool                         isFirstMessage;
+  std::string                  nickName;
+  IRC_UserModes_t              userModes;
+
+  channel_to_names_t           channelToNames;
+  channel_to_number_of_users_t channelToNumberOfUsers;
 };
 
 typedef Net_IConnection_T<ACE_INET_Addr,

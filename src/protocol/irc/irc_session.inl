@@ -540,6 +540,8 @@ IRC_Session_T<ConnectionType,
           converter >> num_members;
           iterator--;
 
+          inherited::state_.channelToNumberOfUsers[*iterator] = num_members;
+
           break;
         }
         case IRC_Codes::RPL_NOTOPIC:          // 331
@@ -585,43 +587,22 @@ IRC_Session_T<ConnectionType,
           break;
         }
         case IRC_Codes::RPL_NAMREPLY:         // 353
-        {
+        { ACE_ASSERT (record_r.parameters_.size () >= 3);
           // bisect (WS-separated) nicknames from the final parameter string
-
-          //ACE_DEBUG ((LM_DEBUG,
-          //            ACE_TEXT ("bisecting nicknames: \"%s\"...\n"),
-          //            ACE_TEXT (record_r.params.back ().c_str ())));
-
-          std::string::size_type current_position = 0;
-          std::string::size_type last_position = 0;
-          std::string nick;
-          string_list_t list;
-//          bool is_operator = false;
-          do
-          {
-            current_position =
-              record_r.parameters_.back ().find (' ', last_position);
-            nick =
-              record_r.parameters_.back ().substr (last_position,
-              (((current_position == std::string::npos) ? record_r.parameters_.back ().size ()
-              : current_position) - last_position));
-
-            //// check whether user is a channel operator
-            //if (nick.find (nickname_) != std::string::npos)
-            //  is_operator = ((nick[0] == '@') &&
-            //  (nick.size () == (nickname_.size () + 1)));
-
-            list.push_back (nick);
-
-            // advance
-            last_position = current_position + 1;
-          } while (current_position != std::string::npos);
+          std::vector<std::string> nicknames_a =
+            Common_String_Tools::split (record_r.parameters_.back (),
+                                        ' ');
 
           // retrieve channel name
           IRC_ParametersIterator_t iterator =
             record_r.parameters_.begin ();
-          ACE_ASSERT (record_r.parameters_.size () >= 3);
           std::advance (iterator, 2);
+
+          string_list_t nicknames_2 (nicknames_a.size ());
+          std::copy (nicknames_a.begin (),
+                     nicknames_a.end (),
+                     nicknames_2.begin ());
+          inherited::state_.channelToNames[*iterator] = nicknames_2;
 
           break;
         }
@@ -722,7 +703,8 @@ IRC_Session_T<ConnectionType,
             std::string channel = record_r.parameters_.front ();
             inherited::state_.channels.push_back (channel);
             inherited::state_.channelModes.insert (std::make_pair (channel, 0));
-            inherited::state_.activeChannel = channel;
+            inherited::state_.channel = channel;
+
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
             switch (inherited::CONNECTION_BASE_T::configuration_->UIState->type)
@@ -760,16 +742,17 @@ IRC_Session_T<ConnectionType,
                          channel);
             ACE_ASSERT (iterator != inherited::state_.channels.end ());
             inherited::state_.channels.erase (iterator);
-            if (inherited::state_.activeChannel == channel)
-              inherited::state_.activeChannel.clear ();
-            if (inherited::state_.activeChannel.empty () &&
+            if (inherited::state_.channel == channel)
+              inherited::state_.channel.clear ();
+            if (inherited::state_.channel.empty () &&
                 !inherited::state_.channels.empty ())
-              inherited::state_.activeChannel =
+              inherited::state_.channel =
                 inherited::state_.channels.front ();
             channel_modes_iterator_t iterator_2 =
               inherited::state_.channelModes.find (channel);
             ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
             inherited::state_.channelModes.erase (iterator_2);
+
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
             switch (inherited::CONNECTION_BASE_T::configuration_->UIState->type)
