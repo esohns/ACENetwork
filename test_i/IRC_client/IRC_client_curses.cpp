@@ -65,6 +65,29 @@ curses_input (struct Common_UI_Curses_State* state_in,
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
       break;
     }
+    case KEY_MOUSE:
+    {
+      MEVENT mouse_event;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      result = nc_getmouse (&mouse_event);
+#else
+      result = getmouse (&mouse_event);
+#endif // ACE_WIN32 || ACE_WIN64
+      if (unlikely (result == ERR))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to getmouse(), aborting\n")));
+        return false;
+      } // end IF
+      char buffer_a[BUFSIZ];
+      ACE_OS::snprintf (buffer_a, sizeof (char[BUFSIZ]),
+                        ACE_TEXT_ALWAYS_CHAR ("0x%08lx"),
+                        mouse_event.bstate);
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("mouse @(%d,%d), state: %s\n"),
+                  mouse_event.x, mouse_event.y, buffer_a));
+      break;
+    }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     case CTL_TAB:
 #endif // ACE_WIN32 || ACE_WIN64
@@ -351,9 +374,7 @@ curses_input (struct Common_UI_Curses_State* state_in,
           {
             string_list_const_iterator_t iterator = parameters_a.begin ();
             std::string channel_string = (*state_r.activePanel).first;
-            if (parameters_a.empty () && !channel_string.empty ())
-              channel_string = channel_string;
-            else
+            if (!parameters_a.empty ())
               channel_string = *iterator;
             std::string topic_string;
             if (!IRC_Tools::isValidChannelName (channel_string))
@@ -603,23 +624,6 @@ continue_:
 
       break;
     }
-    case KEY_MOUSE:
-    {
-      MEVENT mouse_event;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      result = nc_getmouse (&mouse_event);
-#else
-      result = getmouse (&mouse_event);
-#endif // ACE_WIN32 || ACE_WIN64
-      if (result == ERR)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to getmouse(), aborting\n")));
-        return false;
-      } // end IF
-      //mouse_mask = getmouse ();
-      break;
-    }
   } // end SWITCH
 
   return true;
@@ -866,6 +870,9 @@ curses_init (struct Common_UI_Curses_State* state_in)
                 ACE_TEXT ("failed to meta(), aborting\n")));
     goto error;
   } // end IF
+
+  // mouse handling
+  keypad (state_r.std_window, TRUE);
   mouse_mask = mousemask (ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
   if (mouse_mask == 0)
   {
@@ -874,6 +881,8 @@ curses_init (struct Common_UI_Curses_State* state_in)
     result = ERR;
     goto error;
   } // end IF
+  // makes the terminal report mouse movement events
+  printf ("\033[?1003h\n");
 
   return true;
 
@@ -993,6 +1002,9 @@ curses_fini (struct Common_UI_Curses_State* state_in)
 #else
   delscreen (state_r.screen);
 #endif // ACE_WIN32 || ACE_WIN64
+
+  // makes the terminal not report mouse movement events any more
+  printf ("\033[?1003l\n");
 
   return true;
 }
@@ -1401,7 +1413,7 @@ curses_mode (const std::string& channel_in,
 }
 
 void
-curses_msg (const std::string& nickname_in,
+curses_msg (const std::string& nickName_in,
             const std::string& message_in,
             struct IRC_Client_CursesState& state_in)
 {

@@ -106,7 +106,7 @@ void curses_part (const std::string&,              // channel
                   struct IRC_Client_CursesState&); // state
 void curses_mode (const std::string&,              // channel
                   struct IRC_Client_CursesState&); // state
-void curses_msg (const std::string&,              // nickname
+void curses_msg (const std::string&,              // nickname (origin)
                  const std::string&,              // text
                  struct IRC_Client_CursesState&); // state
 

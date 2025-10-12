@@ -573,48 +573,50 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
           break;
         }
         case IRC_Record::JOIN:
-        {
+        { ACE_ASSERT (!record_r.parameters_.empty ());
           // there are two possibilities:
           // - reply from a successful join request
-          // - stranger entering the channel
+          // - someone joined a common channel
+          std::string channel_string = record_r.parameters_.front ();
 
           // reply from a successful join request ?
           if (record_r.prefix_.origin == inherited::state_.nickName)
-          {
-            std::string channel = record_r.parameters_.front ();
-            // sanity check(s)
-            channels_iterator_t iterator =
-              std::find (inherited::state_.channels.begin (),
-                         inherited::state_.channels.end (),
-                         channel);
-            if (unlikely (iterator != inherited::state_.channels.end ()))
-            {
-              ACE_DEBUG ((LM_WARNING,
-                          ACE_TEXT ("already joined channel (was: \"%s\"), continuing\n"),
-                          ACE_TEXT (channel.c_str ())));
-              break;
-            } // end IF
-            inherited::state_.channels.push_back (channel);
-            inherited::state_.channelModes.insert (std::make_pair (channel, 0));
-            inherited::state_.channel = channel;
+          { ACE_ASSERT (std::find (inherited::state_.channels.begin (), inherited::state_.channels.end (), channel_string) == inherited::state_.channels.end ());
+            inherited::state_.channels.push_back (channel_string);
+            inherited::state_.channelModes.insert (std::make_pair (channel_string, 0));
+            inherited::state_.channel = channel_string;
 
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
             if (inherited::CONNECTION_BASE_T::configuration_->UIState->type == COMMON_UI_FRAMEWORK_CURSES)
             {
 #if defined (CURSES_SUPPORT)
-              if (!curses_join (channel,
+              if (!curses_join (channel_string,
                                 *static_cast<IRC_Client_CursesState*> (inherited::CONNECTION_BASE_T::configuration_->UIState)))
                 ACE_DEBUG ((LM_ERROR,
                             ACE_TEXT ("failed to curses_join(\"%s\"), continuing\n"),
-                            ACE_TEXT (channel.c_str ())));
+                            ACE_TEXT (channel_string.c_str ())));
 #endif // CURSES_SUPPORT
             } // end IF
 
             break;
           } // end IF
 
-          // someone joined a common channel...
+          // --> someone joined a common channel
+          ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+          ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
+          if (inherited::CONNECTION_BASE_T::configuration_->UIState->type == COMMON_UI_FRAMEWORK_CURSES)
+          {
+#if defined (CURSES_SUPPORT)
+            curses_log (channel_string,
+                        IRC_Tools::RecordToString (record_r),
+                        *static_cast<IRC_Client_CursesState*> (inherited::CONNECTION_BASE_T::configuration_->UIState),
+                        true);
+#endif // CURSES_SUPPORT
+
+            break;
+          } // end IF
+
           inherited::log (record_r);
 
           break;
@@ -673,40 +675,54 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
           // there are two possibilities:
           // - user mode message
           // - channel mode message
-          inherited::log (record_r);
 
           // retrieve mode string
           IRC_ParametersIterator_t iterator =
             record_r.parameters_.begin ();
-          iterator++;
+          std::string nickname_string = *iterator;
           std::string channel_string;
+          std::advance (iterator, 1);
 
-          if (record_r.parameters_.front () == inherited::state_.nickName)
+          if (nickname_string == inherited::state_.nickName)
           {
             // --> user mode
-            IRC_Tools::merge (record_r.parameters_.back (),
+            IRC_Tools::merge (*iterator,
                               inherited::state_.userModes);
           } // end IF
           else
-          {
+          { ACE_ASSERT (record_r.parameters_.size () >= 3);
             // --> channel mode
-            channel_string = record_r.parameters_.front ();
-            channel_modes_iterator_t iterator_2 =
-              inherited::state_.channelModes.find (channel_string);
-            ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
-            IRC_Tools::merge (*iterator,
-                              (*iterator_2).second);
+            channel_string = nickname_string;
+            IRC_ParametersIterator_t iterator_2 = record_r.parameters_.begin ();
+            std::advance (iterator_2, 2);
+            nickname_string = *iterator_2;
+
+            if (nickname_string == inherited::state_.nickName)
+            {
+              channel_modes_iterator_t iterator_3 =
+                inherited::state_.channelModes.find (channel_string);
+              ACE_ASSERT (iterator_3 != inherited::state_.channelModes.end ());
+              IRC_Tools::merge (*iterator,
+                                (*iterator_3).second);
+            } // end IF
           } // end ELSE
 
-          ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-          ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
-          if (inherited::CONNECTION_BASE_T::configuration_->UIState->type == COMMON_UI_FRAMEWORK_CURSES)
+          if (nickname_string == inherited::state_.nickName)
           {
+            ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+            ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
+            if (inherited::CONNECTION_BASE_T::configuration_->UIState->type == COMMON_UI_FRAMEWORK_CURSES)
+            {
 #if defined (CURSES_SUPPORT)
-            curses_mode (channel_string,
-                         *static_cast<IRC_Client_CursesState*> (inherited::CONNECTION_BASE_T::configuration_->UIState));
+              curses_mode (channel_string,
+                           *static_cast<IRC_Client_CursesState*> (inherited::CONNECTION_BASE_T::configuration_->UIState));
 #endif // CURSES_SUPPORT
+
+              break;
+            } // end IF
           } // end IF
+
+          inherited::log (record_r);
 
           break;
         }
@@ -744,16 +760,18 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
         {
           // *TODO*: parse (list of) receiver(s)
 
+          std::string nickname_string;
           std::string message_text;
           if (!record_r.prefix_.origin.empty ())
           {
+            nickname_string = record_r.prefix_.origin;
             message_text += ACE_TEXT_ALWAYS_CHAR ("<");
-            message_text += record_r.prefix_.origin;
+            message_text += nickname_string;
             message_text += ACE_TEXT_ALWAYS_CHAR ("> ");
           } // end IF
           message_text += record_r.parameters_.back ();
 
-          // private message ?
+          // private message from someone else ?
           if (inherited::state_.nickName == record_r.parameters_.front ())
           {
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
@@ -761,7 +779,7 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
             if (inherited::CONNECTION_BASE_T::configuration_->UIState->type == COMMON_UI_FRAMEWORK_CURSES)
             {
 #if defined (CURSES_SUPPORT)
-              curses_msg (inherited::state_.nickName,
+              curses_msg (nickname_string,
                           message_text,
                           *static_cast<IRC_Client_CursesState*> (inherited::CONNECTION_BASE_T::configuration_->UIState));
 #endif // CURSES_SUPPORT
@@ -770,6 +788,7 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
             break;
           } // end IF
 
+          // message to channel
           log (record_r.parameters_.front (),
                message_text);
 
