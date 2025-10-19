@@ -259,7 +259,29 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
         case IRC_Codes::RPL_YOURHOST:         //   2
         case IRC_Codes::RPL_CREATED:          //   3
         case IRC_Codes::RPL_MYINFO:           //   4
+        {
+          inherited::log (record_r);
+          break;
+        }
         case IRC_Codes::RPL_PROTOCTL:         //   5
+        { ACE_ASSERT (record_r.parameters_.size () >= 1);
+          IRC_ParametersIterator_t iterator = record_r.parameters_.begin ();
+          std::advance (iterator, 1);
+          string_list_t parameters_a (record_r.parameters_.size ());
+          std::copy (iterator, record_r.parameters_.end (),
+                     parameters_a.begin ());
+          if (!IRC_Tools::parse (parameters_a,
+                                 inherited::state_.serverExtensions))
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to IRC_Tools::parse (\"%s\"), continuing\n"),
+                        ACE_TEXT (IRC_Tools::dump (record_r).c_str ())));
+            break;
+          } // end IF
+
+          inherited::log (record_r);
+          break;
+        }
         case IRC_Codes::RPL_SNOMASK:          //   8
         case IRC_Codes::RPL_YOURID:           //  42
         case IRC_Codes::RPL_STATSDLINE:       // 250

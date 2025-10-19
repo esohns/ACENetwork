@@ -555,6 +555,29 @@ curses_input (struct Common_UI_Curses_State* state_in,
 
             goto continue_;
           }
+          case IRC_Record::CommandType::KNOCK:
+          { ACE_ASSERT (parameters_a.size () >= 1);
+            string_list_const_iterator_t iterator = parameters_a.begin ();
+            ACE_ASSERT (!(*iterator).empty ());
+            std::string channel_string = *iterator;
+            std::advance (iterator, 1);
+            std::string comment_string;
+            if (iterator != parameters_a.end () &&
+                !(*iterator).empty ())
+              comment_string = *iterator;
+
+            try
+            {
+              state_r.controller->knock (channel_string,
+                                         comment_string);
+            } catch (...) {
+              ACE_DEBUG ((LM_ERROR,
+                          ACE_TEXT ("caught exception in IRC_IControl::knock(), aborting\n")));
+              return false;
+            }
+
+            goto continue_;
+          }
           default:
             goto continue_;
         } // end SWITCH

@@ -62,6 +62,8 @@ class IRC_IControl
   virtual void kick (const std::string&,      // channel
                      const std::string&,      // nick
                      const std::string&) = 0; // comment
+  virtual void knock (const std::string&,      // channel
+                      const std::string&) = 0; // comment
   virtual void privmsg (const string_list_t&,    // receiver(s) [nick/channel]
                         const std::string&) = 0; // message
   virtual void notice (const string_list_t&,    // receiver(s) [nick/channel]

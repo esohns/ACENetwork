@@ -113,6 +113,8 @@ class IRC_Client_Module_IRCHandler
   virtual void kick (const std::string&,  // channel
                      const std::string&,  // nick
                      const std::string&); // comment
+  virtual void knock (const std::string&,  // channel
+                      const std::string&); // comment
   virtual void privmsg (const string_list_t&, // receiver(s) [nick/channel]
                         const std::string&);  // message
   virtual void notice (const string_list_t&, // receiver(s) [nick/channel]

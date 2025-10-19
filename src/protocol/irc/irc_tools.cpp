@@ -518,6 +518,46 @@ IRC_Tools::isValidChannelName (const std::string& string_in)
 }
 
 bool
+IRC_Tools::parse (const IRC_Parameters_t& parameters_in,
+                  server_extensions_t& extensions_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::parse"));
+
+  // step1: parse extensions
+  std::regex regex (ACE_TEXT_ALWAYS_CHAR ("^(?:([^=]+)(=)(.*))|(.*)$"));
+  std::smatch match_results;
+  for (IRC_ParametersIterator_t iterator = parameters_in.begin ();
+       iterator != parameters_in.end ();
+       ++iterator)
+  {
+    if (!std::regex_match (*iterator,
+                           match_results,
+                           regex,
+                           std::regex_constants::match_default))
+      return false;
+    ACE_ASSERT (match_results.ready ());
+
+    // check if this extension has a value
+    if (!match_results[2].matched)
+    { // check if this is an extension
+      std::regex regex_2 (ACE_TEXT_ALWAYS_CHAR ("^([A-Z]+)$"));
+      std::smatch match_results_2;
+      std::string test_string = match_results[4].str ();
+      if (std::regex_match (test_string,
+                            match_results_2,
+                            regex_2,
+                            std::regex_constants::match_default))
+        extensions_out.insert (std::make_pair (test_string, ACE_TEXT_ALWAYS_CHAR ("")));
+      continue;
+    } // end IF
+    ACE_ASSERT (match_results[2].str () == ACE_TEXT_ALWAYS_CHAR ("="));
+    extensions_out.insert (std::make_pair (match_results[1].str (), match_results[3].str ()));
+  } // end FOR
+
+  return true;
+}
+
+bool
 IRC_Tools::parse (const std::string& inputString_in,
                   IRC_CommandType_t& command_out,
                   string_list_t& parameters_out)
@@ -1847,8 +1887,12 @@ IRC_Tools::CharToCommand (char char_in)
   {
     case 'a':
       return IRC_Record::CommandType::AWAY;
+    case 'c':
+      return IRC_Record::CommandType::KNOCK;
     case 'e':
       return IRC_Record::CommandType::NAMES;
+    case 'h':
+      return IRC_Record::CommandType::USERHOST;
     case 'i':
       return IRC_Record::CommandType::INVITE;
     case 'j':

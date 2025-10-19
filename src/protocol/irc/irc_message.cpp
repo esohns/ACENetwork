@@ -306,6 +306,8 @@ IRC_Message::CommandTypeToString(const IRC_CommandType_t& commandType_in)
       result = ACE_TEXT_ALWAYS_CHAR ("USERHOST"); break;
     case IRC_Record::ISON:
       result = ACE_TEXT_ALWAYS_CHAR ("ISON"); break;
+    case IRC_Record::KNOCK:
+      result = ACE_TEXT_ALWAYS_CHAR ("KNOCK"); break;
     default:
     {
       // try numeric conversion

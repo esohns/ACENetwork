@@ -65,6 +65,8 @@ class IRC_Tools
 
   static bool isValidChannelName (const std::string&); // string
 
+  static bool parse (const IRC_Parameters_t&, // input strings (i.e. see: RPL_ISUPPORT (5))
+                     server_extensions_t&);   // return value: supported server extensions
   static bool parse (const std::string&, // input string
                      IRC_CommandType_t&, // return value: command
                      string_list_t&);    // return value: parameters

@@ -45,7 +45,6 @@
 #include "irc_network.h"
 
 #include "IRC_client_defines.h"
-//#include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
 
 //////////////////////////////////////////
@@ -56,62 +55,6 @@ struct IRC_Client_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
                                struct IRC_Client_StreamConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
-//class IRC_Client_ConnectionConfiguration
-// : public Net_ConnectionConfiguration_T<struct IRC_AllocatorConfiguration,
-//                                        IRC_Client_StreamConfiguration_t,
-//                                        NET_TRANSPORTLAYER_TCP>
-//{
-// public:
-//  IRC_Client_ConnectionConfiguration ()
-//   : Net_ConnectionConfiguration_T ()
-//   ///////////////////////////////////////
-//   , cursesState (NULL)
-//   , protocolConfiguration (NULL)
-//   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
-//  {
-//    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
-//  }
-
-//  struct IRC_Client_CursesState*    cursesState;
-//  struct IRC_ProtocolConfiguration* protocolConfiguration;
-//  bool                              logToFile;
-//};
-
-//struct IRC_Client_ConnectionState
-// : IRC_ConnectionState
-//{
-//  IRC_Client_ConnectionState ()
-//   : IRC_ConnectionState ()
-//   //, configuration (NULL)
-////   , userData (NULL)
-//  {}
-//
-//  //IRC_Client_ConnectionConfiguration* configuration;
-//
-////  struct Net_UserData*           userData;
-//};
-//// *TODO*: remove this ASAP
-//struct IRC_SessionState
-// : IRC_Client_ConnectionState
-//{
-//  IRC_SessionState ()
-//   : IRC_Client_ConnectionState ()
-//   , away (false)
-//   , channel ()
-//   , channelModes ()
-//   , isFirstMessage (false)
-//   , nickName ()
-//   , userModes ()
-//  {}
-//
-//  // *TODO*: remove this
-//  bool               away;
-//  std::string        channel;
-//  IRC_ChannelModes_t channelModes;
-//  bool               isFirstMessage;
-//  std::string        nickName;
-//  IRC_UserModes_t    userModes;
-//};
 
 //////////////////////////////////////////
 template <typename TimerManagerType> // implements Common_ITimer
@@ -145,12 +88,6 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 Net_TCPSocketConfiguration_t,
                                 IRC_Client_Stream_t,
                                 enum Stream_StateMachine_ControlState> IRC_Client_IStreamConnection_t;
-//typedef Net_ISession_T<ACE_INET_Addr,
-//                       struct Net_SocketConfiguration,
-//                       IRC_Client_ConnectionConfiguration,
-//                       struct IRC_Client_ConnectionState,
-//                       IRC_Client_Statistic_t,
-//                       IRC_Client_Stream> IRC_Client_ISession_t;
 
 //////////////////////////////////////////
 

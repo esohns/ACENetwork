@@ -398,7 +398,7 @@ install (FILES
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-a irc.eu.dal.net -l -n -N testeee -t"
+                         ARGS "-a irc.eu.dal.net -l -n -N testeee -t -u"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../pdcurses/win32
@@ -440,7 +440,7 @@ elseif (WIN32)
                            ${WXWIDGETS_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-a irc.eu.dal.net -l -n -N testeee -r -t"
+                         ARGS "-a irc.eu.dal.net -l -n -N testeee -t -u"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}

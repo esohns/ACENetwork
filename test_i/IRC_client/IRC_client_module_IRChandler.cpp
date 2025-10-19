@@ -1004,6 +1004,29 @@ IRC_Client_Module_IRCHandler::kick (const std::string& channel_in,
 }
 
 void
+IRC_Client_Module_IRCHandler::knock (const std::string& channel_in,
+                                     const std::string& comment_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::knock"));
+
+  // step1: initialize KICK
+  IRC_Record* message_p = allocateMessage (IRC_Record::KNOCK);
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(): \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  message_p->parameters_.push_back (channel_in);
+  if (!comment_in.empty ())
+    message_p->parameters_.push_back (comment_in);
+
+  // step2: send it upstream
+  sendMessage (message_p);
+}
+
+void
 IRC_Client_Module_IRCHandler::privmsg (const string_list_t& receivers_in,
                                        const std::string& message_in)
 {

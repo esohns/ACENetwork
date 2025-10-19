@@ -85,6 +85,7 @@ struct IRC_SessionState
    , isFirstMessage (false)
    , nickName ()
    , userModes ()
+   , serverExtensions ()
   {}
 
   std::string                  channel;
@@ -97,6 +98,8 @@ struct IRC_SessionState
 
   channel_to_names_t           channelToNames;
   channel_to_number_of_users_t channelToNumberOfUsers;
+
+  server_extensions_t          serverExtensions;
 };
 
 typedef Net_IConnection_T<ACE_INET_Addr,

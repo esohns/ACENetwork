@@ -22,6 +22,7 @@
 #define IRC_RECORD_H
 
 #include <list>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -31,7 +32,6 @@
 #include "common_idumpstate.h"
 #include "common_referencecounter.h"
 
-//#include "irc_exports.h"
 #include "irc_codes.h"
 
 // *NOTE*: the list of parameters is essentially a simple list of items
@@ -45,6 +45,8 @@ typedef string_list_t::const_iterator string_list_const_iterator_t;
 typedef std::pair<unsigned long, unsigned long> list_item_range_t;
 typedef std::vector<list_item_range_t> list_items_ranges_t;
 typedef list_items_ranges_t::const_iterator list_items_ranges_iterator_t;
+typedef std::map<std::string, std::string> server_extensions_t;
+typedef server_extensions_t::const_iterator server_extensions_iterator_t;
 
 typedef string_list_t IRC_Parameters_t;
 typedef string_list_const_iterator_t IRC_ParametersIterator_t;
@@ -107,6 +109,7 @@ class IRC_Record
     WALLOPS,
     USERHOST,
     ISON,
+    KNOCK,
     //
     IRC_COMMANDTYPE_MAX,
     IRC_COMMANDTYPE_INVALID
