@@ -421,7 +421,7 @@ IRC_Session_T<ConnectionType,
         { ACE_ASSERT (record_r.parameters_.size () >= 1);
           IRC_ParametersIterator_t iterator = record_r.parameters_.begin ();
           std::advance (iterator, 1);
-          string_list_t parameters_a (record_r.parameters_.size ());
+          string_list_t parameters_a (record_r.parameters_.size () - 1);
           std::copy (iterator, record_r.parameters_.end (),
                      parameters_a.begin ());
           if (!IRC_Tools::parse (parameters_a,
