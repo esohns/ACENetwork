@@ -234,6 +234,8 @@ do_work (const std::string& databaseFilePath_in,
   //MMDB_entry_data_list_s* entry_data_list_p = NULL;
   MMDB_lookup_result_s result_2;
   MMDB_entry_data_s entry_data_s;
+  std::string value_string;
+
   result = MMDB_open (databaseFilePath_in.c_str (),
                       MMDB_MODE_MMAP,
                       &mmdb_s);
@@ -305,7 +307,7 @@ do_work (const std::string& databaseFilePath_in,
   if (!entry_data_s.has_data)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("IP address entry has not data for path (was: \"%s:%s\"), returning\n"),
+                ACE_TEXT ("IP address entry has no data for path (was: \"%s:%s\"), returning\n"),
                 ACE_TEXT ("location"), ACE_TEXT ("latitude")));
     goto clean_up;
   } // end IF
@@ -325,13 +327,78 @@ do_work (const std::string& databaseFilePath_in,
   if (!entry_data_s.has_data)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("IP address entry has not data for path (was: \"%s:%s\"), returning\n"),
+                ACE_TEXT ("IP address entry has no data for path (was: \"%s:%s\"), returning\n"),
                 ACE_TEXT ("location"), ACE_TEXT ("longitude")));
     goto clean_up;
   } // end IF
   ACE_ASSERT (entry_data_s.type == MMDB_DATA_TYPE_DOUBLE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR (", longitude: ") << std::fixed << entry_data_s.double_value;
-  std::cout << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR (", longitude: ") << std::fixed << entry_data_s.double_value << std::endl;
+
+  result = MMDB_get_value (&result_2.entry,
+                           &entry_data_s,
+                           ACE_TEXT_ALWAYS_CHAR ("country"), ACE_TEXT_ALWAYS_CHAR ("names"), ACE_TEXT_ALWAYS_CHAR ("en"),
+                           NULL);
+  if (MMDB_SUCCESS != result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::MMDB_get_value(): \"%s\", returning\n"),
+                ACE_TEXT (MMDB_strerror (result))));
+    goto clean_up;
+  } // end IF
+  if (!entry_data_s.has_data)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("IP address entry has no data for path (was: \"%s:%s:%s\"), returning\n"),
+                ACE_TEXT ("country"), ACE_TEXT ("names"), ACE_TEXT ("en")));
+    goto clean_up;
+  } // end IF
+  ACE_ASSERT (entry_data_s.type == MMDB_DATA_TYPE_UTF8_STRING);
+  value_string.assign (entry_data_s.utf8_string, entry_data_s.data_size);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("country: \"") << value_string << ACE_TEXT_ALWAYS_CHAR ("\"") << std::endl;
+
+  result = MMDB_get_value (&result_2.entry,
+                           &entry_data_s,
+                           ACE_TEXT_ALWAYS_CHAR ("country"), ACE_TEXT_ALWAYS_CHAR ("iso_code"),
+                           NULL);
+  if (MMDB_SUCCESS != result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::MMDB_get_value(): \"%s\", returning\n"),
+                ACE_TEXT (MMDB_strerror (result))));
+    goto clean_up;
+  } // end IF
+  if (!entry_data_s.has_data)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("IP address entry has no data for path (was: \"%s:%s\"), returning\n"),
+                ACE_TEXT ("country"), ACE_TEXT ("iso_code")));
+    goto clean_up;
+  } // end IF
+  ACE_ASSERT (entry_data_s.type == MMDB_DATA_TYPE_UTF8_STRING);
+  value_string.assign (entry_data_s.utf8_string, entry_data_s.data_size);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("ISO code: \"") << value_string << ACE_TEXT_ALWAYS_CHAR ("\"") << std::endl;
+
+  result = MMDB_get_value (&result_2.entry,
+                           &entry_data_s,
+                           ACE_TEXT_ALWAYS_CHAR ("city"), ACE_TEXT_ALWAYS_CHAR ("names"), ACE_TEXT_ALWAYS_CHAR ("en"),
+                           NULL);
+  if (MMDB_SUCCESS != result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::MMDB_get_value(): \"%s\", returning\n"),
+                ACE_TEXT (MMDB_strerror (result))));
+    goto clean_up;
+  } // end IF
+  if (!entry_data_s.has_data)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("IP address entry has no data for path (was: \"%s:%s:%s\"), returning\n"),
+                ACE_TEXT ("city"), ACE_TEXT ("names"), ACE_TEXT ("en")));
+    goto clean_up;
+  } // end IF
+  ACE_ASSERT (entry_data_s.type == MMDB_DATA_TYPE_UTF8_STRING);
+  value_string.assign (entry_data_s.utf8_string, entry_data_s.data_size);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("city: \"") << value_string << ACE_TEXT_ALWAYS_CHAR ("\"") << std::endl;
 
 clean_up:
   //if (entry_data_list_p)

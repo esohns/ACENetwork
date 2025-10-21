@@ -11,8 +11,6 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-add_definitions (-DCOMMON_HAS_DLL)
-add_definitions (-DCOMMON_UI_HAS_DLL)
 
 if (GEOIP2_SUPPORT)
  include_directories (${GEOIP2_INCLUDE_DIRS})
@@ -100,12 +98,10 @@ if (GTK_SUPPORT)
  if (GTK3_USE)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk3/bin GTK_LIB_PATH)
   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                            G:/software/Development/dll
                             ${GTK_LIB_PATH})
  elseif (GTK2_USE)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                            G:/software/Development/dll
                             ${GTK_LIB_PATH})
  endif ()
 endif (GTK_SUPPORT)
@@ -127,15 +123,9 @@ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t"
+                         ARGS "-f /mnt/win_e/databases/GeoLite2-City.mmdb -l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib
-#                                             ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
-                                              /usr/local/lib
                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
@@ -148,15 +138,17 @@ elseif (WIN32)
   file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIB_PATH)
  endif (WXWIDGETS_SUPPORT)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
+ file (TO_CMAKE_PATH ${GEOIP2_LIB_DIR} GEOIP2_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}
+                           ${GEOIP2_LIB_PATH}
                            ${GTK_LIB_PATH}
                            ${WXWIDGETS_LIB_PATH}
                            ${ACE_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-f .\\\\etc\\\\GeoLite2-City.mmdb -l -t"
+                         ARGS "-f e:\\\\databases\\\\GeoLite2-City.mmdb -l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
