@@ -425,7 +425,7 @@ IRC_Session_T<ConnectionType,
           std::copy (iterator, record_r.parameters_.end (),
                      parameters_a.begin ());
           if (!IRC_Tools::parse (parameters_a,
-                                 state_.serverExtensions))
+                                 inherited::state_.serverExtensions))
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to IRC_Tools::parse (\"%s\"), continuing\n"),
