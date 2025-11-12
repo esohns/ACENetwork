@@ -33,7 +33,9 @@ if (UNIX)
  add_link_options ("LINKER:--as-needed")
 endif (UNIX)
 
-add_library (${PROJECT_NAME}_Test_U STATIC "")
+add_library (${PROJECT_NAME}_Test_U
+             STATIC "")
+set_property (TARGET ${PROJECT_NAME}_Test_U PROPERTY FOLDER "test_u")
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
@@ -46,7 +48,6 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-#add_definitions (-DCOMMON_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -57,7 +58,6 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
-#add_definitions (-DACESTREAM_HAS_DLL)
 
 if (CURSES_SUPPORT)
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
@@ -290,6 +290,8 @@ export (TARGETS ${PROJECT_NAME}_Test_U
 
 add_custom_target (test_u ALL
                    COMMENT "building test_u...")
+set_property (TARGET test_u PROPERTY FOLDER "test_u")
+
 if (BUILD_TEST_U)
  add_subdirectory (client_server)
  add_subdirectory (DHCP_client)
