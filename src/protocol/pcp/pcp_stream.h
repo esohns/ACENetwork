@@ -76,7 +76,8 @@ class PCP_Stream_T
                         SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
-                        SessionMessageType>
+                        SessionMessageType,
+                        struct Stream_UserData>
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -91,7 +92,8 @@ class PCP_Stream_T
                         SessionManagerType,
                         ControlMessageType,
                         DataMessageType,
-                        SessionMessageType> inherited;
+                        SessionMessageType,
+                        struct Stream_UserData> inherited;
 
  public:
   PCP_Stream_T ();
@@ -174,8 +176,7 @@ class PCP_Stream_T
                                                         PCP_Opcode_t,
                                                         PCP_Statistic_t,
                                                         TimerManagerType,
-                                                        typename SessionMessageType::DATA_T::DATA_T,
-                                                        typename SessionMessageType::DATA_T> STATISTIC_READER_T;
+                                                        struct Stream_UserData> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                         Common_TimePolicy_t,
                                                         ModuleHandlerConfigurationType,
@@ -185,8 +186,7 @@ class PCP_Stream_T
                                                         PCP_Opcode_t,
                                                         PCP_Statistic_t,
                                                         TimerManagerType,
-                                                        typename SessionMessageType::DATA_T::DATA_T,
-                                                        typename SessionMessageType::DATA_T> STATISTIC_WRITER_T;
+                                                        struct Stream_UserData> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 typename SessionMessageType::DATA_T::DATA_T, // session data type

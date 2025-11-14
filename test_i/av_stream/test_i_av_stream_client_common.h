@@ -234,7 +234,8 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_Client_DirectShow_SessionManager_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_DirectShow_Message,
-                      Test_I_AVStream_Client_DirectShow_SessionMessage> Test_I_AVStream_Client_DirectShow_Audio_StreamBase_t;
+                      Test_I_AVStream_Client_DirectShow_SessionMessage,
+                      struct Stream_UserData> Test_I_AVStream_Client_DirectShow_Audio_StreamBase_t;
 typedef Stream_Base_T<ACE_MT_SYNCH,
                       Common_TimePolicy_t,
                       stream_name_string_2,
@@ -248,7 +249,8 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_Client_DirectShow_SessionManager_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_DirectShow_Message,
-                      Test_I_AVStream_Client_DirectShow_SessionMessage> Test_I_AVStream_Client_DirectShow_Video_StreamBase_t;
+                      Test_I_AVStream_Client_DirectShow_SessionMessage,
+                      struct Stream_UserData> Test_I_AVStream_Client_DirectShow_Video_StreamBase_t;
 
 typedef Stream_Base_T<ACE_MT_SYNCH,
                       Common_TimePolicy_t,
@@ -263,7 +265,8 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_Client_MediaFoundation_SessionManager_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_MediaFoundation_Message,
-                      Test_I_AVStream_Client_MediaFoundation_SessionMessage> Test_I_AVStream_Client_MediaFoundation_Audio_StreamBase_t;
+                      Test_I_AVStream_Client_MediaFoundation_SessionMessage,
+                      struct Stream_UserData> Test_I_AVStream_Client_MediaFoundation_Audio_StreamBase_t;
 typedef Stream_Base_T<ACE_MT_SYNCH,
                       Common_TimePolicy_t,
                       stream_name_string_2,
@@ -277,7 +280,8 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_Client_MediaFoundation_SessionManager_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_MediaFoundation_Message,
-                      Test_I_AVStream_Client_MediaFoundation_SessionMessage> Test_I_AVStream_Client_MediaFoundation_Video_StreamBase_t;
+                      Test_I_AVStream_Client_MediaFoundation_SessionMessage,
+                      struct Stream_UserData> Test_I_AVStream_Client_MediaFoundation_Video_StreamBase_t;
 #else
 struct Test_I_AVStream_Client_ALSA_V4L_StreamState;
 struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration;
@@ -296,7 +300,8 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_Client_ALSA_V4L_SessionManager_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_ALSA_V4L_Message,
-                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_ALSA_StreamBase_t;
+                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                      struct Stream_UserData> Test_I_AVStream_Client_ALSA_StreamBase_t;
 typedef Stream_Base_T<ACE_MT_SYNCH,
                       Common_TimePolicy_t,
                       stream_name_string_2,
@@ -310,7 +315,8 @@ typedef Stream_Base_T<ACE_MT_SYNCH,
                       Test_I_Client_ALSA_V4L_SessionManager_t,
                       Stream_ControlMessage_t,
                       Test_I_AVStream_Client_ALSA_V4L_Message,
-                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage> Test_I_AVStream_Client_V4L_StreamBase_t;
+                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                      struct Stream_UserData> Test_I_AVStream_Client_V4L_StreamBase_t;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_ISessionDataNotify_T<Test_I_AVStream_Client_DirectShow_StreamSessionData,

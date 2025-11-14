@@ -253,7 +253,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   bytes_sent =
       inherited::HANDLER_T::send (message_block_p->rd_ptr (), // data
                                   message_block_p->length (), // #bytes to send
-                                  inherited::address_,        // peer address
+                                  inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.peerAddress, // peer address
                                   0);//,                      // flags
                                   //NULL);                   // timeout
   switch (bytes_sent)

@@ -41,12 +41,12 @@ class ACE_Notification_Strategy;
 template <typename HandlerType,
           ////////////////////////////////
           typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename UserDataType>
 class Net_StreamUDPSocketBase_T
@@ -90,11 +90,16 @@ class Net_StreamUDPSocketBase_T
 #else
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
+  inline virtual ACE_Notification_Strategy* notification () { ACE_ASSERT (false); return NULL; }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
+  using inherited::send;
+
  protected:
+  // convenient types
+  typedef HandlerType HANDLER_T;
+
   Net_StreamUDPSocketBase_T ();
 
   // override some ACE_Svc_Handler members
@@ -104,7 +109,7 @@ class Net_StreamUDPSocketBase_T
   // helper method(s)
 #if defined (ACE_LINUX)
   void processErrorQueue ();
-#endif
+#endif // ACE_LINUX
 
   ACE_Message_Block* writeBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
@@ -122,12 +127,12 @@ class Net_StreamUDPSocketBase_T
 
 // partial specialization (for connected sockets)
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename UserDataType>
 class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
@@ -186,11 +191,16 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 #else
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
+  inline virtual ACE_Notification_Strategy* notification () { return inherited::configuration_->streamConfiguration->configuration_.notificationStrategy; }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
  protected:
+  // convenient types
+  typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                                 HandlerConfigurationType,
+                                 Net_SOCK_CODgram> HANDLER_T;
+
   Net_StreamUDPSocketBase_T ();
 
   // override some ACE_Svc_Handler members
@@ -200,7 +210,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   // helper method(s)
 #if defined (ACE_LINUX)
   void processErrorQueue ();
-#endif
+#endif // ACE_LINUX
 
   ACE_Message_Block* writeBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
@@ -218,12 +228,12 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 
 #if defined (NETLINK_SUPPORT)
 // partial specialization (for Netlink)
-template <typename ConfigurationType,
+template <typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename UserDataType>
 class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
@@ -279,6 +289,9 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
  protected:
+  // convenient types
+  typedef Net_NetlinkSocketHandler_T<HandlerConfigurationType> HANDLER_T;
+
   Net_StreamUDPSocketBase_T ();
 
   // override some ACE_Svc_Handler members
@@ -288,7 +301,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   // helper method(s)
 #if defined (ACE_LINUX)
   void processErrorQueue ();
-#endif
+#endif // ACE_LINUX
 
   ACE_Message_Block* writeBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;

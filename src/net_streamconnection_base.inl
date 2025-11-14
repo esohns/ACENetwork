@@ -229,7 +229,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end IF
 
   // step1: initialize/tweak socket
-  if (unlikely (!inherited::initialize (configuration_p->socketConfiguration)))
+  if (unlikely (!HANDLER_T::initialize (configuration_p->socketConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_SocketHandlerBase_T::initialize(): \"%m\", aborting\n"),
@@ -1304,7 +1304,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (configuration_p);
   socket_handler_configuration_p = &configuration_p->socketConfiguration;
 
-  if (unlikely (!inherited::initialize (*socket_handler_configuration_p)))
+  if (unlikely (!HANDLER_T::initialize (*socket_handler_configuration_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_SocketHandlerBase_T::initialize(): \"%m\", returning\n"),

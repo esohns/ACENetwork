@@ -134,11 +134,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
   inherited::closing_ = true;
   // *TODO*: find a better way to do this
   serializeOutput_ =
-      configuration_p->streamConfiguration->configuration_.serializeOutput;
+    configuration_p->streamConfiguration->configuration_->serializeOutput;
 
   // step1: initialize/tweak socket, ...
   // *TODO*: remove type inferences
-  result = inherited::open (&configuration_p->socketHandlerConfiguration);
+  result = inherited::open (&configuration_p->socketConfiguration);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -161,7 +161,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //handle_manager = true;
 
   // step4: register with the reactor ?
-  if (likely (!inherited::writeOnly_))
+  if (likely (!configuration_p->socketConfiguration.writeOnly))
   {
     ACE_Reactor* reactor_p = inherited::reactor ();
     ACE_ASSERT (reactor_p);
@@ -191,7 +191,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // *NOTE*: let the reactor manage this handler
   // *WARNING*: this has some implications (see close() below)
   // *TODO*: remove type inference
-  if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
+  if (likely (!configuration_p->useThreadPerConnection))
     this->decrease ();
 
   return 0;
@@ -379,22 +379,26 @@ Net_StreamUDPSocketBase_T<HandlerType,
   int result = -1;
   ssize_t bytes_received = -1;
   ACE_INET_Addr peer_address;
-  const ConfigurationType& configuration_r = this->getR ();
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
   bool enqueue = true;
   ACE_Message_Block* buffer_p = NULL;
 
   // sanity check(s)
-  ACE_ASSERT (configuration_r.streamConfiguration);
+  ACE_ASSERT (configuration_p->streamConfiguration);
+  ACE_ASSERT (configuration_p->streamConfiguration->configuration_);
+  ACE_ASSERT (configuration_p->streamConfiguration->configuration_->allocatorConfiguration);
 
   // read a datagram from the socket
   // *TODO*: remove type inferences
   size_t pdu_size_i =
-    configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize +
-    configuration_r.streamConfiguration->allocatorConfiguration_.paddingBytes;
+    configuration_p->streamConfiguration->configuration_->allocatorConfiguration->defaultBufferSize +
+    configuration_p->streamConfiguration->configuration_->allocatorConfiguration->paddingBytes;
   buffer_p = this->allocateMessage (pdu_size_i);
   if (unlikely (!buffer_p))
-  { ACE_ASSERT (configuration_r.messageAllocator);
-    if (configuration_r.messageAllocator->block ())
+  { ACE_ASSERT (configuration_p->messageAllocator);
+    if (configuration_p->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
@@ -425,12 +429,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
     } // end IF
   } // end IF
   ACE_ASSERT (buffer_p);
-  buffer_p->size (configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize);
+  buffer_p->size (configuration_p->streamConfiguration->configuration_->allocatorConfiguration->defaultBufferSize);
 
   // read a datagram from the socket
   bytes_received =
     inherited::peer_.recv (buffer_p->wr_ptr (),   // buffer
-                           configuration_r.streamConfiguration->allocatorConfiguration_.defaultBufferSize, // buffer size
+                           configuration_p->streamConfiguration->configuration_->allocatorConfiguration->defaultBufferSize, // buffer size
                            peer_address,          // peer address
                            0);                    // flags
   //bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
@@ -745,6 +749,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ACE_Reactor* reactor_p = inherited::reactor ();
   ACE_ASSERT (reactor_p);
 
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
+
   // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
   //                   gone away, i.e. no new data will be accepted by the
   //                   kernel / forwarded by the proactor
@@ -761,11 +769,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      const ConfigurationType& configuration_r = this->getR ();
-
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (unlikely (!configuration_r.socketHandlerConfiguration.useThreadPerConnection))
+      if (unlikely (!configuration_r.useThreadPerConnection))
       {
         // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
@@ -804,7 +810,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   } // end SWITCH
 
   // step3: deregister from the reactor ?
-  if (likely (!inherited::writeOnly_ &&
+  if (likely (!configuration_p->socketConfiguration.writeOnly &&
               (handle_in != ACE_INVALID_HANDLE)))
   {
     result =
@@ -874,6 +880,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   int result = -1;
   int error = 0;
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
@@ -891,7 +900,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
-  if (likely (inherited::writeOnly_))
+  if (likely (configuration_p->socketConfiguration.writeOnly))
     remoteSAP_out = inherited::address_;
   else
   {

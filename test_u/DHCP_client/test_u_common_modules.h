@@ -145,8 +145,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       DHCP_MessageType_t,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct DHCPClient_SessionData,
-                                                      DHCPClient_SessionData_t> DHCPClient_Module_StatisticReport_ReaderTask_t;
+                                                      struct Stream_UserData> DHCPClient_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct DHCPClient_ModuleHandlerConfiguration,
@@ -156,8 +155,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       DHCP_MessageType_t,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct DHCPClient_SessionData,
-                                                      DHCPClient_SessionData_t> DHCPClient_Module_StatisticReport_WriterTask_t;
+                                                      struct Stream_UserData> DHCPClient_Module_StatisticReport_WriterTask_t;
 
 typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,

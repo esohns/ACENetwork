@@ -32,6 +32,7 @@
 #include "stream_statemachine_control.h"
 
 #include "net_common.h"
+#include "net_connection_configuration.h"
 #include "net_iconnectionmanager.h"
 #include "net_netlinksockethandler.h"
 #include "net_streamconnection_base.h"

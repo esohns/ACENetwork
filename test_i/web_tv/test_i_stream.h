@@ -60,7 +60,8 @@ class Test_I_AVStream
                         Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
-                        Test_I_SessionMessage_3>
+                        Test_I_SessionMessage_3,
+                        struct Stream_UserData>
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -75,7 +76,8 @@ class Test_I_AVStream
                         Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
-                        Test_I_SessionMessage_3> inherited;
+                        Test_I_SessionMessage_3,
+                        struct Stream_UserData> inherited;
 
  public:
   Test_I_AVStream ();
@@ -109,7 +111,8 @@ class Test_I_AudioStream
                         Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
-                        Test_I_SessionMessage_3>
+                        Test_I_SessionMessage_3,
+                        struct Stream_UserData>
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -124,7 +127,8 @@ class Test_I_AudioStream
                         Test_I_SessionManager_3,
                         Stream_ControlMessage_t,
                         Test_I_Message,
-                        Test_I_SessionMessage_3> inherited;
+                        Test_I_SessionMessage_3,
+                        struct Stream_UserData> inherited;
 
  public:
   Test_I_AudioStream ();

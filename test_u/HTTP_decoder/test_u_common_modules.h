@@ -79,8 +79,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       HTTP_Method_t,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct Test_U_HTTPDecoder_SessionData,
-                                                      Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
+                                                      struct Stream_UserData> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
@@ -90,8 +89,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       HTTP_Method_t,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct Test_U_HTTPDecoder_SessionData,
-                                                      Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
+                                                      struct Stream_UserData> Test_U_Module_StatisticReport_WriterTask_t;
 
 typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,

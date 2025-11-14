@@ -83,8 +83,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       IRC_CommandType_t,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct IRC_Client_SessionData,
-                                                      IRC_Client_SessionData_t> IRC_Client_Module_Statistic_ReaderTask_t;
+                                                      struct Stream_UserData> IRC_Client_Module_Statistic_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct IRC_Client_ModuleHandlerConfiguration,
@@ -94,8 +93,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       IRC_CommandType_t,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct IRC_Client_SessionData,
-                                                      IRC_Client_SessionData_t> IRC_Client_Module_Statistic_WriterTask_t;
+                                                      struct Stream_UserData> IRC_Client_Module_Statistic_WriterTask_t;
 
 DATASTREAM_MODULE_DUPLEX (struct IRC_Client_SessionData,                // session data type
                           enum Stream_SessionMessageType,               // session event type

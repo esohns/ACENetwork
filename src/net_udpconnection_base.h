@@ -39,7 +39,7 @@
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename SocketHandlerType, // implements Net_UDPSocketHandler_T
           ////////////////////////////////
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -142,7 +142,7 @@ class Net_UDPConnectionBase_T
 
 template <typename SocketHandlerType, // implements Net_AsynchUDPSocketHandler_T
           ////////////////////////////////
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////

@@ -137,8 +137,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       int,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct FileServer_SessionData,
-                                                      FileServer_SessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
+                                                      struct Stream_UserData> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct FileServer_ModuleHandlerConfiguration,
@@ -148,8 +147,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       int,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
-                                                      struct FileServer_SessionData,
-                                                      FileServer_SessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
+                                                      struct Stream_UserData> Test_U_Module_StatisticReport_WriterTask_t;
 DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,              // session data type
                           enum Stream_SessionMessageType,             // session event type
                           struct FileServer_ModuleHandlerConfiguration,   // module handler configuration type

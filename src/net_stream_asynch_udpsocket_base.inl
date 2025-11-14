@@ -84,10 +84,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #endif // ACE_LINUX
   bool handle_socket = false;
   bool decrease_reference_count = false;
-  const ConfigurationType& configuration_r = this->getR ();
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
 
   // step0: initialize base-class
-  if (unlikely (!inherited::initialize (configuration_r.socketHandlerConfiguration)))
+  if (unlikely (!inherited::initialize (configuration_p->socketConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -99,10 +101,26 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                    messageBlock_in);
 
   // step4: start reading ?
-  if (likely (!configuration_r.writeOnly))
+  if (likely (!configuration_p->socketConfiguration.writeOnly))
   {
     if (likely (messageBlock_in.length () == 0))
-      inherited::initiate_read_dgram ();
+    {
+      // allocate a data buffer
+      unsigned int pdu_size_i =
+        configuration_p->allocatorConfiguration->defaultBufferSize +
+        configuration_p->allocatorConfiguration->paddingBytes;
+      ACE_Message_Block* message_block_p = this->allocateMessage (pdu_size_i);
+      if (unlikely (!message_block_p))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_ISocketHandler::allocateMessage(%u), aborting\n"),
+                    pdu_size_i));
+        goto error;
+      } // end IF
+      message_block_p->size (configuration_p->allocatorConfiguration->defaultBufferSize);
+
+      inherited::initiate_read (message_block_p);
+    } // end IF
     else
     {
       // forward data argument
@@ -221,6 +239,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   unsigned int length = 0;
   size_t bytes_sent = 0;
   ssize_t result_2 = 0;
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
 
   // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
   //                   been notified
@@ -288,7 +309,7 @@ send:
       inherited::outputStream_.send (message_block_p,                      // data
                                      bytes_sent,                           // #bytes sent
                                      0,                                    // flags
-                                     inherited::address_,                  // peer address
+                                     configuration_p->socketConfiguration.peerAddress, // peer address
                                      NULL,                                 // asynchronous completion token
                                      0,                                    // priority
                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -392,6 +413,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   int result = -1;
   int error = 0;
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
 
   handle_out = inherited2::get_handle ();
   localSAP_out.reset ();
@@ -409,8 +433,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
-  if (likely (inherited::writeOnly_))
-    remoteSAP_out = inherited::address_;
+  if (likely (configuration_p->socketConfiguration.writeOnly))
+    remoteSAP_out = configuration_p->socketConfiguration.peerAddress;
   else
   {
     result = inherited::get_remote_addr (remoteSAP_out);
@@ -481,10 +505,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ISOCKET_CONNECTION_T* isocket_connection_p = this;
   try {
-    isocket_connection_p->close ();
+    isocket_connection_p->abort ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ISocketConnection_T::close(): \"%m\", aborting\n")));
+                ACE_TEXT ("caught exception in Net_ISocketConnection_T::abort(): \"%m\", aborting\n")));
     return -1;
   }
 
@@ -511,12 +535,15 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::close"));
 
   int result = -1;
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
 
   // step1: shutdown operations
   ACE_HANDLE handle = inherited2::get_handle ();
 
   // *TODO*: remove type inference
-  if (unlikely (inherited::writeOnly_))
+  if (unlikely (configuration_p->socketConfiguration.writeOnly))
     result = handle_close (handle,
                            ACE_Event_Handler::ALL_EVENTS_MASK);
   else
@@ -662,6 +689,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
 
   // sanity check
   result = result_in.success ();
@@ -737,7 +767,21 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       } // end IF
 
       // start next read
-      if (unlikely (!inherited::initiate_read_dgram ()))
+      // allocate a data buffer
+      unsigned int pdu_size_i =
+        configuration_p->allocatorConfiguration->defaultBufferSize +
+        configuration_p->allocatorConfiguration->paddingBytes;
+      message_block_p = this->allocateMessage (pdu_size_i);
+      if (unlikely (!message_block_p))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_ISocketHandler::allocateMessage(%u), aborting\n"),
+                    pdu_size_i));
+        break;
+      } // end IF
+      message_block_p->size (configuration_p->allocatorConfiguration->defaultBufferSize);
+
+      if (unlikely (!inherited::initiate_read (message_block_p)))
       {
         int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

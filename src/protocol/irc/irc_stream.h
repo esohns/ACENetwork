@@ -183,8 +183,7 @@ class IRC_Stream_T
                                                         IRC_CommandType_t,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        typename SessionMessageType::DATA_T::DATA_T,
-                                                        typename SessionMessageType::DATA_T> STATISTIC_READER_T;
+                                                        UserDataType> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                         Common_TimePolicy_t,
                                                         ModuleHandlerConfigurationType,
@@ -194,8 +193,7 @@ class IRC_Stream_T
                                                         IRC_CommandType_t,
                                                         StatisticContainerType,
                                                         TimerManagerType,
-                                                        typename SessionMessageType::DATA_T::DATA_T,
-                                                        typename SessionMessageType::DATA_T> STATISTIC_WRITER_T;
+                                                        UserDataType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 typename SessionMessageType::DATA_T::DATA_T, // session data type

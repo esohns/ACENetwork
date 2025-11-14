@@ -264,7 +264,7 @@ class Net_AsynchStreamConnectionBase_T
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
   // -------------------------------------
   virtual void set (enum Net_ClientServerRole);
-  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (inherited::configuration_); return *(inherited::configuration_); }
+  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (inherited::configuration_); return *inherited::configuration_; }
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
@@ -299,17 +299,17 @@ class Net_AsynchStreamConnectionBase_T
   Stream_IAllocator* allocator_;
   StreamType         stream_;
 
- private:
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T (const Net_AsynchStreamConnectionBase_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T& operator= (const Net_AsynchStreamConnectionBase_T&))
-
-  using ISTREAM_CONNECTION_T::ISOCKET_CONNECTION_T::ITRANSPORT_LAYER_T::initialize;
-
   // override some ACE_Handler methods
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T (const Net_AsynchStreamConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T& operator= (const Net_AsynchStreamConnectionBase_T&))
+
+  using ISTREAM_CONNECTION_T::ISOCKET_CONNECTION_T::ITRANSPORT_LAYER_T::initialize;
 
   bool               notify_; // still to notify the processing stream ?
 };

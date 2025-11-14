@@ -52,7 +52,8 @@ template <typename HandlerType,
           typename UserDataType>
 class Net_StreamAsynchUDPSocketBase_T
  : public HandlerType
- , public ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_NULL_SYNCH>
+ , public ACE_Svc_Handler<ACE_SOCK_DGRAM,
+                          ACE_NULL_SYNCH>
  , virtual public Net_ISocketConnection_T<AddressType,
                                           ConfigurationType,
                                           StateType,
@@ -60,14 +61,15 @@ class Net_StreamAsynchUDPSocketBase_T
                                           HandlerConfigurationType>
 {
   typedef HandlerType inherited;
-  typedef ACE_Svc_Handler<ACE_SOCK_DGRAM, ACE_NULL_SYNCH> inherited2;
+  typedef ACE_Svc_Handler<ACE_SOCK_DGRAM,
+                          ACE_NULL_SYNCH> inherited2;
 
  public:
-  inline virtual ~Net_StreamAsynchUDPSocketBase_T () {};
+  inline virtual ~Net_StreamAsynchUDPSocketBase_T () {}
 
   // implement Common_IReset
   // *NOTE*: use this to modify the source/target address after initialization
-  virtual void reset ();
+  inline virtual void reset () { ACE_ASSERT (false); }
 
   // override some ACE_Service_Handler methods
   virtual void open (ACE_HANDLE,          // (socket) handle
@@ -85,7 +87,7 @@ class Net_StreamAsynchUDPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual Net_ConnectionId_t id () const;
-  inline virtual ACE_Notification_Strategy* notification () { return this; };
+  inline virtual ACE_Notification_Strategy* notification () { return this; }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
@@ -94,6 +96,10 @@ class Net_StreamAsynchUDPSocketBase_T
   typedef HandlerType HANDLER_T;
 
   Net_StreamAsynchUDPSocketBase_T ();
+
+  // helper methods
+  virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
+  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
  private:
   // convenient types
@@ -105,10 +111,6 @@ class Net_StreamAsynchUDPSocketBase_T
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&))
-
-  // helper methods
-  virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
-  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 };
 
 //////////////////////////////////////////
@@ -133,7 +135,8 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                       UserDataType>
  : public Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_SOCK_Netlink
- , public ACE_Svc_Handler<Net_SOCK_Netlink, ACE_NULL_SYNCH>
+ , public ACE_Svc_Handler<Net_SOCK_Netlink,
+                          ACE_NULL_SYNCH>
  , virtual public Net_ISocketConnection_T<Net_Netlink_Addr,
                                           ConfigurationType,
                                           StateType,
@@ -146,7 +149,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                           ACE_NULL_SYNCH> inherited3;
 
  public:
-  inline virtual ~Net_StreamAsynchUDPSocketBase_T () {};
+  inline virtual ~Net_StreamAsynchUDPSocketBase_T () {}
 
   // override some ACE_Service_Handler methods
   virtual void open (ACE_HANDLE,          // (socket) handle
@@ -163,8 +166,8 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   virtual void info (ACE_HANDLE&,              // return value: handle
                      Net_Netlink_Addr&,        // return value: local SAP
                      Net_Netlink_Addr&) const; // return value: remote SAP
-  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited2::get_handle ()); };
-  inline virtual ACE_Notification_Strategy* notification () { return this; };
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited2::get_handle ()); }
+  inline virtual ACE_Notification_Strategy* notification () { return this; }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?
@@ -174,6 +177,10 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   typedef Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType> HANDLER_T;
 
   Net_StreamAsynchUDPSocketBase_T ();
+
+  // helper methods
+  virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
+  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
  private:
   // convenient types
@@ -185,10 +192,6 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&))
-
-  // helper methods
-  virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
-  virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 };
 #endif // NETLINK_SUPPORT
 
