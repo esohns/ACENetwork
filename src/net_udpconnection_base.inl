@@ -431,6 +431,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
 
+  Net_ConnectionId_t id_i = id ();
+
   inherited::abort ();
 
   if (inherited::CONNECTION_BASE_T::configuration_->socketConfiguration.writeOnly)
@@ -440,8 +442,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
     if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to Net_StreamConnectionBase_T::handle_close(): \"%m\", continuing\n"),
-                  this->id ()));
-    // *NOTE*: the caller retains any final reference(s)
+                  id_i));
   } // end IF
 }
 
@@ -959,34 +960,33 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   peerSAP_out = inherited::HANDLER_T::configuration_->peerAddress;
 }
 
-template <typename SocketHandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType>
-void
-Net_AsynchUDPConnectionBase_T<SocketHandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              StreamType,
-                              UserDataType>::abort ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::abort"));
-
-  Net_ConnectionId_t id_i = id ();
-
-  inherited::abort ();
-
-  int result = inherited::handle_close (inherited::writeHandle_,
-                                        ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (unlikely (result == -1))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to Net_StreamConnectionBase_T::handle_close(): \"%m\", continuing\n"),
-                id_i));
-  // *NOTE*: the caller retains any final reference(s)
-}
+//template <typename SocketHandlerType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename StreamType,
+//          typename UserDataType>
+//void
+//Net_AsynchUDPConnectionBase_T<SocketHandlerType,
+//                              ConfigurationType,
+//                              StateType,
+//                              StatisticContainerType,
+//                              StreamType,
+//                              UserDataType>::abort ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::abort"));
+//
+//  //Net_ConnectionId_t id_i = id ();
+//
+//  inherited::abort ();
+//
+//  //int result = inherited::handle_close (inherited::writeHandle_,
+//  //                                      ACE_Event_Handler::ALL_EVENTS_MASK);
+//  //if (unlikely (result == -1))
+//  //  ACE_DEBUG ((LM_ERROR,
+//  //              ACE_TEXT ("%u: failed to Net_StreamConnectionBase_T::handle_close(): \"%m\", continuing\n"),
+//  //              id_i));
+//}
 
 template <typename SocketHandlerType,
           typename ConfigurationType,
