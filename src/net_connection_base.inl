@@ -202,6 +202,10 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
     CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (manager_p);
 
+  ICONNECTOR_T* connector_p = connector_;
+  ILISTENER_T* listener_p = listener_;
+  ACE_HANDLE handle_h = state_.handle;
+
   // (try to) de-register with the connection manager
   isRegistered_ = false;
   // *IMPORTANT NOTE*: may delete 'this'
@@ -211,28 +215,27 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
   }
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("deregistered connection [0x%@/%d] (total: %u)\n"),
-              this, reinterpret_cast<int> (state_.handle),
+              this, reinterpret_cast<int> (handle_h),
               manager_p->count ()));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
-              this, state_.handle,
+              this, handle_h,
               manager_p->count ()));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  if (connector_ || listener_)
+  if (connector_p || listener_p)
   {
     // notify the (UDP-) connector (server-side only !)
-    if (connector_)
-      connector_->disconnect (state_.handle);
+    if (connector_p)
+      connector_p->disconnect (handle_h);
 
     // notify the listener (server-side only !)
-    if (listener_)
-      listener_->disconnect (state_.handle);
+    if (listener_p)
+      listener_p->disconnect (handle_h);
   } // end IF
 }
 

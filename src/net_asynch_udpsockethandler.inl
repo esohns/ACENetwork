@@ -671,7 +671,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
   int result = 0;
   ACE_HANDLE handle_h = inherited2::get_handle ();
-  //ACE_ASSERT (handle_in == handle_h);
 
   if ((handle_h != ACE_INVALID_HANDLE) &&
       !is_writeonly_b)
@@ -689,6 +688,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   inherited2::set_handle (ACE_INVALID_HANDLE);
+
   if (writeHandle_ != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (writeHandle_);

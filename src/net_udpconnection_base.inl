@@ -975,6 +975,8 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::abort"));
 
+  Net_ConnectionId_t id_i = id ();
+
   inherited::abort ();
 
   int result = inherited::handle_close (inherited::writeHandle_,
@@ -982,7 +984,7 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
   if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_StreamConnectionBase_T::handle_close(): \"%m\", continuing\n"),
-                this->id ()));
+                id_i));
   // *NOTE*: the caller retains any final reference(s)
 }
 

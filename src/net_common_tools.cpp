@@ -307,9 +307,9 @@ Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& address_in)
 
   int result = -1;
   ACE_TCHAR buffer_a[BUFSIZ]; // "%u:%u\0"
-  ACE_OS::memset (&buffer_a, 0, sizeof (buffer_a));
+  ACE_OS::memset (&buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   result = address_in.addr_to_string (buffer_a,
-                                      sizeof (buffer_a),
+                                      sizeof (ACE_TCHAR[BUFSIZ]),
                                       1); // N/A
   if (unlikely (result == -1))
   {
@@ -392,7 +392,7 @@ Net_Common_Tools::IPv4AddressToString (ACE_UINT16 port_in,
     return return_value;
   } // end IF
   result = inet_addr.addr_to_string (buffer_a,
-                                     sizeof (char[BUFSIZ]),
+                                     sizeof (ACE_TCHAR[BUFSIZ]),
                                      1); // want IP address, not hostname !
   if (unlikely (result == -1))
   {
