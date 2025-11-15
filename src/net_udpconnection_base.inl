@@ -431,7 +431,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
 
-  Net_ConnectionId_t id_i = id ();
+  Net_ConnectionId_t id_i = this->id ();
 
   inherited::abort ();
 

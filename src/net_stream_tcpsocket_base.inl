@@ -125,7 +125,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
   //                   (see handle_close()) and de-register; after the last
   //                   active notification has been dispatched, it will be
   //                   safely deleted
-  inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  // inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
   // *IMPORTANT NOTE*: due to reference counting, the
   //                   ACE_Svc_Handle::shutdown() method will crash, as it
   //                   references a connection recycler AFTER removing the

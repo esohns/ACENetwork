@@ -91,6 +91,9 @@ class Net_StreamAsynchUDPSocketBase_T
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
+  // resolve ambiguity between HandlerType and Net_ISocketConnection_T
+  using inherited::initialize;
+
  protected:
   // convenient types
   typedef HandlerType HANDLER_T;
@@ -171,6 +174,9 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?
+
+  // resolve ambiguity between HandlerType and Net_ISocketConnection_T
+  using inherited::initialize;
 
  protected:
   // convenient types

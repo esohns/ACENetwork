@@ -94,6 +94,7 @@ class Net_StreamUDPSocketBase_T
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
+  using inherited::initialize;
   using inherited::send;
 
  protected:
@@ -195,6 +196,8 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
+  using inherited::initialize;
+
  protected:
   // convenient types
   typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
@@ -287,6 +290,8 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
+
+  using inherited::initialize;
 
  protected:
   // convenient types

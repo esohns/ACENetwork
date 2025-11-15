@@ -121,7 +121,7 @@ class Net_IConnection_T
 //////////////////////////////////////////
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////

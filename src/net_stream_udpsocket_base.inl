@@ -98,8 +98,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::open"));
 
-  ConfigurationType* configuration_p =
-    static_cast<ConfigurationType*> (arg_in);
+  // ConfigurationType* configuration_p =
+  //   static_cast<ConfigurationType*> (arg_in);
+  const struct Net_ConnectionConfigurationBase& configuration_r = this->getR ();
+  const ConfigurationType* configuration_p =
+    static_cast<const ConfigurationType*> (&configuration_r);
 
   // sanity check(s)
   ACE_ASSERT (configuration_p);
@@ -121,7 +124,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //                   (see handle_close()) and de-register; after the last
   //                   active notification has been dispatched, it will be
   //                   safely deleted
-  inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  //inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
   // *IMPORTANT NOTE*: due to reference counting, the
   //                   ACE_Svc_Handle::shutdown() method will crash, as it
   //                   references a connection recycler AFTER removing the
@@ -138,7 +141,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // step1: initialize/tweak socket, ...
   // *TODO*: remove type inferences
-  result = inherited::open (&configuration_p->socketConfiguration);
+  result = inherited::open (arg_in);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1265,7 +1268,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   //                   (see handle_close()) and de-register; after the last
   //                   active notification has been dispatched, it will be
   //                   safely deleted
-  inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  //inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
   // *IMPORTANT NOTE*: due to reference counting, the
   //                   ACE_Svc_Handle::shutdown() method will crash, as it
   //                   references a connection recycler AFTER removing the
@@ -2394,7 +2397,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   //                   (see handle_close()) and de-register; after the last
   //                   active notification has been dispatched, it will be
   //                   safely deleted
-  inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
+  //inherited::reference_counting_policy ().value (ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
   // *IMPORTANT NOTE*: due to reference counting, the
   //                   ACE_Svc_Handle::shutdown() method will crash, as it
   //                   references a connection recycler AFTER removing the

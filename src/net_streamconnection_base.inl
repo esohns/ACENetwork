@@ -528,8 +528,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     {
       notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
-                      true,  // recurse upstream (if any) ?
-                      true); // expedite ?
+                      true,   // recurse upstream (if any) ?
+                      false); // expedite ?
     } // end IF
 
     // step1: shut down the processing stream
@@ -601,6 +601,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 //  inherited::set_handle (handle_in); // reset for debugging purposes
+
+  decrease_b &= (this->count () > 1); // *TODO*: remove this hack ASAP !
 
   // step4: deregister with the connection manager (if any)
   if (likely (deregister))
