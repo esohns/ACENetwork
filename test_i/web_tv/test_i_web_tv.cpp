@@ -746,8 +746,9 @@ do_work (const std::string& configurationFile_in,
 #else
   struct Stream_AllocatorConfiguration allocator_configuration_2;
 #endif // FFMPEG_SUPPORT
-  allocator_configuration.defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE * 10;
-  allocator_configuration_2.defaultBufferSize = TEST_I_DEFAULT_BUFFER_SIZE * 10;
+  allocator_configuration.defaultBufferSize = TEST_I_WEBTV_DEFAULT_BUFFER_SIZE;
+  allocator_configuration_2.defaultBufferSize =
+    TEST_I_WEBTV_DEFAULT_BUFFER_SIZE;
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
@@ -1022,6 +1023,7 @@ do_work (const std::string& configurationFile_in,
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_4b.concurrency =
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
+  modulehandler_configuration_4b.computeThroughput = true;
   modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
 //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
@@ -1161,19 +1163,12 @@ do_work (const std::string& configurationFile_in,
   connection_manager_3->set (connection_configuration_3a,
                              NULL);
 
-  Common_Timer_Manager_t* timer_manager_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (timer_manager_p);
-  struct Common_TimerConfiguration timer_configuration;
-  timer_configuration.dispatch = COMMON_TIMER_DISPATCH_REACTOR;
+  // step0b: initialize event dispatch
+  struct Common_EventDispatchState event_dispatch_state_s;
 #if defined (GTK_SUPPORT)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_SUPPORT
-  struct Common_EventDispatchState event_dispatch_state_s;
-  event_dispatch_state_s.configuration =
-    &configuration_in.dispatchConfiguration;
 
-  // step0b: initialize event dispatch
   configuration_in.dispatchConfiguration.numberOfReactorThreads =
     ((configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? TEST_I_WEBTV_NUMBER_OF_DISPATCH_THREADS_REACTOR : 0);
   configuration_in.dispatchConfiguration.numberOfProactorThreads =
@@ -1184,6 +1179,18 @@ do_work (const std::string& configurationFile_in,
                 ACE_TEXT ("failed to Common_Event_Tools::initializeEventDispatch(), returning\n")));
     goto clean;
   } // end IF
+
+  // Common_Timer_Manager_t* timer_manager_p =
+  //   COMMON_TIMERMANAGER_SINGLETON::instance ();
+  // ACE_ASSERT (timer_manager_p);
+  // intialize timers
+  Common_Timer_Tools::configuration_.dispatch =
+    useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR;
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+  Common_Timer_Tools::initialize ();
+
+  event_dispatch_state_s.configuration =
+    &configuration_in.dispatchConfiguration;
 
   // step0c: initialize signal handling
   //CBData_in.configuration->signalHandlerConfiguration.hasUI =
@@ -1209,10 +1216,6 @@ do_work (const std::string& configurationFile_in,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
     goto clean;
   } // end IF
-
-  // intialize timers
-  timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start (NULL);
 
   // step1a: start GTK event loop ?
   if (!UIDefinitionFileName_in.empty ())
@@ -1282,7 +1285,8 @@ do_work (const std::string& configurationFile_in,
 #endif // GTK_USE
 
   // step3: clean up
-  timer_manager_p->stop ();
+  // timer_manager_p->stop ();
+  Common_Timer_Tools::finalize ();
 
   connection_manager_p->stop (false, // wait ?
                               true); // high priority ?
@@ -1337,7 +1341,8 @@ clean:
                         false,  // recurse ?
                         false); // high priority
 
-  timer_manager_p->stop ();
+  // timer_manager_p->stop ();
+  Common_Timer_Tools::finalize ();
 }
 
 void

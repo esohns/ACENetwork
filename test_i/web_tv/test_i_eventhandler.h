@@ -56,7 +56,7 @@ class Test_I_EventHandler // master m3u
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler (const Test_I_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler& operator= (const Test_I_EventHandler&))
 
-  typedef std::map<unsigned int, struct Test_I_WebTV_SessionData*> SESSION_DATA_MAP_T;
+  typedef std::map<Stream_SessionId_t, struct Test_I_WebTV_SessionData*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
   struct Test_I_WebTV_UI_CBData* CBData_;
@@ -89,7 +89,7 @@ class Test_I_EventHandler_2 // playlist m3u
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2 (const Test_I_EventHandler_2&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2& operator= (const Test_I_EventHandler_2&))
 
-  typedef std::map<unsigned int, Test_I_WebTV_SessionData*> SESSION_DATA_MAP_T;
+  typedef std::map<Stream_SessionId_t, Test_I_WebTV_SessionData*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
   struct Test_I_WebTV_UI_CBData* CBData_;
@@ -122,7 +122,7 @@ class Test_I_EventHandler_3 // content
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3 (const Test_I_EventHandler_3&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3& operator= (const Test_I_EventHandler_3&))
 
-  typedef std::map<unsigned int, Test_I_WebTV_SessionData_3*> SESSION_DATA_MAP_T;
+  typedef std::map<Stream_SessionId_t, Test_I_WebTV_SessionData_3*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
   struct Test_I_WebTV_UI_CBData* CBData_;

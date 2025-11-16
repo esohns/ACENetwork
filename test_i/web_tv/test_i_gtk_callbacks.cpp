@@ -1083,7 +1083,7 @@ idle_notify_segment_data_cb (gpointer userData_in)
   if ((*channel_iterator).second.videoSegment.URLs.empty () ||
       (((data_p->currentAudioStream != -1) && (*channel_iterator).second.audioSegment.URLs.empty ()) &&
        ((data_p->currentAudioStream != -1) && !(*stream_iterator_3a).second.second->URL.empty ()))) // e.g. RBB
-    return G_SOURCE_REMOVE; // wait for audio/video segment data
+    return G_SOURCE_REMOVE; // wait for both (!) audio/video segment data
 
   // close connection(s)
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
@@ -1428,6 +1428,7 @@ continue_2:
     } // end IF
   } // end IF | lock scope
 
+  if (!data_p->videoUpdateEventSourceId) // *TODO*: why is this called several times ?
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     data_p->videoUpdateEventSourceId =
       g_timeout_add (COMMON_UI_REFRESH_DEFAULT_VIDEO_MS, // ms (?)
@@ -1435,13 +1436,12 @@ continue_2:
                      userData_in);
     ACE_ASSERT (data_p->videoUpdateEventSourceId > 0);
     state_r.eventSourceIds.insert (data_p->videoUpdateEventSourceId);
-  } // end lock scope
+  } // end IF | lock scope
 
   GtkToggleButton* toggle_button_p =
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
-  //ACE_ASSERT (gtk_toggle_button_get_active (toggle_button_p));
   if (gtk_toggle_button_get_active (toggle_button_p))
   {
     gtk_button_set_label (GTK_BUTTON (toggle_button_p),
@@ -1553,8 +1553,6 @@ idle_update_progress_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer_a[BUFSIZ];
-  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   int result = -1;
   float speed = 0.0F;
 
@@ -1564,6 +1562,8 @@ idle_update_progress_cb (gpointer userData_in)
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
   if (speed)
   {
+    ACE_TCHAR buffer_a[BUFSIZ];
+    ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
     if (speed >= 1024.0F)
     {
       speed /= 1024.0F;
@@ -1579,9 +1579,9 @@ idle_update_progress_cb (gpointer userData_in)
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
+    gtk_progress_bar_set_text (progress_bar_p,
+                               ACE_TEXT_ALWAYS_CHAR (buffer_a));
   } // end IF
-  gtk_progress_bar_set_text (progress_bar_p,
-                             ACE_TEXT_ALWAYS_CHAR (buffer_a));
   gtk_progress_bar_pulse (progress_bar_p);
 
   // --> reschedule
@@ -2368,6 +2368,7 @@ continue_4:
                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
     ACE_ASSERT (progressbar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
+    gtk_progress_bar_set_text (progressbar_p, ACE_TEXT_ALWAYS_CHAR (""));
     gtk_progress_bar_set_show_text (progressbar_p, TRUE);
 
     if (!data_p->progressData.eventSourceId)
@@ -2595,6 +2596,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progressbar_p);
   gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
+  gtk_progress_bar_set_text (progressbar_p, ACE_TEXT_ALWAYS_CHAR (""));
   gtk_progress_bar_set_show_text (progressbar_p, TRUE);
 
   if (!data_p->progressData.eventSourceId) // *TODO*: why oh why ?

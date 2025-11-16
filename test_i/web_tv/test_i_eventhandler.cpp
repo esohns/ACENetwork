@@ -948,13 +948,17 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_ABORT:
-      event_e = COMMON_UI_EVENT_FINISHED; break;
+      event_e = COMMON_UI_EVENT_FINISHED;
+      break;
     case STREAM_SESSION_MESSAGE_CONNECT:
-      event_e = COMMON_UI_EVENT_CONNECT; break;
+      event_e = COMMON_UI_EVENT_CONNECT;
+      break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
-      event_e = COMMON_UI_EVENT_DISCONNECT; break;
+      event_e = COMMON_UI_EVENT_DISCONNECT;
+      break;
     case STREAM_SESSION_MESSAGE_RESIZE:
-      event_e = COMMON_UI_EVENT_RESIZE; break;
+      event_e = COMMON_UI_EVENT_RESIZE;
+      break;
     case STREAM_SESSION_MESSAGE_STEP:
     {
 #if defined (GTK_USE)
@@ -968,7 +972,7 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
                     ACE_TEXT ("failed to g_idle_add(idle_segment_download_complete_cb): \"%m\", returning\n")));
         return;
       } // end IF
-      state_r.eventSourceIds.insert (event_source_id);
+      // state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 
       event_e = COMMON_UI_EVENT_STEP;
@@ -979,25 +983,31 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
       break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
-      if ((*iterator).second->lock)
-      {
-        result = (*iterator).second->lock->acquire ();
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
-      } // end IF
+      // if ((*iterator).second->lock)
+      // {
+      //   result = (*iterator).second->lock->acquire ();
+      //   if (result == -1)
+      //     ACE_DEBUG ((LM_ERROR,
+      //                 ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
+      // } // end IF
+
+      const Test_I_WebTV_SessionData_3_t& session_data_container_r =
+        sessionMessage_in.getR ();
+      const Test_I_WebTV_SessionData_3& session_data_r =
+        session_data_container_r.getR ();
 
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
-      CBData_->progressData.statistic = (*iterator).second->statistic;
+      // CBData_->progressData.statistic = (*iterator).second->statistic;
+      CBData_->progressData.statistic = session_data_r.statistic;
 #endif // GTK_USE || WXWIDGETS_USE
 
-      if ((*iterator).second->lock)
-      {
-        result = (*iterator).second->lock->release ();
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-      } // end IF
+      // if ((*iterator).second->lock)
+      // {
+      //   result = (*iterator).second->lock->release ();
+      //   if (result == -1)
+      //     ACE_DEBUG ((LM_ERROR,
+      //                 ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+      // } // end IF
 
       event_e = COMMON_UI_EVENT_STATISTIC;
       break;

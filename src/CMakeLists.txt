@@ -187,18 +187,18 @@ set (source_files
      net_streamconnection_base.cpp
      net_streamconnection_base.h
      net_streamconnection_base.inl
-     net_stream_asynch_tcpsocket_base.cpp
-     net_stream_asynch_tcpsocket_base.h
-     net_stream_asynch_tcpsocket_base.inl
-     net_stream_asynch_udpsocket_base.cpp
-     net_stream_asynch_udpsocket_base.h
-     net_stream_asynch_udpsocket_base.inl
-     net_stream_tcpsocket_base.cpp
-     net_stream_tcpsocket_base.h
-     net_stream_tcpsocket_base.inl
-     net_stream_udpsocket_base.cpp
-     net_stream_udpsocket_base.h
-     net_stream_udpsocket_base.inl
+#     net_stream_asynch_tcpsocket_base.cpp
+#     net_stream_asynch_tcpsocket_base.h
+#     net_stream_asynch_tcpsocket_base.inl
+#     net_stream_asynch_udpsocket_base.cpp
+#     net_stream_asynch_udpsocket_base.h
+#     net_stream_asynch_udpsocket_base.inl
+#     net_stream_tcpsocket_base.cpp
+#     net_stream_tcpsocket_base.h
+#     net_stream_tcpsocket_base.inl
+#     net_stream_udpsocket_base.cpp
+#     net_stream_udpsocket_base.h
+#     net_stream_udpsocket_base.inl
      net_tcpconnection_base.cpp
      net_tcpconnection_base.h
      net_tcpconnection_base.inl
@@ -353,14 +353,14 @@ install (FILES
          net_statistic.h
          net_streamconnection_base.h
          net_streamconnection_base.inl
-         net_stream_asynch_tcpsocket_base.h
-         net_stream_asynch_tcpsocket_base.inl
-         net_stream_asynch_udpsocket_base.h
-         net_stream_asynch_udpsocket_base.inl
-         net_stream_tcpsocket_base.h
-         net_stream_tcpsocket_base.inl
-         net_stream_udpsocket_base.h
-         net_stream_udpsocket_base.inl
+#         net_stream_asynch_tcpsocket_base.h
+#         net_stream_asynch_tcpsocket_base.inl
+#         net_stream_asynch_udpsocket_base.h
+#         net_stream_asynch_udpsocket_base.inl
+#         net_stream_tcpsocket_base.h
+#         net_stream_tcpsocket_base.inl
+#         net_stream_udpsocket_base.h
+#         net_stream_udpsocket_base.inl
          net_tcpconnection_base.h
          net_tcpconnection_base.inl
          net_tcpsockethandler.h
