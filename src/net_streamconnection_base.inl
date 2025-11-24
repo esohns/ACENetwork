@@ -1085,7 +1085,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                                       timeValue_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u/%s/%s: caught exception in Stream_IStateMachine_t::wait(%d,%T#), continuing\n"),
+                ACE_TEXT ("%u/%s/%s: caught exception in Stream_IStateMachine_t::wait(%d,%#T), continuing\n"),
                 id (),
                 ACE_TEXT (stream_.name ().c_str ()),
                 top_module_p->name (),
