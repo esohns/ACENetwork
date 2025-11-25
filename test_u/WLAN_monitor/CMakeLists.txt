@@ -1,4 +1,5 @@
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
+include (libxml2)
 include (PreXMLImplementation)
 include (SetXMLImplementation)
 
@@ -39,9 +40,6 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-add_definitions (-DCOMMON_HAS_DLL)
-#add_definitions (-DCOMMON_UI_HAS_DLL)
-#add_definitions (-DCOMMON_XML_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -52,7 +50,6 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
-add_definitions (-DACESTREAM_HAS_DLL)
 
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
@@ -308,35 +305,30 @@ elseif (WIN32)
   set (ARGS "-g.\\\\etc\\\\${ui_definition_file} ${ARGS}")
  endif (GTK_USE OR WXWIDGETS_USE)
 
- if (GTK3_SUPPORT)
-  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                            G:/software/Development/dll
-                            ${PROJECT_SOURCE_DIR}/../gtk3/bin)
- elseif (GTK2_SUPPORT)
-  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                            G:/software/Development/dll
-                            ${PROJECT_SOURCE_DIR}/../gtk2/bin)
- endif ()
+ if (GTK_SUPPORT)
+  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+ endif (GTK_SUPPORT)
  if (WXWIDGETS_SUPPORT)
-  string (REPLACE "\\" "\\\\" wxWidgets_LIB_DIR wxWidgets_LIB_DIR) 
-  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                            ${wxWidgets_LIB_DIR})
+  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_PATH)
  endif (WXWIDGETS_SUPPORT)
- 
+
  if (GTK_USE OR WXWIDGETS_USE)
  else ()
   set (ARGS "-g ${ARGS}")
  endif (GTK_USE OR WXWIDGETS_USE)
+
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
- file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_PATH)
+
+ file (TO_CMAKE_PATH "${LIBXML2_LIB_DIR}" LIBXML2_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                           ${PROJECT_SOURCE_DIR}/../libiconv-1.9.2-1/bin
-                           ${PROJECT_SOURCE_DIR}/../libxml2/win32/bin.msvc
+#                           ${PROJECT_SOURCE_DIR}/../libiconv-1.9.2-1/bin
+                           ${LIBXML2_PATH}
                            ${PROJECT_SOURCE_DIR}/../libpng-1.6.25/cmake/${CMAKE_BUILD_TYPE}
                            ${GTK_PATH}
+                           ${WXWIDGETS_PATH}
                            ${ACE_PATH}
                            ${SSL_LIB_PATH})
 endif ()
