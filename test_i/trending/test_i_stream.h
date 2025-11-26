@@ -107,6 +107,7 @@ class Test_I_Trending_Stream_T
   typedef Stream_Module_Net_Source_Writer_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,
                                             struct Test_I_Trending_ModuleHandlerConfiguration,
+                                            Test_I_SessionManager_t,
                                             Stream_ControlMessage_t,
                                             Test_I_Stream_Message,
                                             Test_I_Stream_SessionMessage,
