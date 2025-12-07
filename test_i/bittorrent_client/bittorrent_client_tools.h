@@ -34,7 +34,7 @@ class BitTorrent_Client_Tools
   static ACE_HANDLE connect (BitTorrent_Client_IPeerConnector_t&,    // connector handle
                              BitTorrent_Client_ITrackerConnector_t&, // connector handle
                              const ACE_INET_Addr&,                   // peer address
-                             bool,                                   // clone module ? // ? ==> delete module
+                             bool,                                   // clone module ? // ? : delete module
                              Stream_Module_t*&,                      // (final) module handle
                              bool = true);                           // peer ? : tracker
 

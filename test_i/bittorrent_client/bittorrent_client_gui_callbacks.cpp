@@ -178,21 +178,133 @@ extern "C"
 {
 #endif /* __cplusplus */
 gboolean
+idle_load_session_ui_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_load_session_ui_cb"));
+
+  // sanity check(s)
+  struct BitTorrent_Client_UI_SessionCBData* session_cb_data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
+  ACE_ASSERT (session_cb_data_p);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+
+  GError* error_p = NULL;
+  GtkComboBox* combo_box_p = NULL;
+  GtkCellRenderer* cell_renderer_p = NULL;
+  GtkTextBuffer* text_buffer_p = NULL;
+  GtkTextIter text_iter;
+  GtkTextView* text_view_p = NULL;
+
+  // create new GtkBuilder
+  GtkBuilder* builder_p = gtk_builder_new ();
+  if (!builder_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+
+  std::string ui_definition_filename = session_cb_data_p->UIFileDirectory;
+  ui_definition_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  ui_definition_filename +=
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_SESSION_FILE);
+  if (!Common_File_Tools::isReadable (ui_definition_filename))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid UI file (was: \"%s\"): not readable, aborting\n"),
+                ACE_TEXT (ui_definition_filename.c_str ())));
+    return G_SOURCE_REMOVE;
+  } // end IF
+
+  // load widget tree
+  gtk_builder_add_from_file (builder_p,
+                             ui_definition_filename.c_str (),
+                             &error_p);
+  if (error_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_builder_add_from_file(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (ui_definition_filename.c_str ()),
+                ACE_TEXT (error_p->message)));
+    g_error_free (error_p); error_p = NULL;
+    return G_SOURCE_REMOVE;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("loaded widgets tree \"%s\": \"%s\"\n"),
+              ACE_TEXT (session_cb_data_p->label.c_str ()),
+              ACE_TEXT (ui_definition_filename.c_str ())));
+
+  // connect signal(s)
+  // step1: connect signals/slots
+  gtk_builder_connect_signals (builder_p,
+                               userData_in);
+
+  combo_box_p =
+    GTK_COMBO_BOX (gtk_builder_get_object (builder_p,
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CONNECTION)));
+  ACE_ASSERT (combo_box_p);
+  cell_renderer_p = gtk_cell_renderer_text_new ();
+  if (!cell_renderer_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
+                              TRUE);
+  // *NOTE*: cell_renderer_p does not need to be g_object_unref()ed because it
+  //         is GInitiallyUnowned and the floating reference has been
+  //         passed to combo_box_p by the gtk_cell_layout_pack_start() call
+  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
+                                  //"cell-background", 0,
+                                  ACE_TEXT ("text"), 0,
+                                  NULL);
+
+  text_buffer_p =
+    GTK_TEXT_BUFFER (gtk_builder_get_object (builder_p,
+                                             ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTBUFFER_SESSION)));
+  ACE_ASSERT (text_buffer_p);
+  gtk_text_buffer_get_end_iter (text_buffer_p,
+                                &text_iter);
+  gtk_text_buffer_create_mark (text_buffer_p,
+                               ACE_TEXT_ALWAYS_CHAR ("scroll"),
+                               &text_iter,
+                               TRUE);
+  text_view_p =
+    GTK_TEXT_VIEW (gtk_builder_get_object (builder_p,
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTVIEW_SESSION)));
+  ACE_ASSERT (text_view_p);
+  gtk_text_view_set_buffer (text_view_p, text_buffer_p);
+
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+    state_r.builders[session_cb_data_p->label] =
+      std::make_pair (ui_definition_filename, builder_p);
+  } // end lock scope
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
 idle_add_session_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_add_session_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_UI_SessionCBData* data_p =
+  struct BitTorrent_Client_UI_SessionCBData* session_cb_data_p =
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
-  ACE_ASSERT (data_p);
+  ACE_ASSERT (session_cb_data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersIterator_t iterator =
-    state_r.builders.find (data_p->label);
+    state_r.builders.find (session_cb_data_p->label);
   ACE_ASSERT (iterator != state_r.builders.end ());
   Common_UI_GTK_BuildersIterator_t iterator_2 =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -203,7 +315,11 @@ idle_add_session_cb (gpointer userData_in)
   GtkLabel* label_p = NULL;
   GtkVBox* vbox_p = NULL;
   GtkNotebook* notebook_p = NULL;
+#if defined (GTK2_USE)
   GtkTable* table_p = NULL;
+#elif defined (GTK3_USE)
+  GtkGrid* grid_p = NULL;
+#endif // GTK2_USE || GTK3_USE
   gint page_number = -1;
 
   // add new page to the sessions notebook
@@ -226,7 +342,7 @@ idle_add_session_cb (gpointer userData_in)
                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LABEL_TAB_SESSION)));
   ACE_ASSERT (label_p);
   gtk_label_set_text (label_p,
-                      data_p->label.c_str ());
+                      session_cb_data_p->label.c_str ());
 
   // retrieve (dummy) parent window
   window_p =
@@ -273,18 +389,36 @@ idle_add_session_cb (gpointer userData_in)
                                  page_number);
 
   // initialize pieces map
+#if defined (GTK2_USE)
   table_p =
     GTK_TABLE (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TABLE_PIECES)));
   ACE_ASSERT (table_p);
-  unsigned int number_of_pieces_i = data_p->session->numberOfPieces ();
+#elif defined (GTK3_USE)
+  grid_p =
+    GTK_GRID (gtk_builder_get_object ((*iterator).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_GRID_PIECES)));
+  ACE_ASSERT (grid_p);
+#endif // GTK2_USE || GTK3_USE
+  unsigned int number_of_pieces_i =
+    session_cb_data_p->session->numberOfPieces ();
   unsigned int number_of_colummns_and_rows_i =
     static_cast<unsigned int> (std::ceil (std::sqrt (static_cast<float> (number_of_pieces_i))));
+#if defined (GTK2_USE)
   gtk_table_resize (table_p,
                     number_of_colummns_and_rows_i,
                     number_of_colummns_and_rows_i);
+#elif defined (GTK3_USE)
+#endif // GTK2_USE || GTK3_USE
   int x, y;
   GtkButton* button_p = NULL;
+  bool has_piece_b = false;
+  const struct BitTorrent_Client_SessionState& session_state_r =
+    session_cb_data_p->session->state ();
+  std::vector<unsigned int> complete_piece_indexes_a =
+    BitTorrent_Tools ::getPieceIndexes (session_state_r.pieces,
+                                        false);
+  std::vector<unsigned int>::iterator complete_piece_indexes_iterator;
 #if defined (GTK2_USE)
   GdkColor black = {0, 0x0000, 0x0000, 0x0000};
 #elif defined (GTK3_USE)
@@ -295,6 +429,13 @@ idle_add_session_cb (gpointer userData_in)
   // Load CSS into the object ("-1" says, that the css string is \0-terminated)
   gtk_css_provider_load_from_data (css_provider_p,
                                    ACE_TEXT ("* { background-image:none; background-color:black; }"), -1,
+                                   NULL);
+
+  GtkCssProvider* css_provider_2 = gtk_css_provider_new ();
+  ACE_ASSERT (css_provider_2);
+  // Load CSS into the object ("-1" says, that the css string is \0-terminated)
+  gtk_css_provider_load_from_data (css_provider_2,
+                                   ACE_TEXT ("* { background-image:none; background-color:green; }"), -1,
                                    NULL);
 #endif // GTK2_USE || GTK3_USE
   for (unsigned int i = 0;
@@ -307,7 +448,13 @@ idle_add_session_cb (gpointer userData_in)
                        ACE_TEXT ("index"),
                        reinterpret_cast<gpointer> (i));
 
+    gtk_widget_set_size_request (GTK_WIDGET (button_p), 10, 10);
     gtk_widget_set_visible (GTK_WIDGET (button_p), TRUE); // *TODO*: why ?
+
+    complete_piece_indexes_iterator = std::find (complete_piece_indexes_a.begin (),
+                                                 complete_piece_indexes_a.end (),
+                                                 i);
+    has_piece_b = complete_piece_indexes_iterator != complete_piece_indexes_a.end ();
 #if defined (GTK2_USE)
     gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_NORMAL, &black);
     gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_PRELIGHT, &black);
@@ -321,18 +468,26 @@ idle_add_session_cb (gpointer userData_in)
     //gtk_widget_override_color (GTK_WIDGET (button_p), GTK_STATE_FLAG_ACTIVE, &black);
 
     gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (button_p)),
-                                    GTK_STYLE_PROVIDER (css_provider_p),
+                                    has_piece_b ? GTK_STYLE_PROVIDER (css_provider_2) : GTK_STYLE_PROVIDER (css_provider_p),
                                     GTK_STYLE_PROVIDER_PRIORITY_USER);
 #endif // GTK2_USE || GTK3_USE
     x = i % number_of_colummns_and_rows_i;
     y = i / number_of_colummns_and_rows_i;
+#if defined (GTK2_USE)
     gtk_table_attach_defaults (table_p,
                                GTK_WIDGET (button_p),
                                x, x + 1,
                                y, y + 1);
+#elif defined (GTK3_USE)
+    gtk_grid_attach (grid_p,
+                     GTK_WIDGET (button_p),
+                     x, y,
+                     1, 1);
+#endif // GTK2_USE || GTK3_USE
   } // end FOR
 #if defined (GTK3_USE)
   g_object_unref (css_provider_p); css_provider_p = NULL;
+  g_object_unref (css_provider_2); css_provider_2 = NULL;
 #endif // GTK3_USE
 
   return G_SOURCE_REMOVE;
@@ -541,7 +696,6 @@ idle_log_progress_cb (gpointer userData_in)
   gtk_text_buffer_get_end_iter (text_buffer_p,
                                 &text_iter);
   std::string message_string = data_p->message;
-  message_string += '\n';
   gtk_text_buffer_insert (text_buffer_p,
                           &text_iter,
                           message_string.c_str (), -1);
@@ -589,23 +743,30 @@ idle_piece_complete_progress_cb (gpointer userData_in)
   Common_UI_GTK_BuildersIterator_t iterator =
     state_r.builders.find (data_p->label);
   ACE_ASSERT (iterator != state_r.builders.end ());
+
+#if defined (GTK2_USE)
   GtkTable* table_p =
     GTK_TABLE (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TABLE_PIECES)));
   ACE_ASSERT (table_p);
   GList* list_p = gtk_container_get_children (GTK_CONTAINER (table_p));
+#elif defined (GTK3_USE)
+  GtkGrid* grid_p =
+    GTK_GRID (gtk_builder_get_object ((*iterator).second.second,
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_GRID_PIECES)));
+  ACE_ASSERT (grid_p);
+  GList* list_p = gtk_container_get_children (GTK_CONTAINER (grid_p));
+#endif // GTK2_USE || GTK3_USE
   if (!list_p)
     return G_SOURCE_CONTINUE; // *NOTE*: wait for the session to establish
 
-  GList* l = list_p;
   GtkButton* button_p = NULL;
-  for (;
-    l != NULL;
-    l = l->next)
-  {
-    ACE_ASSERT (l && l->data);
+  for (GList* l = list_p;
+       l != NULL;
+       l = l->next)
+  { ACE_ASSERT (l && l->data);
     button_p = static_cast<GtkButton*> (l->data);
-    if (static_cast<unsigned int> (reinterpret_cast<size_t> (g_object_get_data (G_OBJECT (button_p), ACE_TEXT ("index")))) == static_cast<unsigned int> (data_p->pieceIndex))
+    if (static_cast<unsigned int> (reinterpret_cast<size_t> (g_object_get_data (G_OBJECT (button_p), ACE_TEXT_ALWAYS_CHAR ("index")))) == static_cast<unsigned int> (data_p->pieceIndex))
       break;
   } // end FOR
   ACE_ASSERT (button_p);
@@ -680,8 +841,9 @@ idle_complete_progress_cb (gpointer userData_in)
                                         GTK_DIALOG_DESTROY_WITH_PARENT,
                                         (data_p->cancelled ? GTK_MESSAGE_ERROR : GTK_MESSAGE_INFO),
                                         GTK_BUTTONS_CLOSE,
-                                        ACE_TEXT ("%s completed"),
-                                        data_p->label.c_str ());
+                                        ACE_TEXT ("%s %s"),
+                                        data_p->label.c_str (),
+                                        (data_p->cancelled ? ACE_TEXT ("cancelled") : ACE_TEXT ("completed")));
   gtk_dialog_run (GTK_DIALOG (widget_p));
   gtk_widget_destroy (widget_p); widget_p = NULL;
 
@@ -951,33 +1113,32 @@ button_start_clicked_cb (GtkWidget* widget_in,
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_FILECHOOSERBUTTON_TORRENT)));
   ACE_ASSERT (file_chooser_button_p);
-  gchar* filename_p =
-      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_button_p));
-  if (!filename_p)
+  gchar* path_p =
+    gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_button_p));
+  if (!path_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("no .torrent file selected, returning\n")));
     return;
   } // end IF
-  if (!Common_File_Tools::isReadable (ACE_TEXT_ALWAYS_CHAR (filename_p)))
+  if (!Common_File_Tools::isReadable (ACE_TEXT_ALWAYS_CHAR (path_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT (".torrent file (was: \"%s\") not readable, returning\n"),
-                ACE_TEXT (filename_p)));
-    g_free (filename_p);
+                ACE_TEXT (path_p)));
+    g_free (path_p);
     return;
   } // end IF
-  data_p->configuration->sessionConfiguration.metaInfoFileName =
-    filename_p;
-  g_free (filename_p);
+  data_p->configuration->sessionConfiguration.metaInfoFileName = path_p;
+  g_free (path_p); path_p = NULL;
 
   // step2: retrieve target directory
   file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_FILECHOOSERBUTTON_DESTINATION)));
   ACE_ASSERT (file_chooser_button_p);
-  gchar* path_p =
-      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_button_p));
+  path_p =
+    gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_button_p));
   if (!path_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -993,10 +1154,10 @@ button_start_clicked_cb (GtkWidget* widget_in,
     return;
   } // end IF
   BitTorrent_Client_PeerStreamConfiguration_t::ITERATOR_T iterator_2 =
-      data_p->configuration->peerStreamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->peerStreamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->peerStreamConfiguration.end ());
   (*iterator_2).second.second->destination = path_p;
-  g_free (path_p);
+  g_free (path_p); path_p = NULL;
 
   // start session thread
   // *IMPORTANT NOTE*: every session should have its' own dedicated event source
@@ -1043,15 +1204,15 @@ button_start_clicked_cb (GtkWidget* widget_in,
       delete session_thread_data_p; session_thread_data_p = NULL;
       return;
     } // end IF
-  #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("started session thread (id was: %d)...\n"),
                 thread_id));
-  #else
+#else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("started session thread (id was: %u)...\n"),
                 thread_id));
-  #endif // ACE_WIN32 || ACE_WIN64
+#endif // ACE_WIN32 || ACE_WIN64
 
     // setup progress updates ?
     GtkProgressBar* progress_bar_p = NULL;

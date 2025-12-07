@@ -49,7 +49,7 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::handle"));
 
-  //  sanity check(s)
+  // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->monitor);
 

@@ -21,8 +21,6 @@
 #ifndef BITTORRENT_CLIENT_GUI_CALLBACKS_H
 #define BITTORRENT_CLIENT_GUI_CALLBACKS_H
 
-#include "ace/config-macros.h"
-
 #include "gtk/gtk.h"
 
 //------------------------------------------------------------------------------
@@ -33,6 +31,7 @@ extern "C"
 #endif /* __cplusplus */
 
 // idle routines
+gboolean idle_load_session_ui_cb (gpointer);
 gboolean idle_add_session_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
@@ -58,7 +57,6 @@ G_MODULE_EXPORT void button_session_close_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void button_session_connection_close_clicked_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void combobox_connections_changed_cb (GtkWidget*, gpointer);
 
-// BitTorrent_Client_GUI_Connection
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -2281,9 +2281,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     result_in.message_block ().release ();
 
   Net_ConnectionId_t id = this->id ();
-  result =
-      handle_close (result_in.handle (),
-                    ACE_Event_Handler::ALL_EVENTS_MASK);
+  result = handle_close (result_in.handle (),
+                         ACE_Event_Handler::ALL_EVENTS_MASK);
   if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();

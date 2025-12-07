@@ -84,7 +84,6 @@ class BitTorrent_Client_GUI_Session_T
 #if defined (GTK_USE)
   guint                contextId_;
 #endif // GTK_USE
-//  struct BitTorrent_Client_SessionState*     sessionState_;
   std::string          UIFileDirectory_;
 };
 

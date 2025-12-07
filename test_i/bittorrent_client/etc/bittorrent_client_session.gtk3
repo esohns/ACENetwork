@@ -12,13 +12,30 @@
     <property name="stock">gtk-close</property>
     <property name="icon-size">1</property>
   </object>
-  <object class="GtkListStore" id="liststore_page_session_connections"/>
-  <object class="GtkTextBuffer" id="textbuffer_notebook_page_session_log">
-    <property name="tag_table">texttagtable_notebook_page_session_channels</property>
+  <object class="GtkListStore" id="liststore_page_session_connections">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="guint"/>
+    </columns>
   </object>
-  <object class="GtkTextTagTable" id="texttagtable_notebook_page_session_channels"/>
+  <object class="GtkTextTagTable" id="texttagtable_notebook_page_session_log">
+    <child type="tag">
+      <object class="GtkTextTag" id="texttag_notebook_page_session_log">
+        <property name="background">red</property>
+      </object>
+    </child>
+  </object>
+  <object class="GtkTextBuffer" id="textbuffer_notebook_page_session_log">
+    <property name="tag_table">texttagtable_notebook_page_session_log</property>
+  </object>
   <object class="GtkWindow" id="window_page_session">
     <property name="can_focus">False</property>
+    <property name="resizable">False</property>
+    <property name="focus_on_map">False</property>
+    <property name="decorated">False</property>
+    <property name="deletable">False</property>
     <child>
       <object class="GtkHBox" id="hbox_page_session">
         <property name="visible">True</property>
@@ -30,7 +47,6 @@
             <child>
               <object class="GtkHBox" id="hbox_page_session_connections">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <child>
                   <object class="GtkFrame" id="frame_page_session_connection">
@@ -53,17 +69,10 @@
                                 <property name="model">liststore_page_session_connections</property>
                                 <property name="has_frame">False</property>
                                 <property name="focus_on_click">False</property>
-                                <signal name="changed" handler="usersbox_changed_cb" swapped="no"/>
-                                <child>
-                                  <object class="GtkCellRendererText" id="cellrenderertext_page_session_connection"/>
-                                  <attributes>
-                                    <attribute name="text">0</attribute>
-                                  </attributes>
-                                </child>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
                                 <property name="position">3</property>
                               </packing>
                             </child>
@@ -77,7 +86,7 @@
                                 <property name="use_underline">True</property>
                                 <property name="use_stock">True</property>
                                 <property name="focus_on_click">False</property>
-                                <signal name="clicked" handler="refresh_users_clicked_cb" swapped="no"/>
+                                <signal name="clicked" handler="button_session_connection_close_clicked_cb" swapped="no"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -161,9 +170,9 @@
                 <child type="label">
                   <object class="GtkLabel" id="label_pieces">
                     <property name="visible">True</property>
-                    <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">pieces</property>
+                    <property name="label" translatable="yes">&lt;b&gt;&lt;i&gt;pieces&lt;/i&gt;&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
                     <property name="track_visited_links">False</property>
                   </object>
                 </child>
@@ -184,9 +193,9 @@
         <child>
           <object class="GtkFrame" id="frame_page_session_log">
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="label_xalign">0</property>
+            <property name="shadow_type">etched-out</property>
             <child>
               <object class="GtkAlignment" id="alignment_page_session_log">
                 <property name="visible">True</property>
@@ -195,7 +204,7 @@
                   <object class="GtkScrolledWindow" id="scrolledwindow_page_session_log">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="shadow_type">etched-in</property>
+                    <property name="shadow_type">etched-out</property>
                     <child>
                       <object class="GtkTextView" id="textview_page_session_log">
                         <property name="visible">True</property>
@@ -213,9 +222,9 @@
             <child type="label">
               <object class="GtkLabel" id="label_page_session_log">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">log</property>
+                <property name="label" translatable="yes">&lt;b&gt;&lt;i&gt;log&lt;/i&gt;&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
                 <property name="track_visited_links">False</property>
               </object>
             </child>
@@ -228,6 +237,10 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkTextTagTable" id="texttagtable_notebook_page_session"/>
+  <object class="GtkTextBuffer" id="textbuffer_notebook_page_session">
+    <property name="tag_table">texttagtable_notebook_page_session</property>
   </object>
   <object class="GtkWindow" id="window_tab_session">
     <property name="can_focus">False</property>
@@ -253,13 +266,13 @@
         <child>
           <object class="GtkButton" id="button_tab_session_close">
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">False</property>
             <property name="receives_default">False</property>
             <property name="image">button_disconnect_image</property>
             <property name="relief">half</property>
             <property name="focus_on_click">False</property>
             <property name="image_position">right</property>
+            <signal name="clicked" handler="button_session_close_clicked_cb" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>

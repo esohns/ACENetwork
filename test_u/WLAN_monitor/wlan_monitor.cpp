@@ -626,12 +626,13 @@ do_work (bool autoAssociate_in,
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iwlanmonitor_p && istatistic_handler_p);
   iwlanmonitor_p->initialize (configuration_in.WLANMonitorConfiguration);
+  configuration_in.signalHandlerConfiguration.monitor = iwlanmonitor_p;
 
   Net_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                             dynamic_cast<Net_IStatisticHandler_t*> (iwlanmonitor_p),
                                             false);
 
-  // step5a: start GTK event loop ?
+  // step5a: start GUI event loop ?
   if (!UIDefinitionFile_in.empty ())
   {
 #if defined (GTK_USE)

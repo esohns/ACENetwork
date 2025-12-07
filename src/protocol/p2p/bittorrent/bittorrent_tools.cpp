@@ -218,6 +218,7 @@ BitTorrent_Tools::RecordToString (const struct BitTorrent_PeerRecord& peerRecord
       }
     } // end SWITCH
   } // end ELSE
+  result += '\n';
 
   return result;
 }
@@ -1373,7 +1374,8 @@ BitTorrent_Tools::getPieceIndexes (const BitTorrent_Pieces_t& pieces_in,
        iterator != pieces_in.end ();
        ++iterator, ++index_i)
   {
-    is_complete_b = BitTorrent_Tools::isPieceComplete ((*iterator).length,
+    is_complete_b = (*iterator).onDisk ||
+                    BitTorrent_Tools::isPieceComplete ((*iterator).length,
                                                        (*iterator).chunks);
     if ((getMissing_in && !is_complete_b) || (!getMissing_in && is_complete_b))
       result.push_back (index_i);

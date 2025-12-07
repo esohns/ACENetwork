@@ -264,7 +264,9 @@ add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE_GUI}_EXE_SRCS}
                 etc/bittorrent_client_main.glade
-                etc/bittorrent_client_session.glade)
+                etc/bittorrent_client_main.gtk3
+                etc/bittorrent_client_session.glade
+                etc/bittorrent_client_session.gtk3)
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
 if (WIN32)
  if (NOT BUILD_TEST_I)
@@ -341,7 +343,7 @@ install (FILES
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-f etc/test.torrent -l -r -t"
+                         ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
@@ -353,7 +355,7 @@ if (UNIX)
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_GUI}
-                         ARGS "-l -r -t"
+                         ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
@@ -391,14 +393,14 @@ elseif (WIN32)
                            ${ACE_LIBRARY_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-f etc\\\\test.torrent -l -r -t"
+                         ARGS "-l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/${EXECUTABLE}
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_GUI}
                          COMMAND ${COMMAND_2}
-                         ARGS "-l -r -t"
+                         ARGS "-f C:\\\\Users\\\\eriks\\\\Downloads\\\\KNOPPIX_V9.1CD-2021-01-25-EN.torrent -l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client

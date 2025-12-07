@@ -202,14 +202,14 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   const struct BitTorrent_PeerRecord& record_r = data_container_r.getR ();
   try {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        session_->notify (reinterpret_cast<Net_ConnectionId_t> (handle_h),
+    session_->notify (reinterpret_cast<Net_ConnectionId_t> (handle_h),
 #else
-        session_->notify (static_cast<Net_ConnectionId_t> (handle_h),
+    session_->notify (static_cast<Net_ConnectionId_t> (handle_h),
 #endif // ACE_WIN32 || ACE_WIN64
-                          record_r,
-                          (record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
-                                                                                                             UserDataType>&> (message_in)
-                                                                          : NULL);
+                      record_r,
+                      (record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
+                                                                                                         UserDataType>&> (message_in)
+                                                                      : NULL);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::notify(), continuing\n")));

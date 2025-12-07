@@ -75,6 +75,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   CBData_.CBData = &CBData_inout;
   CBData_.handler = this;
   CBData_.label = label_in;
+  CBData_.UIFileDirectory = UIFileDirectory_in;
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -83,111 +84,22 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
-  GError* error_p = NULL;
-  GtkComboBox* combo_box_p = NULL;
-  GtkCellRenderer* cell_renderer_p = NULL;
-  GtkTextBuffer* text_buffer_p = NULL;
-  GtkTextIter text_iter;
-  GtkTextView* text_view_p = NULL;
-
-  // create new GtkBuilder
-  GtkBuilder* builder_p = gtk_builder_new ();
-  if (!builder_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    return;
-  } // end IF
-
-  std::string ui_definition_filename = UIFileDirectory_;
-  ui_definition_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  ui_definition_filename +=
-      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_SESSION_FILE);
-  if (!Common_File_Tools::isReadable (ui_definition_filename))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("invalid UI file (was: \"%s\"): not readable, returning\n"),
-                ACE_TEXT (ui_definition_filename.c_str ())));
-    goto error;
-  } // end IF
-
-  // load widget tree
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-  gdk_threads_enter ();
-#endif // GTK_CHECK_VERSION (3,6,0)
-
-  gtk_builder_add_from_file (builder_p,
-                             ui_definition_filename.c_str (),
-                             &error_p);
-  if (error_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gtk_builder_add_from_file(\"%s\"): \"%s\", aborting\n"),
-                ACE_TEXT (ui_definition_filename.c_str ()),
-                ACE_TEXT (error_p->message)));
-    g_error_free (error_p); error_p = NULL;
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-    gdk_threads_leave ();
-#endif // GTK_CHECK_VERSION (3,6,0)
-    goto error;
-  } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("loaded widgets tree \"%s\": \"%s\"\n"),
-              ACE_TEXT (CBData_.label.c_str ()),
-              ACE_TEXT (ui_definition_filename.c_str ())));
-
-  // connect signal(s)
-  // step1: connect signals/slots
-  gtk_builder_connect_signals (builder_p,
-                               &CBData_);
-
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-  gdk_threads_leave ();
-#endif // GTK_CHECK_VERSION (3,6,0)
-
-  combo_box_p =
-    GTK_COMBO_BOX (gtk_builder_get_object (builder_p,
-                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CONNECTION)));
-  ACE_ASSERT (combo_box_p);
-  cell_renderer_p = gtk_cell_renderer_text_new ();
-  if (!cell_renderer_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
-    goto error;
-  } // end IF
-  gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
-                              TRUE);
-  // *NOTE*: cell_renderer_p does not need to be g_object_unref()ed because it
-  //         is GInitiallyUnowned and the floating reference has been
-  //         passed to combo_box_p by the gtk_cell_layout_pack_start() call
-  gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
-                                  //"cell-background", 0,
-                                  ACE_TEXT ("text"), 0,
-                                  NULL);
-
-  text_buffer_p =
-    GTK_TEXT_BUFFER (gtk_builder_get_object (builder_p,
-                                             ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTBUFFER_SESSION)));
-  ACE_ASSERT (text_buffer_p);
-  gtk_text_buffer_get_end_iter (text_buffer_p,
-                                &text_iter);
-  gtk_text_buffer_create_mark (text_buffer_p,
-                               ACE_TEXT_ALWAYS_CHAR ("scroll"),
-                               &text_iter,
-                               TRUE);
-  text_view_p =
-    GTK_TEXT_VIEW (gtk_builder_get_object (builder_p,
-                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TEXTVIEW_SESSION)));
-  ACE_ASSERT (text_view_p);
-  gtk_text_view_set_buffer (text_view_p, text_buffer_p);
-
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.builders[CBData_.label] =
-      std::make_pair (ui_definition_filename, builder_p);
+    CBData_.eventSourceId =
+      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                       idle_load_session_ui_cb,
+                       &CBData_,
+                       NULL);
+    if (!CBData_.eventSourceId)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add_full(idle_add_session_cb): \"%m\", returning\n")));
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+      goto error;
+    } // end IF
+    state_r.eventSourceIds.insert (CBData_.eventSourceId);
+    CBData_.CBData->progressData.pendingActions[CBData_.eventSourceId] =
+      ACE_Thread_ID (0, 0);
   } // end lock scope
 #endif // GTK_USE
 
@@ -242,7 +154,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     } // end IF
     state_r.eventSourceIds.insert (CBData_.eventSourceId);
     CBData_.CBData->progressData.pendingActions[CBData_.eventSourceId] =
-        ACE_Thread_ID (0, 0);
+      ACE_Thread_ID (0, 0);
   } // end lock scope
 
 #if GTK_CHECK_VERSION (3,6,0)
@@ -259,9 +171,6 @@ error:
     CBData_.session->close (true);
     delete CBData_.session; CBData_.session = NULL;
   } // end IF
-#if defined (GTK_USE)
-  g_object_unref (G_OBJECT (builder_p)); builder_p = NULL;
-#endif // GTK_USE
 }
 
 template <typename SessionInterfaceType,
@@ -393,10 +302,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   cb_data_p->pieceIndex = static_cast<int> (pieceIndex_in);
 
   guint event_source_id =
-      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                       idle_piece_complete_progress_cb,
-                       cb_data_p,
-                       NULL);
+    g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                     idle_piece_complete_progress_cb,
+                     cb_data_p,
+                     NULL);
   ACE_ASSERT (event_source_id);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     state_r.eventSourceIds.insert (event_source_id);
@@ -429,10 +338,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   cb_data_p->cancelled = cancelled_in;
 
   guint event_source_id =
-      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                       idle_complete_progress_cb,
-                       cb_data_p,
-                       NULL);
+    g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                     idle_complete_progress_cb,
+                     cb_data_p,
+                     NULL);
   ACE_ASSERT (event_source_id);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     state_r.eventSourceIds.insert (event_source_id);

@@ -23,8 +23,13 @@
 
 // glade/GTKBuilder definitions
 // files
+#if defined (GTK2_USE)
 #define BITTORRENT_CLIENT_GUI_GTK_UI_MAIN_FILE                          "bittorrent_client_main.glade"
 #define BITTORRENT_CLIENT_GUI_GTK_UI_SESSION_FILE                       "bittorrent_client_session.glade"
+#elif defined (GTK3_USE)
+#define BITTORRENT_CLIENT_GUI_GTK_UI_MAIN_FILE                          "bittorrent_client_main.gtk3"
+#define BITTORRENT_CLIENT_GUI_GTK_UI_SESSION_FILE                       "bittorrent_client_session.gtk3"
+#endif // GTK2_USE || GTK3_USE
 
 // GTK .rc files
 #define BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE                            "bittorrent_client.rc"
@@ -56,7 +61,11 @@
 #define BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR                           "progressbar"
 #define BITTORRENT_CLIENT_GUI_GTK_SCROLLEDWINDOW_SESSION                "scrolledwindow_page_session_log"
 #define BITTORRENT_CLIENT_GUI_GTK_STATUSBAR                             "statusbar"
+#if defined (GTK2_USE)
 #define BITTORRENT_CLIENT_GUI_GTK_TABLE_PIECES                          "table_pieces"
+#elif defined (GTK3_USE)
+#define BITTORRENT_CLIENT_GUI_GTK_GRID_PIECES                           "grid_pieces"
+#endif // GTK2_USE || GTK3_USE
 #define BITTORRENT_CLIENT_GUI_GTK_TEXTTAG_DEFAULT_SESSION               "texttag_default"
 #define BITTORRENT_CLIENT_GUI_GTK_TEXTTAGTABLE_SESSION                  "texttagtable_notebook_page_session"
 #define BITTORRENT_CLIENT_GUI_GTK_TEXTBUFFER_SESSION                    "textbuffer_notebook_page_session"

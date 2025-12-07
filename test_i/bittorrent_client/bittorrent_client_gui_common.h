@@ -158,6 +158,7 @@ struct BitTorrent_Client_UI_SessionCBData
    , handler (NULL)
    , label ()
    , session (NULL)
+   , UIFileDirectory ()
   {}
 
   BitTorrent_Client_IControl_t*           controller;
@@ -169,6 +170,7 @@ struct BitTorrent_Client_UI_SessionCBData
   // *TODO*: remove this
   std::string                             label;
   BitTorrent_Client_ISession_t*           session;
+  std::string                             UIFileDirectory;
 };
 
 struct BitTorrent_Client_UI_SessionProgressData
