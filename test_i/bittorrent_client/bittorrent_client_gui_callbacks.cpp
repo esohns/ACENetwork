@@ -313,7 +313,6 @@ idle_add_session_cb (gpointer userData_in)
   GtkWindow* window_p = NULL;
   GtkHBox* hbox_p = NULL, *hbox_2 = NULL;
   GtkLabel* label_p = NULL;
-  GtkVBox* vbox_p = NULL;
   GtkNotebook* notebook_p = NULL;
 #if defined (GTK2_USE)
   GtkTable* table_p = NULL;
@@ -382,7 +381,7 @@ idle_add_session_cb (gpointer userData_in)
 
   // allow reordering
   gtk_notebook_set_tab_reorderable (notebook_p,
-                                    GTK_WIDGET (vbox_p),
+                                    GTK_WIDGET (hbox_p),
                                     TRUE);
 
   gtk_notebook_set_current_page (notebook_p,
@@ -428,14 +427,14 @@ idle_add_session_cb (gpointer userData_in)
   ACE_ASSERT (css_provider_p);
   // Load CSS into the object ("-1" says, that the css string is \0-terminated)
   gtk_css_provider_load_from_data (css_provider_p,
-                                   ACE_TEXT ("* { background-image:none; background-color:black; }"), -1,
+                                   ACE_TEXT_ALWAYS_CHAR ("* { background-image:none; background-color:black; }"), -1,
                                    NULL);
 
   GtkCssProvider* css_provider_2 = gtk_css_provider_new ();
   ACE_ASSERT (css_provider_2);
   // Load CSS into the object ("-1" says, that the css string is \0-terminated)
   gtk_css_provider_load_from_data (css_provider_2,
-                                   ACE_TEXT ("* { background-image:none; background-color:green; }"), -1,
+                                   ACE_TEXT_ALWAYS_CHAR ("* { background-image:none; background-color:green; }"), -1,
                                    NULL);
 #endif // GTK2_USE || GTK3_USE
   for (unsigned int i = 0;
@@ -445,10 +444,10 @@ idle_add_session_cb (gpointer userData_in)
     button_p = GTK_BUTTON (gtk_button_new ());
     ACE_ASSERT (button_p);
     g_object_set_data (G_OBJECT (button_p),
-                       ACE_TEXT ("index"),
+                       ACE_TEXT_ALWAYS_CHAR ("index"),
                        reinterpret_cast<gpointer> (i));
 
-    gtk_widget_set_size_request (GTK_WIDGET (button_p), 10, 10);
+    //gtk_widget_set_size_request (GTK_WIDGET (button_p), 7, 7);
     gtk_widget_set_visible (GTK_WIDGET (button_p), TRUE); // *TODO*: why ?
 
     complete_piece_indexes_iterator = std::find (complete_piece_indexes_a.begin (),
@@ -732,30 +731,31 @@ idle_piece_complete_progress_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_piece_complete_progress_cb"));
 
   // sanity check(s)
-  struct BitTorrent_Client_UI_SessionProgressData* data_p =
+  struct BitTorrent_Client_UI_SessionProgressData* session_progress_data_p =
     static_cast<struct BitTorrent_Client_UI_SessionProgressData*> (userData_in);
-  ACE_ASSERT (data_p);
+  ACE_ASSERT (session_progress_data_p);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersIterator_t iterator =
-    state_r.builders.find (data_p->label);
+    state_r.builders.find (session_progress_data_p->label);
   ACE_ASSERT (iterator != state_r.builders.end ());
+  GList* list_p = NULL;
 
 #if defined (GTK2_USE)
   GtkTable* table_p =
     GTK_TABLE (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TABLE_PIECES)));
   ACE_ASSERT (table_p);
-  GList* list_p = gtk_container_get_children (GTK_CONTAINER (table_p));
+  list_p = gtk_container_get_children (GTK_CONTAINER (table_p));
 #elif defined (GTK3_USE)
   GtkGrid* grid_p =
     GTK_GRID (gtk_builder_get_object ((*iterator).second.second,
                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_GRID_PIECES)));
   ACE_ASSERT (grid_p);
-  GList* list_p = gtk_container_get_children (GTK_CONTAINER (grid_p));
+  list_p = gtk_container_get_children (GTK_CONTAINER (grid_p));
 #endif // GTK2_USE || GTK3_USE
   if (!list_p)
     return G_SOURCE_CONTINUE; // *NOTE*: wait for the session to establish
@@ -766,7 +766,7 @@ idle_piece_complete_progress_cb (gpointer userData_in)
        l = l->next)
   { ACE_ASSERT (l && l->data);
     button_p = static_cast<GtkButton*> (l->data);
-    if (static_cast<unsigned int> (reinterpret_cast<size_t> (g_object_get_data (G_OBJECT (button_p), ACE_TEXT_ALWAYS_CHAR ("index")))) == static_cast<unsigned int> (data_p->pieceIndex))
+    if (static_cast<unsigned int> (reinterpret_cast<size_t> (g_object_get_data (G_OBJECT (button_p), ACE_TEXT_ALWAYS_CHAR ("index")))) == static_cast<unsigned int> (session_progress_data_p->pieceIndex))
       break;
   } // end FOR
   ACE_ASSERT (button_p);
@@ -809,7 +809,7 @@ idle_piece_complete_progress_cb (gpointer userData_in)
 
 //clean_up:
   g_list_free (list_p); list_p = NULL;
-  delete data_p; data_p = NULL;
+  delete session_progress_data_p; session_progress_data_p = NULL;
 
   return G_SOURCE_REMOVE;
 }

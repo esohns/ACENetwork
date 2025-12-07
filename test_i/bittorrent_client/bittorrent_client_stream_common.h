@@ -241,29 +241,6 @@ struct BitTorrent_Client_TrackerStreamState
   struct BitTorrent_Client_TrackerSessionData* sessionData;
 };
 
-//struct BitTorrent_Client_PeerModuleHandlerConfiguration;
-//struct BitTorrent_Client_PeerStreamConfiguration
-// : BitTorrent_PeerStreamConfiguration
-//{
-//  BitTorrent_Client_PeerStreamConfiguration ()
-//   : BitTorrent_PeerStreamConfiguration ()
-//   , userData (NULL)
-//  {}
-
-//  struct Net_UserData* userData;
-//};
-//struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
-//struct BitTorrent_Client_TrackerStreamConfiguration
-// : BitTorrent_TrackerStreamConfiguration
-//{
-//  BitTorrent_Client_TrackerStreamConfiguration ()
-//   : BitTorrent_TrackerStreamConfiguration ()
-//   , userData (NULL)
-//  {}
-//
-//  struct Net_UserData* userData;
-//};
-
 //typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
 //                                        struct Common_AllocatorConfiguration,
 //                                        Stream_ControlMessage_t,

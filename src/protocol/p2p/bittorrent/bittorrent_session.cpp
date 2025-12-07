@@ -49,6 +49,7 @@ net_bittorrent_session_setup_function (void* arg_in)
     data_p->addresses.pop_back ();
     delete_thread_data_b = data_p->addresses.empty ();
     isession_p = data_p->session;
+    ACE_ASSERT (isession_p);
   } // end lock scope
 
   ACE_DEBUG ((LM_DEBUG,
@@ -64,7 +65,13 @@ net_bittorrent_session_setup_function (void* arg_in)
 #endif // ACE_WIN32 || ACE_WIN64
 
   if (unlikely (delete_thread_data_b))
-    delete data_p;
+  {
+    { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *data_p->lock, result);
+      data_p->state->connecting = false;
+    } // end lock scope
+
+    delete data_p; data_p = NULL;
+  } // end IF
 
   return result;
 }

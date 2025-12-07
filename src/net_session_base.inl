@@ -164,10 +164,18 @@ Net_SessionBase_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->connectionConfiguration);
 
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   ConnectorType connector (true);
+
+  typename ConnectorType::CONNECTION_MANAGER_T::INTERFACE_T* iconnection_manager_p =
+    ConnectorType::CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  ACE_ASSERT (iconnection_manager_p);
+  ConnectionConfigurationType* connection_configuration_p = NULL;
+  struct Net_UserData* user_data_p = NULL;
+
+  iconnection_manager_p->get (connection_configuration_p,
+                              user_data_p);
 
   // *NOTE*: this memory is cleaned up when the session closes (see also:
   //         Net_SessionBase_T::close())
@@ -176,8 +184,7 @@ Net_SessionBase_T<AddressType,
   ACE_NEW_NORETURN (stream_configuration_p,
                     typename ConnectionConfigurationType::STREAM_CONFIGURATION_T ());
   ACE_ASSERT (stream_configuration_p);
-  *stream_configuration_p =
-    *static_cast<ConnectionConfigurationType*> (configuration_->connectionConfiguration)->streamConfiguration;
+  *stream_configuration_p = *connection_configuration_p->streamConfiguration;
 
   typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::MODULEHANDLER_CONFIGURATION_T* module_handler_configuration_p =
     NULL;
@@ -192,15 +199,13 @@ Net_SessionBase_T<AddressType,
     (*iterator).second.second = module_handler_configuration_p;
   } // end FOR
 
-  ConnectionConfigurationType* connection_configuration_p = NULL;
-  ACE_NEW_NORETURN (connection_configuration_p,
+  ConnectionConfigurationType* connection_configuration_2 = NULL;
+  ACE_NEW_NORETURN (connection_configuration_2,
                     ConnectionConfigurationType ());
-  ACE_ASSERT (connection_configuration_p);
-  *connection_configuration_p =
-    *static_cast<ConnectionConfigurationType*> (configuration_->connectionConfiguration);
-  connection_configuration_p->streamConfiguration = stream_configuration_p;
+  ACE_ASSERT (connection_configuration_2);
+  *connection_configuration_2 = *connection_configuration_p;
+  connection_configuration_2->streamConfiguration = stream_configuration_p;
 
-  struct Net_UserData user_data_s; // *TODO*: make this generic
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
   Net_ConnectionId_t id_i;
   Net_SessionConnectionConfigurationsIterator_t iterator;
@@ -208,8 +213,8 @@ Net_SessionBase_T<AddressType,
 
   handle_h =
     Net_Client_Common_Tools::connect (connector,
-                                      *connection_configuration_p,
-                                      user_data_s,
+                                      *connection_configuration_2,
+                                      *user_data_p,
                                       address_in,
                                       true,
                                       true,
@@ -223,9 +228,9 @@ Net_SessionBase_T<AddressType,
   } // end IF
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    CONNECTION_MANAGER_SINGLETON_T::instance ()->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
 #else
-    CONNECTION_MANAGER_SINGLETON_T::instance ()->get (static_cast<Net_ConnectionId_t> (handle_h));
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
   if (unlikely (!iconnection_p))
   {
@@ -236,31 +241,31 @@ Net_SessionBase_T<AddressType,
   } // end IF
   id_i = iconnection_p->id ();
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%u: connected to %s...\n"),
-              id_i,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("%u: connected to %s...\n"),
+  //            id_i,
+  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
 
   // clean up ?
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     iterator = configuration_->connectionConfigurations.find (id_i);
     if (unlikely (iterator != configuration_->connectionConfigurations.end ()))
     {
-      ConnectionConfigurationType* connection_configuration_2 =
+      ConnectionConfigurationType* connection_configuration_3 =
         static_cast<ConnectionConfigurationType*> ((*iterator).second);
-      ACE_ASSERT (connection_configuration_2->streamConfiguration);
-      for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_2->streamConfiguration->begin ();
-           iterator_2 != connection_configuration_2->streamConfiguration->end ();
+      ACE_ASSERT (connection_configuration_3->streamConfiguration);
+      for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_3->streamConfiguration->begin ();
+           iterator_2 != connection_configuration_3->streamConfiguration->end ();
            ++iterator_2)
         delete (*iterator_2).second.second;
-      delete connection_configuration_2->streamConfiguration;
-      delete connection_configuration_2;
+      delete connection_configuration_3->streamConfiguration;
+      delete connection_configuration_3;
       configuration_->connectionConfigurations.erase (iterator);
     } // end IF
 
     result_s =
       configuration_->connectionConfigurations.insert (std::make_pair (id_i,
-                                                                       connection_configuration_p));
+                                                                       connection_configuration_2));
     ACE_ASSERT (result_s.second);
   } // end lock scope
 
@@ -280,7 +285,9 @@ error:
          ++iterator)
       delete (*iterator).second.second;
   delete stream_configuration_p;
-  delete connection_configuration_p;
+  delete connection_configuration_2;
+  iconnection_manager_p->set (*connection_configuration_p,
+                              user_data_p);
 }
 
 template <typename AddressType,

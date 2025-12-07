@@ -473,9 +473,14 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   PeerConnectionConfigurationType* connection_configuration_p = NULL;
   PeerUserDataType* user_data_p = NULL;
   typename PeerStreamType::CONFIGURATION_T::ITERATOR_T iterator;
+  typename PeerConnectorType::CONNECTION_MANAGER_T::INTERFACE_T* iconnection_manager_p =
+    PeerConnectorType::CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  ACE_ASSERT (iconnection_manager_p);
 
-  inherited::CONNECTION_MANAGER_SINGLETON_T::instance ()->get (connection_configuration_p,
-                                                               user_data_p);
+  iconnection_manager_p->lock (true);
+
+  iconnection_manager_p->get (connection_configuration_p,
+                              user_data_p);
 
   // sanity check(s)
   ACE_ASSERT (connection_configuration_p);
@@ -502,11 +507,13 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   connection_configuration_2->streamConfiguration->configuration_->module =
     peerHandlerModule_;
 
-  inherited::CONNECTION_MANAGER_SINGLETON_T::instance ()->set (*connection_configuration_2,
-                                                               user_data_p);
+  iconnection_manager_p->set (*connection_configuration_2,
+                              user_data_p);
 
   // step2: (try to) connect
   inherited::connect (address_in);
+
+  iconnection_manager_p->unlock (false);
 }
 
 template <typename PeerConnectionConfigurationType,
@@ -822,7 +829,10 @@ continue_:
       inherited::state_.peerState.erase (iterator);
     } // end IF
 
-    if (unlikely (inherited::state_.connections.empty ()))
+    // *NOTE*: iff there are no connections AND (!) no more connections will
+    //         establish, notify controller
+    if (unlikely (inherited::state_.connections.empty () &&
+                  !inherited::state_.connecting))
       notify_controller_b = true;
   } // end lock scope
   if (notify_controller_b)
@@ -1994,7 +2004,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       event_e = BITTORRENT_EVENT_CANCELLED;
       notify_controller_b = true;
     } // end IF
-    else if (inherited::state_.connections.empty ())
+    // *NOTE*: iff there are no connections AND (!) no more connections will
+    //         establish, notify controller
+    else if (inherited::state_.connections.empty () &&
+             !inherited::state_.connecting)
     {
       event_e = BITTORRENT_EVENT_NO_MORE_PEERS;
       notify_controller_b = true;
@@ -2445,6 +2458,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               peer_addresses_a.size ()));
 
+  inherited::state_.connecting = true;
+
   struct BitTorrent_SessionInitiationThreadData* thread_data_p = NULL;
   ACE_NEW_NORETURN (thread_data_p,
                     struct BitTorrent_SessionInitiationThreadData ());
@@ -2452,6 +2467,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   thread_data_p->addresses = peer_addresses_a;
   thread_data_p->lock = &(inherited::lock_);
   thread_data_p->session = this;
+  thread_data_p->state = &(inherited::state_);
+
   ACE_Thread_Manager* thread_manager_p = NULL;
   const char** thread_names_p = NULL;
   char* thread_name_p = NULL;
@@ -2573,6 +2590,7 @@ error:
     delete [] thread_names_p;
   if (thread_data_p)
     delete thread_data_p;
+  inherited::state_.connecting = false;
 }
 
 template <typename PeerConnectionConfigurationType,

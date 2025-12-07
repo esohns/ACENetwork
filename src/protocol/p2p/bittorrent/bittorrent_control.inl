@@ -679,7 +679,7 @@ continue_:
     case BITTORRENT_EVENT_NO_MORE_PEERS:
     {
       notifyTracker (event_inout->metaInfoFileName,
-                     static_cast<enum BitTorrent_Event> (event_inout->type));
+                     BITTORRENT_EVENT_NO_MORE_PEERS);
       break;
     }
     case BITTORRENT_EVENT_TRACKER_REDIRECTED:

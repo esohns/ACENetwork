@@ -223,10 +223,11 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   ACE_ASSERT (isInitialized_);
 
   // *NOTE*: this is called by managed (!) connections to retrieve their
-  //         respective configuration; (hopefully) the globalLock_ is being held
-  //         by the initiating thread (*NOTE*: this might very well be a
-  //         different thread for asynch connections)
+  //         respective configuration; (hopefully) the configurationLock_ is
+  //         being held by the initiating thread (*NOTE*: this might very well
+  //         be a different thread for asynch connections)
   //         --> do NOT try to grab the lock here !
+  // ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, configurationLock_);
   configuration_out = configuration_;
   userData_out = userData_;
 }

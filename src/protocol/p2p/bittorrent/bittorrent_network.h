@@ -122,6 +122,46 @@ class BitTorrent_TrackerConnectionConfiguration
 
 //////////////////////////////////////////
 
+typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_SessionManager_Configuration,
+                                 struct BitTorrent_PeerSessionData,
+                                 struct Stream_Statistic,
+                                 struct Stream_UserData> BitTorrent_PeerSession_Manager_t;
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 BitTorrent_PeerConnectionConfiguration,
+                                 struct BitTorrent_PeerConnectionState,
+                                 Net_StreamStatistic_t,
+                                 struct Net_UserData> BitTorrent_PeerConnection_Manager_t;
+
+typedef BitTorrent_PeerStream_T<struct BitTorrent_PeerStreamState,
+                                struct BitTorrent_PeerStreamConfiguration,
+                                struct Stream_Statistic,
+                                Common_Timer_Manager_t,
+                                struct BitTorrent_PeerModuleHandlerConfiguration,
+                                BitTorrent_PeerSession_Manager_t,
+                                Stream_ControlMessage_t,
+                                BitTorrent_Message_t,
+                                BitTorrent_PeerSessionMessage_t,
+                                BitTorrent_PeerConnectionConfiguration,
+                                struct BitTorrent_PeerConnectionState,
+                                Net_TCPSocketConfiguration_t,
+                                struct BitTorrent_SessionState,
+                                BitTorrent_PeerConnection_Manager_t,
+                                struct Stream_UserData> BitTorrent_PeerStream_t;
+
+struct BitTorrent_SessionConfiguration;
+typedef BitTorrent_ISession_T<ACE_INET_Addr,
+                              BitTorrent_PeerConnectionConfiguration,
+                              BitTorrent_TrackerConnectionConfiguration,
+                              struct BitTorrent_PeerConnectionState,
+                              Net_StreamStatistic_t,
+                              BitTorrent_PeerStream_t,
+                              enum Stream_StateMachine_ControlState,
+                              struct BitTorrent_SessionConfiguration,
+                              struct BitTorrent_SessionState> BitTorrent_ISession_t;
+
 typedef std::vector<ACE_INET_Addr> BitTorrent_PeerAddresses_t;
 typedef BitTorrent_PeerAddresses_t::const_iterator BitTorrent_PeerAddressesIterator_t;
 struct BitTorrent_SessionInitiationThreadData
@@ -130,11 +170,13 @@ struct BitTorrent_SessionInitiationThreadData
    : addresses ()
    , lock (NULL)
    , session (NULL)
+   , state (NULL)
   {}
 
-  BitTorrent_PeerAddresses_t addresses;
-  ACE_SYNCH_MUTEX*           lock;
-  Net_IInetSession_t*        session;
+  BitTorrent_PeerAddresses_t      addresses;
+  ACE_SYNCH_MUTEX*                lock;
+  Net_IInetSession_t*             session;
+  struct BitTorrent_SessionState* state;
 };
 
 struct BitTorrent_SessionConfiguration
@@ -209,45 +251,6 @@ struct BitTorrent_PeerState
   struct BitTorrent_PeerStatus       status;
 };
 
-typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
-                                 enum Stream_SessionMessageType,
-                                 struct Stream_SessionManager_Configuration,
-                                 struct BitTorrent_PeerSessionData,
-                                 struct Stream_Statistic,
-                                 struct Stream_UserData> BitTorrent_PeerSession_Manager_t;
-typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 BitTorrent_PeerConnectionConfiguration,
-                                 struct BitTorrent_PeerConnectionState,
-                                 Net_StreamStatistic_t,
-                                 struct Net_UserData> BitTorrent_PeerConnection_Manager_t;
-
-typedef BitTorrent_PeerStream_T<struct BitTorrent_PeerStreamState,
-                                struct BitTorrent_PeerStreamConfiguration,
-                                struct Stream_Statistic,
-                                Common_Timer_Manager_t,
-                                struct BitTorrent_PeerModuleHandlerConfiguration,
-                                BitTorrent_PeerSession_Manager_t,
-                                Stream_ControlMessage_t,
-                                BitTorrent_Message_t,
-                                BitTorrent_PeerSessionMessage_t,
-                                BitTorrent_PeerConnectionConfiguration,
-                                struct BitTorrent_PeerConnectionState,
-                                Net_TCPSocketConfiguration_t,
-                                struct BitTorrent_SessionState,
-                                BitTorrent_PeerConnection_Manager_t,
-                                struct Stream_UserData> BitTorrent_PeerStream_t;
-
-typedef BitTorrent_ISession_T<ACE_INET_Addr,
-                              BitTorrent_PeerConnectionConfiguration,
-                              BitTorrent_TrackerConnectionConfiguration,
-                              struct BitTorrent_PeerConnectionState,
-                              Net_StreamStatistic_t,
-                              BitTorrent_PeerStream_t,
-                              enum Stream_StateMachine_ControlState,
-                              struct BitTorrent_SessionConfiguration,
-                              struct BitTorrent_SessionState> BitTorrent_ISession_t;
-
 //----------------------------------------
 
 typedef BitTorrent_PeerStreamHandler_T<struct BitTorrent_PeerSessionData,
@@ -266,6 +269,7 @@ struct BitTorrent_SessionState
 {
   BitTorrent_SessionState ()
    : aborted (false)
+   , connecting (false)
    , connections ()
    , fileName ()
    , metaInfo (NULL)
@@ -292,6 +296,8 @@ struct BitTorrent_SessionState
   {}
 
   bool                                      aborted;
+  bool                                      connecting;
+
   Net_ConnectionIds_t                       connections;
   std::string                               fileName; // .torrent file
   Bencoding_Dictionary_t*                   metaInfo;
