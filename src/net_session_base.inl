@@ -267,9 +267,13 @@ Net_SessionBase_T<AddressType,
       configuration_->connectionConfigurations.insert (std::make_pair (id_i,
                                                                        connection_configuration_2));
     ACE_ASSERT (result_s.second);
+    connection_configuration_2 = NULL;
   } // end lock scope
 
   iconnection_p->decrease (); iconnection_p = NULL;
+
+  iconnection_manager_p->set (*connection_configuration_p,
+                              user_data_p);
 
   return;
 
@@ -402,24 +406,24 @@ Net_SessionBase_T<AddressType,
           iterator != connection_ids_a.end ();
           ++iterator)
       connection_manager_p->wait_2 (*iterator);
-
-    // step3: clean up connection configurations (see connect()/disconnect())
-    for (Net_SessionConnectionConfigurationsIterator_t iterator = configuration_->connectionConfigurations.begin ();
-         iterator != configuration_->connectionConfigurations.end ();
-         ++iterator)
-    {
-      ConnectionConfigurationType* connection_configuration_p =
-        static_cast<ConnectionConfigurationType*> ((*iterator).second);
-      ACE_ASSERT (connection_configuration_p->streamConfiguration);
-      for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
-            iterator_2 != connection_configuration_p->streamConfiguration->end ();
-            ++iterator_2)
-        delete (*iterator_2).second.second;
-      delete connection_configuration_p->streamConfiguration;
-      delete connection_configuration_p;
-    } // end FOR
-    configuration_->connectionConfigurations.clear ();
   } // end IF
+
+  // step3: clean up connection configurations (see connect()/disconnect())
+  for (Net_SessionConnectionConfigurationsIterator_t iterator = configuration_->connectionConfigurations.begin ();
+        iterator != configuration_->connectionConfigurations.end ();
+        ++iterator)
+  {
+    ConnectionConfigurationType* connection_configuration_p =
+      static_cast<ConnectionConfigurationType*> ((*iterator).second);
+    ACE_ASSERT (connection_configuration_p->streamConfiguration);
+    for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
+          iterator_2 != connection_configuration_p->streamConfiguration->end ();
+          ++iterator_2)
+      delete (*iterator_2).second.second;
+    delete connection_configuration_p->streamConfiguration;
+    delete connection_configuration_p;
+  } // end FOR
+  configuration_->connectionConfigurations.clear ();
 }
 
 template <typename AddressType,
@@ -521,22 +525,24 @@ Net_SessionBase_T<AddressType,
   // sanity check(s)
   ACE_ASSERT (configuration_);
 
-  // step1: clean up connection configuration
-  // *WARNING*: potential leakage here --> do it in the close(), after all (!)
-  //            session connections have deregistered
+  // *NOTE*: cannot do this here because the underlying stream may still be
+  //         running --> clean up in close() (see above)
+  // step1: clean up connection configuration ?
   //Net_SessionConnectionConfigurationsIterator_t iterator =
   //  configuration_->connectionConfigurations.find (id_in);
-  //ACE_ASSERT (iterator != configuration_->connectionConfigurations.end ());
-  //ConnectionConfigurationType* connection_configuration_p =
-  //  static_cast<ConnectionConfigurationType*> ((*iterator).second);
-  //ACE_ASSERT (connection_configuration_p->streamConfiguration);
-  //for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
-  //     iterator_2 != connection_configuration_p->streamConfiguration->end ();
-  //      ++iterator_2)
-  //  delete (*iterator_2).second.second;
-  //delete connection_configuration_p->streamConfiguration;
-  //delete connection_configuration_p;
-  //configuration_->connectionConfigurations.erase (iterator);
+  //if (likely (iterator != configuration_->connectionConfigurations.end ()))
+  //{
+  //  ConnectionConfigurationType* connection_configuration_p =
+  //    static_cast<ConnectionConfigurationType*> ((*iterator).second);
+  //  ACE_ASSERT (connection_configuration_p->streamConfiguration);
+  //  for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
+  //       iterator_2 != connection_configuration_p->streamConfiguration->end ();
+  //       ++iterator_2)
+  //    delete (*iterator_2).second.second;
+  //  delete connection_configuration_p->streamConfiguration;
+  //  delete connection_configuration_p;
+  //  configuration_->connectionConfigurations.erase (iterator);
+  //} // end IF
 
   // step2: remove connection from state
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);

@@ -513,6 +513,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   // step2: (try to) connect
   inherited::connect (address_in);
 
+  delete connection_configuration_2; connection_configuration_2 = NULL;
+  iconnection_manager_p->set (*connection_configuration_p,
+                              user_data_p);
+
   iconnection_manager_p->unlock (false);
 }
 
@@ -777,31 +781,6 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::disconnect"));
 
   ACE_UINT32 peer_address_i = connectionIdToPeerAddress (id_in);
-
-  // clean up connection configuration
-  PeerConnectionConfigurationType* configuration_p = NULL;
-  ICONNECTION_T* iconnection_p =
-    inherited::CONNECTION_MANAGER_SINGLETON_T::instance ()->get (id_in);
-  if (unlikely (!iconnection_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve connection handle (id was: %d), continuing\n"),
-                id_in));
-    goto continue_;
-  } // end IF
-
-  // ACE_HANDLE handle_h;
-  // ACE_INET_Addr local_address, peer_address;
-  // iconnection_p->info (handle_h,
-  //                      local_address,
-  //                      peer_address);
-  configuration_p =
-    const_cast<PeerConnectionConfigurationType*> (static_cast<const PeerConnectionConfigurationType*> (&iconnection_p->getR ()));
-
-  // clean up
-  iconnection_p->decrease (); iconnection_p = NULL;
-  delete configuration_p; configuration_p = NULL;
-continue_:
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
