@@ -51,32 +51,12 @@
 #include "bittorrent_isession.h"
 #include "bittorrent_network.h"
 
-//#include "bittorrent_client_stream_common.h"
-
 //////////////////////////////////////////
 
-//struct BitTorrent_Client_PeerStreamConfiguration;
-//struct BitTorrent_Client_PeerStreamConfiguration
-// : BitTorrent_PeerStreamConfiguration
-//{
-//  BitTorrent_Client_PeerStreamConfiguration ()
-//   : BitTorrent_PeerStreamConfiguration ()
-//   , userData (NULL)
-//  {}
-//
-//  struct Net_UserData* userData;
-//};
 struct BitTorrent_Client_PeerModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
                                struct BitTorrent_PeerStreamConfiguration,
                                struct BitTorrent_Client_PeerModuleHandlerConfiguration> BitTorrent_Client_PeerStreamConfiguration_t;
-//class BitTorrent_Client_PeerConnectionConfiguration;
-//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-//                                 ACE_INET_Addr,
-//                                 BitTorrent_Client_PeerConnectionConfiguration,
-//                                 struct BitTorrent_Client_PeerConnectionState,
-//                                 Net_StreamStatistic_t,
-//                                 struct Net_UserData> BitTorrent_Client_PeerIConnection_Manager_t;
 class BitTorrent_Client_PeerConnectionConfiguration
  : public Net_StreamConnectionConfiguration_T<BitTorrent_Client_PeerStreamConfiguration_t,
                                               NET_TRANSPORTLAYER_TCP>
@@ -85,14 +65,8 @@ class BitTorrent_Client_PeerConnectionConfiguration
   BitTorrent_Client_PeerConnectionConfiguration ()
    : Net_StreamConnectionConfiguration_T ()
    ///////////////////////////////////////
-//   , connectionManager (NULL)
   {}
-
-//  BitTorrent_Client_PeerIConnection_Manager_t*            connectionManager;
 };
-//typedef std::map<std::string,
-//                 BitTorrent_Client_PeerConnectionConfiguration> BitTorrent_Client_PeerConnectionConfigurations_t;
-//typedef BitTorrent_Client_PeerConnectionConfigurations_t::iterator BitTorrent_Client_PeerConnectionConfigurationIterator_t;
 
 struct BitTorrent_Client_PeerConnectionState;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
@@ -109,13 +83,6 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
                                struct BitTorrent_TrackerStreamConfiguration,
                                struct BitTorrent_Client_TrackerModuleHandlerConfiguration> BitTorrent_Client_TrackerStreamConfiguration_t;
-//class BitTorrent_Client_TrackerConnectionConfiguration;
-//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-//                                 ACE_INET_Addr,
-//                                 BitTorrent_Client_TrackerConnectionConfiguration,
-//                                 struct BitTorrent_Client_TrackerConnectionState,
-//                                 Net_StreamStatistic_t,
-//                                 struct Net_UserData> BitTorrent_Client_TrackerIConnection_Manager_t;
 class BitTorrent_Client_TrackerConnectionConfiguration
  : public Net_StreamConnectionConfiguration_T<BitTorrent_Client_TrackerStreamConfiguration_t,
                                               NET_TRANSPORTLAYER_TCP>
@@ -124,14 +91,8 @@ class BitTorrent_Client_TrackerConnectionConfiguration
   BitTorrent_Client_TrackerConnectionConfiguration ()
    : Net_StreamConnectionConfiguration_T ()
    ///////////////////////////////////////
-//   , connectionManager (NULL)
   {}
-
-//  BitTorrent_Client_TrackerIConnection_Manager_t*            connectionManager;
 };
-//typedef std::map<std::string,
-//                 BitTorrent_Client_TrackerConnectionConfiguration> BitTorrent_Client_TrackerConnectionConfigurations_t;
-//typedef BitTorrent_Client_TrackerConnectionConfigurations_t::iterator BitTorrent_Client_TrackerConnectionConfigurationIterator_t;
 
 struct BitTorrent_Client_TrackerConnectionState;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
@@ -142,11 +103,9 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> BitTorrent_Client_TrackerConnection_Manager_t;
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          //BitTorrent_Client_PeerConnectionConfiguration,
                           struct BitTorrent_Client_PeerConnectionState,
                           Net_StreamStatistic_t> BitTorrent_Client_IPeerConnection_t;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          //BitTorrent_Client_TrackerConnectionConfiguration,
                           struct BitTorrent_Client_TrackerConnectionState,
                           Net_StreamStatistic_t> BitTorrent_Client_ITrackerConnection_t;
 

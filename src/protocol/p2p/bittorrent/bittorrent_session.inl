@@ -575,8 +575,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: new peer connection (id: %d)\n"),
-              ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE::basename (inherited::configuration_->metaInfoFileName.c_str (), ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
   struct BitTorrent_PeerState peer_state_s;
@@ -719,6 +718,10 @@ continue_:
   // clean up
   istream_connection_p->decrease ();
 
+  // notify connection to event subscriber
+  if (inherited::configuration_->subscriber)
+    inherited::configuration_->subscriber->peerConnect (id_in);
+
   return;
 
 error:
@@ -789,8 +792,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: peer connection closed (id was: %d)\n"),
-              ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE::basename (inherited::configuration_->metaInfoFileName.c_str (), ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
 
   bool notify_controller_b = false;
@@ -825,6 +827,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                   ACE_TEXT ("caught exception in BitTorrent_IControl_T::notify(), continuing\n")));
     }
   } // end IF
+
+  // notify connection end to event subscriber
+  if (inherited::configuration_->subscriber)
+    inherited::configuration_->subscriber->peerDisconnect (id_in);
 }
 
 template <typename PeerConnectionConfigurationType,
@@ -928,9 +934,9 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   istream_connection_p->decrease ();
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: interested in peer (id was: %d)...\n"),
-              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
-                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              ACE_TEXT ("%s: %s peer (id was: %d)...\n"),
+              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (), ACE_DIRECTORY_SEPARATOR_CHAR)),
+              (choke_in ? ACE_TEXT ("choked") : ACE_TEXT ("unchoked")),
               id_in));
 
   return;
@@ -1046,8 +1052,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: interested in peer (id was: %d)...\n"),
-              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (),
-                                       ACE_DIRECTORY_SEPARATOR_CHAR)),
+              ACE_TEXT (ACE::basename (inherited::configuration_->metaInfoFileName.c_str (), ACE_DIRECTORY_SEPARATOR_CHAR)),
               id_in));
 
   return;
@@ -1910,9 +1915,12 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: new tracker connection (id: %d)\n"),
-              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
+
+  // notify connection to event subscriber
+  if (inherited::configuration_->subscriber)
+    inherited::configuration_->subscriber->trackerConnect (id_in);
 }
 
 template <typename PeerConnectionConfigurationType,
@@ -2020,6 +2028,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   //                timerId_));
   //  timerId_ = -1;
   //} // end IF
+
+  // notify connection end to event subscriber
+  if (inherited::configuration_->subscriber)
+    inherited::configuration_->subscriber->trackerDisconnect (id_in);
 }
 
 template <typename PeerConnectionConfigurationType,
@@ -2336,7 +2348,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   switch ((*iterator).second->type)
   {
     case Bencoding_Element::BENCODING_TYPE_STRING:
-    {
+    { ACE_ASSERT ((*iterator).second->string->size () % 6 == 0);
       const char* char_p = (*iterator).second->string->c_str ();
 
       // *IMPORTANT NOTE*: the 'compact' 'peers' representation is assumed here

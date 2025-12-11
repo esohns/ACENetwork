@@ -333,8 +333,6 @@ error:
     istream_connection_p->decrease ();
   if (session_context.configuration.metaInfo)
     Common_Parser_Bencoding_Tools::free (session_context.configuration.metaInfo);
-  if (session_context.session)
-    delete session_context.session;
   if (message_p)
     message_p->release ();
 }
@@ -565,7 +563,7 @@ BitTorrent_Control_T<SessionAsynchType,
                    highPriority_in);
 
   if (waitForCompletion_in)
-    wait ();
+    wait (true); // wait for queue ?
 
   if (sessions_i)
     ACE_DEBUG ((LM_DEBUG,

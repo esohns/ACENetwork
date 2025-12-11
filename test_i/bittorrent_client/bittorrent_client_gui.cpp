@@ -103,20 +103,22 @@ do_printUsage (const std::string& programName_in)
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
             << ACE_TEXT_ALWAYS_CHAR (" [OPTIONS]")
             << std::endl << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
+            << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-b              : do NOT send bitfield after peer handshake")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
+            << !BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c              : do NOT request 'compact' peer addresses")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
+            << !BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d              : debug [")
             << (COMMON_PARSER_DEFAULT_LEX_TRACE ||
@@ -173,6 +175,8 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR* argv_in[], // cannot be const
+                     bool& requestCompactPeerAddresses_out,
+                     bool& sendBitfieldAfterHandshake_out,
                      bool& debug_out,
                      std::string& torrentFile_out,
                      std::string& UIRCFile_out,
@@ -192,8 +196,12 @@ do_processArguments (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   // initialize results
-  debug_out =(COMMON_PARSER_DEFAULT_LEX_TRACE ||
-              COMMON_PARSER_DEFAULT_YACC_TRACE);
+  requestCompactPeerAddresses_out =
+    BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES;
+  sendBitfieldAfterHandshake_out =
+    BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE;
+  debug_out = (COMMON_PARSER_DEFAULT_LEX_TRACE ||
+               COMMON_PARSER_DEFAULT_YACC_TRACE);
 
   torrentFile_out = configuration_path;
   torrentFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -221,7 +229,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("df:g:lrs:tu:v"),
+                              ACE_TEXT ("bcdf:g:lrs:tu:v"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -233,6 +241,16 @@ do_processArguments (int argc_in,
   {
     switch (option)
     {
+      case 'b':
+      {
+        sendBitfieldAfterHandshake_out = false;
+        break;
+      }
+      case 'c':
+      {
+        requestCompactPeerAddresses_out = false;
+        break;
+      }
       case 'd':
       {
         debug_out = true;
@@ -409,7 +427,9 @@ do_initializeSignals (bool useReactor_in,
 }
 
 void
-do_work (bool debug_in,
+do_work (bool requestCompactPeerAddresses_in,
+         bool sendBitfieldAfterHandshake_in,
+         bool debug_in,
          const std::string& torrentFile_in,
          unsigned int numberOfDispatchThreads_in,
          bool useReactor_in,
@@ -539,10 +559,15 @@ do_work (bool debug_in,
     &CBData_in.configuration->parserConfiguration;
   CBData_in.configuration->sessionConfiguration.trackerConnectionConfiguration =
     &tracker_connection_configuration;
-
   CBData_in.configuration->sessionConfiguration.dispatch =
       (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                      : COMMON_EVENT_DISPATCH_PROACTOR);
+  // CBData_in.configuration->sessionConfiguration.allowMultipleConnectionsPerPeer =
+  //   allowMultiplerConnectionsPerPeer_in;
+  CBData_in.configuration->sessionConfiguration.requestCompactPeerAddresses =
+    requestCompactPeerAddresses_in;
+  CBData_in.configuration->sessionConfiguration.sendBitfieldAfterHandshake =
+    sendBitfieldAfterHandshake_in;
 
   // step2: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;
@@ -666,14 +691,15 @@ do_work (bool debug_in,
   bittorrent_control.stop (true,  // wait ?
                            true); // high priority ?
 
-  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
-
   // wait for connection processing to complete
   peer_connection_manager_p->abort ();
   tracker_connection_manager_p->abort ();
   peer_connection_manager_p->wait ();
   tracker_connection_manager_p->wait ();
+
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true,   // wait ?
+                                             false); // close() singletons ?
 
   timer_manager_p->stop ();
 
@@ -776,6 +802,10 @@ ACE_TMAIN (int argc_in,
   configuration_path                   +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
+  bool request_compact_peer_addresses_b =
+    BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES;
+  bool send_bitfield_after_handshake_b =
+    BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE;
   bool debug                                 =
       (COMMON_PARSER_DEFAULT_LEX_TRACE ||
        COMMON_PARSER_DEFAULT_YACC_TRACE);
@@ -812,6 +842,8 @@ ACE_TMAIN (int argc_in,
   unsigned int number_of_thread_pool_threads = 3;
   if (!do_processArguments (argc_in,
                             argv_in,
+                            request_compact_peer_addresses_b,
+                            send_bitfield_after_handshake_b,
                             debug,
                             torrent_file_name,
                             rc_file_name,
@@ -988,7 +1020,9 @@ ACE_TMAIN (int argc_in,
   // step9: do work
   ACE_High_Res_Timer timer;
   timer.start ();
-  do_work (debug,
+  do_work (request_compact_peer_addresses_b,
+           send_bitfield_after_handshake_b,
+           debug,
            torrent_file_name,
            number_of_thread_pool_threads,
            use_reactor,

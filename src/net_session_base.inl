@@ -403,27 +403,27 @@ Net_SessionBase_T<AddressType,
     // *NOTE*: this step is needed to safely release all connection/stream
     //         configurations that are still around (see step3)
     for (Net_ConnectionIdsIterator_t iterator = connection_ids_a.begin ();
-          iterator != connection_ids_a.end ();
-          ++iterator)
+         iterator != connection_ids_a.end ();
+         ++iterator)
       connection_manager_p->wait_2 (*iterator);
-  } // end IF
 
-  // step3: clean up connection configurations (see connect()/disconnect())
-  for (Net_SessionConnectionConfigurationsIterator_t iterator = configuration_->connectionConfigurations.begin ();
-        iterator != configuration_->connectionConfigurations.end ();
-        ++iterator)
-  {
-    ConnectionConfigurationType* connection_configuration_p =
-      static_cast<ConnectionConfigurationType*> ((*iterator).second);
-    ACE_ASSERT (connection_configuration_p->streamConfiguration);
-    for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
-          iterator_2 != connection_configuration_p->streamConfiguration->end ();
-          ++iterator_2)
-      delete (*iterator_2).second.second;
-    delete connection_configuration_p->streamConfiguration;
-    delete connection_configuration_p;
-  } // end FOR
-  configuration_->connectionConfigurations.clear ();
+    // step3: clean up connection configurations (see connect()/disconnect())
+    for (Net_SessionConnectionConfigurationsIterator_t iterator = configuration_->connectionConfigurations.begin ();
+         iterator != configuration_->connectionConfigurations.end ();
+         ++iterator)
+    {
+      ConnectionConfigurationType* connection_configuration_p =
+        static_cast<ConnectionConfigurationType*> ((*iterator).second);
+      ACE_ASSERT (connection_configuration_p->streamConfiguration);
+      for (typename ConnectionConfigurationType::STREAM_CONFIGURATION_T::ITERATOR_T iterator_2 = connection_configuration_p->streamConfiguration->begin ();
+           iterator_2 != connection_configuration_p->streamConfiguration->end ();
+           ++iterator_2)
+        delete (*iterator_2).second.second;
+      delete connection_configuration_p->streamConfiguration;
+      delete connection_configuration_p;
+    } // end FOR
+    configuration_->connectionConfigurations.clear ();
+  } // end IF
 }
 
 template <typename AddressType,

@@ -644,11 +644,15 @@ BitTorrent_Tools::hasMissingPiece (const BitTorrent_Pieces_t& pieces_in,
   for (BitTorrent_PiecesConstIterator_t iterator = pieces_in.begin ();
        iterator != pieces_in.end ();
        ++iterator)
+  {
+    if ((*iterator).onDisk)
+      continue;
     if (!BitTorrent_Tools::isPieceComplete ((*iterator).length,
                                             (*iterator).chunks) &&
         BitTorrent_Tools::havePiece (static_cast<unsigned int> (std::distance (pieces_in.begin (), iterator)),
                                      bitfield_in))
       return true;
+  } // end FOR
 
   return false;
 }

@@ -93,7 +93,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     if (!CBData_.eventSourceId)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add_full(idle_add_session_cb): \"%m\", returning\n")));
+                  ACE_TEXT ("failed to g_idle_add_full(idle_load_session_ui_cb): \"%m\", returning\n")));
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       goto error;
     } // end IF
@@ -344,6 +344,116 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                      NULL);
   ACE_ASSERT (event_source_id);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventSourceIds.insert (event_source_id);
+  } // end lock scope
+#endif // GTK_USE
+}
+
+template <typename SessionInterfaceType,
+          typename ConnectionType,
+          typename ConnectionCBDataType>
+void
+BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
+                                ConnectionType,
+                                ConnectionCBDataType>::peerConnect (Net_ConnectionId_t id_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::peerConnect"));
+
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+
+  struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+    NULL;
+  ACE_NEW_NORETURN (session_connection_cb_data_p,
+                    struct BitTorrent_Client_UI_SessionConnectionCBData ());
+  ACE_ASSERT (session_connection_cb_data_p);
+  session_connection_cb_data_p->CBData = &CBData_;
+
+  ConnectionType* iconnection_p =
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ()->get (id_in);
+  if (unlikely (!iconnection_p))
+  {
+    delete session_connection_cb_data_p;
+    return;
+  } // end IF
+  ACE_INET_Addr local_address, peer_address;
+  iconnection_p->info (session_connection_cb_data_p->connectionHandle,
+                       local_address, peer_address);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    guint event_source_id =
+      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                       idle_add_session_connection_cb,
+                       session_connection_cb_data_p,
+                       NULL);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_add_session_connection_cb): \"%m\", returning\n")));
+      iconnection_p->decrease ();
+      delete session_connection_cb_data_p;
+      return;
+    } // end IF
+    iconnection_p->decrease (); iconnection_p = NULL;
+
+    state_r.eventSourceIds.insert (event_source_id);
+  } // end lock scope
+#endif // GTK_USE
+}
+
+template <typename SessionInterfaceType,
+          typename ConnectionType,
+          typename ConnectionCBDataType>
+void
+BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
+                                ConnectionType,
+                                ConnectionCBDataType>::peerDisconnect (Net_ConnectionId_t id_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::peerDisconnect"));
+
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+
+  struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+    NULL;
+  ACE_NEW_NORETURN (session_connection_cb_data_p,
+                    struct BitTorrent_Client_UI_SessionConnectionCBData ());
+  ACE_ASSERT (session_connection_cb_data_p);
+  session_connection_cb_data_p->CBData = &CBData_;
+
+  ConnectionType* iconnection_p =
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ()->get (id_in);
+  if (unlikely (!iconnection_p))
+  {
+    delete session_connection_cb_data_p;
+    return;
+  } // end IF
+  ACE_INET_Addr local_address, peer_address;
+  iconnection_p->info (session_connection_cb_data_p->connectionHandle,
+                       local_address, peer_address);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    guint event_source_id =
+      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                       idle_remove_session_connection_cb,
+                       session_connection_cb_data_p,
+                       NULL);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_remove_session_connection_cb): \"%m\", returning\n")));
+      iconnection_p->decrease ();
+      delete session_connection_cb_data_p;
+      return;
+    } // end IF
+    iconnection_p->decrease (); iconnection_p = NULL;
+
     state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 #endif // GTK_USE

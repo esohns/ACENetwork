@@ -263,13 +263,13 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           BitTorrent_Client_TrackerMessage_t,
                                           BitTorrent_Client_TrackerSessionMessage_t> BitTorrent_Client_TrackerMessageAllocator_t;
 
-typedef BitTorrent_PeerStreamHandler_T<struct BitTorrent_Client_PeerSessionData,
-                                       struct Stream_UserData,
-                                       BitTorrent_Client_ISession_t,
-                                       struct BitTorrent_Client_UI_CBData> BitTorrent_Client_PeerStreamHandler_t;
-typedef BitTorrent_TrackerStreamHandler_T<struct BitTorrent_Client_TrackerSessionData,
-                                          struct Stream_UserData,
-                                          BitTorrent_Client_ISession_t,
-                                          struct BitTorrent_Client_UI_CBData> BitTorrent_Client_TrackerStreamHandler_t;
+typedef BitTorrent_Client_PeerStreamHandler_T<struct BitTorrent_Client_PeerSessionData,
+                                              struct Stream_UserData,
+                                              BitTorrent_Client_ISession_t,
+                                              struct BitTorrent_Client_UI_CBData> BitTorrent_Client_PeerStreamHandler_t;
+typedef BitTorrent_Client_TrackerStreamHandler_T<struct BitTorrent_Client_TrackerSessionData,
+                                              struct Stream_UserData,
+                                              BitTorrent_Client_ISession_t,
+                                              struct BitTorrent_Client_UI_CBData> BitTorrent_Client_TrackerStreamHandler_t;
 
 #endif

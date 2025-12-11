@@ -33,6 +33,8 @@ extern "C"
 // idle routines
 gboolean idle_load_session_ui_cb (gpointer);
 gboolean idle_add_session_cb (gpointer);
+gboolean idle_add_session_connection_cb (gpointer);
+gboolean idle_remove_session_connection_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
 gboolean idle_log_progress_cb (gpointer);
@@ -55,7 +57,7 @@ G_MODULE_EXPORT void button_quit_clicked_cb (GtkWidget*, GdkEvent*, gpointer);
 // BitTorrent_Client_GUI_Session
 G_MODULE_EXPORT void button_session_close_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void button_session_connection_close_clicked_cb (GtkWidget*, gpointer);
-//G_MODULE_EXPORT void combobox_connections_changed_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void combobox_connections_changed_cb (GtkWidget*, gpointer);
 
 #ifdef __cplusplus
 }

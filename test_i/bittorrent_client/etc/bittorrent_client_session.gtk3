@@ -17,7 +17,7 @@
       <!-- column-name text -->
       <column type="gchararray"/>
       <!-- column-name id -->
-      <column type="guint"/>
+      <column type="gint"/>
     </columns>
   </object>
   <object class="GtkTextTagTable" id="texttagtable_notebook_page_session_log">

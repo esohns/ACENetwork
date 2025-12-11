@@ -67,8 +67,8 @@ class BitTorrent_Client_GUI_Session_T
   virtual void complete (bool = false); // cancelled ?
   inline virtual void trackerConnect (Net_ConnectionId_t) {}
   inline virtual void trackerDisconnect (Net_ConnectionId_t) {}
-  inline virtual void peerConnect (Net_ConnectionId_t) {}
-  inline virtual void peerDisconnect (Net_ConnectionId_t) {}
+  virtual void peerConnect (Net_ConnectionId_t);
+  virtual void peerDisconnect (Net_ConnectionId_t);
 
   // implement Common_IGet_T
   inline virtual const ConnectionCBDataType& getR () const { return CBData_; }

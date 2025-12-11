@@ -256,17 +256,24 @@ if (GTK_SUPPORT)
       ${${EXECUTABLE_GUI}_EXE_SRCS}
       bittorrent_client_gui_callbacks.cpp
       bittorrent_client_gui_callbacks.h)
+ if (GTK2_USE)
+  set (${EXECUTABLE_GUI}_EXE_SRCS
+       ${${EXECUTABLE_GUI}_EXE_SRCS}
+       etc/bittorrent_client_main.glade
+       etc/bittorrent_client_session.glade)
+ elseif (GTK3_USE)
+  set (${EXECUTABLE_GUI}_EXE_SRCS
+       ${${EXECUTABLE_GUI}_EXE_SRCS}
+       etc/bittorrent_client_main.gtk3
+       etc/bittorrent_client_session.gtk3)
+ endif ()
 endif (GTK_SUPPORT)
 
 #set_source_files_properties (${bittorrent_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
-                ${${EXECUTABLE_GUI}_EXE_SRCS}
-                etc/bittorrent_client_main.glade
-                etc/bittorrent_client_main.gtk3
-                etc/bittorrent_client_session.glade
-                etc/bittorrent_client_session.gtk3)
+                ${${EXECUTABLE_GUI}_EXE_SRCS})
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
 if (WIN32)
  if (NOT BUILD_TEST_I)

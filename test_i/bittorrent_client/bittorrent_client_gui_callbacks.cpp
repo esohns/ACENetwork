@@ -262,7 +262,7 @@ idle_load_session_ui_cb (gpointer userData_in)
   //         passed to combo_box_p by the gtk_cell_layout_pack_start() call
   gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
                                   //"cell-background", 0,
-                                  ACE_TEXT ("text"), 0,
+                                  ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
 
   text_buffer_p =
@@ -491,6 +491,103 @@ idle_add_session_cb (gpointer userData_in)
 
   return G_SOURCE_REMOVE;
 }
+
+gboolean
+idle_add_session_connection_cb (gpointer userData_in)
+{
+  // sanity check(s)
+  struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionConnectionCBData*> (userData_in);
+  ACE_ASSERT (session_connection_cb_data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (session_connection_cb_data_p->CBData);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    state_r.builders.find (session_connection_cb_data_p->CBData->label);
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_CONNECTIONS)));
+  ACE_ASSERT (list_store_p);
+  GtkTreeIter tree_iter;
+  gchar* connection_string_p = NULL;
+  int connection_id_i =
+    static_cast<int> (session_connection_cb_data_p->connectionHandle);
+
+  ACE_HANDLE handle_h;
+  ACE_INET_Addr local_address, peer_address;
+  BitTorrent_Client_IPeerConnection_t* iconnection_p =
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ()->get (session_connection_cb_data_p->connectionHandle);
+  if (unlikely (!iconnection_p))
+    goto clean; // short-lived connection ?
+  iconnection_p->info (handle_h,
+                       local_address, peer_address);
+  connection_string_p =
+    Common_UI_GTK_Tools::localeToUTF8 (Net_Common_Tools::IPAddressToString (peer_address, false, false));
+  ACE_ASSERT (connection_string_p);
+
+  gtk_list_store_append (list_store_p,
+                         &tree_iter);
+  gtk_list_store_set (list_store_p, &tree_iter,
+                      0, connection_string_p, // column 0
+                      1, connection_id_i,     // column 1
+                      -1);
+
+  iconnection_p->decrease (); iconnection_p = NULL;
+
+clean:
+  g_free (connection_string_p);
+  delete session_connection_cb_data_p;
+
+  return G_SOURCE_REMOVE;
+} // idle_add_session_connection_cb
+
+gboolean
+idle_remove_session_connection_cb (gpointer userData_in)
+{
+  // sanity check(s)
+  struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+    static_cast<struct BitTorrent_Client_UI_SessionConnectionCBData*> (userData_in);
+  ACE_ASSERT (session_connection_cb_data_p);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (session_connection_cb_data_p->CBData);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    state_r.builders.find (session_connection_cb_data_p->CBData->label);
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_CONNECTIONS)));
+  ACE_ASSERT (list_store_p);
+  GtkTreeIter tree_iter;
+  int connection_id_i =
+    static_cast<int> (session_connection_cb_data_p->connectionHandle);
+  int connection_id_2;
+  if (!gtk_tree_model_get_iter_first (GTK_TREE_MODEL (list_store_p), &tree_iter))
+    goto clean;
+  do
+  {
+    gtk_tree_model_get (GTK_TREE_MODEL (list_store_p), &tree_iter,
+                        1, &connection_id_2, // column 1
+                        -1);
+    if (connection_id_i == connection_id_2)
+    {
+      gtk_list_store_remove (list_store_p, &tree_iter);
+      break;
+    } // end IF
+  } while (gtk_tree_model_iter_next (GTK_TREE_MODEL (list_store_p), &tree_iter));
+
+clean:
+  delete session_connection_cb_data_p;
+
+  return G_SOURCE_REMOVE;
+} // idle_remove_session_connection_cb
 
 gboolean
 idle_finalize_UI_cb (gpointer userData_in)
@@ -904,8 +1001,9 @@ idle_remove_session_cb (gpointer userData_in)
     data_p->CBData->progressData.completedActions.insert (data_p->eventSourceId);
   } // end lock scope
 
-  data_p->session->wait ();
-  delete data_p->session; data_p->session = NULL;
+  data_p->session->close (false);
+  // data_p->session->wait ();
+  // delete data_p->session; data_p->session = NULL;
 
   return G_SOURCE_REMOVE;
 }
@@ -1412,8 +1510,8 @@ button_session_connection_close_clicked_cb (GtkWidget* widget_in,
                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CONNECTION)));
   ACE_ASSERT (combo_box_p);
   GtkTreeIter active_iter;
-  //   GValue active_value;
-  gchar* connection_value_p = NULL;
+  gchar* connection_string_p = NULL;
+  int connection_id_i = 0;
   if (!gtk_combo_box_get_active_iter (combo_box_p,
                                       &active_iter))
   {
@@ -1421,33 +1519,35 @@ button_session_connection_close_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
     return;
   } // end IF
-//   gtk_tree_model_get_value (gtk_combo_box_get_model(serverlist),
-//                             &active_iter,
-//                             0, &active_value);
   gtk_tree_model_get (gtk_combo_box_get_model (combo_box_p),
                       &active_iter,
-                      0, &connection_value_p, // just retrieve the first column...
+                      0, &connection_string_p,
+                      1, &connection_id_i,
                       -1);
-  //   ACE_ASSERT(G_VALUE_HOLDS_STRING(&active_value));
-  ACE_ASSERT (connection_value_p);
+  ACE_ASSERT (connection_string_p && connection_id_i);
 
   // convert UTF8 to locale
-//   connection_string = g_value_get_string(&active_value);
   std::string connection_string =
-    Common_UI_GTK_Tools::UTF8ToLocale (connection_value_p,
-                                       g_utf8_strlen (connection_value_p, -1));
+    Common_UI_GTK_Tools::UTF8ToLocale (connection_string_p,
+                                       g_utf8_strlen (connection_string_p, -1));
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_UI_GTK_Tools::UTF8ToLocale(\"%s\"), returning\n"),
-                connection_value_p));
-    g_free (connection_value_p);
+                ACE_TEXT (connection_string_p)));
+    g_free (connection_string_p);
     return;
   } // end IF
-  g_free (connection_value_p); connection_value_p = NULL;
+  g_free (connection_string_p); connection_string_p = NULL;
 
-  ACE_INET_Addr address;
-  data_p->session->disconnect (address);
+  ACE_HANDLE connection_h = static_cast<ACE_HANDLE> (connection_id_i);
+  BitTorrent_Client_IPeerConnection_t* iconnection_p =
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ()->get (connection_h);
+  if (likely (iconnection_p))
+  {
+    iconnection_p->abort ();
+    iconnection_p->decrease ();
+  } // end IF
 }
 
 void
@@ -1462,50 +1562,34 @@ combobox_connections_changed_cb (GtkWidget* widget_in,
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-//  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
-
   // step1: retrieve active connection entry
   // retrieve session tab connections combobox handle
   GtkComboBox* combobox_p = GTK_COMBO_BOX (widget_in);
   ACE_ASSERT (combobox_p);
   GtkTreeIter active_iter;
-  //   GValue active_value;
-  gchar* connection_value = NULL;
+  gchar* connection_string_p = NULL;
   if (!gtk_combo_box_get_active_iter (combobox_p,
                                       &active_iter))
-  {
-//     ACE_DEBUG((LM_DEBUG,
-//                ACE_TEXT("failed to gtk_combo_box_get_active_iter(%@), returning\n"),
-//                server_tab_channels_combobox));
-
     return;
-  } // end IF
-//   gtk_tree_model_get_value(gtk_combo_box_get_model(serverlist),
-//                            &active_iter,
-//                            0, &active_value);
   gtk_tree_model_get (gtk_combo_box_get_model (combobox_p),
                       &active_iter,
-                      0, &connection_value, // just retrieve the first column...
+                      0, &connection_string_p, // retrieve the first column...
                       -1);
-  //   ACE_ASSERT(G_VALUE_HOLDS_STRING(&active_value));
-  ACE_ASSERT (connection_value);
+  ACE_ASSERT (connection_string_p);
 
   // convert UTF8 to locale
-//   channel_string = g_value_get_string(&active_value);
   std::string connection_string =
-    Common_UI_GTK_Tools::UTF8ToLocale (connection_value,
-                                       g_utf8_strlen (connection_value, -1));
-  g_free (connection_value);
+    Common_UI_GTK_Tools::UTF8ToLocale (connection_string_p,
+                                       g_utf8_strlen (connection_string_p, -1));
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_UI_GTK_Tools::UTF8ToLocale(\"%s\"), returning\n"),
-                connection_value));
+                ACE_TEXT (connection_string_p)));
+    g_free (connection_string_p);
     return;
   } // end IF
+  g_free (connection_string_p); connection_string_p = NULL;
 }
 #ifdef __cplusplus
 }

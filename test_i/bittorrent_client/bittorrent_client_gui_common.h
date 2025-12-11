@@ -188,4 +188,15 @@ struct BitTorrent_Client_UI_SessionProgressData
   bool        cancelled;
 };
 
+struct BitTorrent_Client_UI_SessionConnectionCBData
+{
+  BitTorrent_Client_UI_SessionConnectionCBData ()
+   : CBData (NULL)
+   , connectionHandle (ACE_INVALID_HANDLE)
+  {}
+
+  struct BitTorrent_Client_UI_SessionCBData* CBData;
+  ACE_HANDLE                                 connectionHandle;
+};
+
 #endif

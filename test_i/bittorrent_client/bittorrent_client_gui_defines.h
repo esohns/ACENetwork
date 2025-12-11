@@ -51,7 +51,7 @@
 #define BITTORRENT_CLIENT_GUI_GTK_HBOX_PAGE_SESSION                     "hbox_page_session"
 #define BITTORRENT_CLIENT_GUI_GTK_HBOX_TAB_SESSION                      "hbox_tab_session"
 #define BITTORRENT_CLIENT_GUI_GTK_LABEL_TAB_SESSION                     "label_tab_session"
-#define BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_CONNECTIONS                 "liststore_page_connections"
+#define BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_CONNECTIONS                 "liststore_page_session_connections"
 #define BITTORRENT_CLIENT_GUI_GTK_MENU_CHANNEL                          "menu_page_channel"
 #define BITTORRENT_CLIENT_GUI_GTK_MENU_CHANNEL_INVITE                   "menu_page_channel_invite"
 #define BITTORRENT_CLIENT_GUI_GTK_MENUITEM_BAN                          "menuitem_ban"

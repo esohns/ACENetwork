@@ -99,14 +99,6 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::headFragment_);
   ACE_ASSERT (record_inout);
 
-// #if defined (_DEBUG)
-//  if (inherited2::configuration_->debugParser)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%s\n"),
-//                ACE_TEXT (BitTorrent_Tools::RecordToString
-//                (*data_r.peerRecord).c_str ())));
-// #endif // _DEBUG
-
   // allocate message data and -container
   DATA_T* data_p = NULL;
   ACE_NEW_NORETURN (data_p,
@@ -114,7 +106,8 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   if (unlikely (!data_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+                ACE_TEXT ("%s: failed to allocate memory: \"%m\", returning\n"),
+                inherited::mod_->name ()));
     delete record_inout;
     return;
   } // end IF
@@ -125,7 +118,8 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   if (unlikely (!data_container_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+                ACE_TEXT ("%s: failed to allocate memory: \"%m\", returning\n"),
+                inherited::mod_->name ()));
     delete data_p;
     delete record_inout;
     return;
@@ -175,13 +169,24 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
       default:
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown type (was: %d), aborting\n"),
+                    ACE_TEXT ("%s: invalid/unknown record type (was: %d), returning\n"),
+                    inherited::mod_->name (),
                     data_r.peerRecord->type));
-        break;
+        inherited::headFragment_->release (); inherited::headFragment_ = NULL;
+        return;
       }
     } // end SWITCH
   } // end ELSE
   ACE_ASSERT (message_bytes);
+  if (inherited::headFragment_->total_length () < message_bytes)
+  { // *TODO*: find out why this happens
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: received only %Q/%u record byte(s), returning\n"),
+                inherited::mod_->name (),
+                inherited::headFragment_->total_length (), message_bytes));
+    inherited::headFragment_->release (); inherited::headFragment_ = NULL;
+    return;
+  } // end IF
 
   ACE_Message_Block* message_block_p = inherited::headFragment_;
   unsigned int skipped_bytes = 0;
@@ -312,8 +317,6 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", continuing\n"),
                 inherited::mod_->name ()));
-
-    // clean up
     message_block_p->release ();
   } // end IF
 }

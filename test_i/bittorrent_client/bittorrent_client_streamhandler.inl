@@ -20,6 +20,7 @@
 
 #include "ace/Guard_T.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS_Memory.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_parser_bencoding_tools.h"
@@ -31,6 +32,9 @@
 #include "bittorrent_message.h"
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_sessionmessage.h"
+
+#include "bittorrent_client_gui_callbacks.h"
+#include "bittorrent_client_gui_common.h"
 
 template <typename SessionDataType,
           typename UserDataType,
@@ -71,22 +75,30 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
         COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     Common_UI_GTK_State_t& state_r =
-        const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
     } // end lock scope
-//  inherited::CBData_->progressData.transferred = 0;
 
-//    guint event_source_id = g_idle_add (idle_start_UI_cb,
-//                                        inherited::CBData_);
-//    if (event_source_id == 0)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to g_idle_add(idle_send_UI_cb): \"%m\", returning\n")));
-//      return;
-//    } // end IF
-//    inherited::CBData_->eventSourceIds.insert (event_source_id);
-#endif // GTK_USE
+//     struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+//       NULL;
+//     ACE_NEW_NORETURN (session_connection_cb_data_p,
+//                       struct BitTorrent_Client_UI_SessionConnectionCBData ());
+//     ACE_ASSERT (session_connection_cb_data_p);
+//     session_connection_cb_data_p->CBData = inherited::CBData_;
+//     ACE_ASSERT (!sessionData_in.connectionStates.empty ());
+//     session_connection_cb_data_p->connectionHandle =
+//         sessionData_in.connectionStates.begin ()->second->handle;
+//     guint event_source_id = g_idle_add (idle_add_session_connection_cb,
+//                                         session_connection_cb_data_p);
+//     if (event_source_id == 0)
+//     {
+//       ACE_DEBUG ((LM_ERROR,
+//                   ACE_TEXT ("failed to g_idle_add(idle_add_session_connection_cb): \"%m\", returning\n")));
+//       return;
+//     } // end IF
+//     state_r.eventSourceIds.insert (event_source_id);
+ #endif // GTK_USE
   } // end IF
 }
 
@@ -119,7 +131,9 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStreamHandler_T::end"));
 
-  inherited::end (sessionId_in);
+  typename inherited::SESSION_DATA_ITERATOR_T iterator =
+    inherited::sessionData_.find (sessionId_in);
+  ACE_ASSERT (iterator != inherited::sessionData_.end ());
 
   if (inherited::CBData_)
   {
@@ -133,17 +147,28 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
       state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
     } // end lock scope
 
-//    guint event_source_id = g_idle_add (idle_end_UI_cb,
-//                                        inherited::CBData_);
-//    if (event_source_id == 0)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to g_idle_add(idle_end_UI_cb): \"%m\", returning\n")));
-//      return;
-//    } // end IF
-//    inherited::CBData_->eventSourceIds.insert (event_source_id);
+    // struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+    //   NULL;
+    // ACE_NEW_NORETURN (session_connection_cb_data_p,
+    //                   struct BitTorrent_Client_UI_SessionConnectionCBData ());
+    // ACE_ASSERT (session_connection_cb_data_p);
+    // session_connection_cb_data_p->CBData = inherited::CBData_;
+    // ACE_ASSERT (!(*iterator).second->connectionStates.empty ());
+    // session_connection_cb_data_p->connectionHandle =
+    //   (*iterator).second->connectionStates.begin ()->second->handle;
+    // guint event_source_id = g_idle_add (idle_remove_session_connection_cb,
+    //                                     session_connection_cb_data_p);
+    // if (event_source_id == 0)
+    // {
+    //   ACE_DEBUG ((LM_ERROR,
+    //               ACE_TEXT ("failed to g_idle_add(idle_remove_session_connection_cb): \"%m\", returning\n")));
+    //   return;
+    // } // end IF
+    // state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
   } // end IF
+
+  inherited::end (sessionId_in);
 }
 
 template <typename SessionDataType,
@@ -191,15 +216,15 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
                                                            const BitTorrent_SessionMessage_T<SessionDataType,
                                                                                              UserDataType>& sessionMessage_in)
 {
-  NETWORK_TRACE(ACE_TEXT("BitTorrent_Client_PeerStreamHandler_T::notify"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStreamHandler_T::notify"));
 
-  inherited::notify(sessionId_in, sessionMessage_in);
-
-  typename inherited::SESSION_DATA_ITERATOR_T iterator =
-      inherited::sessionData_.find(sessionId_in);
+  inherited::notify (sessionId_in,
+                     sessionMessage_in);
 
   // sanity check(s)
-  ACE_ASSERT(iterator != inherited::sessionData_.end());
+  typename inherited::SESSION_DATA_ITERATOR_T iterator =
+    inherited::sessionData_.find (sessionId_in);
+  ACE_ASSERT (iterator != inherited::sessionData_.end ());
 
   int result = -1;
 
@@ -216,6 +241,56 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
       enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
       switch (sessionMessage_in.type ())
       {
+        case STREAM_SESSION_MESSAGE_CONNECT:
+        {
+// #if defined (GTK_USE)
+//           struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+//             NULL;
+//           ACE_NEW_NORETURN (session_connection_cb_data_p,
+//                             struct BitTorrent_Client_UI_SessionConnectionCBData ());
+//           ACE_ASSERT (session_connection_cb_data_p);
+//           session_connection_cb_data_p->CBData = inherited::CBData_;
+//           ACE_ASSERT (!(*iterator).second->connectionStates.empty ());
+//           session_connection_cb_data_p->connectionHandle =
+//             (*iterator).second->connectionStates.begin ()->second->handle;
+//           guint event_source_id = g_idle_add (idle_add_session_connection_cb,
+//                                               session_connection_cb_data_p);
+//           if (event_source_id == 0)
+//           {
+//             ACE_DEBUG ((LM_ERROR,
+//                         ACE_TEXT ("failed to g_idle_add(idle_add_session_connection_cb): \"%m\", returning\n")));
+//             return;
+//           } // end IF
+//           inherited::CBData_->eventSourceIds.insert (event_source_id);
+// #endif // GTK_USE
+          event_e = COMMON_UI_EVENT_CONNECT;
+          break;
+        }
+        case STREAM_SESSION_MESSAGE_DISCONNECT:
+        {
+// #if defined (GTK_USE)
+          // struct BitTorrent_Client_UI_SessionConnectionCBData* session_connection_cb_data_p =
+          //   NULL;
+          // ACE_NEW_NORETURN (session_connection_cb_data_p,
+          //                   struct BitTorrent_Client_UI_SessionConnectionCBData ());
+          // ACE_ASSERT (session_connection_cb_data_p);
+          // session_connection_cb_data_p->CBData = inherited::CBData_;
+          // ACE_ASSERT (!(*iterator).second->connectionStates.empty ());
+          // session_connection_cb_data_p->connectionHandle =
+          //   (*iterator).second->connectionStates.begin ()->second->handle;
+          // guint event_source_id = g_idle_add (idle_remove_session_connection_cb,
+          //                                     session_connection_cb_data_p);
+          // if (event_source_id == 0)
+          // {
+          //   ACE_DEBUG ((LM_ERROR,
+          //               ACE_TEXT ("failed to g_idle_add(idle_remove_session_connection_cb): \"%m\", returning\n")));
+          //   return;
+          // } // end IF
+          // inherited::CBData_->eventSourceIds.insert (event_source_id);
+// #endif // GTK_USE
+          event_e = COMMON_UI_EVENT_DISCONNECT;
+          break;
+        }
         case STREAM_SESSION_MESSAGE_STATISTIC:
         {
           if ((*iterator).second->lock)
@@ -228,7 +303,7 @@ BitTorrent_Client_PeerStreamHandler_T<SessionDataType,
 
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
           inherited::CBData_->progressData.statistic =
-              (*iterator).second->statistic;
+            (*iterator).second->statistic;
 #endif // GTK_USE || WXWIDGETS_USE
 
           if ((*iterator).second->lock)
