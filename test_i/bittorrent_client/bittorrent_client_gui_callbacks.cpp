@@ -515,7 +515,11 @@ idle_add_session_connection_cb (gpointer userData_in)
   GtkTreeIter tree_iter;
   gchar* connection_string_p = NULL;
   int connection_id_i =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    reinterpret_cast<int> (session_connection_cb_data_p->connectionHandle);
+#else
     static_cast<int> (session_connection_cb_data_p->connectionHandle);
+#endif // ACE_WIN32 || ACE_WIN64
 
   ACE_HANDLE handle_h;
   ACE_INET_Addr local_address, peer_address;
@@ -567,7 +571,11 @@ idle_remove_session_connection_cb (gpointer userData_in)
   ACE_ASSERT (list_store_p);
   GtkTreeIter tree_iter;
   int connection_id_i =
+#if defined(ACE_WIN32) || defined(ACE_WIN64)
+    reinterpret_cast<int> (session_connection_cb_data_p->connectionHandle);
+#else
     static_cast<int> (session_connection_cb_data_p->connectionHandle);
+#endif // ACE_WIN32 || ACE_WIN64
   int connection_id_2;
   if (!gtk_tree_model_get_iter_first (GTK_TREE_MODEL (list_store_p), &tree_iter))
     goto clean;
@@ -1511,7 +1519,7 @@ button_session_connection_close_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (combo_box_p);
   GtkTreeIter active_iter;
   gchar* connection_string_p = NULL;
-  int connection_id_i = 0;
+  gint connection_id_i = 0;
   if (!gtk_combo_box_get_active_iter (combo_box_p,
                                       &active_iter))
   {
@@ -1540,7 +1548,12 @@ button_session_connection_close_clicked_cb (GtkWidget* widget_in,
   } // end IF
   g_free (connection_string_p); connection_string_p = NULL;
 
-  ACE_HANDLE connection_h = static_cast<ACE_HANDLE> (connection_id_i);
+  ACE_HANDLE connection_h =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    reinterpret_cast<ACE_HANDLE> (connection_id_i);
+#else
+    static_cast<ACE_HANDLE> (connection_id_i);
+#endif // ACE_WIN32 || ACE_WIN64
   BitTorrent_Client_IPeerConnection_t* iconnection_p =
     BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ()->get (connection_h);
   if (likely (iconnection_p))
@@ -1548,7 +1561,7 @@ button_session_connection_close_clicked_cb (GtkWidget* widget_in,
     iconnection_p->abort ();
     iconnection_p->decrease ();
   } // end IF
-}
+} // button_session_connection_close_clicked_cb
 
 void
 combobox_connections_changed_cb (GtkWidget* widget_in,
