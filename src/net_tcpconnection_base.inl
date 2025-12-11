@@ -71,16 +71,14 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration);
 
   // *TODO*: remove type inferences
-  unsigned int pdu_size_i =
-    inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize +
-    inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->paddingBytes;
-  message_block_p = inherited::allocateMessage (pdu_size_i);
+  message_block_p =
+    inherited::allocateMessage (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to allocateMessage(%u), aborting\n"),
+                ACE_TEXT ("%u: failed to Net_StreamConnectionBase_T::allocateMessage(%u), aborting\n"),
                 this->id (),
-                pdu_size_i));
+                inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
   message_block_p->size (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize);

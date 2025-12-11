@@ -489,7 +489,7 @@ do_work (bool requestCompactPeerAddresses_in,
   ////////////////////// socket handler configuration //////////////////////////
   BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
   peer_connection_configuration.allocatorConfiguration =
-      &allocator_configuration;
+    &allocator_configuration;
   peer_connection_configuration.messageAllocator = &peer_message_allocator;
 //  peer_connection_configuration.statisticReportingInterval =
 //    ACE_Time_Value (reporting_interval, 0);
@@ -501,7 +501,7 @@ do_work (bool requestCompactPeerAddresses_in,
 
   BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
   tracker_connection_configuration.allocatorConfiguration =
-      &allocator_configuration;
+    &allocator_configuration;
   tracker_connection_configuration.messageAllocator =
     &tracker_message_allocator;
 //  tracker_connection_configuration.statisticReportingInterval =
