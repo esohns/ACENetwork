@@ -5401,8 +5401,8 @@ static const yy_state_type yy_NUL_trans[144] =
 
 static const flex_int32_t yy_rule_linenum[15] =
     {   0,
-      189,  197,  202,  209,  216,  224,  243,  289,  299,  313,
-      329,  345,  358,  370
+      189,  197,  202,  209,  216,  224,  243,  290,  300,  314,
+      330,  346,  359,  371
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -6115,7 +6115,8 @@ YY_RULE_SETUP
                                 ACE_DEBUG ((LM_ERROR,
                                             ACE_TEXT ("invalid/unknown message type (was: %d), aborting\n"),
                                             yylval->record->type));
-                                yyterminate ();
+                                BEGIN (state_length);
+                                yyterminate (); // *TODO*: be more resilient here (i.e. avoid crashing in the next step)
                               }
                             } // end SWITCH
                           }
@@ -6215,11 +6216,10 @@ case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                            ACE_ASSERT (yylval->record);
                             ACE_ASSERT (bytes_to_skip);
                             --bytes_to_skip;
                             if (unlikely (!bytes_to_skip))
-                            {
+                            { ACE_ASSERT (yylval->record);
                               iparser_p->offset (yylval->record->length - 9);
                               BEGIN (state_length);
                               return yy::BitTorrent_Parser::token::PIECE;
@@ -6246,14 +6246,21 @@ case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
 { /* *TODO*: use (?s:.) ? */
+                            if (!iparser_p->isBlocking ())
+                            {
+                              yyless (0);
+                              return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
+                            } // end IF
+
                             // wait for more data fragment(s)
                             if (!iparser_p->switchBuffer ())
                             { // *NOTE*: most probable reason: connection has
                               //         been closed --> session end
                               ACE_DEBUG ((LM_DEBUG,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                              yyterminate (); // not enough data, cannot proceed
+                              return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
                             } // end IF
+
                             yyless (0);
                           }
 	YY_BREAK
@@ -7642,7 +7649,7 @@ BitTorrent_Scanner_wrap (yyscan_t yyscanner)
 
 //  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
   BitTorrent_IParser_t* iparser_p =
-      BitTorrent_Scanner_get_extra (yyscanner);
+    BitTorrent_Scanner_get_extra (yyscanner);
 
   // sanity check(s)
   ACE_ASSERT (iparser_p);
@@ -7673,7 +7680,8 @@ BitTorrent_Scanner_wrap (yyscan_t yyscanner)
   if (!iparser_p->switchBuffer ())
   {
     // *NOTE*: most probable reason: received session end message
-    iparser_p->error (ACE_TEXT_ALWAYS_CHAR ("failed to Common_IScannerBase::switchBuffer(), aborting\n"));
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to Common_IParser::switchBuffer(), aborting\n")));
     return 1;
   } // end IF
 

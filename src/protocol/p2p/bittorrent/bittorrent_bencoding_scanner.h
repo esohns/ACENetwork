@@ -72,8 +72,9 @@ class BitTorrent_Bencoding_Scanner
   inline virtual bool switchBuffer (bool unlink_in = false) { ACE_ASSERT (parser_); return parser_->switchBuffer (unlink_in); }
   inline virtual void waitBuffer () { ACE_ASSERT (parser_); return parser_->waitBuffer (); }
   // *NOTE*: to be invoked by the scanner (ONLY !)
-  inline virtual void offset (unsigned int offset_in) { ACE_ASSERT (parser_); parser_->offset (offset_in); }
   inline virtual void error (const std::string& errorString_in) { ACE_ASSERT (parser_); parser_->error (yy::location (), errorString_in); }
+  inline virtual void head (ACE_Message_Block*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void offset (unsigned int offset_in) { ACE_ASSERT (parser_); parser_->offset (offset_in); }
   inline virtual const struct Common_FlexBisonParserConfiguration& getR () const { ACE_ASSERT (false); static struct Common_FlexBisonParserConfiguration dummy; ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
   inline virtual const struct Common_FlexScannerState& getR_2 () const { return state_; }
   inline virtual const BitTorrent_Bencoding_IParser* const getP_2 () const { return parser_; }

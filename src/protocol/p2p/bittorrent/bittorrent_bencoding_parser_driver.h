@@ -67,6 +67,7 @@ class BitTorrent_Bencoding_ParserDriver
   using PARSER_BASE_T::buffer;
 //  using PARSER_BASE_T::debug;
   using PARSER_BASE_T::isBlocking;
+  using PARSER_BASE_T::head;
   using PARSER_BASE_T::offset;
   using PARSER_BASE_T::switchBuffer;
   using PARSER_BASE_T::waitBuffer;

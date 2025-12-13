@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.7.4.
+// A Bison parser, made by GNU Bison 3.8.2.
 
 // Skeleton implementation for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2021 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // As a special exception, you may create a larger work that contains
 // part or all of the Bison parser skeleton and distribute that work
@@ -38,7 +38,15 @@
 
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "bittorrent_bencoding_parser.h"
+
+
+
+
+
+#include "bittorrent_bencoding_parser.h"
+
 
 // Unqualified %code blocks.
 
@@ -154,7 +162,7 @@
 #else // !YYDEBUG
 
 # define YYCDEBUG if (false) std::cerr
-# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE (Symbol)
+# define YY_SYMBOL_PRINT(Title, Symbol)  YY_USE (Symbol)
 # define YY_REDUCE_PRINT(Rule)           static_cast<void> (0)
 # define YY_STACK_PRINT()                static_cast<void> (0)
 
@@ -188,9 +196,9 @@ namespace yy {
   BitTorrent_Bencoding_Parser::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
   {}
 
-  /*---------------.
-  | symbol kinds.  |
-  `---------------*/
+  /*---------.
+  | symbol.  |
+  `---------*/
 
   // basic_symbol.
   template <typename Base>
@@ -210,11 +218,12 @@ namespace yy {
   {}
 
   template <typename Base>
-  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_RVREF (semantic_type) v, YY_RVREF (location_type) l)
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_RVREF (value_type) v, YY_RVREF (location_type) l)
     : Base (t)
     , value (YY_MOVE (v))
     , location (YY_MOVE (l))
   {}
+
 
   template <typename Base>
   BitTorrent_Bencoding_Parser::symbol_kind_type
@@ -222,6 +231,7 @@ namespace yy {
   {
     return this->kind ();
   }
+
 
   template <typename Base>
   bool
@@ -240,28 +250,30 @@ namespace yy {
   }
 
   // by_kind.
-  BitTorrent_Bencoding_Parser::by_kind::by_kind ()
+  BitTorrent_Bencoding_Parser::by_kind::by_kind () YY_NOEXCEPT
     : kind_ (symbol_kind::S_YYEMPTY)
   {}
 
 #if 201103L <= YY_CPLUSPLUS
-  BitTorrent_Bencoding_Parser::by_kind::by_kind (by_kind&& that)
+  BitTorrent_Bencoding_Parser::by_kind::by_kind (by_kind&& that) YY_NOEXCEPT
     : kind_ (that.kind_)
   {
     that.clear ();
   }
 #endif
 
-  BitTorrent_Bencoding_Parser::by_kind::by_kind (const by_kind& that)
+  BitTorrent_Bencoding_Parser::by_kind::by_kind (const by_kind& that) YY_NOEXCEPT
     : kind_ (that.kind_)
   {}
 
-  BitTorrent_Bencoding_Parser::by_kind::by_kind (token_kind_type t)
+  BitTorrent_Bencoding_Parser::by_kind::by_kind (token_kind_type t) YY_NOEXCEPT
     : kind_ (yytranslate_ (t))
   {}
 
+
+
   void
-  BitTorrent_Bencoding_Parser::by_kind::clear ()
+  BitTorrent_Bencoding_Parser::by_kind::clear () YY_NOEXCEPT
   {
     kind_ = symbol_kind::S_YYEMPTY;
   }
@@ -279,11 +291,13 @@ namespace yy {
     return kind_;
   }
 
+
   BitTorrent_Bencoding_Parser::symbol_kind_type
   BitTorrent_Bencoding_Parser::by_kind::type_get () const YY_NOEXCEPT
   {
     return this->kind ();
   }
+
 
 
   // by_state.
@@ -370,7 +384,7 @@ namespace yy {
       YY_SYMBOL_PRINT (yymsg, yysym);
 
     // User destructor.
-    YYUSE (yysym.kind ());
+    YY_USE (yysym.kind ());
   }
 
 #if YYDEBUG
@@ -379,7 +393,7 @@ namespace yy {
   BitTorrent_Bencoding_Parser::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
-    YYUSE (yyoutput);
+    YY_USE (yyoutput);
     if (yysym.empty ())
       yyo << "empty symbol";
     else
@@ -446,7 +460,7 @@ namespace yy {
   }
 
   void
-  BitTorrent_Bencoding_Parser::yypop_ (int n)
+  BitTorrent_Bencoding_Parser::yypop_ (int n) YY_NOEXCEPT
   {
     yystack_.pop (n);
   }
@@ -489,13 +503,13 @@ namespace yy {
   }
 
   bool
-  BitTorrent_Bencoding_Parser::yy_pact_value_is_default_ (int yyvalue)
+  BitTorrent_Bencoding_Parser::yy_pact_value_is_default_ (int yyvalue) YY_NOEXCEPT
   {
     return yyvalue == yypact_ninf_;
   }
 
   bool
-  BitTorrent_Bencoding_Parser::yy_table_value_is_error_ (int yyvalue)
+  BitTorrent_Bencoding_Parser::yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT
   {
     return yyvalue == yytable_ninf_;
   }
@@ -1062,16 +1076,16 @@ namespace yy {
     // Actual number of expected tokens
     int yycount = 0;
 
-    int yyn = yypact_[+yyparser_.yystack_[0].state];
+    const int yyn = yypact_[+yyparser_.yystack_[0].state];
     if (!yy_pact_value_is_default_ (yyn))
       {
         /* Start YYX at -YYN if negative to avoid negative indexes in
            YYCHECK.  In other words, skip the first -YYN actions for
            this state because they are default actions.  */
-        int yyxbegin = yyn < 0 ? -yyn : 0;
+        const int yyxbegin = yyn < 0 ? -yyn : 0;
         // Stay within bounds of both yycheck and yytname.
-        int yychecklim = yylast_ - yyn + 1;
-        int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+        const int yychecklim = yylast_ - yyn + 1;
+        const int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
         for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
           if (yycheck_[yyx + yyn] == yyx && yyx != symbol_kind::S_YYerror
               && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
@@ -1089,6 +1103,9 @@ namespace yy {
       yyarg[0] = symbol_kind::S_YYEMPTY;
     return yycount;
   }
+
+
+
 
 
 
@@ -1205,7 +1222,7 @@ namespace yy {
   const signed char
   BitTorrent_Bencoding_Parser::yydefgoto_[] =
   {
-      -1,     5,     6,     7,     9,    16,    20,    21,    10,    19,
+       0,     5,     6,     7,     9,    16,    20,    21,    10,    19,
       22,    29,    32,    33
   };
 
@@ -1305,7 +1322,7 @@ namespace yy {
 #endif // YYDEBUG
 
   BitTorrent_Bencoding_Parser::symbol_kind_type
-  BitTorrent_Bencoding_Parser::yytranslate_ (int t)
+  BitTorrent_Bencoding_Parser::yytranslate_ (int t) YY_NOEXCEPT
   {
     // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
     // TOKEN-NUM as returned by yylex.
@@ -1347,7 +1364,7 @@ namespace yy {
     if (t <= 0)
       return symbol_kind::S_YYEOF;
     else if (t <= code_max)
-      return YY_CAST (symbol_kind_type, translate_table[t]);
+      return static_cast <symbol_kind_type> (translate_table[t]);
     else
       return symbol_kind::S_YYUNDEF;
   }

@@ -96,8 +96,8 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerParser_T::record"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::headFragment_);
   ACE_ASSERT (record_inout);
+  ACE_ASSERT (inherited::headFragment_);
 
   // allocate message data and -container
   DATA_T* data_p = NULL;
@@ -173,6 +173,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
                     inherited::mod_->name (),
                     data_r.peerRecord->type));
         inherited::headFragment_->release (); inherited::headFragment_ = NULL;
+        inherited::fragment_ = NULL;
         return;
       }
     } // end SWITCH
@@ -185,6 +186,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
                 inherited::mod_->name (),
                 inherited::headFragment_->total_length (), message_bytes));
     inherited::headFragment_->release (); inherited::headFragment_ = NULL;
+    inherited::fragment_ = NULL;
     return;
   } // end IF
 
@@ -207,6 +209,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
     } while (true);
     ACE_ASSERT (message_block_p);
     message_bytes -= 4 + 1 + 4 + 4;
+
     do
     { ACE_ASSERT (message_block_p);
       skipped_bytes += static_cast<unsigned int> (message_block_p->length ());
@@ -226,11 +229,13 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
             static_cast<DataMessageType*> (message_block_p->cont ());
           message_block_p->cont (NULL);
           message_block_p = message_block_2;
+          inherited::fragment_ = inherited::headFragment_;
         } // end IF
         else
         {
           message_block_p = inherited::headFragment_;
           inherited::headFragment_ = NULL;
+          inherited::fragment_ = NULL;
         } // end ELSE
         break;
       } // end IF
@@ -248,6 +253,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
       message_block_p = inherited::headFragment_;
       inherited::headFragment_ =
         static_cast<DataMessageType*> (message_block_2);
+      inherited::fragment_ = inherited::headFragment_;
       break;
     } while (true);
     ACE_ASSERT (message_block_p->total_length () == (data_r.peerRecord->length - 9));
@@ -273,6 +279,7 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
           message_block_p = inherited::headFragment_;
           inherited::headFragment_ =
             static_cast<DataMessageType*> (message_block_2);
+          inherited::fragment_ = inherited::headFragment_;
         } // end IF
         else
         {
@@ -283,11 +290,13 @@ BitTorrent_Module_PeerParser_T<ACE_SYNCH_USE,
               static_cast<DataMessageType*> (message_block_p->cont ());
             message_block_p->cont (NULL);
             message_block_p = message_block_2;
+            inherited::fragment_ = inherited::headFragment_;
           } // end IF
           else
           {
             message_block_p = inherited::headFragment_;
             inherited::headFragment_ = NULL;
+            inherited::fragment_ = NULL;
           } // end ELSE
         } // end ELSE
         break;
@@ -436,13 +445,6 @@ BitTorrent_Module_TrackerParser_T<ACE_SYNCH_USE,
     const_cast<DATA_CONTAINER_T&> (inherited::headFragment_->getR ());
   DATA_T& data_r =
     const_cast<DATA_T&> (data_container_r.getR ());
-
-// #if defined (_DEBUG)
-//  if (inherited::configuration_->debugParser)
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%s\n"),
-//                ACE_TEXT (Common_Parser_Bencoding_Tools::DictionaryToString (*bencoding_inout).c_str ())));
-//#endif // _DEBUG
 
   // set new head fragment ?
   ACE_Message_Block* message_block_p = inherited::headFragment_;

@@ -2,6 +2,7 @@
 #define BitTorrent_Scanner_HEADER_H 1
 #define BitTorrent_Scanner_IN_HEADER 1
 
+#line 2 "./../scripts/scanner.l"
 //#include "bittorrent_common.h"
 //#include "bittorrent_exports.h"
 //#include "bittorrent_iparser.h"

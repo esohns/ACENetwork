@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.7.4.
+// A Bison parser, made by GNU Bison 3.8.2.
 
 // Skeleton implementation for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2021 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 // As a special exception, you may create a larger work that contains
 // part or all of the Bison parser skeleton and distribute that work
@@ -38,6 +38,7 @@
 
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 
 
@@ -72,6 +73,7 @@
 #include "net_macros.h"
 
 #include "bittorrent_defines.h"
+/*#include "ace/Synch.h"*/
 #include "bittorrent_parser_driver.h"
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
@@ -158,7 +160,7 @@
 #else // !YYDEBUG
 
 # define YYCDEBUG if (false) std::cerr
-# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE (Symbol)
+# define YY_SYMBOL_PRINT(Title, Symbol)  YY_USE (Symbol)
 # define YY_REDUCE_PRINT(Rule)           static_cast<void> (0)
 # define YY_STACK_PRINT()                static_cast<void> (0)
 
@@ -192,9 +194,9 @@ namespace yy {
   BitTorrent_Parser::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
   {}
 
-  /*---------------.
-  | symbol kinds.  |
-  `---------------*/
+  /*---------.
+  | symbol.  |
+  `---------*/
 
   // basic_symbol.
   template <typename Base>
@@ -214,11 +216,12 @@ namespace yy {
   {}
 
   template <typename Base>
-  BitTorrent_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_RVREF (semantic_type) v, YY_RVREF (location_type) l)
+  BitTorrent_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, YY_RVREF (value_type) v, YY_RVREF (location_type) l)
     : Base (t)
     , value (YY_MOVE (v))
     , location (YY_MOVE (l))
   {}
+
 
   template <typename Base>
   BitTorrent_Parser::symbol_kind_type
@@ -226,6 +229,7 @@ namespace yy {
   {
     return this->kind ();
   }
+
 
   template <typename Base>
   bool
@@ -244,28 +248,30 @@ namespace yy {
   }
 
   // by_kind.
-  BitTorrent_Parser::by_kind::by_kind ()
+  BitTorrent_Parser::by_kind::by_kind () YY_NOEXCEPT
     : kind_ (symbol_kind::S_YYEMPTY)
   {}
 
 #if 201103L <= YY_CPLUSPLUS
-  BitTorrent_Parser::by_kind::by_kind (by_kind&& that)
+  BitTorrent_Parser::by_kind::by_kind (by_kind&& that) YY_NOEXCEPT
     : kind_ (that.kind_)
   {
     that.clear ();
   }
 #endif
 
-  BitTorrent_Parser::by_kind::by_kind (const by_kind& that)
+  BitTorrent_Parser::by_kind::by_kind (const by_kind& that) YY_NOEXCEPT
     : kind_ (that.kind_)
   {}
 
-  BitTorrent_Parser::by_kind::by_kind (token_kind_type t)
+  BitTorrent_Parser::by_kind::by_kind (token_kind_type t) YY_NOEXCEPT
     : kind_ (yytranslate_ (t))
   {}
 
+
+
   void
-  BitTorrent_Parser::by_kind::clear ()
+  BitTorrent_Parser::by_kind::clear () YY_NOEXCEPT
   {
     kind_ = symbol_kind::S_YYEMPTY;
   }
@@ -283,11 +289,13 @@ namespace yy {
     return kind_;
   }
 
+
   BitTorrent_Parser::symbol_kind_type
   BitTorrent_Parser::by_kind::type_get () const YY_NOEXCEPT
   {
     return this->kind ();
   }
+
 
 
   // by_state.
@@ -455,7 +463,7 @@ namespace yy {
   BitTorrent_Parser::yy_print_ (std::ostream& yyo, const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
-    YYUSE (yyoutput);
+    YY_USE (yyoutput);
     if (yysym.empty ())
       yyo << "empty symbol";
     else
@@ -562,7 +570,7 @@ namespace yy {
   }
 
   void
-  BitTorrent_Parser::yypop_ (int n)
+  BitTorrent_Parser::yypop_ (int n) YY_NOEXCEPT
   {
     yystack_.pop (n);
   }
@@ -605,13 +613,13 @@ namespace yy {
   }
 
   bool
-  BitTorrent_Parser::yy_pact_value_is_default_ (int yyvalue)
+  BitTorrent_Parser::yy_pact_value_is_default_ (int yyvalue) YY_NOEXCEPT
   {
     return yyvalue == yypact_ninf_;
   }
 
   bool
-  BitTorrent_Parser::yy_table_value_is_error_ (int yyvalue)
+  BitTorrent_Parser::yy_table_value_is_error_ (int yyvalue) YY_NOEXCEPT
   {
     return yyvalue == yytable_ninf_;
   }
@@ -802,13 +810,11 @@ namespace yy {
     break;
 
   case 3: // session: "handshake" $@1 messages
-                               { (yylhs.value.size) = 67 + (yystack_[0].value.size); // 19 + 8 + 20 + 20
-                                 YYACCEPT; }
+                               { (yylhs.value.size) = 67 + (yystack_[0].value.size); }
     break;
 
   case 4: // session: messages
-                               { (yylhs.value.size) = (yystack_[0].value.size);
-                                 YYACCEPT; }
+                               { (yylhs.value.size) = (yystack_[0].value.size); }
     break;
 
   case 5: // messages: messages message
@@ -829,8 +835,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 8: // message: "cancel"
@@ -843,8 +848,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 9: // message: "choke"
@@ -857,8 +861,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 10: // message: "have"
@@ -871,8 +874,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 11: // message: "interested"
@@ -885,8 +887,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 12: // message: "keep-alive"
@@ -899,8 +900,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 13: // message: "not_interested"
@@ -913,8 +913,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 14: // message: "piece"
@@ -927,8 +926,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 15: // message: "port"
@@ -941,8 +939,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 16: // message: "request"
@@ -955,8 +952,7 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
   case 17: // message: "unchoke"
@@ -969,12 +965,12 @@ namespace yy {
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
-                                 }
-                                 YYACCEPT; }
+                                 } }
     break;
 
-  case 18: // message: "end_of_fragment"
-                               { (yylhs.value.size) = (yystack_[0].value.size); }
+  case 18: // message: "end"
+                   { (yylhs.value.size) = (yystack_[0].value.size);
+                     YYABORT; }
     break;
 
 
@@ -1215,16 +1211,16 @@ namespace yy {
     // Actual number of expected tokens
     int yycount = 0;
 
-    int yyn = yypact_[+yyparser_.yystack_[0].state];
+    const int yyn = yypact_[+yyparser_.yystack_[0].state];
     if (!yy_pact_value_is_default_ (yyn))
       {
         /* Start YYX at -YYN if negative to avoid negative indexes in
            YYCHECK.  In other words, skip the first -YYN actions for
            this state because they are default actions.  */
-        int yyxbegin = yyn < 0 ? -yyn : 0;
+        const int yyxbegin = yyn < 0 ? -yyn : 0;
         // Stay within bounds of both yycheck and yytname.
-        int yychecklim = yylast_ - yyn + 1;
-        int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+        const int yychecklim = yylast_ - yyn + 1;
+        const int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
         for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
           if (yycheck_[yyx + yyn] == yyx && yyx != symbol_kind::S_YYerror
               && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
@@ -1242,6 +1238,9 @@ namespace yy {
       yyarg[0] = symbol_kind::S_YYEMPTY;
     return yycount;
   }
+
+
+
 
 
 
@@ -1326,55 +1325,55 @@ namespace yy {
   }
 
 
-  const signed char BitTorrent_Parser::yypact_ninf_ = -5;
+  const signed char BitTorrent_Parser::yypact_ninf_ = -3;
 
   const signed char BitTorrent_Parser::yytable_ninf_ = -1;
 
   const signed char
   BitTorrent_Parser::yypact_[] =
   {
-       9,    -5,    13,    -4,    -5,    -5,    -5,    -5,    -5,    -5,
-      -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5,    -4
+      -2,    -3,     2,     0,    -3,    -3,    -3,    -3,    -3,    -3,
+      -3,    -3,    -3,    -3,    -3,    -3,    -3,    -3,    -3,     0
   };
 
   const signed char
   BitTorrent_Parser::yydefact_[] =
   {
-       6,     2,     0,     4,     6,     1,     7,     8,     9,    10,
-      11,    12,    13,    14,    15,    16,    17,    18,     5,     3
+       6,     2,     0,     0,     6,     1,    18,     7,     8,     9,
+      10,    11,    12,    13,    14,    15,    16,    17,     5,     0
   };
 
   const signed char
   BitTorrent_Parser::yypgoto_[] =
   {
-      -5,    -5,    -5,    10,    -5
+      -3,    -3,    -3,    -1,    -3
   };
 
   const signed char
   BitTorrent_Parser::yydefgoto_[] =
   {
-      -1,     2,     4,     3,    18
+       0,     2,     4,     3,    18
   };
 
   const signed char
   BitTorrent_Parser::yytable_[] =
   {
-       6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
-      16,    17,     1,     5,    19
+       6,     1,     5,    19,     7,     8,     9,    10,    11,    12,
+      13,    14,    15,    16,    17
   };
 
   const signed char
   BitTorrent_Parser::yycheck_[] =
   {
-       4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
-      14,    15,     3,     0,     4
+       0,     3,     0,     4,     4,     5,     6,     7,     8,     9,
+      10,    11,    12,    13,    14
   };
 
   const signed char
   BitTorrent_Parser::yystos_[] =
   {
-       0,     3,    17,    19,    18,     0,     4,     5,     6,     7,
-       8,     9,    10,    11,    12,    13,    14,    15,    20,    19
+       0,     3,    17,    19,    18,     0,     0,     4,     5,     6,
+       7,     8,     9,    10,    11,    12,    13,    14,    20,    19
   };
 
   const signed char
@@ -1411,8 +1410,8 @@ namespace yy {
   const short
   BitTorrent_Parser::yyrline_[] =
   {
-       0,   223,   223,   223,   234,   236,   237,   239,   250,   261,
-     272,   283,   294,   305,   316,   327,   338,   349,   360
+       0,   223,   223,   223,   233,   234,   235,   237,   247,   257,
+     267,   277,   287,   297,   307,   317,   327,   337,   347
   };
 
   void
@@ -1443,7 +1442,7 @@ namespace yy {
 #endif // YYDEBUG
 
   BitTorrent_Parser::symbol_kind_type
-  BitTorrent_Parser::yytranslate_ (int t)
+  BitTorrent_Parser::yytranslate_ (int t) YY_NOEXCEPT
   {
     // YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to
     // TOKEN-NUM as returned by yylex.
@@ -1486,7 +1485,7 @@ namespace yy {
     if (t <= 0)
       return symbol_kind::S_YYEOF;
     else if (t <= code_max)
-      return YY_CAST (symbol_kind_type, translate_table[t]);
+      return static_cast <symbol_kind_type> (translate_table[t]);
     else
       return symbol_kind::S_YYUNDEF;
   }
@@ -1505,7 +1504,7 @@ yy::BitTorrent_Parser::error (const location_type& location_in,
     parser->error (location_in, message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_IParser_t::error(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_IParser::error(), continuing\n")));
   }
 }
 

@@ -101,6 +101,9 @@ class HTTP_Module_Parser_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
 
+  // override (part of) Common_IScannerBase
+  inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
+
   // implement (part of) HTTP_IParser
   virtual void record (struct HTTP_Record*&); // data record
   inline virtual bool headerOnly () { ACE_ASSERT (inherited2::configuration_); return inherited2::configuration_->headerOnly; } // returns: parse HTTP header only ?
@@ -219,6 +222,9 @@ class HTTP_Module_ParserH_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
+
+  // override (part of) Common_IScannerBase
+  inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
 
   // implement (part of) HTTP_IParser
   virtual void record (struct HTTP_Record*&); // data record
