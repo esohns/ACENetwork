@@ -70,9 +70,9 @@ struct BitTorrent_Client_Configuration
 //   , protocolConfiguration ()
    , sessionConfiguration ()
    ///////////////////////////////////////
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
    , cursesState (NULL)
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
    , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (TEST_I_DEFAULT_SESSION_LOG)
    , peerUserData ()
@@ -95,10 +95,10 @@ struct BitTorrent_Client_Configuration
 //  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
   struct BitTorrent_Client_SessionConfiguration       sessionConfiguration;
   // ***************************************************************************
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   // *TODO*: move this somewhere else
   struct BitTorrent_Client_CursesState*               cursesState;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
   int                                                 groupId;
   bool                                                logToFile;
 

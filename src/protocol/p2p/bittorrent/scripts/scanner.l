@@ -279,7 +279,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                                 ACE_DEBUG ((LM_ERROR,
                                             ACE_TEXT ("invalid/unknown message type (was: %d), aborting\n"),
                                             yylval->record->type));
-                                yyterminate (); // *TODO*: be more resilient here (avoid crashing in the next step)
+                                yyterminate (); // *TODO*: be more resilient here (i.e. avoid crashing in the next step)
                               }
                             } // end SWITCH
                           }

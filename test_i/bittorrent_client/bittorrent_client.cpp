@@ -113,25 +113,25 @@ do_printUsage (const std::string& programName_in)
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
 
-  std::cout << ACE_TEXT ("usage: ")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
-            << ACE_TEXT (" [OPTIONS]")
+            << ACE_TEXT_ALWAYS_CHAR (" [OPTIONS]")
             << std::endl << std::endl;
-  std::cout << ACE_TEXT ("currently available options:") << std::endl;
-  std::cout << ACE_TEXT ("-b        : do NOT send bitfield after peer handshake")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:") << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-b        : do NOT send bitfield after peer handshake")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << !BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-c        : do NOT request 'compact' peer addresses")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c        : do NOT request 'compact' peer addresses")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << !BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-d        : debug parser")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d        : debug parser")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -139,39 +139,50 @@ do_printUsage (const std::string& programName_in)
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
-  std::cout << ACE_TEXT ("-f [FILE] : meta-info file")
-            << ACE_TEXT (" [\"")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [FILE] : meta-info file")
+            << ACE_TEXT_ALWAYS_CHAR (" [\"")
             << path
-            << ACE_TEXT ("\"]")
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-  std::cout << ACE_TEXT ("-l        : log to a file")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-l        : log to a file")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << TEST_I_DEFAULT_SESSION_LOG
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-m        : allow multiple connections per peer")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-m        : allow multiple connections per peer")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << BITTORRENT_DEFAULT_ALLOW_MULTIPLE_CONNECTIONS_PER_PEER
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-r        : use reactor [")
+#if defined (CURSES_SUPPORT)
+  bool use_curses_default_b = false;
+#if defined (CURSES_USE)
+  use_curses_default_b = true;
+#endif // CURSES_USE
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n        : use (n)curses")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
+            << use_curses_default_b
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+#endif // CURSES_SUPPORT
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r        : use reactor [")
             << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-t        : trace information")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-t        : trace information")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT ("-v        : print version information and exit")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-v        : print version information and exit")
+            << ACE_TEXT_ALWAYS_CHAR (" [")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 } // end print_usage
 
@@ -184,6 +195,9 @@ do_processArguments (int argc_in,
                      std::string& metaInfoFileName_out,
                      bool& logToFile_out,
                      bool& allowMultipleConnectionsPerPeer_out,
+#if defined (CURSES_SUPPORT)
+                     bool& useCurses_out,
+#endif // CURSES_SUPPORT
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -211,6 +225,14 @@ do_processArguments (int argc_in,
   logToFile_out                  = TEST_I_DEFAULT_SESSION_LOG;
   allowMultipleConnectionsPerPeer_out =
     BITTORRENT_DEFAULT_ALLOW_MULTIPLE_CONNECTIONS_PER_PEER;
+
+#if defined (CURSES_SUPPORT)
+  useCurses_out = false;
+#if defined (CURSES_USE)
+  useCurses_out = true;
+#endif // CURSES_USE
+#endif // CURSES_SUPPORT
+
   useReactor_out                 =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
@@ -218,9 +240,13 @@ do_processArguments (int argc_in,
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
 
+  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("bcdf:lmrs:tv");
+#if defined (CURSES_SUPPORT)
+  options_string += 'n';
+#endif // CURSES_SUPPORT
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("bcdf:lmrs:tv"),
+                              ACE_TEXT (options_string.c_str ()),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -261,6 +287,13 @@ do_processArguments (int argc_in,
         allowMultipleConnectionsPerPeer_out = true;
         break;
       }
+#if defined (CURSES_SUPPORT)
+      case 'n':
+      {
+        useCurses_out = true;
+        break;
+      }
+#endif // CURSES_SUPPORT
       case 'r':
       {
         useReactor_out = true;
@@ -410,7 +443,7 @@ do_initializeSignals (bool useReactor_in,
 #endif // VALGRIND_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   // *NOTE*: let (n)curses install it's own signal handler and process events in
   //         (w)getch()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -418,18 +451,10 @@ do_initializeSignals (bool useReactor_in,
 //    signals_out.sig_del (SIGINT);
   signals_out.sig_del (SIGWINCH);
 #endif // ACE_WIN32 || ACE_WIN64
-#endif // CURSES_USE
-
-//// *NOTE*: gdb sends some signals (when running in an IDE ?)
-////         --> remove signals (and let IDE handle them)
-//#if defined (__GNUC__) && defined (DEBUG_DEBUGGER)
-////  signals_out.sig_del (SIGINT);
-//  signals_out.sig_del (SIGCONT);
-//  signals_out.sig_del (SIGHUP);
-//#endif // __GNUC__ && DEBUG_DEBUGGER
+#endif // CURSES_SUPPORT
 }
 
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
 ACE_THR_FUNC_RETURN
 session_setup_curses_function (void* arg_in)
 {
@@ -503,18 +528,21 @@ session_setup_curses_function (void* arg_in)
 
 error:
   // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (data_p->dispatchState->proactorGroupId,
-                                       data_p->dispatchState->reactorGroupId,
-                                       false);                                 // don't block
+  Common_Event_Tools::finalizeEventDispatch (*data_p->dispatchState,
+                                             true,
+                                             false);
 
   return return_value;
 }
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 
 void
 do_work (struct BitTorrent_Client_Configuration& configuration_in,
          bool debugParser_in,
          const std::string& metaInfoFileName_in,
+#if defined (CURSES_SUPPORT)
+         bool useCurses_in,
+#endif // CURSES_SUPPORT
          bool useReactor_in,
          bool requestCompactPeerAddresses_in,
          bool sendBitfieldAfterHandshake_in,
@@ -539,7 +567,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   ACE_ASSERT (timer_manager_p);
   long timer_id = -1;
 
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   int result = -1;
   // *TODO*: clean this up
   struct BitTorrent_Client_CursesState curses_state;
@@ -552,16 +580,17 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   const char* thread_name_2 = NULL;
   int group_id_2 = (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = NULL;
-#endif // CURSES_USE
+  ACE_THR_FUNC_RETURN curses_exit_status;
+#endif // CURSES_SUPPORT
 #if defined (SSL_SUPPORT)
   BitTorrent_Client_SSLControl_t bittorrent_control (&configuration_in.sessionConfiguration);
 #else
   BitTorrent_Client_Control_t bittorrent_control (&configuration_in.sessionConfiguration);
 #endif // SSL_SUPPORT
   BitTorrent_Client_PeerConnection_Manager_t* peer_connection_manager_p =
-      BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
   BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =
-      BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
+    BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
   ACE_ASSERT (tracker_connection_manager_p);
   Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
@@ -589,9 +618,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                                                                          true);
 
   // step1: initialize configuration
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   configuration_in.cursesState = &curses_state;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 
 #if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
@@ -710,7 +739,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
                 ACE_TEXT (interface_identifier.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
@@ -735,9 +764,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     sendBitfieldAfterHandshake_in;
 
   configuration_in.signalHandlerConfiguration.controller = &bittorrent_control;
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
   configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 
   // step4: initialize signal handling
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
@@ -801,7 +830,14 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step6b: (try to) connect to the torrent tracker
   bittorrent_control.start (NULL);
 
-#if defined (CURSES_USE)
+#if defined (CURSES_SUPPORT)
+  if (!useCurses_in)
+  {
+    // step6c: dispatch connection attempt, wait for the session to finish
+    bittorrent_control.request (metaInfoFileName_in);
+    goto continue_;
+  } // end IF
+
   thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
 
@@ -820,12 +856,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-
-    // clean up
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
-                                         false);
-
     goto clean;
   } // end IF
   ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
@@ -847,18 +877,30 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
-
-    // clean up
-    Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
-                                         event_dispatch_state_s.reactorGroupId,
-                                         false);
-
+    delete [] thread_name_p; thread_name_p = NULL;
     goto clean;
   } // end IF
-#endif // CURSES_USE
+  delete [] thread_name_p; thread_name_p = NULL;
 
+  result = thread_manager_p->join (thread_id,
+                                   &curses_exit_status);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::join(): \"%m\", returning\n")));
+    goto clean;
+  } // end IF
+  //   result = thread_manager_p->wait_grp (group_id_2);
+  //   if (result == -1)
+  //     ACE_DEBUG ((LM_ERROR,
+  //                 ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
+  //                 group_id_2));
+continue_:
+#else
   // step6c: dispatch connection attempt, wait for the session to finish
   bittorrent_control.request (metaInfoFileName_in);
+#endif // CURSES_SUPPORT
+
   // wait for the download to complete
   try {
     bittorrent_control.wait (true);
@@ -867,15 +909,11 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                 ACE_TEXT ("caught exception in BitTorrent_IControl_T::wait(), returning\n")));
     goto clean;
   }
-  bittorrent_control.stop (true,   // wait ?
-                           false); // high priority ?
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("session complete...\n")));
 
-  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true,   // wait ?
-                                             false); // do not remove the event dispatch singletons here
+  bittorrent_control.stop (true,   // wait ?
+                           false); // high priority ?
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -884,16 +922,14 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 clean:
   peer_connection_manager_p->stop (true, false);
   peer_connection_manager_p->abort (true);
+  peer_connection_manager_p->wait (true);
   tracker_connection_manager_p->stop (true, false);
   tracker_connection_manager_p->abort (true);
+  tracker_connection_manager_p->wait (true);
 
-#if defined (CURSES_USE)
-  result = thread_manager_p->wait_grp (group_id_2);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
-                group_id_2));
-#endif // CURSES_USE
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true,   // wait ?
+                                             false); // do not remove the event dispatch singletons here
 
   Common_Timer_Tools::finalize ();
 }
@@ -907,48 +943,48 @@ do_printVersion (const std::string& programName_in)
 
   // compiler version string...
   converter << ACE::compiler_major_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::compiler_minor_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::compiler_beta_version ();
 
   std::cout << programName_in
-            << ACE_TEXT (" compiled on ")
+            << ACE_TEXT_ALWAYS_CHAR (" compiled on ")
             << ACE::compiler_name ()
-            << ACE_TEXT (" ")
+            << ACE_TEXT_ALWAYS_CHAR (" ")
             << converter.str ()
             << std::endl << std::endl;
 
-  std::cout << ACE_TEXT ("libraries: ")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("libraries: ")
             << std::endl
 #if defined (HAVE_CONFIG_H)
-            << ACE_TEXT (ACENetwork_PACKAGE_NAME)
-            << ACE_TEXT (": ")
-            << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
+            << ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME)
+            << ACE_TEXT_ALWAYS_CHAR (": ")
+            << ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION)
             << std::endl;
 #endif // HAVE_CONFIG_H
 
   converter.str ("");
   // ACE version string...
   converter << ACE::major_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::minor_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::beta_version ();
 
   // *NOTE*: cannot use ACE_VERSION, as it doesn't contain the (potential) beta
   // version number... Need this, as the library soname is compared to this
   // string
-  std::cout << ACE_TEXT ("ACE: ")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("ACE: ")
 //             << ACE_VERSION
             << converter.str ()
             << std::endl;
 
-#if defined (CURSES_USE)
-  std::cout << ACE_TEXT ("curses: ")
+#if defined (CURSES_SUPPORT)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("curses: ")
             << curses_version ()
             << std::endl;
-#endif // CURSES_USE
+#endif // CURSES_SUPPORT
 }
 
 int
@@ -1000,6 +1036,12 @@ ACE_TMAIN (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   bool log_to_file                           = TEST_I_DEFAULT_SESSION_LOG;
+#if defined (CURSES_SUPPORT)
+  bool use_curses_b = false;
+#if defined (CURSES_USE)
+  use_curses_b = true;
+#endif // CURSES_USE
+#endif // CURSES_SUPPORT
   bool use_reactor                           =
       (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
@@ -1016,6 +1058,9 @@ ACE_TMAIN (int argc_in,
                             meta_info_file_name,
                             log_to_file,
                             allow_multiple_connections_per_peer_b,
+#if defined (CURSES_SUPPORT)
+                            use_curses_b,
+#endif // CURSES_SUPPORT
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
@@ -1139,6 +1184,9 @@ ACE_TMAIN (int argc_in,
   do_work (configuration,
            debug_parser,
            meta_info_file_name,
+#if defined (CURSES_SUPPORT)
+           use_curses_b,
+#endif // CURSES_SUPPORT
            use_reactor,
            request_compact_peer_addresses_b,
            send_bitfield_after_handshake_b,

@@ -978,7 +978,7 @@ idle_remove_session_cb (gpointer userData_in)
     state_r.builders.find (data_p->label);
   ACE_ASSERT (iterator != state_r.builders.end ());
   Common_UI_GTK_BuildersIterator_t iterator_2 =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator_2 != state_r.builders.end ());
 
   GtkNotebook* notebook_p = NULL;
@@ -1004,6 +1004,13 @@ idle_remove_session_cb (gpointer userData_in)
   } // end IF && lock scope
   gtk_notebook_remove_page (notebook_p,
                             page_number);
+
+  // shrink window ?
+  GtkWindow* window_p =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator_2).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_MAIN)));
+  ACE_ASSERT (window_p);
+  gtk_window_resize (window_p, 1, 1);
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     data_p->CBData->progressData.completedActions.insert (data_p->eventSourceId);
