@@ -101,6 +101,7 @@ BitTorrent_Control_T<SessionAsynchType,
 
   // sanity check(s)
   ACE_ASSERT (sessionConfigurationBase_);
+  ACE_ASSERT (sessionConfigurationBase_->parserConfiguration);
 
   bool remove_session = false;
   CONTEXT_T session_context;
@@ -124,11 +125,10 @@ BitTorrent_Control_T<SessionAsynchType,
   std::pair<SESSIONS_ITERATOR_T, bool> result_s;
 
   // step0: prepare session configuration
-  ACE_ASSERT (sessionConfigurationBase_->parserConfiguration);
   session_context.configuration = *sessionConfigurationBase_;
 
   // step1: parse metainfo
-  if (unlikely (!BitTorrent_Tools::parseMetaInfoFile (*static_cast<struct Common_FlexBisonParserConfiguration*> (session_context.configuration.parserConfiguration),
+  if (unlikely (!BitTorrent_Tools::parseMetaInfoFile (*static_cast<struct Common_FlexBisonParserConfiguration*> (sessionConfigurationBase_->parserConfiguration),
                                                       metaInfoFileName_in,
                                                       session_context.configuration.metaInfo)))
   {
@@ -201,7 +201,23 @@ BitTorrent_Control_T<SessionAsynchType,
   } // end IF
   session_state_p->trackerBaseURI = URI_string;
 
-  // step4: send request
+  // sanity check: already done ?
+  if (unlikely (!BitTorrent_Tools::isMissingPiece (session_state_p->pieces)))
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("no pieces left to download, returning\n")));
+
+    // notify torrent complete to event subscriber
+    if (session_context.configuration.subscriber)
+      session_context.configuration.subscriber->complete (false);
+
+    notify (metaInfoFileName_in,
+            BITTORRENT_EVENT_COMPLETE,
+            ACE_TEXT_ALWAYS_CHAR (""));
+    return;
+  } // end IF
+
+  // step4: send request to tracker
   if (unlikely (!getTrackerConnectionAndMessage (session_context.session,
                                                  istream_connection_p,
                                                  message_p)))
@@ -638,22 +654,12 @@ BitTorrent_Control_T<SessionAsynchType,
           goto continue_;
         ACE_ASSERT ((*iterator).second.session);
 
-        // close tracker connection
-        id_i = (*iterator).second.session->trackerConnectionId ();
-        iconnection_p = CONNECTION_MANAGER_SINGLETON_2::instance ()->get (id_i);
-        if (unlikely (!iconnection_p))
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to retrieve tracker connection (id was: %u) handle, continuing\n"),
-                      id_i));
-        else
-        {
-          iconnection_p->abort ();
-          CONNECTION_MANAGER_SINGLETON_2::instance ()->wait_2 (id_i);
-          iconnection_p->decrease (); iconnection_p = NULL;
-        } // end IF
-
-        // close all session connections
+        // close all session (tracker|peer) connections and wait for thread(s)
         (*iterator).second.session->close (true); // wait ?
+
+        // notify torrent complete to event subscriber
+        if ((*iterator).second.configuration.subscriber)
+          (*iterator).second.configuration.subscriber->finalize ();
 
         // clean up
         Common_Parser_Bencoding_Tools::free ((*iterator).second.configuration.metaInfo);
@@ -670,8 +676,6 @@ continue_:
                       ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
       } // end lock scope
 
-      stop (false,  // wait ? *WARNING*: cannot wait on 'this' !
-            false); // N/A
       break;
     }
     case BITTORRENT_EVENT_NO_MORE_PEERS:

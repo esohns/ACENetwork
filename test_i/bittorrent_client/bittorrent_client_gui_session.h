@@ -61,8 +61,9 @@ class BitTorrent_Client_GUI_Session_T
   void close ();
 
   // implement BitTorrent_ISessionProgress
+  inline virtual void finalize () { CBData_.session = NULL; }
   virtual void log (const std::string&); // log message
-  inline virtual void numberOfPieces (unsigned int) {}
+  //inline virtual void numberOfPieces (unsigned int) {}
   virtual void pieceComplete (unsigned int); // piece index
   virtual void complete (bool = false); // cancelled ?
   inline virtual void trackerConnect (Net_ConnectionId_t) {}

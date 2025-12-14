@@ -169,12 +169,14 @@ struct BitTorrent_SessionInitiationThreadData
   BitTorrent_SessionInitiationThreadData ()
    : addresses ()
    , lock (NULL)
+   , peerConnectionManager (NULL)
    , session (NULL)
    , state (NULL)
   {}
 
   BitTorrent_PeerAddresses_t      addresses;
   ACE_SYNCH_MUTEX*                lock;
+  Net_IConnectionManagerBase*     peerConnectionManager;
   Net_IInetSession_t*             session;
   struct BitTorrent_SessionState* state;
 };
@@ -270,6 +272,7 @@ struct BitTorrent_SessionState
   BitTorrent_SessionState ()
    : aborted (false)
    , connecting (false)
+   , connectingGroupId (-1)
    , connections ()
    , fileName ()
    , metaInfo (NULL)
@@ -296,7 +299,9 @@ struct BitTorrent_SessionState
   {}
 
   bool                                      aborted;
+
   bool                                      connecting;
+  int                                       connectingGroupId; // 'connecting' group
 
   Net_ConnectionIds_t                       connections;
   std::string                               fileName; // .torrent file

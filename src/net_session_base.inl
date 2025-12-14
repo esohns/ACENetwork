@@ -384,7 +384,7 @@ Net_SessionBase_T<AddressType,
                   *iterator));
     } // end FOR
 
-    if (waitForCompletion_in)
+    if (unlikely (waitForCompletion_in))
     {
       // step1: wait for connections to leave
       while (!state_.connections.empty ())
@@ -397,7 +397,7 @@ Net_SessionBase_T<AddressType,
     } // end IF
   } // end lock scope
 
-  if (waitForCompletion_in)
+  if (unlikely (waitForCompletion_in))
   {
     // step2: now wait for connections to be gone entirely
     // *NOTE*: this step is needed to safely release all connection/stream

@@ -658,6 +658,22 @@ BitTorrent_Tools::hasMissingPiece (const BitTorrent_Pieces_t& pieces_in,
 }
 
 bool
+BitTorrent_Tools::isMissingPiece (const BitTorrent_Pieces_t& pieces_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::isMissingPiece"));
+
+  for (BitTorrent_PiecesConstIterator_t iterator = pieces_in.begin ();
+       iterator != pieces_in.end ();
+       ++iterator)
+    if (!(*iterator).onDisk &&
+        !BitTorrent_Tools::isPieceComplete ((*iterator).length,
+                                            (*iterator).chunks))
+      return true;
+
+  return false;
+}
+
+bool
 BitTorrent_Tools::validatePieceHash (const struct BitTorrent_Piece& piece_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::validatePieceHash"));

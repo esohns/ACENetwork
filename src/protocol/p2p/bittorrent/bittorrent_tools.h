@@ -71,6 +71,7 @@ class BitTorrent_Tools
                          const BitTorrent_MessagePayload_Bitfield&); // 'have' bitfield
   static bool hasMissingPiece (const BitTorrent_Pieces_t&,                 // pieces
                                const BitTorrent_MessagePayload_Bitfield&); // 'have' bitfield
+  static bool isMissingPiece (const BitTorrent_Pieces_t&); // pieces
   inline static unsigned int chunkLength (const struct BitTorrent_Piece_Chunk& chunk_in) { return (chunk_in.data ? static_cast<unsigned int> (chunk_in.data->total_length ()) : 0); }
   static bool validatePieceHash (const struct BitTorrent_Piece&); // piece
   static bool savePiece (const std::string&,                         // metainfo (aka .bittorrent) file

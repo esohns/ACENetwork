@@ -39,10 +39,18 @@
 #include "bittorrent_isession.h"
 #include "bittorrent_stream_common.h"
 #include "bittorrent_streamhandler.h"
+#include "bittorrent_tools.h"
 
 // forward declarations
 class ACE_Message_Block;
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+void net_bittorrent_session_cleanup_data_function (void*, void*); // session initiation thread data handle
+void net_bittorrent_session_cleanup_nmlock_function (void*, void*); // connection manager handle
+#else
+void net_bittorrent_session_cleanup_nmlock_function (void*); // connection manager handle
+void net_bittorrent_session_cleanup_data_function (void*); // session initiation thread data handle
+#endif // ACE_WIN32 || ACE_WIN64
 ACE_THR_FUNC_RETURN net_bittorrent_session_setup_function (void*);
 
 template <typename PeerConnectionConfigurationType,
@@ -134,12 +142,18 @@ class BitTorrent_Session_T
 
   // override/implement (part of) BitTorrent_ISession_T
   inline virtual unsigned int numberOfPieces () const { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, 0); return static_cast<unsigned int> (inherited::state_.pieces.size ()); }
+  inline virtual bool isComplete () const { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, false); return !BitTorrent_Tools::isMissingPiece (inherited::state_.pieces); }
   virtual bool initialize (const ConfigurationType&);
+  // *WARNING*: (concurrently) calling threads must hold the peers' connection
+  //            manager lock to disambiguate between connection configurations
   virtual void connect (const ACE_INET_Addr&);
   virtual void trackerConnect (const ACE_INET_Addr&);
   inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); }
   inline virtual Net_ConnectionId_t trackerConnectionId () { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, 0); return inherited::state_.trackerConnectionId; }
-  inline virtual ACE_INET_Addr trackerAddress () { ACE_INET_Addr dummy; ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, dummy); return inherited::state_.trackerAddress; }
+  inline virtual ACE_INET_Addr trackerAddress () { static ACE_INET_Addr dummy; ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, dummy); return inherited::state_.trackerAddress; }
+
+  // override (part of) Net_ISession_T
+  virtual void close (bool = false); // wait ?
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Session_T (const BitTorrent_Session_T&))

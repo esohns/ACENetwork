@@ -72,7 +72,7 @@ session_handler_cb (void* arg_in)
   guint context_id = 0;
   GtkStatusbar* statusbar_p = NULL;
   std::string label_string =
-    ACE_TEXT_ALWAYS_CHAR (ACE::basename (data_p->filename.c_str ()));
+    Common_File_Tools::basename (data_p->filename, false);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
@@ -298,6 +298,7 @@ idle_add_session_cb (gpointer userData_in)
   struct BitTorrent_Client_UI_SessionCBData* session_cb_data_p =
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (session_cb_data_p);
+  ACE_ASSERT (session_cb_data_p->session);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -417,7 +418,6 @@ idle_add_session_cb (gpointer userData_in)
   std::vector<unsigned int> complete_piece_indexes_a =
     BitTorrent_Tools ::getPieceIndexes (session_state_r.pieces,
                                         false);
-  std::vector<unsigned int>::iterator complete_piece_indexes_iterator;
 #if defined (GTK2_USE)
   GdkColor black = {0, 0x0000, 0x0000, 0x0000};
 #elif defined (GTK3_USE)
@@ -450,10 +450,8 @@ idle_add_session_cb (gpointer userData_in)
     //gtk_widget_set_size_request (GTK_WIDGET (button_p), 7, 7);
     gtk_widget_set_visible (GTK_WIDGET (button_p), TRUE); // *TODO*: why ?
 
-    complete_piece_indexes_iterator = std::find (complete_piece_indexes_a.begin (),
-                                                 complete_piece_indexes_a.end (),
-                                                 i);
-    has_piece_b = complete_piece_indexes_iterator != complete_piece_indexes_a.end ();
+    has_piece_b =
+      std::find (complete_piece_indexes_a.begin (), complete_piece_indexes_a.end (), i) != complete_piece_indexes_a.end ();
 #if defined (GTK2_USE)
     gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_NORMAL, &black);
     gtk_widget_modify_bg (GTK_WIDGET (button_p), GTK_STATE_PRELIGHT, &black);
@@ -968,7 +966,6 @@ idle_remove_session_cb (gpointer userData_in)
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->eventSourceId);
-  ACE_ASSERT (data_p->session);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -1015,10 +1012,6 @@ idle_remove_session_cb (gpointer userData_in)
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     data_p->CBData->progressData.completedActions.insert (data_p->eventSourceId);
   } // end lock scope
-
-  data_p->session->close (false);
-  // data_p->session->wait ();
-  // delete data_p->session; data_p->session = NULL;
 
   return G_SOURCE_REMOVE;
 }

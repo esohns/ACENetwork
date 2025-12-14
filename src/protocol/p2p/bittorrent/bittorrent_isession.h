@@ -57,6 +57,7 @@ class BitTorrent_ISession_T
   inline virtual ~BitTorrent_ISession_T () {} // *TODO*: remove ASAP
 
   virtual unsigned int numberOfPieces () const = 0;
+  virtual bool isComplete () const = 0;
 
   virtual void choke (Net_ConnectionId_t, // connection id
                       bool) = 0;          // choke ? : unchoke
@@ -103,9 +104,11 @@ class BitTorrent_ISession_T
 class BitTorrent_ISessionProgress
 {
  public:
+  virtual void finalize () = 0;
+
   virtual void log (const std::string&) = 0; // log message
 
-  virtual void numberOfPieces (unsigned int) = 0; // #pieces in torrent
+  //virtual void numberOfPieces (unsigned int) = 0; // #pieces in torrent
   virtual void pieceComplete (unsigned int) = 0; // piece index
 
   virtual void complete (bool = false) = 0; // cancelled ?

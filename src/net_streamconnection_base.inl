@@ -502,6 +502,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   bool initialization_failed_b = false;
   bool peer_closed_b = false;
   bool decrease_b = true;
+  bool already_closed_b = false;
 
   // step0a: set state
   // *IMPORTANT NOTE*: set the state early to avoid deadlock in
@@ -509,6 +510,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //                   invoked by stream_.finished()
   // *TODO*: remove type inference
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited2::state_.lock, -1);
+    already_closed_b = inherited2::state_.closed;
     initialization_failed_b =
       (inherited2::state_.status == NET_CONNECTION_STATUS_INITIALIZATION_FAILED);
     if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
@@ -532,7 +534,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                       false); // expedite ?
     } // end IF
 
-    // step1: shut down the processing stream
+    // step1: shut down the processing stream ?
+    if (already_closed_b)
+      goto continue_;
     // *NOTE*: flush outbound data only !
     stream_.flush (false, // flush inbound data ?
                    false, // flush session messages ?
@@ -543,6 +547,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                   true,   // recurse upstream (if any) ?
                   false); // high priority ?
 //  } // end lock scope
+continue_:
 
   switch (mask_in)
   {

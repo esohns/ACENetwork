@@ -477,7 +477,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     PeerConnectorType::CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
-  iconnection_manager_p->lock (true);
+  //iconnection_manager_p->lock (true);
 
   iconnection_manager_p->get (connection_configuration_p,
                               user_data_p);
@@ -517,7 +517,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   iconnection_manager_p->set (*connection_configuration_p,
                               user_data_p);
 
-  iconnection_manager_p->unlock (false);
+  //iconnection_manager_p->unlock (false);
 }
 
 template <typename PeerConnectionConfigurationType,
@@ -1967,6 +1967,113 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                      PeerUserDataType,
                      TrackerUserDataType,
                      ControllerInterfaceType,
+                     CBDataType>::close (bool waitForCompletion_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::close"));
+
+  // step1: stop connecting to new peers
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+    if (!inherited::state_.connecting ||
+        inherited::state_.connectingGroupId == -1)
+      goto continue_;
+    ACE_ASSERT (inherited::state_.connectingGroupId != -1);
+    ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
+    ACE_ASSERT (thread_manager_p);
+    int result =
+      thread_manager_p->cancel_grp (inherited::state_.connectingGroupId, // group id
+                                    1);                                  // asynch ?
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Manager::cancel_grp(%d, 1): \"%m\", continuing\n"),
+                  inherited::state_.connectingGroupId));
+    if (unlikely (waitForCompletion_in))
+    {
+      result =
+        thread_manager_p->wait_grp (inherited::state_.connectingGroupId); // group id
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
+                    inherited::state_.connectingGroupId));
+      inherited::state_.connectingGroupId = -1;
+    } // end IF
+  } // end lock scope
+
+continue_:
+  // step2: close any tracker connection
+  if (!inherited::state_.trackerConnectionId)
+    goto continue_2;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+    for (Net_ConnectionIdsIterator_t iterator = inherited::state_.connections.begin ();
+         iterator != inherited::state_.connections.end ();
+         ++iterator)
+    {
+      if (*iterator != inherited::state_.trackerConnectionId)
+        continue;
+      typename TrackerConnectorType::ICONNECTION_T* iconnection_p =
+        TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (inherited::state_.trackerConnectionId);
+      if (!iconnection_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to retrieve tracker connection handle (id was: %d), continuing\n"),
+                    inherited::state_.trackerConnectionId));
+        break;
+      } // end IF
+      iconnection_p->abort ();
+      iconnection_p->decrease (); iconnection_p = NULL;
+      break;
+    } // end FOR
+  } // end lock scope
+  TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->wait_2 (inherited::state_.trackerConnectionId);
+
+continue_2:
+  // step3: close any peer connection(s)
+  inherited::close (waitForCompletion_in);
+}
+
+template <typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
+          typename PeerStreamType,
+          typename TrackerStreamType,
+          typename StreamStatusType,
+          typename PeerStreamHandlerType,
+          typename TrackerStreamHandlerType,
+          typename PeerConnectionType,
+          typename TrackerConnectionType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
+          typename PeerConnectorType,
+          typename TrackerConnectorType,
+          typename ConfigurationType,
+          typename StateType,
+          typename PeerStreamUserDataType,
+          typename TrackerStreamUserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
+          typename ControllerInterfaceType,
+          typename CBDataType>
+void
+BitTorrent_Session_T<PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
+                     PeerStreamType,
+                     TrackerStreamType,
+                     StreamStatusType,
+                     PeerStreamHandlerType,
+                     TrackerStreamHandlerType,
+                     PeerConnectionType,
+                     TrackerConnectionType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
+                     PeerConnectorType,
+                     TrackerConnectorType,
+                     ConfigurationType,
+                     StateType,
+                     PeerStreamUserDataType,
+                     TrackerStreamUserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
+                     ControllerInterfaceType,
                      CBDataType>::trackerDisconnect (Net_ConnectionId_t id_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerDisconnect"));
@@ -1976,8 +2083,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   ACE_ASSERT (inherited::configuration_);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: tracker connection closed (id was: %d)\n"),
-              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE_TEXT (Common_File_Tools::basename (inherited::configuration_->metaInfoFileName, false).c_str ()),
               id_in));
 
   bool notify_controller_b = false;
@@ -1991,9 +2097,10 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
       event_e = BITTORRENT_EVENT_CANCELLED;
       notify_controller_b = true;
     } // end IF
-    // *NOTE*: iff there are no connections AND (!) no more connections will
-    //         establish, notify controller
-    else if (inherited::state_.connections.empty () &&
+    // *NOTE*: iff there is data missing AND there are no connections AND (!)
+    //         no more connections will establish, notify controller
+    else if (BitTorrent_Tools::isMissingPiece (inherited::state_.pieces) &&
+             inherited::state_.connections.empty ()                      &&
              !inherited::state_.connecting)
     {
       event_e = BITTORRENT_EVENT_NO_MORE_PEERS;
@@ -2216,10 +2323,6 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("%s\n"),
-//              ACE_TEXT (BitTorrent_Tools::DictionaryToString (record_in).c_str ())));
-
   // *NOTE*: this could be the response to either a response or a 'scrape', the
   //         type can be deduced from the dictionary schema
   Bencoding_DictionaryIterator_t iterator = record_in.begin ();
@@ -2439,14 +2542,12 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s: tracker sent no peers, returning\n"),
-                ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                               ACE_DIRECTORY_SEPARATOR_CHAR)));
+                ACE_TEXT (Common_File_Tools::basename (inherited::configuration_->metaInfoFileName, false).c_str ())));
     return;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: tracker sent %u peer(s)...\n"),
-              ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              ACE_TEXT (Common_File_Tools::basename (inherited::configuration_->metaInfoFileName, false).c_str ()),
               peer_addresses_a.size ()));
 
   inherited::state_.connecting = true;
@@ -2457,6 +2558,8 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   ACE_ASSERT (thread_data_p);
   thread_data_p->addresses = peer_addresses_a;
   thread_data_p->lock = &(inherited::lock_);
+  thread_data_p->peerConnectionManager =
+    typename PeerConnectionManagerType::SINGLETON_T::instance ();
   thread_data_p->session = this;
   thread_data_p->state = &(inherited::state_);
 
@@ -2465,7 +2568,6 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   char* thread_name_p = NULL;
   std::string buffer;
   std::ostringstream converter;
-  int group_id_i = -1;
   size_t number_of_threads_i = peer_addresses_a.size ();
   ACE_ASSERT (number_of_threads_i);
   ACE_thread_t* thread_ids_p = NULL;
@@ -2535,14 +2637,15 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   } // end FOR
   thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
-  group_id_i =
+  inherited::state_.connectingGroupId =
     thread_manager_p->spawn_n (thread_ids_p,                               // id(s)
                                number_of_threads_i,                        // # threads
                                static_cast<ACE_THR_FUNC> (::net_bittorrent_session_setup_function), // function
                                thread_data_p,                              // argument
-                               (THR_NEW_LWP      |
-                                //THR_JOINABLE     |
-                                THR_DETACHED     |
+                               (THR_CANCEL_DEFERRED |
+                                THR_NEW_LWP         |
+                                THR_JOINABLE        |
+                                //THR_DETACHED     |
                                 THR_INHERIT_SCHED),                        // flags
                                ACE_DEFAULT_THREAD_PRIORITY,                // priority
                                BITTORRENT_SESSION_HANDLER_THREAD_GROUP_ID, // group id
@@ -2551,7 +2654,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
                                thread_handles_p,                           // handle(s)
                                NULL,                                       // task
                                thread_names_p);                            // name(s)
-  if (unlikely (group_id_i == -1))
+  if (unlikely (inherited::state_.connectingGroupId == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn_n(%u): \"%m\", aborting\n"),

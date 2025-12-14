@@ -66,6 +66,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::BitTorrent_Client_GUI_Session_T"));
 
   // sanity check(s)
+  ACE_ASSERT (CBData_inout.configuration);
   ACE_ASSERT (Common_File_Tools::isDirectory (UIFileDirectory_in));
 
   // initialize cb data
@@ -83,23 +84,21 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  guint event_source_id_i;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    CBData_.eventSourceId =
+    event_source_id_i =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_load_session_ui_cb,
                        &CBData_,
                        NULL);
-    if (!CBData_.eventSourceId)
+    if (unlikely (!event_source_id_i))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_idle_add_full(idle_load_session_ui_cb): \"%m\", returning\n")));
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       goto error;
     } // end IF
-    state_r.eventSourceIds.insert (CBData_.eventSourceId);
-    CBData_.CBData->progressData.pendingActions[CBData_.eventSourceId] =
-      ACE_Thread_ID (0, 0);
+    state_r.eventSourceIds.insert (event_source_id_i);
   } // end lock scope
 #endif // GTK_USE
 
@@ -111,56 +110,37 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in BitTorrent_IControl_T::request(\"%s\"), returning\n"),
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
-#if defined (GTK_USE)
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.builders.erase (CBData_.label);
-#endif // GTK_USE
     goto error;
   }
 
   ACE_ASSERT (!CBData_.session);
   CBData_.session = CBData_.controller->get (metaInfoFileName_in);
-  if (!CBData_.session)
+  if (unlikely (!CBData_.session))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve session handle (metainfo file was: \"%s\"), aborting\n"),
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
-#if defined (GTK_USE)
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.builders.erase (CBData_.label);
-#endif // GTK_USE
     goto error;
   } // end IF
 
 #if defined (GTK_USE)
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-  gdk_threads_enter ();
-#endif // GTK_CHECK_VERSION (3,6,0)
-
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    ACE_ASSERT (!CBData_.eventSourceId);
     CBData_.eventSourceId =
-        g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                         idle_add_session_cb,
-                         &CBData_,
-                         NULL);
-    if (!CBData_.eventSourceId)
+      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                       idle_add_session_cb,
+                       &CBData_,
+                       NULL);
+    if (unlikely (!CBData_.eventSourceId))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_idle_add_full(idle_add_session_cb): \"%m\", returning\n")));
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-      state_r.builders.erase (CBData_.label);
       goto error;
     } // end IF
     state_r.eventSourceIds.insert (CBData_.eventSourceId);
     CBData_.CBData->progressData.pendingActions[CBData_.eventSourceId] =
       ACE_Thread_ID (0, 0);
   } // end lock scope
-
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-  gdk_threads_leave ();
-#endif // GTK_CHECK_VERSION (3,6,0)
 #endif // GTK_USE
 
   return;
@@ -171,6 +151,7 @@ error:
     CBData_.session->close (true);
     delete CBData_.session; CBData_.session = NULL;
   } // end IF
+  delete this;
 }
 
 template <typename SessionInterfaceType,
@@ -216,10 +197,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::close"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.session);
-
-  // step1: close connections
-  CBData_.session->close (false);
+  if (likely (CBData_.session))
+    CBData_.session->close (false);
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -229,14 +208,14 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   // step2: remove session from the UI
-  guint event_source_id =
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    guint event_source_id_i =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_remove_session_cb,
                        &CBData_,
                        NULL);
-  ACE_ASSERT (event_source_id);
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-    state_r.eventSourceIds.insert (event_source_id);
+    ACE_ASSERT (event_source_id_i);
+    state_r.eventSourceIds.insert (event_source_id_i);
   } // end lock scope
 #endif // GTK_USE
 }
