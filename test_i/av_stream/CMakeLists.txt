@@ -30,19 +30,7 @@ if (NOT EXISTS ${ACEStream_DIR})
 else ()
  message (STATUS "found package \"ACEStream\": \"${ACEStream_DIR}\"")
 endif ()
-add_definitions (-DACESTREAM_HAS_DLL)
-
-if (WIN32)
- if (MSVC)
-  add_compile_options (/bigobj)
-# else ()
-#  add_compile_options(-Wa,-mbig-obj)
- endif (MSVC)
-
- # *NOTE*: DirectShow uses 'DEBUG'
-# add_definitions (-DDEBUG) # activate DirectShow debug logging
- add_compile_options ($<$<CONFIG:Debug>:-DDEBUG>)
-endif (WIN32)
+#add_definitions (-DACESTREAM_HAS_DLL)
 
 if (FFMPEG_SUPPORT)
  include_directories (${ffmpeg_INCLUDE_DIRS})
@@ -253,13 +241,25 @@ add_dependencies (${EXECUTABLE_CLIENT} ACEStream_Visualization)
 
 add_dependencies (${EXECUTABLE_CLIENT} ${PROJECT_NAME})
 
-target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+if (WIN32)
+ if (MSVC)
+  target_compile_options (${EXECUTABLE_CLIENT} PUBLIC /bigobj)
+ else ()
+  target_compile_options (${EXECUTABLE_CLIENT} PUBLIC -Wa,-mbig-obj)
+ endif (MSVC)
+ # *NOTE*: DirectShow uses 'DEBUG'
+# add_definitions (-DDEBUG) # activate DirectShow debug logging
+ add_compile_options ($<$<CONFIG:Debug>:-DDEBUG>)
+endif (WIN32)
+
+#target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (FFMPEG_SUPPORT)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${ffmpeg_LIBRARIES})
 endif (FFMPEG_SUPPORT)
 if (UNIX)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${PKG_V4L2_LIBRARIES})
 elseif (WIN32)
+# target_link_options (${EXECUTABLE_CLIENT} PUBLIC /NODEFAULTLIB:\"libcmt.lib\")
 # set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
 
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC evr.lib)

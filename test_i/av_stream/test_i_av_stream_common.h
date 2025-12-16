@@ -26,8 +26,6 @@
 #include <set>
 #include <string>
 
-#include "ace/Synch_Traits.h"
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "d3d9.h"
 #undef GetObject
@@ -49,6 +47,8 @@ extern "C"
 #if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
 #endif // GTK_SUPPORT
+
+#include "ace/Synch_Traits.h"
 
 #include "common.h"
 #include "common_istatistic.h"
@@ -247,10 +247,10 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
 #endif // ACE_WIN32 || ACE_WIN64
    , display ()
    , fullScreen (false)
-#if defined (GTK_USE)
-   , pixelBuffer (NULL)
-   , pixelBufferLock (NULL)
-#endif // GTK_USE
+//#if defined (GTK_USE)
+//   , pixelBuffer (NULL)
+//   , pixelBufferLock (NULL)
+//#endif // GTK_USE
    , parserConfiguration (NULL)
    , window ()
   {
@@ -263,7 +263,7 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
 #endif // ACE_WIN32 || ACE_WIN64
   }
 
-  struct Test_I_AVStream_Configuration*               configuration;
+  struct Test_I_AVStream_Configuration*                configuration;
 #if defined (GTK_USE)
   guint                                                contextId;
 #endif // GTK_USE
@@ -273,10 +273,10 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
 #endif // ACE_WIN32 || ACE_WIN64
   struct Common_UI_DisplayDevice                       display;
   bool                                                 fullScreen;
-#if defined (GTK_USE)
-  GdkPixbuf*                                           pixelBuffer;
-  ACE_SYNCH_MUTEX*                                     pixelBufferLock;
-#endif // GTK_USE
+//#if defined (GTK_USE)
+//  GdkPixbuf*                                           pixelBuffer;
+//  ACE_SYNCH_MUTEX*                                     pixelBufferLock;
+//#endif // GTK_USE
   struct Common_FlexBisonParserConfiguration*          parserConfiguration;                  // parser module(s)
   struct Common_UI_Window                              window;
 };
@@ -329,17 +329,17 @@ struct Test_I_AVStream_UI_CBData
    : Test_I_UI_CBData ()
    , configuration (NULL)
    , isFirst (true)
-#if defined (GTK_USE)
-   , pixelBuffer (NULL)
-#endif // GTK_USE
+//#if defined (GTK_USE)
+//   , pixelBuffer (NULL)
+//#endif // GTK_USE
    , progressData ()
   {}
 
   struct Test_I_AVStream_Configuration*  configuration;
   bool                                   isFirst; // first activation ?
-#if defined (GTK_USE)
-  GdkPixbuf*                             pixelBuffer;
-#endif // GTK_USE
+//#if defined (GTK_USE)
+//  GdkPixbuf*                             pixelBuffer;
+//#endif // GTK_USE
   struct Test_I_AVStream_UI_ProgressData progressData;
 };
 

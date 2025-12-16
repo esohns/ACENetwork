@@ -19,6 +19,10 @@
 ***************************************************************************/
 #include "stdafx.h"
 
+#include <iostream>
+#include <limits>
+#include <string>
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define INITGUID // *NOTE*: this exports DEFINE_GUIDs (see stream_misc_common.h)
 #include "mfapi.h"
@@ -30,15 +34,15 @@
 #endif // UUIDS_H
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include <iostream>
-#include <limits>
-#include <string>
-
 #include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
+#include "ace/iosfwd.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN64
-#include "ace/Log_Msg.h"
+#include "ace/POSIX_Proactor.h"
+// #include "ace/Synch.h"
+#include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"
@@ -94,6 +98,7 @@
 #include "test_i_common_modules.h"
 
 #include "test_i_av_stream_common.h"
+#include "test_i_av_stream_stream_common.h"
 
 #include "test_i_av_stream_client_common.h"
 #include "test_i_av_stream_client_eventhandler.h"
@@ -101,12 +106,11 @@
 #include "test_i_av_stream_client_session_message.h"
 #include "test_i_av_stream_client_signalhandler.h"
 #include "test_i_av_stream_client_stream.h"
-#include "test_i_av_stream_stream_common.h"
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Audio");
 const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("AVStream_Video");
 const char stream_name_string_3[] =
-    ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING);
+  ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING);
 
 void
 do_printUsage (const std::string& programName_in)
@@ -901,14 +905,35 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
-      &camstream_configuration_p->dispatchConfiguration;
+    &camstream_configuration_p->dispatchConfiguration;
 
   // step0b: initialize configuration and stream
   struct Common_AllocatorConfiguration* allocator_configuration_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    struct _AllocatorProperties allocator_properties;
+  ACE_OS::memset (&allocator_properties, 0, sizeof (struct _AllocatorProperties));
+  allocator_properties.cBuffers =
+      STREAM_LIB_DIRECTSHOW_VIDEO_DEFAULT_SOURCE_BUFFERS;
+  allocator_properties.cbBuffer = -1; // <-- use default
+  // *TODO*: IMemAllocator::SetProperties returns VFW_E_BADALIGN (0x8004020e)
+  //         if this is -1/0 (why ?)
+  //allocatorProperties_.cbAlign = -1;  // <-- use default
+  allocator_properties.cbAlign = 1;
+  // *TODO*: IMemAllocator::SetProperties returns E_INVALIDARG (0x80070057)
+  //         if this is -1/0 (why ?)
+  //allocatorProperties.cbPrefix = -1; // <-- use default
+  allocator_properties.cbPrefix = 0;
+
   switch (mediaFramework_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
+      directShowCBData_in.configuration->pinConfiguration.allocatorProperties =
+        &allocator_properties;
+      directShowCBData_in.configuration->filterConfiguration.allocatorProperties =
+        &allocator_properties;
+      directShowCBData_in.configuration->filterConfiguration.pinConfiguration =
+        &directShowCBData_in.configuration->pinConfiguration;
+
       allocator_configuration_p =
         &directShowCBData_in.configuration->allocatorConfiguration;
       break;
@@ -1013,6 +1038,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
         STREAM_HEADMODULECONCURRENCY_ACTIVE;
       directshow_modulehandler_configuration.deviceIdentifier =
         videoDeviceIdentifier_in;
+      directshow_modulehandler_configuration.filterConfiguration =
+        &directShowCBData_in.configuration->filterConfiguration;
 
       directshow_modulehandler_configuration_2a =
         directshow_modulehandler_configuration;
@@ -2187,7 +2214,7 @@ do_printVersion (const std::string& programName_in)
             << std::endl;
 }
 
-#undef main
+//#undef main
 int
 ACE_TMAIN (int argc_in,
            ACE_TCHAR* argv_in[])

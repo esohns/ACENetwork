@@ -21,7 +21,6 @@
 #ifndef TEST_I_CALLBACKS_H
 #define TEST_I_CALLBACKS_H
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "guiddef.h"
 #undef GetObject
@@ -126,10 +125,11 @@ G_MODULE_EXPORT void combobox_format_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void combobox_resolution_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void combobox_rate_changed_cb (GtkComboBox*, gpointer);
 #if GTK_CHECK_VERSION (3,0,0)
-  G_MODULE_EXPORT void drawingarea_size_allocate_source_cb (GtkWidget*, GdkRectangle*, gpointer);
+G_MODULE_EXPORT void drawingarea_size_allocate_source_cb (GtkWidget*, GdkRectangle*, gpointer);
 #else
-  G_MODULE_EXPORT gboolean drawingarea_configure_event_source_cb (GtkWidget*, GdkEvent*, gpointer);
-#endif
+G_MODULE_EXPORT gboolean drawingarea_configure_event_source_cb (GtkWidget*, GdkEvent*, gpointer);
+#endif // GTK_CHECK_VERSION (3,0,0)
+G_MODULE_EXPORT gboolean drawingarea_source_draw_cb (GtkWidget*, cairo_t*, gpointer);
 G_MODULE_EXPORT void filechooserbutton_source_cb (GtkFileChooserButton*, gpointer);
 G_MODULE_EXPORT void toggleaction_stream_toggled_cb (GtkToggleAction*, gpointer);
 
@@ -137,10 +137,11 @@ G_MODULE_EXPORT void toggleaction_stream_toggled_cb (GtkToggleAction*, gpointer)
 
 G_MODULE_EXPORT void action_close_all_activate_cb (GtkAction*, gpointer);
 #if GTK_CHECK_VERSION (3,0,0)
-  G_MODULE_EXPORT void drawingarea_size_allocate_target_cb (GtkWidget*, GdkRectangle*, gpointer);
+G_MODULE_EXPORT void drawingarea_size_allocate_target_cb (GtkWidget*, GdkRectangle*, gpointer);
 #else
-  G_MODULE_EXPORT gboolean drawingarea_configure_event_target_cb (GtkWidget*, GdkEvent*, gpointer);
-#endif
+G_MODULE_EXPORT gboolean drawingarea_configure_event_target_cb (GtkWidget*, GdkEvent*, gpointer);
+#endif // GTK_CHECK_VERSION (3,0,0)
+G_MODULE_EXPORT gboolean drawingarea_target_draw_cb (GtkWidget*, cairo_t*, gpointer);
 G_MODULE_EXPORT void filechooserbutton_target_cb (GtkFileChooserButton*, gpointer);
 G_MODULE_EXPORT void filechooserdialog_target_cb (GtkFileChooser*, gpointer);
 G_MODULE_EXPORT void filechooser_target_cb (GtkFileChooser*, gpointer);
@@ -149,7 +150,6 @@ G_MODULE_EXPORT void toggleaction_listen_activate_cb (GtkToggleAction*, gpointer
 /////////////////////////////////////////
 
 G_MODULE_EXPORT void action_report_activate_cb (GtkAction*, gpointer);
-G_MODULE_EXPORT gboolean drawingarea_draw_cb (GtkWidget*, cairo_t*, gpointer);
 //G_MODULE_EXPORT void radiobutton_protocol_toggled_cb (GtkToggleButton*, gpointer);
 //G_MODULE_EXPORT void spinbutton_port_value_changed_cb (GtkWidget*, gpointer);
 

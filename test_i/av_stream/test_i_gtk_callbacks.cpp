@@ -954,9 +954,8 @@ load_rates (IAMStreamConfig* IAMStreamConfig_in,
        ++iterator_2)
   {
     frame_rate =
-        (((*iterator_2).first == 1) ? (*iterator_2).second
-                                    : static_cast<guint> (static_cast<float> ((*iterator_2).second) /
-                                                          static_cast<float> ((*iterator_2).first)));
+        (((*iterator_2).second == 1) ? (*iterator_2).first
+                                     : static_cast<guint> (static_cast<float> ((*iterator_2).first) / static_cast<float> ((*iterator_2).second)));
 
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
@@ -2768,13 +2767,13 @@ idle_initialize_source_UI_cb (gpointer userData_in)
   result_2 =
       g_signal_connect (G_OBJECT (drawing_area_p),
                         ACE_TEXT_ALWAYS_CHAR ("draw"),
-                        G_CALLBACK (drawingarea_draw_cb),
+                        G_CALLBACK (drawingarea_source_draw_cb),
                         userData_in);
 #else
   result_2 =
       g_signal_connect (G_OBJECT (drawing_area_p),
                         ACE_TEXT_ALWAYS_CHAR ("expose-event"),
-                        G_CALLBACK (drawingarea_draw_cb),
+                        G_CALLBACK (drawingarea_source_draw_cb),
                         userData_in);
 #endif
   ACE_ASSERT (result_2);
@@ -3878,13 +3877,13 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   result_2 =
     g_signal_connect (G_OBJECT (drawing_area_p),
                       ACE_TEXT_ALWAYS_CHAR ("draw"),
-                      G_CALLBACK (drawingarea_draw_cb),
+                      G_CALLBACK (drawingarea_target_draw_cb),
                       userData_in);
 #else
   result_2 =
     g_signal_connect (G_OBJECT (drawing_area_p),
                       ACE_TEXT_ALWAYS_CHAR ("expose-event"),
-                      G_CALLBACK (drawingarea_draw_cb),
+                      G_CALLBACK (drawingarea_target_draw_cb),
                       userData_in);
 #endif
   ACE_ASSERT (result_2);
@@ -3998,17 +3997,10 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-#if defined (GTK_USE)
       (*directshow_modulehandler_iterator).second.second->window.gdk_window =
         window_p;
       (*directshow_modulehandler_iterator).second.second->window.type =
         Common_UI_Window::TYPE_GTK;
-#else
-      (*directshow_modulehandler_iterator).second.second->window.win32_hwnd =
-        gdk_win32_window_get_impl_hwnd (window_p);
-      (*directshow_modulehandler_iterator).second.second->window.type =
-        Common_UI_Window::TYPE_WIN32;
-#endif // GTK_USE
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -4032,6 +4024,7 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   (*iterator_2).second.second->window.gdk_window = window_p;
   (*iterator_2).second.second->window.type = Common_UI_Window::TYPE_GTK;
 #endif // ACE_WIN32 || ACE_WIN64
+
   GtkAllocation allocation;
   ACE_OS::memset (&allocation, 0, sizeof (allocation));
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
@@ -4039,41 +4032,47 @@ idle_initialize_target_UI_cb (gpointer userData_in)
   g_signal_emit_by_name (G_OBJECT (drawing_area_p),
                          ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
                          &allocation);
-  GdkPixbuf* pixbuf_p = NULL;
-#if defined (GTK_MAJOR_VERSION) && (GTK_MAJOR_VERSION >= 3)
-  pixbuf_p =
-    gdk_pixbuf_get_from_window (window_p,
-                                0, 0,
-                                allocation.width, allocation.height);
-#else
-  pixbuf_p =
-    gdk_pixbuf_get_from_drawable (NULL,
-                                  GDK_DRAWABLE (window_p),
-                                  NULL,
-                                  0, 0,
-                                  0, 0, allocation.width, allocation.height);
-#endif
-  if (!pixbuf_p)
-  { // *NOTE*: most probable reason: window is not mapped
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gdk_pixbuf_get_from_window(), aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
+//  GdkPixbuf* pixbuf_p = NULL;
+//#if defined (GTK_MAJOR_VERSION) && (GTK_MAJOR_VERSION >= 3)
+//  pixbuf_p =
+//    gdk_pixbuf_get_from_window (window_p,
+//                                0, 0,
+//                                allocation.width, allocation.height);
+//#else
+//  pixbuf_p =
+//    gdk_pixbuf_get_from_drawable (NULL,
+//                                  GDK_DRAWABLE (window_p),
+//                                  NULL,
+//                                  0, 0,
+//                                  0, 0, allocation.width, allocation.height);
+//#endif
+//  if (!pixbuf_p)
+//  { // *NOTE*: most probable reason: window is not mapped
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to gdk_pixbuf_get_from_window(), aborting\n")));
+//    return G_SOURCE_REMOVE;
+//  } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   switch (ui_cb_data_base_p->mediaFramework)
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
-    { ACE_ASSERT (!directshow_ui_cb_data_p->pixelBuffer);
-      directshow_ui_cb_data_p->pixelBuffer = pixbuf_p;
-      (*directshow_modulehandler_iterator).second.second->pixelBuffer = pixbuf_p;
+    {
+      //ACE_ASSERT (!directshow_ui_cb_data_p->pixelBuffer);
+      //directshow_ui_cb_data_p->pixelBuffer = pixbuf_p;
+      //(*directshow_modulehandler_iterator).second.second->pixelBuffer = pixbuf_p;
+      Common_Image_Resolution_t output_resolution_s = {allocation.width,
+                                                       allocation.height};
+      Stream_MediaFramework_DirectShow_Tools::setResolution (output_resolution_s,
+                                                             (*directshow_modulehandler_iterator).second.second->outputFormat);
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
-    { ACE_ASSERT (!mediafoundation_ui_cb_data_p->pixelBuffer);
-      mediafoundation_ui_cb_data_p->pixelBuffer = pixbuf_p;
-      (*mediafoundation_modulehandler_iterator).second.second->pixelBuffer =
-        pixbuf_p;
+    {
+      //ACE_ASSERT (!mediafoundation_ui_cb_data_p->pixelBuffer);
+      //mediafoundation_ui_cb_data_p->pixelBuffer = pixbuf_p;
+      //(*mediafoundation_modulehandler_iterator).second.second->pixelBuffer =
+      //  pixbuf_p;
       break;
     }
     default:
@@ -4085,9 +4084,9 @@ idle_initialize_target_UI_cb (gpointer userData_in)
     }
   } // end SWITCH
 #else
-  ACE_ASSERT (!(*iterator_2).second.second->pixelBuffer);
-  (*iterator_2).second.second->pixelBuffer = pixbuf_p;
-  ui_cb_data_p->pixelBuffer = pixbuf_p;
+  //ACE_ASSERT (!(*iterator_2).second.second->pixelBuffer);
+  //(*iterator_2).second.second->pixelBuffer = pixbuf_p;
+  //ui_cb_data_p->pixelBuffer = pixbuf_p;
   (*modulehandler_iterator).second.second->outputFormat.format =
       AV_PIX_FMT_RGB24;
   (*modulehandler_iterator).second.second->outputFormat.resolution.height =
@@ -4951,7 +4950,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_LISTSTORE_SOURCE_NAME)));
     ACE_ASSERT (list_store_p);
-#if GTK_CHECK_VERSION(2,30,0)
+#if GTK_CHECK_VERSION (2,30,0)
   GValue value = G_VALUE_INIT;
 #else
   GValue value;
@@ -6530,11 +6529,11 @@ action_report_activate_cb (GtkAction* action_in,
 //} // spinbutton_port_value_changed_cb
 
 gboolean
-drawingarea_draw_cb (GtkWidget* widget_in,
-                     cairo_t* context_in,
-                     gpointer userData_in)
+drawingarea_source_draw_cb (GtkWidget* widget_in,
+                            cairo_t* context_in,
+                            gpointer userData_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
+  STREAM_TRACE (ACE_TEXT ("::drawingarea_source_draw_cb"));
 
   ACE_UNUSED_ARG (widget_in);
 
@@ -6550,28 +6549,90 @@ drawingarea_draw_cb (GtkWidget* widget_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
+  return TRUE;
+}
+
+gboolean
+drawingarea_target_draw_cb (GtkWidget* widget_in,
+                            cairo_t* context_in,
+                            gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::drawingarea_target_draw_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+
   // sanity check(s)
-  if (!ui_cb_data_p->pixelBuffer)
-    return FALSE; // --> widget has not been realized yet
+  ACE_ASSERT (context_in);
+  struct Test_I_AVStream_UI_CBData* ui_cb_data_base_p =
+    static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
+  ACE_ASSERT (ui_cb_data_base_p);
 
-  //GdkWindow* window_p = gtk_widget_get_window (widget_in);
-  //ACE_ASSERT (window_p);
-  //GtkAllocation allocation;
-  //gtk_widget_get_allocation (widget_in,
-  //                           &allocation);
-//  gdk_cairo_set_source_pixbuf (context_in,
-//                               ui_cb_data_p->pixelBuffer,
-//                               0.0, 0.0);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, FALSE);
-    // *IMPORTANT NOTE*: potentially, this involves tranfer of image data to an
-    //                   X server running on a different host
-    //gdk_draw_pixbuf (GDK_DRAWABLE (window_p), NULL,
-    //                 ui_cb_data_p->pixelBuffer,
-    //                 0, 0, 0, 0, allocation.width, allocation.height,
-    //                 GDK_RGB_DITHER_NONE, 0, 0);
-//    cairo_paint (context_in);
-  } // end lock scope
+  Stream_Module_t* module_p = NULL;
+  Common_IDispatch* dispatch_p = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct Test_I_AVStream_Server_DirectShow_UI_CBData* directshow_ui_cb_data_p = NULL;
+  struct Test_I_AVStream_Server_MediaFoundation_UI_CBData* mediafoundation_ui_cb_data_p =
+      NULL;
+  switch (ui_cb_data_base_p->mediaFramework)
+  {
+    case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
+    {
+      directshow_ui_cb_data_p =
+        static_cast<struct Test_I_AVStream_Server_DirectShow_UI_CBData*> (userData_in);
+
+      Test_I_AVStream_Server_DirectShow_TCPConnectionManager_t* iconnection_manager_p =
+        Test_I_AVStream_Server_DirectShow_TCPConnectionManager_t::SINGLETON_T::instance ();
+      ACE_ASSERT (iconnection_manager_p);
+      iconnection_manager_p->lock ();
+      if (!iconnection_manager_p->count ())
+      {
+        iconnection_manager_p->unlock ();
+        return FALSE;
+      } // end IF
+      Test_I_AVStream_Server_DirectShow_TCPConnectionManager_t::ICONNECTION_T* iconnection_p =
+        iconnection_manager_p->operator[](0);
+      ACE_ASSERT (iconnection_p);
+      iconnection_manager_p->unlock ();
+      Test_I_AVStream_Server_DirectShow_ITCPConnection_t* i_stream_connection_p =
+        dynamic_cast<Test_I_AVStream_Server_DirectShow_ITCPConnection_t*> (iconnection_p);
+      ACE_ASSERT (i_stream_connection_p);
+      const Test_I_AVStream_Server_DirectShow_TCPStream& connection_stream_r =
+        i_stream_connection_p->stream ();
+      module_p =
+        const_cast<Stream_Module_t*> (connection_stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)));
+      ACE_ASSERT (module_p);
+      dispatch_p = dynamic_cast<Common_IDispatch*> (module_p->writer ());
+      iconnection_p->decrease ();
+      break;
+    }
+    case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
+    {
+      mediafoundation_ui_cb_data_p =
+        static_cast<struct Test_I_AVStream_Server_MediaFoundation_UI_CBData*> (userData_in);
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
+                  ui_cb_data_base_p->mediaFramework));
+      return FALSE;
+    }
+  } // end SWITCH
+#else
+  // sanity check(s)
+  struct Test_I_AVStream_Server_ALSA_V4L_UI_CBData* ui_cb_data_p =
+    static_cast<struct Test_I_AVStream_Server_ALSA_V4L_UI_CBData*> (userData_in);
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (dispatch_p);
+
+  dispatch_p->dispatch (context_in);
 
   return TRUE;
 }
@@ -7821,7 +7882,7 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
-                                      2);
+                                      1);
     g_value_unset (&value);
   } // end IF
 } // combobox_resolution_changed_cb
@@ -8039,7 +8100,7 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
   update_buffer_size (ui_cb_data_base_p);
 } // combobox_rate_changed_cb
 
-#if GTK_CHECK_VERSION(3,0,0)
+#if GTK_CHECK_VERSION (3,0,0)
 void
 drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
                                      GdkRectangle* allocation_in,
@@ -8182,6 +8243,7 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
     allocation_in->width;
 #endif // ACE_WIN32 || ACE_WIN64
 } // drawingarea_size_allocate_source_cb
+
 void
 drawingarea_size_allocate_target_cb (GtkWidget* widget_in,
                                      GdkRectangle* allocation_in,

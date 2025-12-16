@@ -684,21 +684,21 @@ typedef Stream_Module_Vis_GTK_Cairo_T<ACE_MT_SYNCH,
                                       struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_DirectShow_GTK_Display;
 #endif // GTK_SUPPORT
 
-struct Test_I_AVStream_Client_DirectShow_FilterConfiguration
- : Stream_MediaFramework_DirectShow_FilterConfiguration
-{
-  Test_I_AVStream_Client_DirectShow_FilterConfiguration ()
-   : Stream_MediaFramework_DirectShow_FilterConfiguration ()
-   //, format (NULL)
-   , module (NULL)
-   , pinConfiguration (NULL)
-  {}
-
-  // *TODO*: specify this as part of the network protocol header/handshake
-  //struct _AMMediaType*                                           format; // handle
-  Stream_Module_t*                                                module; // handle
-  struct Stream_MediaFramework_DirectShow_FilterPinConfiguration* pinConfiguration; // handle
-};
+//struct Test_I_AVStream_Client_DirectShow_FilterConfiguration
+// : Stream_MediaFramework_DirectShow_FilterConfiguration
+//{
+//  Test_I_AVStream_Client_DirectShow_FilterConfiguration ()
+//   : Stream_MediaFramework_DirectShow_FilterConfiguration ()
+//   //, format (NULL)
+//   , module (NULL)
+//   , pinConfiguration (NULL)
+//  {}
+//
+//  // *TODO*: specify this as part of the network protocol header/handshake
+//  //struct _AMMediaType*                                           format; // handle
+//  Stream_Module_t*                                                module; // handle
+//  struct Stream_MediaFramework_DirectShow_FilterPinConfiguration* pinConfiguration; // handle
+//};
 #if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 typedef Stream_MediaFramework_DirectShow_Source_Filter_T<Test_I_AVStream_Client_DirectShow_Message,
                                                          struct Test_I_AVStream_Client_DirectShow_FilterConfiguration,

@@ -96,12 +96,6 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
                   false);
   layout_out->append (module_p, NULL, 0);
   module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  TARGET_MODULE_T (this,
-                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_TARGET_DEFAULT_NAME_STRING)),
-                  false);
-  layout_out->append (module_p, NULL, 0);
-  module_p = NULL;
 
   if ((*iterator_2).second.second->window.type != Common_UI_Window::TYPE_INVALID)
   {
@@ -124,9 +118,6 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
     layout_out->append (module_p, branch_p, index_i);
   } // end IF
 
-  ACE_ASSERT (inherited::configuration_->configuration_->module_2);
-  layout_out->append (inherited::configuration_->configuration_->module_2, NULL, 0);
-
   if ((*iterator_2).second.second->window.type != Common_UI_Window::TYPE_INVALID)
   {
 #if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
@@ -138,6 +129,16 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
     layout_out->append (module_p, branch_p, index_i);
 #endif // DIRECTSHOW_BASECLASSES_SUPPORT
   } // end IF
+
+  ACE_ASSERT (inherited::configuration_->configuration_->module_2);
+  layout_out->append (inherited::configuration_->configuration_->module_2, NULL, 0);
+
+  ACE_NEW_RETURN (module_p,
+                  TARGET_MODULE_T (this,
+                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_TARGET_DEFAULT_NAME_STRING)),
+                  false);
+  layout_out->append (module_p, NULL, 0);
+  module_p = NULL;
 
   delete_out = true;
 

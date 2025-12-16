@@ -28,6 +28,7 @@
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
+//#include "ace/OS_main.h"
 
 #if defined (VALGRIND_USE)
 #include "valgrind/valgrind.h"

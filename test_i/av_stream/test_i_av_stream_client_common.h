@@ -74,6 +74,7 @@
 #include "test_i_configuration.h"
 
 #include "test_i_av_stream_common.h"
+//#include "test_i_common_modules.h"
 #include "test_i_connection_manager_common.h"
 #include "test_i_network.h"
 #include "test_i_av_stream_client_eventhandler.h"
@@ -708,6 +709,22 @@ struct Test_I_AVStream_Client_ALSA_V4L_StreamState
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct Test_I_AVStream_Client_DirectShow_FilterConfiguration
+ : Stream_MediaFramework_DirectShow_FilterConfiguration
+{
+  Test_I_AVStream_Client_DirectShow_FilterConfiguration ()
+   : Stream_MediaFramework_DirectShow_FilterConfiguration ()
+   //, format (NULL)
+   , module (NULL)
+   , pinConfiguration (NULL)
+  {}
+
+  // *TODO*: specify this as part of the network protocol header/handshake
+  //struct _AMMediaType*                                           format; // handle
+  Stream_Module_t*                                                module; // handle
+  struct Stream_MediaFramework_DirectShow_FilterPinConfiguration* pinConfiguration; // handle
+};
+
 struct Test_I_AVStream_Client_DirectShow_Configuration
  : Test_I_AVStream_Configuration
 {
@@ -716,14 +733,18 @@ struct Test_I_AVStream_Client_DirectShow_Configuration
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfigurations ()
+   , pinConfiguration ()
+   , filterConfiguration ()
   {}
 
   // **************************** signal data **********************************
   struct Test_I_AVStream_Client_DirectShow_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  Net_ConnectionConfigurations_t                             connectionConfigurations;
+  Net_ConnectionConfigurations_t                                      connectionConfigurations;
   // **************************** stream data **********************************
   Test_I_AVStream_Client_DirectShow_StreamConfigurations_t            streamConfigurations;
+  struct Stream_MediaFramework_DirectShow_FilterPinConfiguration      pinConfiguration;
+  struct Test_I_AVStream_Client_DirectShow_FilterConfiguration        filterConfiguration;
 };
 
 struct Test_I_AVStream_Client_MediaFoundation_Configuration

@@ -501,7 +501,6 @@ struct Test_I_AVStream_Server_DirectShow_Configuration
   // **************************** signal data **********************************
   struct Test_I_AVStream_Server_DirectShow_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** stream data **********************************
-
   struct Stream_MediaFramework_DirectShow_FilterPinConfiguration      pinConfiguration;
   struct Test_I_AVStream_Server_DirectShow_FilterConfiguration        filterConfiguration;
   Test_I_AVStream_Server_DirectShow_StreamConfiguration_t             streamConfiguration;

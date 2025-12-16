@@ -163,6 +163,7 @@ class Test_I_AVStream_Server_DirectShow_TCPStream
   // *TODO*: re-consider this API
   inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
+
 class Test_I_AVStream_Server_DirectShow_UDPStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -289,6 +290,7 @@ class Test_I_AVStream_Server_MediaFoundation_TCPStream
   IMFMediaSession* mediaSession_;
   ULONG            referenceCount_;
 };
+
 class Test_I_AVStream_Server_MediaFoundation_UDPStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
