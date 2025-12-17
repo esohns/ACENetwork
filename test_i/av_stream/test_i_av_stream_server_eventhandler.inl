@@ -179,11 +179,11 @@ Test_I_Server_EventHandler_T<SessionDataType,
 
     if (message_data_r.header.type == AVSTREAM_MESSAGE_VIDEO)
     {
-      event_source_id = g_idle_add (idle_update_video_display_cb,
-                                    CBData_);
-      if (!event_source_id)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
+      //event_source_id = g_idle_add (idle_update_video_display_cb,
+      //                              CBData_);
+      //if (!event_source_id)
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
       //else
       //  CBData_->UIState.eventSourceIds.insert (event_source_id);
     } // end IF

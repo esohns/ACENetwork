@@ -62,6 +62,7 @@
 #include "stream_lib_v4l_common.h"
 
 #if defined (GTK_SUPPORT)
+#include "stream_vis_gtk_cairo.h"
 #include "stream_vis_gtk_pixbuf.h"
 #endif // GTK_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
@@ -745,14 +746,15 @@ typedef Stream_Miscellaneous_Distributor_WriterTask_T<ACE_MT_SYNCH,
                                                       Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
                                                       Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t> Test_I_AVStream_Client_ALSA_V4L_Distributor_Writer_t;
 
-typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
-                                       Common_TimePolicy_t,
-                                       struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
-                                       Stream_ControlMessage_t,
-                                       Test_I_AVStream_Client_ALSA_V4L_Message,
-                                       Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
-                                       Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
-                                       struct Stream_MediaFramework_V4L_MediaType> Test_I_AVStream_Client_ALSA_V4L_Display;
+typedef Stream_Module_Vis_GTK_Cairo_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,
+                                      Stream_ControlMessage_t,
+                                      Test_I_AVStream_Client_ALSA_V4L_Message,
+                                      Test_I_AVStream_Client_ALSA_V4L_SessionMessage,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
+                                      Test_I_AVStream_Client_ALSA_V4L_StreamSessionData_t,
+                                      struct Stream_MediaFramework_V4L_MediaType> Test_I_AVStream_Client_ALSA_V4L_Display;
 #endif // GTK_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -964,14 +966,23 @@ typedef Stream_Visualization_LibAVResize_T<Test_I_Server_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Resize;
 #endif // FFMPEG_SUPPORT
 #if defined (GTK_SUPPORT)
-typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
-                                       Common_TimePolicy_t,
-                                       struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-                                       Stream_ControlMessage_t,
-                                       Test_I_AVStream_Server_Message,
-                                       Test_I_AVStream_Server_SessionMessage,
-                                       Test_I_AVStream_Server_StreamSessionData_t,
-                                       struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Display;
+// typedef Stream_Module_Vis_GTK_Pixbuf_T<ACE_MT_SYNCH,
+//                                        Common_TimePolicy_t,
+//                                        struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+//                                        Stream_ControlMessage_t,
+//                                        Test_I_AVStream_Server_Message,
+//                                        Test_I_AVStream_Server_SessionMessage,
+//                                        Test_I_AVStream_Server_StreamSessionData_t,
+//                                        struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Display;
+typedef Stream_Module_Vis_GTK_Cairo_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+                                      Stream_ControlMessage_t,
+                                      Test_I_AVStream_Server_Message,
+                                      Test_I_AVStream_Server_SessionMessage,
+                                      Test_I_AVStream_Server_StreamSessionData,
+                                      Test_I_AVStream_Server_StreamSessionData_t,
+                                      struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Display;
 #endif // GTK_SUPPORT
 
 typedef Stream_Dev_Target_ALSA_T<ACE_MT_SYNCH,
@@ -1271,6 +1282,14 @@ DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,    
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (GTK_SUPPORT)
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionData,                // session data type
+                              enum Stream_SessionMessageType,                             // session event type
+                              struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_vis_gtk_cairo_module_name_string,
+                              Stream_INotify_t,                                           // stream notification interface type
+                              Test_I_AVStream_Client_DirectShow_GTK_Display);                          // writer type
+#endif // GTK_SUPPORT
 #if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionData,                // session data type
                               enum Stream_SessionMessageType,                             // session event type
@@ -1299,7 +1318,7 @@ DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,    
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                  // session data type
                               enum Stream_SessionMessageType,                         // session event type
                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,   // module handler configuration type
-                              libacestream_default_vis_gtk_pixbuf_module_name_string,
+                              libacestream_default_vis_gtk_cairo_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
                               Test_I_AVStream_Client_ALSA_V4L_Display);                            // writer type
 #endif // GTK_SUPPORT
@@ -1469,7 +1488,7 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,         
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                       // session data type
                               enum Stream_SessionMessageType,                         // session event type
                               struct Test_I_AVStream_Server_ModuleHandlerConfiguration,        // module handler configuration type
-                              libacestream_default_vis_gtk_pixbuf_module_name_string,
+                              libacestream_default_vis_gtk_cairo_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
                               Test_I_AVStream_Server_Display);                                 // writer type
 #endif // GTK_SUPPORT

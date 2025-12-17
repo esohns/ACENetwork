@@ -66,7 +66,8 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator_2 =
-    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING));
+    //inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING));
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   ACE_ASSERT (iterator_2 != inherited::configuration_->end ());
   Stream_Module_t* module_p = NULL;
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
@@ -110,24 +111,32 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
       dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
     ACE_ASSERT (idistributor_p);
     idistributor_p->initialize (branches_a);
+    module_p = NULL;
 
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_DirectShow_Resize_Module (this,
                                                                      ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2")),
                     false);
     layout_out->append (module_p, branch_p, index_i);
+    module_p = NULL;
   } // end IF
 
   if ((*iterator_2).second.second->window.type != Common_UI_Window::TYPE_INVALID)
   {
-#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
-    module_p = NULL;
+#if defined (GTK_SUPPORT)
     ACE_NEW_RETURN (module_p,
-                    Test_I_AVStream_Client_DirectShow_Display_Module (this,
-                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
+                    Test_I_AVStream_Client_DirectShow_GTK_Display_Module (this,
+                                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                     false);
     layout_out->append (module_p, branch_p, index_i);
-#endif // DIRECTSHOW_BASECLASSES_SUPPORT
+#endif // GTK_SUPPORT
+//#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
+//    ACE_NEW_RETURN (module_p,
+//                    Test_I_AVStream_Client_DirectShow_Display_Module (this,
+//                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING)),
+//                    false);
+//    layout_out->append (module_p, branch_p, index_i);
+//#endif // DIRECTSHOW_BASECLASSES_SUPPORT
   } // end IF
 
   ACE_ASSERT (inherited::configuration_->configuration_->module_2);
@@ -189,7 +198,8 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   iterator_2 =
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING));
+    //const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING));
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
 
   // sanity check(s)
   ACE_ASSERT (session_manager_p);
@@ -1134,7 +1144,7 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
 #if defined (GTK_USE)
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_ALSA_V4L_Display_Module (this,
-                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_PIXBUF_DEFAULT_NAME_STRING)),
+                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                     false);
     layout_inout->append (module_p, branch_p, index_i);
     module_p = NULL;

@@ -24,7 +24,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/Thread_Manager.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 void
 net_bittorrent_session_cleanup_nmlock_function (void* object_in, void* arg_in)
 {
@@ -37,22 +36,7 @@ net_bittorrent_session_cleanup_nmlock_function (void* object_in, void* arg_in)
 
   i_connection_manager_p->unlock (false);
 }
-#else
-void
-net_bittorrent_session_cleanup_nmlock_function (void* arg_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::net_bittorrent_session_cleanup_nmlock_function"));
 
-  // sanity check(s)
-  Net_IConnectionManagerBase* i_connection_manager_p =
-    static_cast<Net_IConnectionManagerBase*> (arg_in);
-  ACE_ASSERT (i_connection_manager_p);
-
-  i_connection_manager_p->unlock (false);
-}
-#endif // ACE_WIN32 || ACE_WIN64
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 void
 net_bittorrent_session_cleanup_data_function (void* object_in, void* arg_in)
 {
@@ -65,20 +49,6 @@ net_bittorrent_session_cleanup_data_function (void* object_in, void* arg_in)
 
   delete data_p;
 }
-#else
-void
-net_bittorrent_session_cleanup_data_function (void* arg_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::net_bittorrent_session_cleanup_data_function"));
-
-  // sanity check(s)
-  struct BitTorrent_SessionInitiationThreadData* data_p =
-    static_cast<struct BitTorrent_SessionInitiationThreadData*> (arg_in);
-  ACE_ASSERT (data_p);
-
-  delete data_p;
-}
-#endif // ACE_WIN32 || ACE_WIN64
 
 ACE_THR_FUNC_RETURN
 net_bittorrent_session_setup_function (void* arg_in)
@@ -108,24 +78,26 @@ net_bittorrent_session_setup_function (void* arg_in)
     peer_address = data_p->addresses.back ();
     data_p->addresses.pop_back ();
     delete_thread_data_b = data_p->addresses.empty ();
-    if (delete_thread_data_b)
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_At_Thread_Exit_Func* at_thread_exit_p = NULL;
-      ACE_hthread_t handle_h;
-      ACE_OS::thr_self (handle_h);
-      ACE_NEW_NORETURN (at_thread_exit_p,
-                        ACE_At_Thread_Exit_Func (handle_h,
-                                                 net_bittorrent_session_cleanup_data_function,
-                                                 arg_in));
-      ACE_ASSERT (at_thread_exit_p);
-      ACE_Thread_Manager::instance ()->at_exit (at_thread_exit_p);
-#else
-      pthread_cleanup_push (net_bittorrent_session_cleanup_data_function,
-                            arg_in);
-#endif // ACE_WIN32 || ACE_WIN64
-    } // end IF
   } // end lock scope
+  if (delete_thread_data_b)
+  {
+    ACE_At_Thread_Exit_Func* at_thread_exit_p = NULL;
+    ACE_hthread_t handle_h;
+    ACE_OS::thr_self (handle_h);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_NEW_NORETURN (at_thread_exit_p,
+                      ACE_At_Thread_Exit_Func (handle_h,
+                                               net_bittorrent_session_cleanup_data_function,
+                                               arg_in));
+#else
+    ACE_NEW_NORETURN (at_thread_exit_p,
+                      ACE_At_Thread_Exit_Func (&handle_h,
+                                               net_bittorrent_session_cleanup_data_function,
+                                               arg_in));
+#endif // ACE_WIN32 || ACE_WIN64
+    ACE_ASSERT (at_thread_exit_p);
+    ACE_Thread_Manager::instance ()->at_exit (at_thread_exit_p);
+  } // end IF
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connecting to peer \"%s\"...\n"),
@@ -133,30 +105,27 @@ net_bittorrent_session_setup_function (void* arg_in)
 
   ACE_ASSERT (data_p->peerConnectionManager);
   data_p->peerConnectionManager->lock (true);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_At_Thread_Exit_Func* at_thread_exit_p = NULL;
   ACE_hthread_t handle_h;
   ACE_OS::thr_self (handle_h);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_NEW_NORETURN (at_thread_exit_p,
                     ACE_At_Thread_Exit_Func (handle_h,
                                              net_bittorrent_session_cleanup_nmlock_function,
                                              data_p->peerConnectionManager));
+#else
+  ACE_NEW_NORETURN (at_thread_exit_p,
+                    ACE_At_Thread_Exit_Func (&handle_h,
+                                             net_bittorrent_session_cleanup_nmlock_function,
+                                             data_p->peerConnectionManager));
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (at_thread_exit_p);
   ACE_Thread_Manager::instance ()->at_exit (at_thread_exit_p);
-#else
-  pthread_cleanup_push (net_bittorrent_session_cleanup_nmlock_function,
-                        data_p->peerConnectionManager);
-#endif // ACE_WIN32 || ACE_WIN64
 
   ACE_ASSERT (data_p->session);
   data_p->session->connect (peer_address);
 
   //data_p->peerConnectionManager->unlock (false);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  pthread_cleanup_pop (1);
-  pthread_setcanceltype (old_type, NULL);
-#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = 0;
@@ -171,10 +140,6 @@ net_bittorrent_session_setup_function (void* arg_in)
     } // end lock scope
 
     //delete data_p; data_p = NULL;
-#if defined(ACE_WIN32) || defined(ACE_WIN64)
-#else
-    pthread_cleanup_pop (1);
-#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   return result;

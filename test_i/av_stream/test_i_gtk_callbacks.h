@@ -93,6 +93,7 @@ ACE_THR_FUNC_RETURN stream_processing_function (void*);
 // idle routines
 gboolean idle_finalize_source_UI_cb (gpointer);
 gboolean idle_initialize_source_UI_cb (gpointer);
+gboolean idle_start_source_UI_cb (gpointer);
 gboolean idle_end_source_UI_cb (gpointer);
 gboolean idle_update_progress_source_cb (gpointer);
 

@@ -88,7 +88,15 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
   } // end lock scope
 
 #if defined (GTK_USE)
+  guint event_source_id = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    event_source_id = g_idle_add (idle_start_source_UI_cb,
+                                  CBData_);
+    if (!event_source_id)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_start_source_UI_cb): \"%m\", continuing\n")));
+    else
+      state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
     CBData_->progressData.transferred = 0;
 #if defined (GTK_USE)
@@ -206,11 +214,11 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
     CBData_->progressData.transferred += message_in.total_length ();
     if (message_in.getMediaType () == STREAM_MEDIATYPE_VIDEO)
     {
-      event_source_id = g_idle_add (idle_update_video_display_cb,
-                                    CBData_);
-      if (!event_source_id)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
+      // event_source_id = g_idle_add (idle_update_video_display_cb,
+      //                               CBData_);
+      // if (!event_source_id)
+      //   ACE_DEBUG ((LM_ERROR,
+      //               ACE_TEXT ("failed to g_idle_add(idle_update_video_display_cb): \"%m\", continuing\n")));
       //else
         //  CBData_->eventSourceIds.insert (event_source_id);
     } // end IF

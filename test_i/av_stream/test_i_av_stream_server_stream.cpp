@@ -1226,7 +1226,6 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
 
   ++index_i;
   module_p = NULL;
-#if defined (GTK_USE)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Defragment_Module (this,
                                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
@@ -1239,9 +1238,10 @@ Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
+#if defined (GTK_USE)
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_Display_Module (this,
-                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_PIXBUF_DEFAULT_NAME_STRING)),
+                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
 #endif // GTK_USE

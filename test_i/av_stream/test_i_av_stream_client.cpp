@@ -1072,7 +1072,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2"),
                                                               std::make_pair (&module_configuration,
                                                                               &directshow_modulehandler_configuration_2a)));
-      directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING),
+      directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING),
+      //directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECTSHOW_DEFAULT_NAME_STRING),
                                                               std::make_pair (&module_configuration,
                                                                               &directshow_modulehandler_configuration_2b)));
       directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_CAPTURE_DEFAULT_NAME_STRING),
@@ -1828,8 +1829,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   ui_state_p = &const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  (*modulehandler_iterator).second.second->pixelBufferLock =
-      &ui_state_p->lock;
   CBData_in.UIState = ui_state_p;
 #endif // GTK_USE
 

@@ -329,18 +329,18 @@ struct Test_I_AVStream_UI_CBData
    : Test_I_UI_CBData ()
    , configuration (NULL)
    , isFirst (true)
-//#if defined (GTK_USE)
-//   , pixelBuffer (NULL)
-//#endif // GTK_USE
    , progressData ()
+#if defined (GTK_USE)
+   , videoRefreshEventSourceId (0)
+#endif // GTK_USE
   {}
 
   struct Test_I_AVStream_Configuration*  configuration;
   bool                                   isFirst; // first activation ?
-//#if defined (GTK_USE)
-//  GdkPixbuf*                             pixelBuffer;
-//#endif // GTK_USE
   struct Test_I_AVStream_UI_ProgressData progressData;
+#if defined (GTK_USE)
+  guint                                  videoRefreshEventSourceId;
+#endif // GTK_USE
 };
 
 struct Test_I_AVStream_ThreadData

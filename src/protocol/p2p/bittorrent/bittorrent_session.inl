@@ -2559,7 +2559,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   thread_data_p->addresses = peer_addresses_a;
   thread_data_p->lock = &(inherited::lock_);
   thread_data_p->peerConnectionManager =
-    typename PeerConnectionManagerType::SINGLETON_T::instance ();
+    PeerConnectionManagerType::SINGLETON_T::instance ();
   thread_data_p->session = this;
   thread_data_p->state = &(inherited::state_);
 

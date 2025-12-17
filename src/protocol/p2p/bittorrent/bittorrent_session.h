@@ -44,13 +44,8 @@
 // forward declarations
 class ACE_Message_Block;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 void net_bittorrent_session_cleanup_data_function (void*, void*); // session initiation thread data handle
 void net_bittorrent_session_cleanup_nmlock_function (void*, void*); // connection manager handle
-#else
-void net_bittorrent_session_cleanup_nmlock_function (void*); // connection manager handle
-void net_bittorrent_session_cleanup_data_function (void*); // session initiation thread data handle
-#endif // ACE_WIN32 || ACE_WIN64
 ACE_THR_FUNC_RETURN net_bittorrent_session_setup_function (void*);
 
 template <typename PeerConnectionConfigurationType,
