@@ -92,7 +92,7 @@ DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,            // session d
                           enum Stream_SessionMessageType,           // session event type
                           struct FileServer_ModuleHandlerConfiguration, // module handler configuration type
                           libacestream_default_net_io_module_name_string,
-                          Stream_INotify_t,                   // stream notification interface type
+                          Stream_INotify_t,                         // stream notification interface type
                           Test_U_Module_Net_Reader_t,               // reader type
                           Test_U_Module_Net_Writer_t,               // writer type
                           Test_U_Net_IO);                           // name
@@ -164,12 +164,12 @@ typedef Stream_Decoder_MPEG_TS_Decoder_T<ACE_MT_SYNCH,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          FileServer_SessionData_t> Test_U_MPEG_TS_Decoder;
-DATASTREAM_MODULE_OUTPUT_ONLY (struct FileServer_SessionData,            // session data type
-                               enum Stream_SessionMessageType,           // session event type
-                               struct FileServer_ModuleHandlerConfiguration, // module handler configuration type
-                               libacestream_default_dec_mpeg_ts_module_name_string,
-                               Stream_INotify_t,                   // stream notification interface type
-                               Test_U_MPEG_TS_Decoder);                  // reader type
+DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
+                              enum Stream_SessionMessageType,           // session event type
+                              struct FileServer_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_dec_mpeg_ts_module_name_string,
+                              Stream_INotify_t,                   // stream notification interface type
+                              Test_U_MPEG_TS_Decoder);                  // reader type
 
 //typedef Stream_Module_FileReader_Writer_T<ACE_MT_SYNCH,
 //                                          Common_TimePolicy_t,

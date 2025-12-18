@@ -27,6 +27,7 @@
  // stream
 #define FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE      65536 // bytes
 #define FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER        1
+#define FILE_SERVER_DEFAULT_AUDIO_STREAM_TYPE             0// 129 // 0x81: AC-3
 #define FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE           27 // H264
 
 //////////////////////////////////////////

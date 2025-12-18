@@ -189,17 +189,15 @@ idle_update_info_display_cb (gpointer userData_in)
   struct FileServer_UI_CBData* data_p =
     static_cast<struct FileServer_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkSpinButton* spin_button_p = NULL;
   bool is_session_message = false;
   enum Common_UI_EventType* event_p = NULL;
   int result = -1;
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
-
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->UIState->eventStack);
@@ -263,6 +261,7 @@ idle_update_info_display_cb (gpointer userData_in)
           break;
         }
         case COMMON_UI_EVENT_STATISTIC:
+        case COMMON_UI_EVENT_STEP:
         {
           spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -451,23 +450,24 @@ idle_initialize_ui_cb (gpointer userData_in)
     //g_object_unref (file_p);
   } // end ELSE
 
-  std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
-  default_folder_uri += (*iterator_2).second.second->fileIdentifier.identifier;
-  filename_p = Common_UI_GTK_Tools::localeToUTF8 (default_folder_uri);
-  ACE_ASSERT (filename_p);
-  gboolean result_2 =
-    gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                             filename_p);
-  if (!result_2)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gtk_file_chooser_set_current_folder_uri(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (default_folder_uri.c_str ())));
+  //std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
+  //default_folder_uri +=
+  //  Common_File_Tools::directory ((*iterator_2).second.second->fileIdentifier.identifier);
+  //filename_p = Common_UI_GTK_Tools::localeToUTF8 (default_folder_uri);
+  //ACE_ASSERT (filename_p);
+  //gboolean result_2 =
+  //  gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
+  //                                           filename_p);
+  //if (!result_2)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to gtk_file_chooser_set_current_folder_uri(\"%s\"): \"%m\", aborting\n"),
+  //              ACE_TEXT (default_folder_uri.c_str ())));
 
-    g_free (filename_p);
+  //  g_free (filename_p);
 
-    return G_SOURCE_REMOVE;
-  } // end IF
+  //  return G_SOURCE_REMOVE;
+  //} // end IF
   g_free (filename_p);
   filename_p = NULL;
 

@@ -170,6 +170,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
     case STREAM_SESSION_MESSAGE_DISCONNECT:
       event_e = COMMON_UI_EVENT_DISCONNECT;
       break;
+    case STREAM_SESSION_MESSAGE_STEP:
+      event_e = COMMON_UI_EVENT_STEP;
+      break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       // sanity check(s)

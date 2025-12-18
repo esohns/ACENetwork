@@ -179,7 +179,7 @@ endif ()
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-f /run/media/eriks/ARCHIVE_2/video/other/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
+                         ARGS "-f /run/media/eriks/ARCHIVE/video/other/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
@@ -213,7 +213,7 @@ elseif (WIN32)
  endif (SSL_SUPPORT)
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-c -f G:/video/other/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
+                         ARGS "-c -f F:/video/other/file_example_mp4_1920_18mg.mp4 -l -p 5555 -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

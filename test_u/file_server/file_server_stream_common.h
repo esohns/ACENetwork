@@ -95,7 +95,7 @@ struct FileServer_ModuleHandlerConfiguration
    , fileIdentifier ()
    , outboundQueue (NULL)
    , program (FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER)
-   , audioStreamType (0)
+   , audioStreamType (FILE_SERVER_DEFAULT_AUDIO_STREAM_TYPE)
    , videoStreamType (FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE)
    , streamConfiguration (NULL)
    , subscriber (NULL)
