@@ -22,21 +22,21 @@
 #define FILESERVER_DEFINES_H
 
  // *** trace log ***
-#define FILE_SERVER_LOG_FILENAME_PREFIX                   "file_server"
+#define FILE_SERVER_LOG_FILENAME_PREFIX                    "file_server"
 
  // stream
-#define FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE      65536 // bytes
-#define FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER        1
-#define FILE_SERVER_DEFAULT_AUDIO_STREAM_TYPE             0// 129 // 0x81: AC-3
-#define FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE           27 // H264
+#define FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE       65536 // bytes
+#define FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER         1
+#define FILE_SERVER_DEFAULT_AUDIO_STREAM_TYPE              0// 129 // 0x81: AC-3
+#define FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE            27 // H264
 
 //////////////////////////////////////////
 
 #if defined (GTK_SUPPORT)
 #if defined (GTK2_USE)
-#define FILE_SERVER_UI_FILE                               "file_server.glade"
+#define FILE_SERVER_UI_FILE                                "file_server.glade"
 #else
-#define FILE_SERVER_UI_FILE                               "file_server.gtk3"
+#define FILE_SERVER_UI_FILE                                "file_server.gtk3"
 #endif // GTK2_USE
 #endif // GTK_SUPPORT
 
@@ -69,17 +69,7 @@
 
 // -----------------------------------------------------------------------------
 
-//#define NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL          0
-//#define NET_CLIENT_DEF_SERVER_PING_INTERVAL             0 // ms {0: OFF}
-//#define NET_CLIENT_DEF_SERVER_TEST_INTERVAL             20 // ms
-//#define NET_CLIENT_DEF_SERVER_STRESS_INTERVAL           1 // ms
-
 // GTK progress/status bar
-#define FILE_SERVER_GTK_STATUSBAR_CONTEXT_DESCRIPTION     "ACENetwork_Test_U::main"
-
-//// define behaviour
-//#define NET_CLIENT_U_TEST_CONNECT_PROBABILITY           0.5F // 50%
-//#define NET_CLIENT_U_TEST_ABORT_PROBABILITY             0.2F // 20%
-//#define NET_CLIENT_U_TEST_DEFAULT_MODE                  Net_Client_TimeoutHandler::ACTION_NORMAL
+#define FILE_SERVER_GTK_STATUSBAR_CONTEXT_DESCRIPTION      "ACENetwork_Test_U::main"
 
 #endif

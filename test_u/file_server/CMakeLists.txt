@@ -91,7 +91,6 @@ set (${EXECUTABLE}_SRCS
      test_u_module_protocolhandler.h
      test_u_sessionmessage.cpp
      test_u_sessionmessage.h
-     test_u_socket_common.h
      test_u_stream.cpp
      test_u_stream.h
      test_u_tcpconnection.cpp
