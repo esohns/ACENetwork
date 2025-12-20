@@ -997,6 +997,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   struct Stream_ModuleConfiguration module_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration;
+  struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2; // convert for display
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2a; // resize for display
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2b; // visualization
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_3; // network io
@@ -1006,7 +1007,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t directshow_stream_configuration_3;
   struct Test_I_AVStream_Client_DirectShow_StreamConfiguration directshow_stream_configuration_4;
   Test_I_AVStream_Client_DirectShow_StreamConfigurationsIterator_t directshow_stream_iterator;
-  Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
 
   struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration mediafoundation_modulehandler_configuration;
   struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration mediafoundation_modulehandler_configuration_2; // visualization
@@ -1041,6 +1041,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       directshow_modulehandler_configuration.filterConfiguration =
         &directShowCBData_in.configuration->filterConfiguration;
 
+      directshow_modulehandler_configuration_2 =
+        directshow_modulehandler_configuration;
       directshow_modulehandler_configuration_2a =
         directshow_modulehandler_configuration;
       directshow_modulehandler_configuration_2b =
@@ -1069,6 +1071,9 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                   directshow_modulehandler_configuration,
                                                   directshow_stream_configuration_2);
 
+      directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
+                                                              std::make_pair (&module_configuration,
+                                                                              &directshow_modulehandler_configuration_2)));
       directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2"),
                                                               std::make_pair (&module_configuration,
                                                                               &directshow_modulehandler_configuration_2a)));
@@ -1384,19 +1389,19 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      directshow_modulehandler_iterator =
-        (*directshow_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (directshow_modulehandler_iterator != (*directshow_stream_iterator).second.end ());
-
       result =
         do_initialize_directshow (videoDeviceIdentifier_in,
                                   !UIDefinitionFilename_in.empty (), // has UI ?
-                                  (*directshow_modulehandler_iterator).second.second->builder,
+                                  directshow_modulehandler_configuration.builder,
                                   directShowCBData_in.streamConfiguration,
                                   (*directshow_stream_iterator).second.configuration_->format.audio,
                                   (*directshow_stream_iterator).second.configuration_->format.video,
-                                  (*directshow_modulehandler_iterator).second.second->outputFormat);
-      Stream_MediaFramework_DirectShow_Tools::copy ((*directshow_modulehandler_iterator).second.second->outputFormat,
+                                  directshow_modulehandler_configuration.outputFormat);
+      Stream_MediaFramework_DirectShow_Tools::copy (directshow_modulehandler_configuration.outputFormat,
+                                                    directshow_modulehandler_configuration_2.outputFormat);
+      Stream_MediaFramework_DirectShow_Tools::setFormat (MEDIASUBTYPE_RGB24,
+                                                         directshow_modulehandler_configuration_2.outputFormat);
+      Stream_MediaFramework_DirectShow_Tools::copy (directshow_modulehandler_configuration.outputFormat,
                                                     directshow_modulehandler_configuration_2a.outputFormat);
       break;
     }
@@ -1765,20 +1770,20 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   {
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
-      (*directshow_modulehandler_iterator).second.second->allocatorConfiguration =
+      directshow_modulehandler_configuration.allocatorConfiguration =
         allocator_configuration_p;
-      (*directshow_modulehandler_iterator).second.second->configuration =
+      directshow_modulehandler_configuration.configuration =
         directShowCBData_in.configuration;
-      (*directshow_modulehandler_iterator).second.second->connectionConfigurations =
+      directshow_modulehandler_configuration.connectionConfigurations =
         &directShowCBData_in.configuration->connectionConfigurations;
-      (*directshow_modulehandler_iterator).second.second->direct3DConfiguration =
+      directshow_modulehandler_configuration.direct3DConfiguration =
         &directShowCBData_in.configuration->direct3DConfiguration;
-      (*directshow_modulehandler_iterator).second.second->statisticReportingInterval =
+      directshow_modulehandler_configuration.statisticReportingInterval =
         ACE_Time_Value (statisticReportingInterval_in, 0);
       //(*directshow_modulehandler_iterator).second.second->stream =
       //  ((directshow_configuration.protocol == NET_TRANSPORTLAYER_TCP) ? directShowCBData_in.stream
       //                                                                 : directShowCBData_in.UDPStream);
-      (*directshow_modulehandler_iterator).second.second->subscriber =
+      directshow_modulehandler_configuration.subscriber =
         &directshow_ui_event_handler;
       break;
     }
@@ -2064,7 +2069,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 
       // clean up
       Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                                 true); // wait ?
+                                                 true,   // wait ?
+                                                 false); // close singletons ?
 
       goto clean;
     } // end IF
@@ -2087,7 +2093,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 //    connection_manager_p->abort ();
   iconnection_manager_p->wait ();
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
+                                             true,   // wait ?
+                                             false); // close singletons ?
 
   // step3: clean up
 clean:

@@ -955,7 +955,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   allocator_properties.cbPrefix = 0;
 
   struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration;
-  Test_I_AVStream_Server_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
+  struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2; // converter (display)
+  //Test_I_AVStream_Server_DirectShow_StreamConfiguration_t::ITERATOR_T directshow_modulehandler_iterator;
   struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration mediafoundation_modulehandler_configuration;
   Test_I_AVStream_Server_MediaFoundation_StreamConfiguration_t::ITERATOR_T mediafoundation_modulehandler_iterator;
 
@@ -1001,14 +1002,18 @@ do_work (unsigned int maximumNumberOfConnections_in,
       directshow_modulehandler_configuration.allocatorConfiguration =
         &allocator_configuration;
 
+      directshow_modulehandler_configuration_2 =
+        directshow_modulehandler_configuration;
+
       directshow_stream_configuration.allocatorConfiguration = &allocator_configuration;
 
       directshow_configuration.streamConfiguration.initialize (module_configuration,
                                                                directshow_modulehandler_configuration,
                                                                directshow_stream_configuration);
-      directshow_modulehandler_iterator =
-        directshow_configuration.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (directshow_modulehandler_iterator != directshow_configuration.streamConfiguration.end ());
+      directshow_configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
+                                                                           std::make_pair (&module_configuration,
+                                                                                           &directshow_modulehandler_configuration_2)));
+
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1147,11 +1152,16 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       //directshow_modulehandler_iterator =
       //  directShowCBData_in.configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (directshow_modulehandler_iterator != directShowCBData_in.configuration->streamConfiguration.end ());
+      //ACE_ASSERT (directshow_modulehandler_iterator != directShowCBData_in.configuration->streamConfiguration.end ());
       result =
         do_initialize_directshow (directshow_stream_configuration.format.audio,
                                   directshow_stream_configuration.format.video,
-                                  (*directshow_modulehandler_iterator).second.second->outputFormat);
+                                  directshow_modulehandler_configuration.outputFormat);
+      Stream_MediaFramework_DirectShow_Tools::copy (directshow_modulehandler_configuration.outputFormat,
+                                                    directshow_modulehandler_configuration_2.outputFormat);
+      Stream_MediaFramework_DirectShow_Tools::setFormat (MEDIASUBTYPE_RGB24,
+                                                         directshow_modulehandler_configuration_2.outputFormat);
+
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1310,7 +1320,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       directshow_udp_connection_manager_p->initialize (maximumNumberOfConnections_in ? maximumNumberOfConnections_in
                                                                                      : std::numeric_limits<unsigned int>::max (),
                                                        ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-      (*directshow_modulehandler_iterator).second.second->connectionManager =
+      directshow_modulehandler_configuration.connectionManager =
         directshow_tcp_connection_manager_p;
       report_handler_p = directshow_tcp_connection_manager_p;
       break;

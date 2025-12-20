@@ -70,6 +70,7 @@
 #if defined (FFMPEG_SUPPORT)
 #include "stream_lib_ffmpeg_common.h"
 
+#include "stream_dec_libav_converter.h"
 #include "stream_dec_libav_decoder.h"
 
 #include "stream_vis_libav_resize.h"
@@ -770,6 +771,10 @@ typedef Stream_Visualization_LibAVResize_T<Test_I_DirectShow_TaskBaseSynch_t,
 typedef Stream_Visualization_LibAVResize_T<Test_I_MediaFoundation_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat> Test_I_AVStream_Client_MediaFoundation_Resize;
 
+typedef Stream_Decoder_LibAVConverter_T<Test_I_DirectShow_Server_TaskBaseSynch_t,
+                                        struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_DirectShow_Converter;
+//typedef Stream_Decoder_LibAVConverter_T<Test_I_MediaFoundation_Server_TaskBaseSynch_t,
+//                                        struct Stream_MediaFramework_MediaFoundation_AudioVideoFormat> Test_I_AVStream_Server_MediaFoundation_Converter;
 typedef Stream_Visualization_LibAVResize_T<Test_I_DirectShow_Server_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Server_DirectShow_Resize;
 #else
@@ -1355,45 +1360,51 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessi
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                       // session data type
                               enum Stream_SessionMessageType,                                      // session event type
                               struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_dec_libav_converter_module_name_string,
+                              Stream_INotify_t,                                                    // stream notification interface type
+                              Test_I_AVStream_Server_DirectShow_Converter);                        // writer type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                       // session data type
+                              enum Stream_SessionMessageType,                                      // session event type
+                              struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_vis_libav_resize_module_name_string,
                               Stream_INotify_t,                                                    // stream notification interface type
                               Test_I_AVStream_Server_DirectShow_Resize);                           // writer type
 #else
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                             // session data type
-                              enum Stream_SessionMessageType,                            // session event type
-                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,       // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                    // session event type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_dec_libav_decoder_module_name_string,
-                              Stream_INotify_t,                                          // stream notification interface type
-                              Test_I_AVStream_Client_ALSA_V4L_Converter);                              // writer type
+                              Stream_INotify_t,                                                  // stream notification interface type
+                              Test_I_AVStream_Client_ALSA_V4L_Converter);                        // writer type
 
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                  // session data type
-                              enum Stream_SessionMessageType,                         // session event type
-                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration,   // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                    // session event type
+                              struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_vis_libav_resize_module_name_string,
-                              Stream_INotify_t,                                       // stream notification interface type
-                              Test_I_AVStream_Client_ALSA_V4L_Resize);                            // writer type
+                              Stream_INotify_t,                                                  // stream notification interface type
+                              Test_I_AVStream_Client_ALSA_V4L_Resize);                           // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionData,                // session data type
-                              enum Stream_SessionMessageType,                             // session event type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                      // session event type
                               struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
-                              Stream_INotify_t,                                           // stream notification interface type
+                              Stream_INotify_t,                                                    // stream notification interface type
                               Test_I_AVStream_Client_DirectShow_EventHandler);                     // writer type
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessionData,                // session data type
-                              enum Stream_SessionMessageType,                                  // session event type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_MediaFoundation_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                           // session event type
                               struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
-                              Stream_INotify_t,                                                // stream notification interface type
+                              Stream_INotify_t,                                                         // stream notification interface type
                               Test_I_AVStream_Client_MediaFoundation_EventHandler);                     // writer type
 #else
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                // session data type
-                              enum Stream_SessionMessageType,                       // session event type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                                    // session event type
                               struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
-                              Stream_INotify_t,                                     // stream notification interface type
+                              Stream_INotify_t,                                                  // stream notification interface type
                               Test_I_AVStream_Client_ALSA_V4L_Module_EventHandler);              // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 

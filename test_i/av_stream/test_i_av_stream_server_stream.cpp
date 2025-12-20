@@ -121,6 +121,13 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, branch_p, index_i);
 
   module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Server_DirectShow_Converter_Module (this,
+                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_DirectShow_Resize_Module (this,
                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
