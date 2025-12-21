@@ -23,6 +23,9 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_file_tools.h"
+#include "common_string_tools.h"
+
 #include "stream_file_defines.h"
 
 #include "net_defines.h"
@@ -55,6 +58,12 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
 
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+  std::string extension_string =
+    Common_String_Tools::tolower (Common_File_Tools::fileExtension ((*iterator).second.second->fileIdentifier.identifier, false));
+
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_FileReaderH_Module (this,
@@ -62,12 +71,19 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_U_MPEG_TS_Decoder_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
-                  false);
-  layout_inout->append (module_p, NULL, 0);
-  module_p = NULL;
+
+  if (extension_string == ACE_TEXT_ALWAYS_CHAR ("ts")     ||
+      extension_string == ACE_TEXT_ALWAYS_CHAR ("mpegts") ||
+      extension_string == ACE_TEXT_ALWAYS_CHAR ("mts"))
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_U_MPEG_TS_Decoder_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
+                    false);
+    layout_inout->append (module_p, NULL, 0);
+    module_p = NULL;
+  }
+
   ACE_NEW_RETURN (module_p,
                   Test_U_StatisticReport_Module (this,
                                                  ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),

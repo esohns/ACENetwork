@@ -850,7 +850,7 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
     (*iterator_2).second.second->fileIdentifier.identifier =
-        Common_UI_GTK_Tools::UTF8ToLocale (filename_p, -1);
+      Common_UI_GTK_Tools::UTF8ToLocale (filename_p, -1);
     g_free (filename_p);
 
     if (!data_p->configuration->listener->initialize (*static_cast<FileServer_TCPConnectionConfiguration*> ((*iterator_3).second)))
