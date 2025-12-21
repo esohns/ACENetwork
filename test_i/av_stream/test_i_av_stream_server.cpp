@@ -881,11 +881,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   struct Test_I_AVStream_Server_Configuration configuration;
   struct Test_I_AVStream_Server_StreamConfiguration stream_configuration;
   if (useReactor_in)
-    configuration.dispatchConfiguration.numberOfReactorThreads =
-      numberOfDispatchThreads_in;
+    configuration.dispatchConfiguration.numberOfReactorThreads = numberOfDispatchThreads_in;
   else
-    configuration.dispatchConfiguration.numberOfProactorThreads =
-      numberOfDispatchThreads_in;
+    configuration.dispatchConfiguration.numberOfProactorThreads = numberOfDispatchThreads_in;
   event_dispatch_configuration_p = &configuration.dispatchConfiguration;
   CBData_in.configuration = &configuration;
   serialize_output = stream_configuration.serializeOutput;
@@ -1068,6 +1066,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
   struct Test_I_AVStream_Server_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_AVStream_Server_ModuleHandlerConfiguration modulehandler_configuration_2; // splitter
+  // struct Test_I_AVStream_Server_ModuleHandlerConfiguration modulehandler_configuration_3; // convert (display)
 
   struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration; // playback
   ALSA_configuration.asynch = false;
@@ -1084,8 +1083,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
                                                      SND_PCM_STREAM_PLAYBACK);
   if (modulehandler_configuration.deviceIdentifier.identifier.empty ())
-    modulehandler_configuration.deviceIdentifier.identifier =
-      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
+    modulehandler_configuration.deviceIdentifier.identifier = ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
   modulehandler_configuration.inbound = true;
 
   //modulehandler_configuration.connectionManager = connection_manager_p;
@@ -1100,14 +1098,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //modulehandler_configuration.format.fmt.pix.sizeimage = 230400;
   //modulehandler_configuration.format.fmt.pix.width = 320;
   modulehandler_configuration.outputFormat.format =
-      AV_PIX_FMT_RGB32;
+    AV_PIX_FMT_BGRA;
   modulehandler_configuration.outputFormat.resolution.height =
-      STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
+    STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
   modulehandler_configuration.outputFormat.resolution.width =
-      STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH ;
+    STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH ;
 
   modulehandler_configuration.parserConfiguration =
-      &configuration.parserConfiguration;
+    &configuration.parserConfiguration;
   modulehandler_configuration.printProgressDot =
     UIDefinitionFilename_in.empty ();
   modulehandler_configuration.statisticReportingInterval =
@@ -1124,23 +1122,26 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   stream_configuration.format.video.format.pixelformat = V4L2_PIX_FMT_RGB32;
   stream_configuration.format.video.format.height =
-      STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
+    STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT;
   stream_configuration.format.video.format.width =
-      STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH ;
+    STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH ;
   stream_configuration.format.video.frameRate.numerator =
-      STREAM_DEV_CAM_DEFAULT_CAPTURE_FRAME_RATE;
+    STREAM_DEV_CAM_DEFAULT_CAPTURE_FRAME_RATE;
 
   configuration.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
                                                 stream_configuration);
-  Test_I_AVStream_Server_StreamConfiguration_t::ITERATOR_T iterator =
-      configuration.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration.streamConfiguration.end ());
 
   modulehandler_configuration_2 = modulehandler_configuration;
   configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_SPLITTER_DEFAULT_NAME_STRING),
                                                             std::make_pair (&module_configuration,
                                                                             &modulehandler_configuration_2)));
+
+  // modulehandler_configuration_3 = modulehandler_configuration;
+  // modulehandler_configuration_3.outputFormat.format = AV_PIX_FMT_RGB24;
+  // configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
+  //                                                           std::make_pair (&module_configuration,
+  //                                                                           &modulehandler_configuration_3)));
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1371,7 +1372,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                                        : std::numeric_limits<unsigned int>::max ()),
                                         ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   report_handler_p = tcp_connection_manager_p;
-  (*iterator).second.second->connectionManager = tcp_connection_manager_p;
+  modulehandler_configuration.connectionManager = tcp_connection_manager_p;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (report_handler_p);
   Net_StreamStatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
@@ -1384,13 +1385,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
     case STREAM_MEDIAFRAMEWORK_DIRECTSHOW:
     {
       directshow_event_handler_p =
-        dynamic_cast<Test_I_AVStream_Server_DirectShow_EventHandler*> (directshow_event_handler.writer ());
+        static_cast<Test_I_AVStream_Server_DirectShow_EventHandler*> (directshow_event_handler.writer ());
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
       mediafoundation_event_handler_p =
-        dynamic_cast<Test_I_AVStream_Server_MediaFoundation_EventHandler*> (mediafoundation_event_handler.writer ());
+        static_cast<Test_I_AVStream_Server_MediaFoundation_EventHandler*> (mediafoundation_event_handler.writer ());
       break;
     } // end IF
     default:
@@ -1405,13 +1406,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
 //  Net_ConnectionConfigurationsIterator_t iterator_2;
   event_handler_p =
-    dynamic_cast<Test_I_AVStream_Server_Module_EventHandler*> (event_handler.writer ());
-  if (!event_handler_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Test_I_AVStream_Server_Module_EventHandler>, returning\n")));
-    return;
-  } // end IF
+    static_cast<Test_I_AVStream_Server_Module_EventHandler*> (event_handler.writer ());
+  ACE_ASSERT (event_handler_p);
 #endif // ACE_WIN32 || ACE_WIN64
 
   struct Net_UserData user_data_s;
@@ -1657,8 +1653,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end SWITCH
 #else
   allocator_configuration.defaultBufferSize =
-    (STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT * STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH * 4) +
-    sizeof (struct acestream_av_stream_header);
+    (STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT * STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_WIDTH * 4) + sizeof (struct acestream_av_stream_header);
 
   stream_configuration.cloneModule = true;
   stream_configuration.messageAllocator = allocator_p;
@@ -1748,18 +1743,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
       tcp_connection_manager_p;
   configuration.signalHandlerConfiguration.dispatchState =
       &event_dispatch_state_s;
-//  if (useReactor_in)
-//    configuration.signalHandlerConfiguration.listener =
-//        Test_I_AVStream_Server_LISTENER_SINGLETON::instance ();
-//  else
-    configuration.signalHandlerConfiguration.listener =
-        TEST_I_AVSTREAM_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+  if (useReactor_in)
+    configuration.signalHandlerConfiguration.listener = TEST_I_AVSTREAM_SERVER_LISTENER_SINGLETON::instance ();
+  else
+    configuration.signalHandlerConfiguration.listener = TEST_I_AVSTREAM_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
   configuration.signalHandlerConfiguration.statisticReportingHandler =
-      report_handler_p;
-  configuration.signalHandlerConfiguration.statisticReportingTimerId =
-      timer_id;
+    report_handler_p;
+  configuration.signalHandlerConfiguration.statisticReportingTimerId = timer_id;
   result =
-      signalHandler_in.initialize (configuration.signalHandlerConfiguration);
+    signalHandler_in.initialize (configuration.signalHandlerConfiguration);
   event_handler_2 = &signalHandler_in;
 #endif // ACE_WIN32 || ACE_WIN64
   if (!result)
@@ -1870,7 +1862,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     Test_I_AVStream_Server_MediaFoundation_IUDPConnector_t* mediafoundation_iconnector_p =
       NULL;
 #else
-//    Test_I_AVStream_Server_ITCPConnector_t* i_tcp_connector_p = NULL;
+    // Test_I_AVStream_Server_ITCPConnector_t* i_tcp_connector_p = NULL;
     Test_I_AVStream_Server_IUDPConnector_t* i_udp_connector_p = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
     if (useUDP_in)
@@ -1997,7 +1989,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
         } // end ELSE
       } // end SWITCH
 #else
-      listen_address = udp_connection_configuration.socketConfiguration.listenAddress;
+      listen_address =
+        udp_connection_configuration.socketConfiguration.listenAddress;
 #endif // ACE_WIN32 || ACE_WIN64
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
@@ -2270,7 +2263,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
                     ACE_TEXT ("failed to initialize listener, returning\n")));
 
         Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                                   true); // wait ?
+                                                   true,   // wait ?
+                                                   false); // close singletons ?
         //		{ // synch access
         //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -2407,7 +2401,8 @@ clean:
   timer_manager_p->stop ();
 
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
+                                             true,   // wait ?
+                                             false); // close singletons ?
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   switch (mediaFramework_in)

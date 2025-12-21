@@ -102,13 +102,18 @@ Test_I_AVStream_Server_SignalHandler_T<ConfigurationType,
       close_all = true;
       break;
     }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    case SIGCHLD:
+      return;
+#endif // ACE_WIN32 || ACE_WIN64
     default:
     {
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal: \"%S\", returning\n"),
-                  signal_in));
+                  signal_in.signal));
       return;
     }
   } // end SWITCH

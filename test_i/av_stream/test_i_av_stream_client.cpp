@@ -1235,8 +1235,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   stream_configuration.messageAllocator = allocator_p;
   stream_configuration.module = &event_handler_module;
   stream_configuration.module_2 = &streamer_module;
-  modulehandler_configuration.outputFormat.format =
-    Stream_MediaFramework_Tools::v4lFormatToffmpegFormat (V4L2_PIX_FMT_RGB32);
+  modulehandler_configuration.outputFormat.format = AV_PIX_FMT_BGRA;
   modulehandler_configuration.outputFormat.resolution.height =
     stream_configuration.format.video.format.height;
   modulehandler_configuration.outputFormat.resolution.width =
@@ -1245,11 +1244,13 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   stream_configuration_3.initialize (module_configuration,
                                      modulehandler_configuration,
                                      stream_configuration);
+
   modulehandler_configuration_2 = modulehandler_configuration;
   modulehandler_configuration_2.deviceIdentifier = audioDeviceIdentifier_in;
   stream_configuration_3.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_MIC_SOURCE_ALSA_DEFAULT_NAME_STRING),
                                                  std::make_pair (&module_configuration,
                                                                  &modulehandler_configuration_2)));
+
   CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                         stream_configuration_3));
   stream_iterator =

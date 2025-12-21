@@ -93,6 +93,11 @@ Test_I_AVStream_Client_SignalHandler_T<ConfigurationType>::handle (const struct 
 
       break;
     }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    case SIGCHLD:
+      return;
+#endif // ACE_WIN32 || ACE_WIN64
     default:
     {
       // *PORTABILITY*: tracing in a signal handler context is not portable

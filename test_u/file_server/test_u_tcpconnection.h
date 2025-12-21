@@ -36,7 +36,6 @@
 #include "net_tcpconnection_base.h"
 
 #include "test_u_configuration.h"
-#include "test_u_socket_common.h"
 
 #include "file_server_connection_common.h"
 

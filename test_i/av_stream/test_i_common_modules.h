@@ -967,6 +967,9 @@ typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
                                    Test_I_AVStream_Server_Message,
                                    Test_I_AVStream_Server_SessionMessage> Test_I_AVStream_Server_Defragment;
 #if defined (FFMPEG_SUPPORT)
+typedef Stream_Decoder_LibAVConverter_T<Test_I_Server_TaskBaseSynch_t,
+                                        struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Convert;
+
 typedef Stream_Visualization_LibAVResize_T<Test_I_Server_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_ALSA_V4L_Format> Test_I_AVStream_Server_Resize;
 #endif // FFMPEG_SUPPORT
@@ -1488,20 +1491,27 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,         
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_AVStream_Server_Defragment);                       // writer type
 #if defined (FFMPEG_SUPPORT)
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                  // session data type
-                             enum Stream_SessionMessageType,                         // session event type
-                             struct Test_I_AVStream_Server_ModuleHandlerConfiguration,   // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                   // session data type
+                             enum Stream_SessionMessageType,                              // session event type
+                             struct Test_I_AVStream_Server_ModuleHandlerConfiguration,    // module handler configuration type
+                             libacestream_default_dec_libav_converter_module_name_string,
+                             Stream_INotify_t,                                            // stream notification interface type
+                             Test_I_AVStream_Server_Convert);                             // writer type
+
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                // session data type
+                             enum Stream_SessionMessageType,                           // session event type
+                             struct Test_I_AVStream_Server_ModuleHandlerConfiguration, // module handler configuration type
                              libacestream_default_vis_libav_resize_module_name_string,
-                             Stream_INotify_t,                                       // stream notification interface type
-                             Test_I_AVStream_Server_Resize);                             // writer type
+                             Stream_INotify_t,                                         // stream notification interface type
+                             Test_I_AVStream_Server_Resize);                           // writer type
 #endif // FFMPEG_SUPPORT
 #if defined (GTK_SUPPORT)
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                       // session data type
-                              enum Stream_SessionMessageType,                         // session event type
-                              struct Test_I_AVStream_Server_ModuleHandlerConfiguration,        // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                 // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_AVStream_Server_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_vis_gtk_cairo_module_name_string,
-                              Stream_INotify_t,                                       // stream notification interface type
-                              Test_I_AVStream_Server_Display);                                 // writer type
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_AVStream_Server_Display);                          // writer type
 #endif // GTK_SUPPORT
 
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                // session data type
@@ -1526,12 +1536,12 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_MediaFoundation_StreamSessi
                               Stream_INotify_t,                                                // stream notification interface type
                               Test_I_AVStream_Server_MediaFoundation_EventHandler);                     // writer type
 #else
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                // session data type
-                              enum Stream_SessionMessageType,                  // session event type
-                              struct Test_I_AVStream_Server_ModuleHandlerConfiguration, // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_StreamSessionData,                    // session data type
+                              enum Stream_SessionMessageType,                              // session event type
+                              struct Test_I_AVStream_Server_ModuleHandlerConfiguration,    // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
-                              Stream_INotify_t,                                // stream notification interface type
-                              Test_I_AVStream_Server_Module_EventHandler);              // writer type
+                              Stream_INotify_t,                                            // stream notification interface type
+                              Test_I_AVStream_Server_Module_EventHandler);                 // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 
 #endif

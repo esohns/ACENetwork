@@ -2094,6 +2094,7 @@ done:
         ACE_ASSERT (module_p);
         directshow_thread_data_p->CBData->audioStream->remove (module_p, true, true);
         directshow_thread_data_p->CBData->videoStream->remove (module_p, true, true);
+
         directshow_thread_data_p->CBData->progressData.completedActions.insert (thread_data_base_p->eventSourceId);
         break;
       }
@@ -2105,9 +2106,9 @@ done:
       default:
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
+                    ACE_TEXT ("invalid/unknown media framework (was: %d), continuing\n"),
                     thread_data_base_p->mediaFramework));
-        goto done;
+        break;
       }
     } // end SWITCH
   } // end lock scope
@@ -2119,6 +2120,7 @@ done:
     ACE_ASSERT (module_p);
     thread_data_p->CBData->audioStream->remove (module_p, true, true);
     thread_data_p->CBData->videoStream->remove (module_p, true, true);
+
     thread_data_p->CBData->progressData.completedActions.insert (thread_data_p->eventSourceId);
   } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
@@ -5620,8 +5622,8 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
     }
   } // end SWITCH
 #else
-  protocol = ui_cb_data_p->configuration->protocol;
-#endif  
+  ui_cb_data_p->configuration->protocol = protocol;
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Test_I_AVStream_Server_DirectShow_TCPConnectionManager_t* directshow_tcp_connection_manager_p =
@@ -5663,6 +5665,9 @@ toggleaction_listen_activate_cb (GtkToggleAction* toggleAction_in,
     }
   } // end SWITCH
 #else
+  Test_I_AVStream_Server_TCPConnectionManager_t* tcp_connection_manager_p =
+    TEST_I_AVSTREAM_SERVER_TCP_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (tcp_connection_manager_p);
   Test_I_AVStream_Server_UDPConnectionManager_t* udp_connection_manager_p =
     TEST_I_AVSTREAM_SERVER_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (udp_connection_manager_p);
@@ -6589,7 +6594,10 @@ drawingarea_source_draw_cb (GtkWidget* widget_in,
       module_p =
         const_cast<Stream_Module_t*> (directshow_ui_cb_data_p->videoStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)));
       ACE_ASSERT (module_p);
-      dispatch_p = dynamic_cast<Common_IDispatch*> (module_p->writer ());
+      Test_I_AVStream_Client_DirectShow_GTK_Display* display_p =
+        static_cast<Test_I_AVStream_Client_DirectShow_GTK_Display*> (module_p->writer ());
+      dispatch_p = display_p;
+      // dispatch_p = dynamic_cast<Common_IDispatch*> (module_p->writer ());
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -6683,7 +6691,10 @@ drawingarea_target_draw_cb (GtkWidget* widget_in,
       module_p =
         const_cast<Stream_Module_t*> (connection_stream_r.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)));
       ACE_ASSERT (module_p);
-      dispatch_p = dynamic_cast<Common_IDispatch*> (module_p->writer ());
+      Test_I_AVStream_Server_DirectShow_GTK_Display* display_p =
+        static_cast<Test_I_AVStream_Server_DirectShow_GTK_Display*> (module_p->writer ());
+      dispatch_p = display_p;
+      // dispatch_p = dynamic_cast<Common_IDispatch*> (module_p->writer ());
       iconnection_p->decrease ();
       break;
     }
