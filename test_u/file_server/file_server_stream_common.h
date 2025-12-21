@@ -100,9 +100,7 @@ struct FileServer_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-  {
-    inbound = true;
-  }
+  {}
 
   FileServer_TCPIConnection_t*      connection;               // net target module
   Net_ConnectionConfigurations_t*   connectionConfigurations; // net target module

@@ -116,7 +116,6 @@ struct PCPClient_ModuleHandlerConfiguration
    , subscribers (NULL)
    , targetFileName ()
   {
-    inbound = true;
     passive = false;
   }
 

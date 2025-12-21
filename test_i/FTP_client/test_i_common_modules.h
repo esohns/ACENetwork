@@ -35,7 +35,7 @@
 
 //#include "stream_stat_statistic_report.h"
 
-#include "stream_net_io.h"
+//#include "stream_net_io.h"
 
 #include "net_connection_manager.h"
 
@@ -66,34 +66,34 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> FTP_Client_ConnectionManager_t;
 
 // declare module(s)
-typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_I_Message,
-                                     Test_I_SessionMessage,
-                                     struct FTP_Client_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct FTP_Client_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_I_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     FTP_Client_ConnectionManager_t,
-                                     struct Stream_UserData> FTP_Client_Module_Net_Writer_t;
-typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_I_Message,
-                                     Test_I_SessionMessage,
-                                     struct FTP_Client_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct FTP_Client_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_I_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     FTP_Client_ConnectionManager_t,
-                                     struct Stream_UserData> FTP_Client_Module_Net_Reader_t;
+//typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
+//                                     Stream_ControlMessage_t,
+//                                     Test_I_Message,
+//                                     Test_I_SessionMessage,
+//                                     struct FTP_Client_ModuleHandlerConfiguration,
+//                                     enum Stream_ControlType,
+//                                     enum Stream_SessionMessageType,
+//                                     struct FTP_Client_StreamState,
+//                                     struct Stream_Statistic,
+//                                     Test_I_SessionManager_t,
+//                                     Common_Timer_Manager_t,
+//                                     ACE_INET_Addr,
+//                                     FTP_Client_ConnectionManager_t,
+//                                     struct Stream_UserData> FTP_Client_Module_Net_Writer_t;
+//typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
+//                                     Stream_ControlMessage_t,
+//                                     Test_I_Message,
+//                                     Test_I_SessionMessage,
+//                                     struct FTP_Client_ModuleHandlerConfiguration,
+//                                     enum Stream_ControlType,
+//                                     enum Stream_SessionMessageType,
+//                                     struct FTP_Client_StreamState,
+//                                     struct Stream_Statistic,
+//                                     Test_I_SessionManager_t,
+//                                     Common_Timer_Manager_t,
+//                                     ACE_INET_Addr,
+//                                     FTP_Client_ConnectionManager_t,
+//                                     struct Stream_UserData> FTP_Client_Module_Net_Reader_t;
 
 typedef FTP_Module_Streamer_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,
@@ -148,14 +148,14 @@ typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        struct Stream_UserData> FTP_Client_MessageHandler;
 
 // declare module(s)
-DATASTREAM_MODULE_DUPLEX (struct FTP_Client_SessionData,                  // session data type
-                          enum Stream_SessionMessageType,                 // session event type
-                          struct FTP_Client_ModuleHandlerConfiguration,   // module handler configuration type
-                          libacestream_default_net_io_module_name_string,
-                          Stream_INotify_t,                               // stream notification interface type
-                          FTP_Client_Module_Net_Reader_t,                 // reader type
-                          FTP_Client_Module_Net_Writer_t,                 // writer type
-                          FTP_Client_Module_Net_IO);                      // name
+//DATASTREAM_MODULE_DUPLEX (struct FTP_Client_SessionData,                  // session data type
+//                          enum Stream_SessionMessageType,                 // session event type
+//                          struct FTP_Client_ModuleHandlerConfiguration,   // module handler configuration type
+//                          libacestream_default_net_io_module_name_string,
+//                          Stream_INotify_t,                               // stream notification interface type
+//                          FTP_Client_Module_Net_Reader_t,                 // reader type
+//                          FTP_Client_Module_Net_Writer_t,                 // writer type
+//                          FTP_Client_Module_Net_IO);                      // name
 
 //DATASTREAM_MODULE_OUTPUT_ONLY (struct FTP_Client_SessionData,                // session data type
 //                               enum Stream_SessionMessageType,               // session event type

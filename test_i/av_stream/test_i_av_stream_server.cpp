@@ -986,7 +986,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
         fileName_in;
       directshow_modulehandler_configuration.filterConfiguration =
         &directshow_configuration.filterConfiguration;
-      directshow_modulehandler_configuration.inbound = true;
       directshow_modulehandler_configuration.parserConfiguration =
         &directshow_configuration.parserConfiguration;
       directshow_modulehandler_configuration.printProgressDot =
@@ -1032,7 +1031,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //              ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
       //  goto clean;
       //} // end IF
-      mediafoundation_modulehandler_configuration.inbound = true;
       mediafoundation_modulehandler_configuration.printProgressDot =
         UIDefinitionFilename_in.empty ();
       mediafoundation_modulehandler_configuration.statisticReportingInterval =

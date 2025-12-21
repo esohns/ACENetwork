@@ -26,7 +26,13 @@
 #include "common_file_tools.h"
 #include "common_string_tools.h"
 
+#include "stream_dec_defines.h"
+
 #include "stream_file_defines.h"
+
+#include "stream_net_defines.h"
+
+#include "stream_stat_defines.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -67,7 +73,7 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_FileReaderH_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("FileSource")),
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SOURCE_DEFAULT_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
@@ -78,7 +84,7 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
   {
     ACE_NEW_RETURN (module_p,
                     Test_U_MPEG_TS_Decoder_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
+                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
                     false);
     layout_inout->append (module_p, NULL, 0);
     module_p = NULL;
@@ -86,15 +92,17 @@ Test_U_Stream::load (Stream_ILayout* layout_inout,
 
   ACE_NEW_RETURN (module_p,
                   Test_U_StatisticReport_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
-                  Test_U_Net_IO_Module (this,
-                                        ACE_TEXT_ALWAYS_CHAR ("NetIO")),
+                  Test_U_Net_Output_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (MODULE_NET_OUTPUT_DEFAULT_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
 
   delete_out = true;
 

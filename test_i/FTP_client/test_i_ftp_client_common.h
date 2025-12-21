@@ -155,7 +155,6 @@ struct FTP_Client_ModuleHandlerConfiguration
    //, connectionConfigurations (NULL)
    , subscriber (NULL)
   {
-    inbound = true;
     passive = false;
   }
 

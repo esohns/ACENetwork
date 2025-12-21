@@ -564,7 +564,6 @@ do_work (
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
   modulehandler_configuration.fileIdentifier.identifier = fileName_in;
-  modulehandler_configuration.inbound = false;
   modulehandler_configuration.printFinalReport = true;
   //modulehandler_configuration.program =
   //  FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER;
@@ -604,7 +603,7 @@ do_work (
   modulehandler_configuration_2 = modulehandler_configuration;
   modulehandler_configuration_2.concurrency =
       STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING),
+  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_OUTPUT_DEFAULT_NAME_STRING),
                                                             std::make_pair (&module_configuration,
                                                                             &modulehandler_configuration_2)));
 

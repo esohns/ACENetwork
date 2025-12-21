@@ -34,7 +34,7 @@
 
 #include "stream_stat_statistic_report.h"
 
-#include "stream_net_io.h"
+#include "stream_net_output.h"
 
 #include "net_connection_manager.h"
 
@@ -67,34 +67,26 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> PCPClient_ConnectionManager_t;
 
 // declare module(s)
-typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_U_Message,
-                                     Test_U_SessionMessage,
-                                     struct PCPClient_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct PCPClient_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_U_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     PCPClient_ConnectionManager_t,
-                                     struct Stream_UserData> PCPClient_Module_Net_Writer_t;
-typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_U_Message,
-                                     Test_U_SessionMessage,
-                                     struct PCPClient_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct PCPClient_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_U_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     PCPClient_ConnectionManager_t,
-                                     struct Stream_UserData> PCPClient_Module_Net_Reader_t;
+typedef Stream_Module_Net_OutputWriter_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct PCPClient_ModuleHandlerConfiguration,
+                                         Stream_ControlMessage_t,
+                                         Test_U_Message,
+                                         Test_U_SessionMessage,
+                                         enum Stream_ControlType,
+                                         enum Stream_SessionMessageType,
+                                         PCPClient_ConnectionManager_t,
+                                         struct Stream_UserData> PCPClient_Module_Net_Writer_t;
+typedef Stream_Module_Net_OutputReader_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct PCPClient_ModuleHandlerConfiguration,
+                                         Stream_ControlMessage_t,
+                                         Test_U_Message,
+                                         Test_U_SessionMessage,
+                                         enum Stream_ControlType,
+                                         enum Stream_SessionMessageType,
+                                         PCPClient_ConnectionManager_t,
+                                         struct Stream_UserData> PCPClient_Module_Net_Reader_t;
 
 typedef PCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -140,44 +132,44 @@ typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              struct Stream_UserData> PCPClient_Module_Dump;
 
 // declare module(s)
-DATASTREAM_MODULE_DUPLEX (struct PCPClient_SessionData,                  // session data type
-                          enum Stream_SessionMessageType,                 // session event type
-                          struct PCPClient_ModuleHandlerConfiguration,   // module handler configuration type
-                          libacestream_default_net_io_module_name_string,
-                          Stream_INotify_t,                               // stream notification interface type
-                          PCPClient_Module_Net_Reader_t,                 // reader type
-                          PCPClient_Module_Net_Writer_t,                 // writer type
-                          PCPClient_Module_Net_IO);                      // name
+DATASTREAM_MODULE_DUPLEX (struct PCPClient_SessionData,                       // session data type
+                          enum Stream_SessionMessageType,                     // session event type
+                          struct PCPClient_ModuleHandlerConfiguration,        // module handler configuration type
+                          libacestream_default_net_output_module_name_string,
+                          Stream_INotify_t,                                   // stream notification interface type
+                          PCPClient_Module_Net_Reader_t,                      // reader type
+                          PCPClient_Module_Net_Writer_t,                      // writer type
+                          PCPClient_Module_Net_Output);                       // name
 
-DATASTREAM_MODULE_OUTPUT_ONLY (struct PCPClient_SessionData,                // session data type
-                               enum Stream_SessionMessageType,               // session event type
-                               struct PCPClient_ModuleHandlerConfiguration, // module handler configuration type
+DATASTREAM_MODULE_OUTPUT_ONLY (struct PCPClient_SessionData,                                   // session data type
+                               enum Stream_SessionMessageType,                                 // session event type
+                               struct PCPClient_ModuleHandlerConfiguration,                    // module handler configuration type
                                libacenetwork_protocol_default_pcp_streamer_module_name_string,
-                               Stream_INotify_t,                             // stream notification interface type
-                               PCPClient_Module_Streamer);                  // reader type
-DATASTREAM_MODULE_DUPLEX (struct PCPClient_SessionData,                // session data type
-                          enum Stream_SessionMessageType,               // session event type
-                          struct PCPClient_ModuleHandlerConfiguration, // module handler configuration type
+                               Stream_INotify_t,                                               // stream notification interface type
+                               PCPClient_Module_Streamer);                                     // reader type
+DATASTREAM_MODULE_DUPLEX (struct PCPClient_SessionData,                                 // session data type
+                          enum Stream_SessionMessageType,                               // session event type
+                          struct PCPClient_ModuleHandlerConfiguration,                  // module handler configuration type
                           libacenetwork_protocol_default_pcp_parser_module_name_string,
-                          Stream_INotify_t,                             // stream notification interface type
-                          PCPClient_Module_Streamer,                   // reader type
-                          PCPClient_Module_Parser,                     // writer type
-                          PCPClient_Module_Marshal);                   // name
+                          Stream_INotify_t,                                             // stream notification interface type
+                          PCPClient_Module_Streamer,                                    // reader type
+                          PCPClient_Module_Parser,                                      // writer type
+                          PCPClient_Module_Marshal);                                    // name
 
-DATASTREAM_MODULE_DUPLEX (struct PCPClient_SessionData,                  // session data type
-                          enum Stream_SessionMessageType,                 // session event type
-                          struct PCPClient_ModuleHandlerConfiguration,   // module handler configuration type
+DATASTREAM_MODULE_DUPLEX (struct PCPClient_SessionData,                        // session data type
+                          enum Stream_SessionMessageType,                      // session event type
+                          struct PCPClient_ModuleHandlerConfiguration,         // module handler configuration type
                           libacestream_default_stat_report_module_name_string,
-                          Stream_INotify_t,                               // stream notification interface type
-                          PCPClient_Module_StatisticReport_ReaderTask_t, // reader type
-                          PCPClient_Module_StatisticReport_WriterTask_t, // writer type
-                          PCPClient_Module_StatisticReport);             // name
+                          Stream_INotify_t,                                    // stream notification interface type
+                          PCPClient_Module_StatisticReport_ReaderTask_t,       // reader type
+                          PCPClient_Module_StatisticReport_WriterTask_t,       // writer type
+                          PCPClient_Module_StatisticReport);                   // name
 
-DATASTREAM_MODULE_INPUT_ONLY (struct PCPClient_SessionData,                // session data type
-                              enum Stream_SessionMessageType,               // session event type
-                              struct PCPClient_ModuleHandlerConfiguration, // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (struct PCPClient_SessionData,                      // session data type
+                              enum Stream_SessionMessageType,                    // session event type
+                              struct PCPClient_ModuleHandlerConfiguration,       // module handler configuration type
                               libacestream_default_misc_dump_module_name_string,
-                              Stream_INotify_t,                             // stream notification interface type
-                              PCPClient_Module_Dump);                      // writer type
+                              Stream_INotify_t,                                  // stream notification interface type
+                              PCPClient_Module_Dump);                            // writer type
 
 #endif

@@ -141,7 +141,6 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
 #endif // GTK_USE
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
-    inbound = true;
   }
 
   Net_ConnectionConfigurations_t* connectionConfigurations;
@@ -206,7 +205,6 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
 #endif // GTK_USE
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
-    inbound = true;
   }
 
 #if defined (FFMPEG_SUPPORT)

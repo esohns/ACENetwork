@@ -132,8 +132,6 @@ struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration
    , windowController (NULL)
    , windowController2 (NULL)
   {
-    inbound = true;
-
     push = true; // *TODO*: support asynch directshow filter
     //filterCLSID =
     //  (push ? CLSID_ACEStream_MediaFramework_Source_Filter
@@ -195,8 +193,6 @@ struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration
    , subscribers (NULL)
    , windowController (NULL)
   {
-    inbound = true;
-
     HRESULT result = MFCreateMediaType (&outputFormat);
     if (FAILED (result))
       ACE_DEBUG ((LM_ERROR,

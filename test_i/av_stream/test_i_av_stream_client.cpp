@@ -1095,7 +1095,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
         directshow_modulehandler_configuration;
       directshow_modulehandler_configuration_3.concurrency =
         STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-      directshow_modulehandler_configuration_3.inbound = false;
 
       directshow_stream_configuration_4 = directshow_stream_configuration_2;
       directshow_stream_configuration_4.module = NULL;
@@ -1157,7 +1156,6 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
         mediafoundation_modulehandler_configuration;
       mediafoundation_modulehandler_configuration_3.concurrency =
         STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-      mediafoundation_modulehandler_configuration_3.inbound = false;
 
       mediafoundation_stream_configuration_4 = mediafoundation_stream_configuration_2;
       mediafoundation_stream_configuration_4.module = NULL;

@@ -121,7 +121,6 @@ struct Test_I_WebTV_ModuleHandlerConfiguration
    , subscriber (NULL)
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-    inbound = true;
   }
 
   Net_ConnectionConfigurations_t* connectionConfigurations;
@@ -183,9 +182,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
    , outputFormat ()
 #endif // FFMPEG_SUPPORT
    , window ()
-  {
-    inbound = true;
-  }
+  {}
 
   struct Stream_MediaFramework_ALSA_Configuration* ALSAConfiguration;
 #if defined (FFMPEG_SUPPORT)

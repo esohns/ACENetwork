@@ -77,7 +77,6 @@ struct IRC_ModuleHandlerConfiguration
     // *WARNING*: currently, this does NOT work with multithreaded streams
     //            --> USE WITH CAUTION !
     //crunchMessages = IRC_DEFAULT_CRUNCH_MESSAGES;
-    inbound = true;
     passive = false;
   }
 

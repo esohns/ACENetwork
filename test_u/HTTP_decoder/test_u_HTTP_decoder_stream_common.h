@@ -133,9 +133,7 @@ struct Test_U_HTTPDecoder_ModuleHandlerConfiguration
    , streamConfiguration (NULL)
    , targetFileName ()
    , URL ()
-  {
-    inbound = true;
-  }
+  {}
 
   struct Test_U_Configuration*              configuration;
   Test_U_IConnection_t*                     connection; // TCP target/IO module

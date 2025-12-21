@@ -35,7 +35,7 @@
 
 #include "stream_stat_statistic_report.h"
 
-#include "stream_net_io.h"
+//#include "stream_net_io.h"
 
 #include "net_connection_manager.h"
 
@@ -71,34 +71,34 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct Net_UserData> DHCPClient_ConnectionManager_t;
 
 // declare module(s)
-typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_U_Message,
-                                     Test_U_SessionMessage,
-                                     struct DHCPClient_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct DHCPClient_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_U_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     DHCPClient_ConnectionManager_t,
-                                     struct Stream_UserData> DHCPClient_Module_Net_Writer_t;
-typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_U_Message,
-                                     Test_U_SessionMessage,
-                                     struct DHCPClient_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct DHCPClient_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_U_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     DHCPClient_ConnectionManager_t,
-                                     struct Stream_UserData> DHCPClient_Module_Net_Reader_t;
+//typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
+//                                     Stream_ControlMessage_t,
+//                                     Test_U_Message,
+//                                     Test_U_SessionMessage,
+//                                     struct DHCPClient_ModuleHandlerConfiguration,
+//                                     enum Stream_ControlType,
+//                                     enum Stream_SessionMessageType,
+//                                     struct DHCPClient_StreamState,
+//                                     struct Stream_Statistic,
+//                                     Test_U_SessionManager_t,
+//                                     Common_Timer_Manager_t,
+//                                     ACE_INET_Addr,
+//                                     DHCPClient_ConnectionManager_t,
+//                                     struct Stream_UserData> DHCPClient_Module_Net_Writer_t;
+//typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
+//                                     Stream_ControlMessage_t,
+//                                     Test_U_Message,
+//                                     Test_U_SessionMessage,
+//                                     struct DHCPClient_ModuleHandlerConfiguration,
+//                                     enum Stream_ControlType,
+//                                     enum Stream_SessionMessageType,
+//                                     struct DHCPClient_StreamState,
+//                                     struct Stream_Statistic,
+//                                     Test_U_SessionManager_t,
+//                                     Common_Timer_Manager_t,
+//                                     ACE_INET_Addr,
+//                                     DHCPClient_ConnectionManager_t,
+//                                     struct Stream_UserData> DHCPClient_Module_Net_Reader_t;
 
 typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -166,14 +166,14 @@ typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              struct Stream_UserData> DHCPClient_Module_Dump;
 
 // declare module(s)
-DATASTREAM_MODULE_DUPLEX (struct DHCPClient_SessionData,                  // session data type
-                          enum Stream_SessionMessageType,                 // session event type
-                          struct DHCPClient_ModuleHandlerConfiguration,   // module handler configuration type
-                          libacestream_default_net_io_module_name_string,
-                          Stream_INotify_t,                               // stream notification interface type
-                          DHCPClient_Module_Net_Reader_t,                 // reader type
-                          DHCPClient_Module_Net_Writer_t,                 // writer type
-                          DHCPClient_Module_Net_IO);                      // name
+//DATASTREAM_MODULE_DUPLEX (struct DHCPClient_SessionData,                  // session data type
+//                          enum Stream_SessionMessageType,                 // session event type
+//                          struct DHCPClient_ModuleHandlerConfiguration,   // module handler configuration type
+//                          libacestream_default_net_io_module_name_string,
+//                          Stream_INotify_t,                               // stream notification interface type
+//                          DHCPClient_Module_Net_Reader_t,                 // reader type
+//                          DHCPClient_Module_Net_Writer_t,                 // writer type
+//                          DHCPClient_Module_Net_IO);                      // name
 
 DATASTREAM_MODULE_INPUT_ONLY (struct DHCPClient_SessionData,                // session data type
                               enum Stream_SessionMessageType,               // session event type

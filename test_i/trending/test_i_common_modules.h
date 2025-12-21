@@ -37,7 +37,7 @@
 
 #include "stream_module_htmlparser.h"
 
-#include "stream_net_io.h"
+#include "stream_net_output.h"
 
 #include "stream_stat_statistic_report.h"
 
@@ -51,50 +51,35 @@
 #include "test_i_trending_common.h"
 #include "test_i_trending_connection_common.h"
 
-// typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
-//                                  enum Stream_SessionMessageType,
-//                                  struct Stream_SessionManager_Configuration,
-//                                  struct Test_I_Trending_SessionData,
-//                                  struct Stream_Statistic,
-//                                  struct Stream_UserData> Test_I_SessionManager_t;
-
 // declare module(s)
-typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_I_Stream_Message,
-                                     Test_I_Stream_SessionMessage,
-                                     struct Test_I_Trending_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct Test_I_Trending_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_I_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     Test_I_Trending_InetConnectionManager_t,
-                                     struct Stream_UserData> Test_I_Net_Reader_t;
-typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                     Stream_ControlMessage_t,
-                                     Test_I_Stream_Message,
-                                     Test_I_Stream_SessionMessage,
-                                     struct Test_I_Trending_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct Test_I_Trending_StreamState,
-                                     struct Stream_Statistic,
-                                     Test_I_SessionManager_t,
-                                     Common_Timer_Manager_t,
-                                     ACE_INET_Addr,
-                                     Test_I_Trending_InetConnectionManager_t,
-                                     struct Stream_UserData> Test_I_Net_Writer_t;
-DATASTREAM_MODULE_DUPLEX (struct Test_I_Trending_SessionData,                // session data type
-                          enum Stream_SessionMessageType,                   // session event type
-                          struct Test_I_Trending_ModuleHandlerConfiguration, // module handler configuration type
-                          libacestream_default_net_io_module_name_string,
-                          Stream_INotify_t,                                 // stream notification interface type
-                          Test_I_Net_Reader_t,                              // reader type
-                          Test_I_Net_Writer_t,                              // writer type
-                          Test_I_Net_IO);                                   // name
+typedef Stream_Module_Net_OutputReader_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct Test_I_Trending_ModuleHandlerConfiguration,
+                                         Stream_ControlMessage_t,
+                                         Test_I_Stream_Message,
+                                         Test_I_Stream_SessionMessage,
+                                         enum Stream_ControlType,
+                                         enum Stream_SessionMessageType,
+                                         Test_I_Trending_InetConnectionManager_t,
+                                         struct Stream_UserData> Test_I_Net_Reader_t;
+typedef Stream_Module_Net_OutputWriter_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct Test_I_Trending_ModuleHandlerConfiguration,
+                                         Stream_ControlMessage_t,
+                                         Test_I_Stream_Message,
+                                         Test_I_Stream_SessionMessage,
+                                         enum Stream_ControlType,
+                                         enum Stream_SessionMessageType,
+                                         Test_I_Trending_InetConnectionManager_t,
+                                         struct Stream_UserData> Test_I_Net_Writer_t;
+DATASTREAM_MODULE_DUPLEX (struct Test_I_Trending_SessionData,                 // session data type
+                          enum Stream_SessionMessageType,                     // session event type
+                          struct Test_I_Trending_ModuleHandlerConfiguration,  // module handler configuration type
+                          libacestream_default_net_output_module_name_string,
+                          Stream_INotify_t,                                   // stream notification interface type
+                          Test_I_Net_Reader_t,                                // reader type
+                          Test_I_Net_Writer_t,                                // writer type
+                          Test_I_Net_Output);                                 // name
 
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,

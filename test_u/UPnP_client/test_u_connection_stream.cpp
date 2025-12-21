@@ -55,14 +55,17 @@ Test_U_InboundSSDPConnectionStream::load (Stream_ILayout* layout_inout,
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_InboundSSDPConnectionStream::load"));
 
-  Stream_Module_t* module_p = NULL;
+  if (!inherited::load (layout_inout,
+                        deleteModules_out))
+    return false;
 
-  ACE_NEW_RETURN (module_p,
-                  UPnP_Client_Module_SSDP_Net_IO_Module (this,
-                                                         ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_inout->append (module_p, NULL, 0);
-  module_p = NULL;
+  Stream_Module_t* module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                UPnP_Client_Module_SSDP_Net_IO_Module (this,
+  //                                                       ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
+  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   UPnP_Client_Module_SSDP_Marshal_Module (this,
                                                           ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),
@@ -105,12 +108,17 @@ Test_U_OutboundSSDPConnectionStream::load (Stream_ILayout* layout_inout,
   // initialize return value(s)
   deleteModules_out = true;
 
+  if (!inherited::load (layout_inout,
+                        deleteModules_out))
+    return false;
+
   Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  UPnP_Client_Module_SSDP_Net_IO_Module (this,
-                                                         ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_inout->append (module_p, NULL, 0);
+  //ACE_NEW_RETURN (module_p,
+  //                UPnP_Client_Module_SSDP_Net_IO_Module (this,
+  //                                                       ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
+  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   UPnP_Client_Module_SSDP_Streamer_Module (this,
                                                            ACE_TEXT_ALWAYS_CHAR (SSDP_DEFAULT_MODULE_STREAMER_NAME_STRING)),
@@ -145,13 +153,17 @@ Test_U_HTTP_ConnectionStream::load (Stream_ILayout* layout_inout,
   // initialize return value(s)
   deleteModules_out = true;
 
+  if (!inherited::load (layout_inout,
+                        deleteModules_out))
+    return false;
+
   Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  UPnP_Client_Module_HTTP_Net_IO_Module (this,
-                                                         ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_inout->append (module_p, NULL, 0);
-  module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                UPnP_Client_Module_HTTP_Net_IO_Module (this,
+  //                                                       ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
+  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   UPnP_Client_Module_HTTP_Marshal_Module (this,
                                                           ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),

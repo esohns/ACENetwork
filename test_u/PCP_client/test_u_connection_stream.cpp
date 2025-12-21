@@ -51,14 +51,17 @@ Test_U_ConnectionStream::load (Stream_ILayout* layout_inout,
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_ConnectionStream::load"));
 
-  Stream_Module_t* module_p = NULL;
+  if (!inherited::load (layout_inout,
+                        deleteModules_out))
+    return false;
 
-  ACE_NEW_RETURN (module_p,
-                  PCPClient_Module_Net_IO_Module (this,
-                                                  ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_inout->append (module_p, NULL, 0);
-  module_p = NULL;
+  Stream_Module_t* module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                PCPClient_Module_Net_IO_Module (this,
+  //                                                ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
+  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   PCPClient_Module_Marshal_Module (this,
                                                    ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),

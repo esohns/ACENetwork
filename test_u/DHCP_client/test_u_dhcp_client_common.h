@@ -120,7 +120,6 @@ struct DHCPClient_ModuleHandlerConfiguration
    , subscribers (NULL)
    , targetFileName ()
   {
-    inbound = true;
     passive = false;
   }
 

@@ -39,7 +39,7 @@
 #include "stream_session_manager.h"
 #include "stream_statemachine_control.h"
 
-#include "stream_net_io.h"
+//#include "stream_net_io.h"
 #include "stream_net_io_stream.h"
 
 #include "net_connection_manager.h"
@@ -132,44 +132,44 @@ class Test_U_Stream_T
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
-  typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                       Stream_ControlMessage_t,
-                                       Test_U_Message,
-                                       Test_U_SessionMessage,
-                                       struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
-                                       enum Stream_ControlType,
-                                       enum Stream_SessionMessageType,
-                                       struct Test_U_HTTPDecoder_StreamState,
-                                       struct Stream_Statistic,
-                                       Test_U_SessionManager_t,
-                                       TimerManagerType,
-                                       ACE_INET_Addr,
-                                       Test_U_ConnectionManager_t,
-                                       struct Stream_UserData> WRITER_T;
-  typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                       Stream_ControlMessage_t,
-                                       Test_U_Message,
-                                       Test_U_SessionMessage,
-                                       struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
-                                       enum Stream_ControlType,
-                                       enum Stream_SessionMessageType,
-                                       struct Test_U_HTTPDecoder_StreamState,
-                                       struct Stream_Statistic,
-                                       Test_U_SessionManager_t,
-                                       TimerManagerType,
-                                       ACE_INET_Addr,
-                                       Test_U_ConnectionManager_t,
-                                       struct Stream_UserData> READER_T;
-  typedef Stream_StreamModule_T<ACE_MT_SYNCH,                             // task synch type
-                                Common_TimePolicy_t,                      // time policy
-                                struct Test_U_HTTPDecoder_SessionData,    // session data type
-                                enum Stream_SessionMessageType,           // session event type
-                                struct Stream_ModuleConfiguration,        // module configuration type
-                                struct Test_U_HTTPDecoder_ModuleHandlerConfiguration, // module handler configuration type
-                                libacestream_default_net_io_module_name_string,
-                                Stream_INotify_t,                         // stream notification interface type
-                                READER_T,                                 // reader type
-                                WRITER_T> IO_MODULE_T;                    // writer type
+  //typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
+  //                                     Stream_ControlMessage_t,
+  //                                     Test_U_Message,
+  //                                     Test_U_SessionMessage,
+  //                                     struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
+  //                                     enum Stream_ControlType,
+  //                                     enum Stream_SessionMessageType,
+  //                                     struct Test_U_HTTPDecoder_StreamState,
+  //                                     struct Stream_Statistic,
+  //                                     Test_U_SessionManager_t,
+  //                                     TimerManagerType,
+  //                                     ACE_INET_Addr,
+  //                                     Test_U_ConnectionManager_t,
+  //                                     struct Stream_UserData> WRITER_T;
+  //typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
+  //                                     Stream_ControlMessage_t,
+  //                                     Test_U_Message,
+  //                                     Test_U_SessionMessage,
+  //                                     struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
+  //                                     enum Stream_ControlType,
+  //                                     enum Stream_SessionMessageType,
+  //                                     struct Test_U_HTTPDecoder_StreamState,
+  //                                     struct Stream_Statistic,
+  //                                     Test_U_SessionManager_t,
+  //                                     TimerManagerType,
+  //                                     ACE_INET_Addr,
+  //                                     Test_U_ConnectionManager_t,
+  //                                     struct Stream_UserData> READER_T;
+  //typedef Stream_StreamModule_T<ACE_MT_SYNCH,                             // task synch type
+  //                              Common_TimePolicy_t,                      // time policy
+  //                              struct Test_U_HTTPDecoder_SessionData,    // session data type
+  //                              enum Stream_SessionMessageType,           // session event type
+  //                              struct Stream_ModuleConfiguration,        // module configuration type
+  //                              struct Test_U_HTTPDecoder_ModuleHandlerConfiguration, // module handler configuration type
+  //                              libacestream_default_net_io_module_name_string,
+  //                              Stream_INotify_t,                         // stream notification interface type
+  //                              READER_T,                                 // reader type
+  //                              WRITER_T> IO_MODULE_T;                    // writer type
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T (const Test_U_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T& operator= (const Test_U_Stream_T&))

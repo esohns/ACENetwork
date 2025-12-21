@@ -62,19 +62,24 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_inout,
   // initialize return value(s)
   deleteModules_out = false;
 
+  if (!inherited::load (layout_inout,
+                        deleteModules_out))
+    return false;
+
   // modules
   Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  IO_MODULE_T (this,
-                               ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
-                  false);
-  layout_inout->append (module_p, NULL, 0);
-  module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                inherited::IO_MODULE_T (this,
+  //                                        ACE_TEXT_ALWAYS_CHAR (MODULE_NET_INPUT_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_inout->append (module_p, NULL, 0);
+  //module_p = NULL;
   //ACE_NEW_RETURN (module_p,
   //                Test_U_Module_FileWriter_Module (this,
   //                                                 ACE_TEXT_ALWAYS_CHAR ("FileDump")),
   //                false);
-  //modules_out.push_back (module_p);
+  //layout_inout->append (module_p, NULL, 0);
+  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Marshal_Module (this,
                                                 ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),

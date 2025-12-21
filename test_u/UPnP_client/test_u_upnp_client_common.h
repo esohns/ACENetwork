@@ -156,7 +156,6 @@ struct UPnP_Client_ModuleHandlerConfiguration
    , xPathQueryString ()
    , xPathNameSpaces ()
   {
-    inbound = true;
     passive = false;
   }
 
