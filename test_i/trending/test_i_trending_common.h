@@ -250,10 +250,10 @@ struct Test_I_Trending_ModuleHandlerConfiguration
 };
 
 struct Test_I_Trending_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_I_Trending_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
   {}
 };
 

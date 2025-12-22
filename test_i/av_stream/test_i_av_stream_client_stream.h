@@ -89,18 +89,18 @@ class Test_I_AVStream_Client_DirectShow_Audio_Stream
                         Test_I_AVStream_Client_DirectShow_SessionMessage,
                         struct Stream_UserData> inherited;
 
-public:
+ public:
   Test_I_AVStream_Client_DirectShow_Audio_Stream ();
   inline virtual ~Test_I_AVStream_Client_DirectShow_Audio_Stream () { inherited::shutdown (); }
 
-     // implement (part of) Stream_IStreamControlBase
+  // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // return value: module list
                      bool&);          // return value: delete modules ?
 
-     // implement Common_IInitialize_T
+  // implement Common_IInitialize_T
   virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
 
-private:
+ private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_DirectShow_Audio_Stream (const Test_I_AVStream_Client_DirectShow_Audio_Stream&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream_Client_DirectShow_Audio_Stream& operator= (const Test_I_AVStream_Client_DirectShow_Audio_Stream&))
 };

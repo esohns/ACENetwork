@@ -35,6 +35,8 @@
 
 #include "stream_common.h"
 
+#include "stream_net_common.h"
+
 #include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
@@ -84,7 +86,7 @@ struct PCP_ProtocolConfiguration
 
 struct PCP_StreamConfiguration;
 struct PCP_ModuleHandlerConfiguration
- : public Stream_ModuleHandlerConfiguration
+ : Stream_ModuleHandlerConfiguration
 {
   PCP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
@@ -105,10 +107,10 @@ typedef std::map<std::string,
 typedef PCP_ModuleHandlerConfigurations_t::const_iterator PCP_ModuleHandlerConfigurationsConstIterator_t;
 
 struct PCP_StreamConfiguration
- : Stream_Configuration
+ : virtual Stream_Net_StreamConfiguration
 {
   PCP_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , moduleConfiguration ()
    , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)

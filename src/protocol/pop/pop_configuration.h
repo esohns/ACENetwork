@@ -27,6 +27,8 @@
 
 #include "stream_common.h"
 
+#include "stream_net_common.h"
+
 #include "net_common.h"
 #include "net_iconnectionmanager.h"
 
@@ -96,17 +98,17 @@ struct POP_ModuleHandlerConfiguration
 };
 
 struct POP_StreamConfiguration
- : virtual Stream_Configuration
+ : virtual Stream_Net_StreamConfiguration
 {
   POP_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , moduleConfiguration (NULL)
    //, moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
   {}
 
   struct Stream_ModuleConfiguration* moduleConfiguration;   // stream module configuration
-  struct POP_ProtocolConfiguration* protocolConfiguration; // protocol configuration
+  struct POP_ProtocolConfiguration*  protocolConfiguration; // protocol configuration
 };
 
 typedef Stream_Configuration_T<//stream_name_string_,

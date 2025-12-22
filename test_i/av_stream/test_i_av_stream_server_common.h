@@ -383,10 +383,10 @@ typedef Test_I_AVStream_Server_SignalHandler_T<struct Test_I_AVStream_Server_Sig
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct Test_I_AVStream_Server_DirectShow_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_I_AVStream_Server_DirectShow_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , format ()
    , graphBuilder (NULL)
   {}
@@ -395,18 +395,18 @@ struct Test_I_AVStream_Server_DirectShow_StreamConfiguration
   IGraphBuilder*                                           graphBuilder;
 };
 struct Test_I_AVStream_Server_MediaFoundation_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_I_AVStream_Server_MediaFoundation_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
   {}
 };
 #else
 struct Test_I_AVStream_Server_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_I_AVStream_Server_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , format ()
 #if defined (GTK_USE)
    , window (NULL)
@@ -426,10 +426,10 @@ struct Test_I_AVStream_Server_DirectShow_StreamState
 {
   Test_I_AVStream_Server_DirectShow_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_AVStream_Server_DirectShow_StreamSessionData* sessionData;
+  //Test_I_AVStream_Server_DirectShow_StreamSessionData* sessionData;
 };
 
 struct Test_I_AVStream_Server_MediaFoundation_StreamState
@@ -437,10 +437,10 @@ struct Test_I_AVStream_Server_MediaFoundation_StreamState
 {
   Test_I_AVStream_Server_MediaFoundation_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_AVStream_Server_MediaFoundation_StreamSessionData* sessionData;
+  //Test_I_AVStream_Server_MediaFoundation_StreamSessionData* sessionData;
 };
 #else
 class Test_I_AVStream_Server_StreamSessionData;

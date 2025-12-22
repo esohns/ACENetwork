@@ -597,10 +597,10 @@ typedef Test_I_AVStream_Client_SignalHandler_T<struct Test_I_AVStream_Client_ALS
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct Test_I_AVStream_Client_DirectShow_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_I_AVStream_Client_DirectShow_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , format ()
    , graphLayout ()
    , module_2 (NULL)
@@ -618,15 +618,15 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration> Test_I_AVStream_Client_DirectShow_StreamConfiguration_t;
 typedef Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T Test_I_AVStream_Client_DirectShow_StreamConfigurationIterator_t;
 typedef std::map<std::string,
-                 Test_I_AVStream_Client_DirectShow_StreamConfiguration_t> Test_I_AVStream_Client_DirectShow_StreamConfigurations_t;
+                 Test_I_AVStream_Client_DirectShow_StreamConfiguration_t*> Test_I_AVStream_Client_DirectShow_StreamConfigurations_t;
 typedef Test_I_AVStream_Client_DirectShow_StreamConfigurations_t::iterator Test_I_AVStream_Client_DirectShow_StreamConfigurationsIterator_t;
 
 struct Test_I_MediaFoundationConfiguration;
 struct Test_I_AVStream_Client_MediaFoundation_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_I_AVStream_Client_MediaFoundation_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , format ()
    , module_2 (NULL)
    , mediaFoundationConfiguration (NULL)
@@ -646,14 +646,14 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration> Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t;
 typedef Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t::ITERATOR_T Test_I_AVStream_Client_MediaFoundation_StreamConfigurationIterator_t;
 typedef std::map<std::string,
-                 Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t> Test_I_AVStream_Client_MediaFoundation_StreamConfigurations_t;
+                 Test_I_AVStream_Client_MediaFoundation_StreamConfiguration_t*> Test_I_AVStream_Client_MediaFoundation_StreamConfigurations_t;
 typedef Test_I_AVStream_Client_MediaFoundation_StreamConfigurations_t::iterator Test_I_AVStream_Client_MediaFoundation_StreamConfigurationsIterator_t;
 #else
 struct Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , format ()
    , module_2 (NULL)
   {}
@@ -669,7 +669,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_I_AVStream_Client_ALSA_V4L_ModuleHandlerConfiguration> Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t;
 typedef Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationIterator_t;
 typedef std::map<std::string,
-                 Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t> Test_I_AVStream_Client_ALSA_V4L_StreamConfigurations_t;
+                 Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t*> Test_I_AVStream_Client_ALSA_V4L_StreamConfigurations_t;
 typedef Test_I_AVStream_Client_ALSA_V4L_StreamConfigurations_t::iterator Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -679,10 +679,10 @@ struct Test_I_AVStream_Client_DirectShow_StreamState
 {
   Test_I_AVStream_Client_DirectShow_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_AVStream_Client_DirectShow_StreamSessionData* sessionData;
+  //Test_I_AVStream_Client_DirectShow_StreamSessionData* sessionData;
 };
 
 struct Test_I_AVStream_Client_MediaFoundation_StreamState
@@ -690,10 +690,10 @@ struct Test_I_AVStream_Client_MediaFoundation_StreamState
 {
   Test_I_AVStream_Client_MediaFoundation_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_AVStream_Client_MediaFoundation_StreamSessionData* sessionData;
+  //Test_I_AVStream_Client_MediaFoundation_StreamSessionData* sessionData;
 };
 #else
 struct Test_I_AVStream_Client_ALSA_V4L_StreamState
@@ -701,10 +701,10 @@ struct Test_I_AVStream_Client_ALSA_V4L_StreamState
 {
   Test_I_AVStream_Client_ALSA_V4L_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_AVStream_Client_ALSA_V4L_StreamSessionData* sessionData;
+  //Test_I_AVStream_Client_ALSA_V4L_StreamSessionData* sessionData;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 

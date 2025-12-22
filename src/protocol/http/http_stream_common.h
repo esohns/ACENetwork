@@ -30,6 +30,8 @@
 #include "stream_imodule.h"
 #include "stream_session_data.h"
 
+#include "stream_net_common.h"
+
 #include "net_defines.h"
 
 #include "http_common.h"
@@ -102,10 +104,10 @@ struct HTTP_ModuleHandlerConfiguration
 
 //struct HTTP_ProtocolConfiguration;
 struct HTTP_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   HTTP_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    //, protocolConfiguration (NULL)
    //, userData (NULL)
   {};

@@ -95,17 +95,17 @@ struct FTP_ModuleHandlerConfiguration
 };
 
 struct FTP_StreamConfiguration
- : virtual Stream_Configuration
+ : virtual Stream_Net_StreamConfiguration
 {
   FTP_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , moduleConfiguration (NULL)
    //, moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
   {}
 
   struct Stream_ModuleConfiguration* moduleConfiguration;   // stream module configuration
-  struct FTP_ProtocolConfiguration* protocolConfiguration; // protocol configuration
+  struct FTP_ProtocolConfiguration*  protocolConfiguration; // protocol configuration
 };
 
 typedef Stream_Configuration_T<//stream_name_string_,

@@ -804,8 +804,8 @@ do_finalize_directshow (struct Test_I_AVStream_Client_DirectShow_UI_CBData& CBDa
     CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != CBData_in.configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_DirectShow_StreamConfiguration_t::ITERATOR_T iterator_2 =
-    (*iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != (*iterator).second.end ());
+    (*iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != (*iterator).second->end ());
   if ((*iterator_2).second.second->builder)
   {
     (*iterator_2).second.second->builder->Release (); (*iterator_2).second.second->builder = NULL;
@@ -1086,7 +1086,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                                               &directshow_modulehandler_configuration_4)));
 
       directShowCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                      directshow_stream_configuration));
+                                                                                      &directshow_stream_configuration));
       directshow_stream_iterator =
         directShowCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_ASSERT (directshow_stream_iterator != directShowCBData_in.configuration->streamConfigurations.end ());
@@ -1097,12 +1097,13 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
         STREAM_HEADMODULECONCURRENCY_CONCURRENT;
 
       directshow_stream_configuration_4 = directshow_stream_configuration_2;
+      directshow_stream_configuration_4.inbound = false;
       directshow_stream_configuration_4.module = NULL;
       directshow_stream_configuration_3.initialize (module_configuration,
                                                     directshow_modulehandler_configuration_3,
                                                     directshow_stream_configuration_4);
       directShowCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING),
-                                                                                      directshow_stream_configuration_3));
+                                                                                      &directshow_stream_configuration_3));
 
       break;
     }
@@ -1147,7 +1148,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                                                    &mediafoundation_modulehandler_configuration_2)));
 
       mediaFoundationCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                           mediafoundation_stream_configuration));
+                                                                                           &mediafoundation_stream_configuration));
       mediafoundation_stream_iterator =
         mediaFoundationCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_ASSERT (mediafoundation_stream_iterator != mediaFoundationCBData_in.configuration->streamConfigurations.end ());
@@ -1163,7 +1164,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                          mediafoundation_modulehandler_configuration_3,
                                                          mediafoundation_stream_configuration_4);
       mediaFoundationCBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING),
-                                                                                           mediafoundation_stream_configuration_3));
+                                                                                           &mediafoundation_stream_configuration_3));
       //mediafoundation_stream_iterator =
       //  mediaFoundationCBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
       //ACE_ASSERT (mediafoundation_stream_iterator != mediaFoundationCBData_in.configuration->streamConfigurations.end ());
@@ -1393,8 +1394,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                   !UIDefinitionFilename_in.empty (), // has UI ?
                                   directshow_modulehandler_configuration.builder,
                                   directShowCBData_in.streamConfiguration,
-                                  (*directshow_stream_iterator).second.configuration_->format.audio,
-                                  (*directshow_stream_iterator).second.configuration_->format.video,
+                                  (*directshow_stream_iterator).second->configuration_->format.audio,
+                                  (*directshow_stream_iterator).second->configuration_->format.video,
                                   directshow_modulehandler_configuration.outputFormat);
       Stream_MediaFramework_DirectShow_Tools::copy (directshow_modulehandler_configuration.outputFormat,
                                                     directshow_modulehandler_configuration_2.outputFormat);
@@ -1471,12 +1472,12 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 
       directshow_tcp_connection_configuration.allocatorConfiguration = allocator_configuration_p;
       directshow_tcp_connection_configuration.streamConfiguration =
-        &(*directshow_stream_iterator).second;
+        (*directshow_stream_iterator).second;
       directShowCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                                           &directshow_tcp_connection_configuration));
       directshow_udp_connection_configuration.allocatorConfiguration = allocator_configuration_p;
       directshow_udp_connection_configuration.streamConfiguration =
-        &(*directshow_stream_iterator).second;
+        (*directshow_stream_iterator).second;
       directshow_udp_connection_configuration.delayRead = true;
       directshow_udp_connection_configuration.socketConfiguration.writeOnly =
         true;
@@ -1492,7 +1493,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 
       mediafoundation_tcp_connection_configuration.allocatorConfiguration = allocator_configuration_p;
       mediafoundation_tcp_connection_configuration.streamConfiguration =
-        &(*mediafoundation_stream_iterator).second;
+        (*mediafoundation_stream_iterator).second;
       mediaFoundationCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("TCP"),
                                                                                                &mediafoundation_tcp_connection_configuration));
       mediaFoundationCBData_in.configuration->connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("UDP"),
@@ -1585,8 +1586,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                      &user_data_s);
 
       mediafoundation_modulehandler_iterator =
-        (*mediafoundation_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (mediafoundation_modulehandler_iterator != (*mediafoundation_stream_iterator).second.end ());
+        (*mediafoundation_stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+      ACE_ASSERT (mediafoundation_modulehandler_iterator != (*mediafoundation_stream_iterator).second->end ());
 
       (*mediafoundation_modulehandler_iterator).second.second->connectionManager =
         mediafoundation_tcp_connection_manager_p;
@@ -1789,8 +1790,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
       mediafoundation_modulehandler_iterator =
-        (*mediafoundation_stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-      ACE_ASSERT (mediafoundation_modulehandler_iterator != (*mediafoundation_stream_iterator).second.end ());
+        (*mediafoundation_stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+      ACE_ASSERT (mediafoundation_modulehandler_iterator != (*mediafoundation_stream_iterator).second->end ());
 
       //(*mediafoundation_modulehandler_iterator).second.second->direct3DConfiguration =
       //  &mediaFoundationCBData_in.configuration->direct3DConfiguration;
@@ -2013,9 +2014,9 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
         stream_2 = directShowCBData_in.videoStream;
 
         result =
-          directShowCBData_in.audioStream->initialize ((*directshow_stream_iterator).second);
+          directShowCBData_in.audioStream->initialize (*(*directshow_stream_iterator).second);
         result &=
-          directShowCBData_in.videoStream->initialize ((*directshow_stream_iterator).second);
+          directShowCBData_in.videoStream->initialize (*(*directshow_stream_iterator).second);
         break;
       }
       case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -2026,15 +2027,15 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
           stream_2 = mediaFoundationCBData_in.videoStream;
 
           result =
-            mediaFoundationCBData_in.audioStream->initialize ((*mediafoundation_stream_iterator).second);
+            mediaFoundationCBData_in.audioStream->initialize (*(*mediafoundation_stream_iterator).second);
           result =
-            mediaFoundationCBData_in.videoStream->initialize ((*mediafoundation_stream_iterator).second);
+            mediaFoundationCBData_in.videoStream->initialize (*(*mediafoundation_stream_iterator).second);
         } // end IF
         else
         {
           stream_p = mediaFoundationCBData_in.UDPStream;
           result =
-            mediaFoundationCBData_in.UDPStream->initialize ((*mediafoundation_stream_iterator).second);
+            mediaFoundationCBData_in.UDPStream->initialize (*(*mediafoundation_stream_iterator).second);
         } // end ELSE
         break;
       }

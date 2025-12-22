@@ -137,8 +137,8 @@ HTTP_Stream_T<StreamStateType,
 
   //  int result = -1;
 //  SessionDataType* session_data_p = NULL;
-  typename inherited::MODULE_T* module_p = NULL;
-  typename inherited::WRITER_T* writer_impl_p = NULL;
+  //typename inherited::MODULE_T* module_p = NULL;
+  //typename inherited::WRITER_T* writer_impl_p = NULL;
 
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;

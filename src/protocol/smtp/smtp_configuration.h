@@ -27,6 +27,8 @@
 
 #include "stream_common.h"
 
+#include "stream_net_common.h"
+
 #include "net_common.h"
 #include "net_iconnectionmanager.h"
 
@@ -95,10 +97,10 @@ struct SMTP_ModuleHandlerConfiguration
 };
 
 struct SMTP_StreamConfiguration
- : virtual Stream_Configuration
+ : virtual Stream_Net_StreamConfiguration
 {
   SMTP_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , moduleConfiguration (NULL)
    //, moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)

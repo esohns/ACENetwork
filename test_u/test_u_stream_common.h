@@ -75,10 +75,10 @@ struct Test_U_ModuleHandlerConfiguration
 };
 
 struct Test_U_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   Test_U_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
   {}
 };
 

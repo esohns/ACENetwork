@@ -153,10 +153,10 @@ struct BitTorrent_TrackerModuleHandlerConfiguration
 
 struct BitTorrent_PeerModuleHandlerConfiguration;
 struct BitTorrent_PeerStreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   BitTorrent_PeerStreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , filename ()
    , metainfo (NULL)
   {}
@@ -166,10 +166,10 @@ struct BitTorrent_PeerStreamConfiguration
 };
 struct BitTorrent_TrackerModuleHandlerConfiguration;
 struct BitTorrent_TrackerStreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   BitTorrent_TrackerStreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , filename ()
    , metainfo (NULL)
   {}

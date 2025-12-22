@@ -115,10 +115,10 @@ struct FileServer_ModuleHandlerConfiguration
 };
 
 struct FileServer_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   FileServer_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    //, userData (NULL)
   {}

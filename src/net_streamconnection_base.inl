@@ -1072,7 +1072,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (top_module_p);
 
   Stream_IStateMachine_t* istatemachine_p =
-      dynamic_cast<Stream_IStateMachine_t*> (top_module_p->writer ());
+    dynamic_cast<Stream_IStateMachine_t*> (top_module_p->writer ());
   if (unlikely (!istatemachine_p))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1423,7 +1423,11 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end IF
 
   // step3: initialize/start stream
+  ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->configuration_);
+  inherited2::configuration_->streamConfiguration->configuration_->notificationStrategy =
+    static_cast<HandlerType*> (this);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
                                      inherited2::state_.handle)))
   {
@@ -1999,7 +2003,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (top_module_p);
 
   Stream_IStateMachine_t* istatemachine_p =
-      dynamic_cast<Stream_IStateMachine_t*> (top_module_p->writer ());
+    dynamic_cast<Stream_IStateMachine_t*> (top_module_p->writer ());
   if (unlikely (!istatemachine_p))
   {
     ACE_DEBUG ((LM_ERROR,

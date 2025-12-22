@@ -35,6 +35,8 @@
 
 #include "stream_common.h"
 
+#include "stream_net_common.h"
+
 #include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
@@ -110,10 +112,10 @@ typedef std::map<std::string,
 typedef DHCP_ModuleHandlerConfigurations_t::const_iterator DHCP_ModuleHandlerConfigurationsConstIterator_t;
 
 struct DHCP_StreamConfiguration
- : Stream_Configuration
+ : Stream_Net_StreamConfiguration
 {
   DHCP_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , moduleConfiguration ()
    , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)

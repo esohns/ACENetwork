@@ -21,14 +21,14 @@
 #ifndef IRC_CONFIGURATION_H
 #define IRC_CONFIGURATION_H
 
-#include <string>
-
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
 
 #include "common_defines.h"
 
 #include "stream_configuration.h"
+
+#include "stream_net_common.h"
 
 #include "net_configuration.h"
 #include "net_defines.h"
@@ -86,10 +86,10 @@ struct IRC_ModuleHandlerConfiguration
 };
 
 struct IRC_StreamConfiguration
- : Stream_Configuration
+ : virtual Stream_Net_StreamConfiguration
 {
   IRC_StreamConfiguration ()
-   : Stream_Configuration ()
+   : Stream_Net_StreamConfiguration ()
    , protocolConfiguration (NULL)
   {}
 

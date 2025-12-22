@@ -185,9 +185,9 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
 //  } // end IF
 
   // ---------------------------------------------------------------------------
-  typename inherited::MODULE_T* module_p = NULL;
-  READER_T* IOReader_impl_p = NULL;
-  WRITER_T* IOWriter_impl_p = NULL;
+  //typename inherited::MODULE_T* module_p = NULL;
+  //READER_T* IOReader_impl_p = NULL;
+  //WRITER_T* IOWriter_impl_p = NULL;
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
       const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
