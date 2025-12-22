@@ -2139,15 +2139,13 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (inherited2::configuration_->allocatorConfiguration);
 
   // allocate a data buffer
-  unsigned int pdu_size_i =
-    inherited2::configuration_->allocatorConfiguration->defaultBufferSize +
-    inherited2::configuration_->allocatorConfiguration->paddingBytes;
-  ACE_Message_Block* message_block_p = this->allocateMessage (pdu_size_i);
+  ACE_Message_Block* message_block_p =
+    this->allocateMessage (inherited2::configuration_->allocatorConfiguration->defaultBufferSize);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ISocketHandler::allocateMessage(%u), aborting\n"),
-                pdu_size_i));
+                inherited2::configuration_->allocatorConfiguration->defaultBufferSize));
     return false;
   } // end IF
   message_block_p->size (inherited2::configuration_->allocatorConfiguration->defaultBufferSize);
