@@ -1586,10 +1586,11 @@ set_capture_format (struct Test_I_AVStream_UI_CBData* CBData_in)
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.video.format.pixelformat =
+  (*stream_iterator).second->configuration_->format.video.format.pixelformat =
     format_i;
-  (*stream_iterator).second.configuration_->format.video.format.height = height;
-  (*stream_iterator).second.configuration_->format.video.format.width = width;
+  (*stream_iterator).second->configuration_->format.video.format.height =
+    height;
+  (*stream_iterator).second->configuration_->format.video.format.width = width;
 //retry:
   if (unlikely (!Stream_Device_Tools::setFormat (ui_cb_data_p->fileDescriptor,
                                                  (*stream_iterator).second->configuration_->format.video.format)))
@@ -1738,7 +1739,7 @@ update_buffer_size (struct Test_I_AVStream_UI_CBData* CBData_in)
   } // end SWITCH
 #else
   frame_size_i =
-      (*stream_iterator).second.configuration_->format.video.format.sizeimage;
+    (*stream_iterator).second->configuration_->format.video.format.sizeimage;
 #endif // ACE_WIN32 || ACE_WIN64
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<gdouble> (frame_size_i));
@@ -1856,8 +1857,8 @@ stream_processing_function (void* arg_in)
     thread_data_p->CBData->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != thread_data_p->CBData->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (lock_p);
 
@@ -1929,10 +1930,10 @@ stream_processing_function (void* arg_in)
         stream_2 = thread_data_p->CBData->videoStream;
 
         result_2 =
-          thread_data_p->CBData->audioStream->initialize ((*stream_iterator).second);
+          thread_data_p->CBData->audioStream->initialize (*(*stream_iterator).second);
         ACE_ASSERT (result_2);
         result_2 =
-          thread_data_p->CBData->videoStream->initialize ((*stream_iterator).second);
+          thread_data_p->CBData->videoStream->initialize (*(*stream_iterator).second);
 
         session_data_p =
           &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (thread_data_p->CBData->videoStream->getR_2 ());
@@ -1996,7 +1997,7 @@ stream_processing_function (void* arg_in)
         stream_p = thread_data_p->CBData->UDPStream;
 
         result_2 =
-          thread_data_p->CBData->UDPStream->initialize ((*stream_iterator).second);
+          thread_data_p->CBData->UDPStream->initialize (*(*stream_iterator).second);
 
         session_data_p =
           &const_cast<Test_I_AVStream_Client_ALSA_V4L_StreamSessionData&> (thread_data_p->CBData->UDPStream->getR_2 ());
@@ -2493,7 +2494,7 @@ idle_initialize_source_UI_cb (gpointer userData_in)
   use_loopback =
     NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.useLoopBackDevice;
   buffer_size =
-    (*stream_iterator).second.configuration_->allocatorConfiguration->defaultBufferSize;
+    (*stream_iterator).second->configuration_->allocatorConfiguration->defaultBufferSize;
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (string_p);
   gtk_entry_set_text (entry_p, string_p);
@@ -2879,8 +2880,8 @@ idle_initialize_source_UI_cb (gpointer userData_in)
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
       ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator_4 =
-      (*iterator_3).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_4 != (*iterator_3).second.end ());
+      (*iterator_3).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4 != (*iterator_3).second->end ());
 
 #if defined (GTK_USE)
   ACE_ASSERT (!(*iterator_4).second.second->window.gdk_window);
@@ -4780,8 +4781,8 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 #endif // ACE_WIN32 || ACE_WIN64
 
   // sanity check(s)
@@ -5176,7 +5177,7 @@ toggleaction_stream_toggled_cb (GtkToggleAction* toggleAction_in,
 #else
   result_3 =
     Stream_Device_Tools::setFormat ((*modulehandler_iterator).second.second->deviceIdentifier.fileDescriptor,
-                                    (*stream_iterator).second.configuration_->format.video.format);
+                                    (*stream_iterator).second->configuration_->format.video.format);
 #endif // ACE_WIN32 || ACE_WIN64
   if (!result_3)
   {
@@ -6994,8 +6995,8 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 #endif // ACE_WIN32 || ACE_WIN64
 
   Common_UI_GTK_BuildersConstIterator_t iterator =
@@ -7277,14 +7278,14 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
   } // end IFs
   ACE_ASSERT (ui_cb_data_p->fileDescriptor == -1);
   Test_I_AVStream_Client_ALSA_V4L_StreamConfigurationsIterator_t iterator_3 =
-      ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T iterator_4 =
-      (*iterator_3).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_4 != (*iterator_3).second.end ());
+    (*iterator_3).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4 != (*iterator_3).second->end ());
   int open_mode =
-      (((*iterator_4).second.second->method == V4L2_MEMORY_MMAP) ? O_RDWR
-                                                                 : O_RDONLY);
+    (((*iterator_4).second.second->method == V4L2_MEMORY_MMAP) ? O_RDWR
+                                                               : O_RDONLY);
   ui_cb_data_p->fileDescriptor =
     v4l2_open (device_identifier_string.c_str (),
                open_mode | V4L2_DISABLE_CONVERSION);
@@ -7391,7 +7392,7 @@ combobox_source_changed_cb (GtkComboBox* comboBox_in,
     index_i = 2;
     g_value_init (&value, G_TYPE_UINT);
     g_value_set_uint (&value,
-                     (*stream_iterator).second.configuration_->format.video.format.pixelformat);
+                      (*stream_iterator).second->configuration_->format.video.format.pixelformat);
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
@@ -7478,8 +7479,8 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 #endif // ACE_WIN32 || ACE_WIN64
 
   Common_UI_GTK_BuildersConstIterator_t iterator_2 =
@@ -7591,7 +7592,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.video.format.pixelformat =
+  (*stream_iterator).second->configuration_->format.video.format.pixelformat =
     format_i;
 
   result =
@@ -7643,7 +7644,7 @@ combobox_format_changed_cb (GtkComboBox* comboBox_in,
                       resolution_s.cy);
 #else
     g_value_set_uint (&value,
-                      (*stream_iterator).second.configuration_->format.video.format.height);
+                      (*stream_iterator).second->configuration_->format.video.format.height);
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
@@ -7723,8 +7724,8 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 #endif // ACE_WIN32 || ACE_WIN64
 
   Common_UI_GTK_BuildersConstIterator_t iterator_2 =
@@ -7939,8 +7940,9 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.video.format.width = width;
-  (*stream_iterator).second.configuration_->format.video.format.height = height;
+  (*stream_iterator).second->configuration_->format.video.format.width = width;
+  (*stream_iterator).second->configuration_->format.video.format.height =
+    height;
 
   result = load_rates (ui_cb_data_p->fileDescriptor,
                        format_i,
@@ -7992,7 +7994,7 @@ combobox_resolution_changed_cb (GtkComboBox* comboBox_in,
                       framerate_i);
 #else
     g_value_set_uint (&value,
-                      (*stream_iterator).second.configuration_->format.video.frameRate.numerator);
+                      (*stream_iterator).second->configuration_->format.video.frameRate.numerator);
 #endif // ACE_WIN32 || ACE_WIN64
     Common_UI_GTK_Tools::selectValue (combo_box_p,
                                       value,
@@ -8072,8 +8074,8 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
     ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 #endif // ACE_WIN32 || ACE_WIN64
 
   Common_UI_GTK_BuildersConstIterator_t iterator_2 =
@@ -8205,10 +8207,10 @@ combobox_rate_changed_cb (GtkComboBox* comboBox_in,
     }
   } // end SWITCH
 #else
-  (*stream_iterator).second.configuration_->format.video.frameRate.numerator =
-      frame_rate;
-  (*stream_iterator).second.configuration_->format.video.frameRate.denominator =
-      frame_rate_denominator;
+  (*stream_iterator).second->configuration_->format.video.frameRate.numerator =
+    frame_rate;
+  (*stream_iterator).second->configuration_->format.video.frameRate.denominator =
+    frame_rate_denominator;
 #endif // ACE_WIN32 || ACE_WIN64
   set_capture_format (ui_cb_data_base_p);
   update_buffer_size (ui_cb_data_base_p);
@@ -8291,8 +8293,8 @@ drawingarea_size_allocate_source_cb (GtkWidget* widget_in,
     alsa_ui_cb_data_p->configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != alsa_ui_cb_data_p->configuration->streamConfigurations.end ());
   Test_I_AVStream_Client_ALSA_V4L_StreamConfiguration_t::ITERATOR_T modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 #endif // ACE_WIN32 || ACE_WIN64
 
   //if (!ui_cb_data_p->configuration->moduleHandlerConfiguration.window) // <-- window not realized yet ?

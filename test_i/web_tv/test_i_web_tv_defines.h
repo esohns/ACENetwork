@@ -59,7 +59,6 @@
 
 //----------------------------------------
 
-#if defined (GTK_SUPPORT)
 #define TEST_I_UI_GTK_BOX_DISPLAY_NAME                    "box_display"
 #define TEST_I_UI_GTK_BOX_SAVE_NAME                       "box_save"
 #define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
@@ -94,6 +93,5 @@
 #define TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME              "togglebutton_play"
 #define TEST_I_UI_GTK_TOGGLEBUTTON_SAVE_NAME              "togglebutton_save"
 #define TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME              "window_fullscreen"
-#endif // GTK_SUPPORT
 
 #endif

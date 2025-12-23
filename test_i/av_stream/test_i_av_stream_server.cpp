@@ -1082,7 +1082,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                                      SND_PCM_STREAM_PLAYBACK);
   if (modulehandler_configuration.deviceIdentifier.identifier.empty ())
     modulehandler_configuration.deviceIdentifier.identifier = ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
-  modulehandler_configuration.inbound = true;
 
   //modulehandler_configuration.connectionManager = connection_manager_p;
   //modulehandler_configuration.format.type =

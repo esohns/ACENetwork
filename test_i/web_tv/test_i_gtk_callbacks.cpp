@@ -2119,7 +2119,7 @@ continue_:
       { ACE_ASSERT ((*iterator_8).frameRate);
         (*stream_iterator_4b).second.second->delayConfiguration->interval.msec (static_cast<long> (1000 / (*iterator_8).frameRate));
         (*stream_iterator_4b).second.second->delayConfiguration->averageTokensPerInterval =
-            1;
+          1;
         URI_string = (*iterator_8).URI;
         break;
       } // end IF

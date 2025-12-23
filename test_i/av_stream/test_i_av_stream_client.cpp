@@ -1251,32 +1251,29 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                                  &modulehandler_configuration_2)));
 
   CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                        stream_configuration_3));
+                                                                        &stream_configuration_3));
   stream_iterator =
     CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator != CBData_in.configuration->streamConfigurations.end ());
-  modulehandler_iterator = (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+  modulehandler_iterator = (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
   allocator_configuration_p = &allocator_configuration;
 
   modulehandler_configuration_3 = modulehandler_configuration;
   modulehandler_configuration_3.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-  modulehandler_configuration_3.inbound = false;
 
   stream_configuration_2.allocatorConfiguration = &allocator_configuration;
+  stream_configuration_2.inbound = false;
   stream_configuration_2.messageAllocator = allocator_p;
   stream_configuration_4.initialize (module_configuration,
                                      modulehandler_configuration_3,
                                      stream_configuration_2);
   CBData_in.configuration->streamConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_IO_DEFAULT_NAME_STRING),
-                                                            stream_configuration_4));
-//  stream_iterator =
-//    CBData_in.configuration->streamConfigurations.find (ACE_TEXT_ALWAYS_CHAR (STREAM_NET_DEFAULT_NAME_STRING));
-//  ACE_ASSERT (stream_iterator != CBData_in.configuration->streamConfigurations.end ());
+                                                                        &stream_configuration_4));
 #endif // ACE_WIN32 || ACE_WIN64
-  camstream_configuration_p->protocol = (useUDP_in ? NET_TRANSPORTLAYER_UDP
-                                                   : NET_TRANSPORTLAYER_TCP);
+  camstream_configuration_p->protocol =
+      (useUDP_in ? NET_TRANSPORTLAYER_UDP : NET_TRANSPORTLAYER_TCP);
 
   result = false;
   if (useReactor_in)
@@ -1810,8 +1807,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   } // end SWITCH
 #else
   modulehandler_iterator =
-    (*stream_iterator).second.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second.end ());
+    (*stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_iterator != (*stream_iterator).second->end ());
 
   (*modulehandler_iterator).second.second->connectionManager =
     connection_manager_p;
@@ -1838,9 +1835,9 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
 #endif // GTK_USE
 
   (*modulehandler_iterator).second.second->method =
-      V4L2_MEMORY_USERPTR;
+    V4L2_MEMORY_USERPTR;
   (*modulehandler_iterator).second.second->streamConfiguration =
-      &(*stream_iterator).second;
+    (*stream_iterator).second;
 #endif // ACE_WIN32 || ACE_WIN64
 
   // step0d: initialize regular (global) statistic reporting
@@ -2053,13 +2050,13 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       stream_p = CBData_in.audioStream;
       stream_2 = CBData_in.videoStream;
 
-      result = CBData_in.audioStream->initialize ((*stream_iterator).second);
-      result &= CBData_in.videoStream->initialize ((*stream_iterator).second);
+      result = CBData_in.audioStream->initialize (*(*stream_iterator).second);
+      result &= CBData_in.videoStream->initialize (*(*stream_iterator).second);
     } // end IF
     else
     {
       stream_p = CBData_in.UDPStream;
-      result = CBData_in.UDPStream->initialize ((*stream_iterator).second);
+      result = CBData_in.UDPStream->initialize (*(*stream_iterator).second);
     } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64
     if (!result)

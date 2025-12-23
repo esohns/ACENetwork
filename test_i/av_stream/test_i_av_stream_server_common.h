@@ -248,9 +248,7 @@ struct Test_I_AVStream_Server_ModuleHandlerConfiguration
    , targetFileName ()
    , subscriber (NULL)
    , subscribers (NULL)
-  {
-    inbound = true;
-  }
+  {}
 
   struct Stream_MediaFramework_ALSA_Configuration*   ALSAConfiguration;
   Net_ConnectionConfigurations_t*                    connectionConfigurations;
