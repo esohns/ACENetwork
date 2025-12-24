@@ -2542,7 +2542,7 @@ idle_initialize_source_UI_cb (gpointer userData_in)
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
-  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
   gint width, height;
   gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
   gtk_progress_bar_set_pulse_step (progress_bar_p,
@@ -3674,6 +3674,7 @@ idle_initialize_target_UI_cb (gpointer userData_in)
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
+  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
   gint width, height;
   gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
   gtk_progress_bar_set_pulse_step (progress_bar_p,
@@ -4322,12 +4323,12 @@ idle_update_progress_target_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer_a[BUFSIZ];
-  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+  char buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (char[BUFSIZ]));
   int result = -1;
-  float fps, speed = 0.0F;
+  float mps = 0.0f, speed = 0.0f;
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    fps   = ui_cb_data_p->statistic.messagesPerSecond;
+    mps   = ui_cb_data_p->statistic.messagesPerSecond;
     speed = ui_cb_data_p->statistic.bytesPerSecond;
   } // end lock scope
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
@@ -4343,8 +4344,8 @@ idle_update_progress_target_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.0f fps | %.2f %s"),
-                              fps, speed, magnitude_string.c_str ());
+    result = ACE_OS::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%.0f mps | %.2f %s"),
+                              mps, speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));

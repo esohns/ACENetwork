@@ -77,11 +77,19 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
   Stream_Branches_t branches_a;
 
   ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Server_DirectShow_StatisticReport_Module (this,
+                                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_DirectShow_Parser_Module (this,
                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Server_DirectShow_Splitter_Module (this,
                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_SPLITTER_DEFAULT_NAME_STRING)),
@@ -101,14 +109,6 @@ Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
                                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_WASAPI_RENDER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, branch_p, index_i);
-
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_AVStream_Server_DirectShow_StatisticReport_Module (this,
-  //                                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-  //                false);
-  //ACE_ASSERT (module_p);
-  //layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
   ++index_i;

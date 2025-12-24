@@ -897,8 +897,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     return;
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
-  event_dispatch_state_s.configuration =
-      event_dispatch_configuration_p;
+  event_dispatch_state_s.configuration = event_dispatch_configuration_p;
 
   // step0b: initialize configuration and stream
   struct Test_I_AVStream_Configuration* camstream_configuration_p = NULL;
@@ -967,7 +966,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       //directshow_configuration.parserConfiguration.debugScanner = true;
       //directshow_configuration.parserConfiguration.debugParser = true;
-
+      directshow_modulehandler_configuration.computeThroughput = true;
       directshow_modulehandler_configuration.concurrency =
         STREAM_HEADMODULECONCURRENCY_CONCURRENT;
       directshow_modulehandler_configuration.configuration =
@@ -1015,6 +1014,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
     {
+      mediafoundation_modulehandler_configuration.computeThroughput = true;
       mediafoundation_modulehandler_configuration.configuration = &mediafoundation_configuration;
       mediafoundation_modulehandler_configuration.connectionConfigurations =
         &mediafoundation_configuration.connectionConfigurations;
@@ -1071,6 +1071,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   modulehandler_configuration.ALSAConfiguration = &ALSA_configuration;
   modulehandler_configuration.allocatorConfiguration = &allocator_configuration;
+  modulehandler_configuration.computeThroughput = true;
   modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.configuration = &configuration;
@@ -1259,10 +1260,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
   Test_I_AVStream_Server_Module_EventHandler* event_handler_p = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
-  struct Common_TimerConfiguration timer_configuration;
-  timer_configuration.dispatch = COMMON_TIMER_DISPATCH_PROACTOR;
   Common_Timer_Manager_t* timer_manager_p =
-        COMMON_TIMERMANAGER_SINGLETON::instance ();
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   long timer_id = -1;
 //  int group_id = -1;
@@ -1662,8 +1661,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // ********************* listener configuration data *************************
 
   // step0d: initialize regular (global) statistic reporting
-  timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start (NULL);
+  Common_Timer_Tools::configuration_.dispatch =
+    useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR;
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+  Common_Timer_Tools::initialize ();
   if (statisticReportingInterval_in)
   {
     ACE_Time_Value interval (statisticReportingInterval_in, 0);
@@ -1676,7 +1677,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
-      timer_manager_p->stop ();
+      //timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       goto clean;
     } // end IF
   } // end IF
@@ -1755,7 +1757,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
-    timer_manager_p->stop ();
+    //timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     goto clean;
   } // end IF
   if (!Common_Signal_Tools::initialize (COMMON_SIGNAL_DISPATCH_SIGNAL,
@@ -1766,7 +1769,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
-    timer_manager_p->stop ();
+    //timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     goto clean;
   } // end IF
 
@@ -1804,7 +1808,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-      timer_manager_p->stop ();
+      //timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       goto clean;
     } // end IF
 #endif // GTK_USE
@@ -1815,10 +1820,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-      timer_manager_p->stop ();
 #if defined (GTK_USE)
       gtk_manager_p->stop (true, true);
 #endif // GTK_USE
+      // timer_manager_p->stop ();
+      Common_Timer_Tools::finalize ();
       goto clean;
     } // end IF
     BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
@@ -1847,7 +1853,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
       ;
 #endif // GTK_USE
-    timer_manager_p->stop ();
+    //timer_manager_p->stop ();
+    Common_Timer_Tools::finalize ();
     goto clean;
   } // end IF
 
@@ -1896,6 +1903,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
                       mediaFramework_in));
+          Common_Timer_Tools::finalize ();
           return;
         } // end ELSE
       } // end SWITCH
@@ -1931,7 +1939,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
           ;
 #endif // GTK_USE
-        timer_manager_p->stop ();
+        //timer_manager_p->stop ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         switch (mediaFramework_in)
         {
@@ -1956,6 +1964,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
         delete i_udp_connector_p; i_udp_connector_p = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
+        Common_Timer_Tools::finalize ();
         goto clean;
       } // end IF
 
@@ -1982,6 +1991,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
                       mediaFramework_in));
+          Common_Timer_Tools::finalize ();
           return;
         } // end ELSE
       } // end SWITCH
@@ -2014,6 +2024,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
                       mediaFramework_in));
+          Common_Timer_Tools::finalize ();
           return;
         } // end ELSE
       } // end SWITCH
@@ -2031,7 +2042,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       bool done = false;
 #else
       typename Test_I_AVStream_Server_UDPAsynchConnector_t::ICONNECTION_T* connection_p =
-          NULL;
+        NULL;
 #endif // ACE_WIN32 || ACE_WIN64
       // *TODO*: avoid tight loop here
       do
@@ -2168,7 +2179,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
           ;
 #endif // GTK_USE
-        timer_manager_p->stop ();
+        //timer_manager_p->stop ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         switch (mediaFramework_in)
         {
@@ -2187,12 +2198,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
                         mediaFramework_in));
+            Common_Timer_Tools::finalize ();
             return;
           } // end ELSE
         } // end SWITCH
 #else
         delete i_udp_connector_p;
 #endif // ACE_WIN32 || ACE_WIN64
+        Common_Timer_Tools::finalize ();
         goto clean;
       } // end IF
       ACE_DEBUG ((LM_DEBUG,
@@ -2247,6 +2260,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid/unknown media framework (was: %d), returning\n"),
                       mediaFramework_in));
+          Common_Timer_Tools::finalize ();
           return;
         } // end ELSE
       } // end SWITCH
@@ -2276,7 +2290,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
           ;
 #endif // GTK_USE
-        timer_manager_p->stop ();
+        //timer_manager_p->stop ();
+        Common_Timer_Tools::finalize ();
         goto clean;
       } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -2395,8 +2410,6 @@ clean:
     tcp_connection_manager_p->wait ();
 #endif // ACE_WIN32 || ACE_WIN64
 
-  timer_manager_p->stop ();
-
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                              true,   // wait ?
                                              false); // close singletons ?
@@ -2483,6 +2496,9 @@ clean:
   } // end SWITCH
 #endif // ACE_WIN32 || ACE_WIN64
 
+  //timer_manager_p->stop ();
+  Common_Timer_Tools::finalize ();
+ 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 }

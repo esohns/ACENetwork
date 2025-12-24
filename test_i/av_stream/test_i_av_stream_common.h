@@ -128,10 +128,10 @@ struct acestream_av_stream_header
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct Test_I_AVStream_DirectShow_StreamSessionData
- : Test_I_DirectShow_StreamSessionData
+ : Test_I_StreamSessionData
 {
   Test_I_AVStream_DirectShow_StreamSessionData ()
-   : Test_I_DirectShow_StreamSessionData ()
+   : Test_I_StreamSessionData ()
    , direct3DDevice (NULL)
    , resetToken (0)
    , stream (NULL)
@@ -141,7 +141,7 @@ struct Test_I_AVStream_DirectShow_StreamSessionData
   struct Test_I_AVStream_DirectShow_StreamSessionData& operator+= (const struct Test_I_AVStream_DirectShow_StreamSessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
-    Test_I_DirectShow_StreamSessionData::operator+= (rhs_in);
+    Test_I_StreamSessionData::operator+= (rhs_in);
 
     // sanity check(s)
 //    ACE_ASSERT (rhs_in.inputFormat);
@@ -176,10 +176,10 @@ struct Test_I_AVStream_DirectShow_StreamSessionData
 //typedef Stream_SessionData_T<Test_I_AVStream_DirectShow_SessionData> Test_I_AVStream_DirectShow_SessionData_t;
 
 struct Test_I_AVStream_MediaFoundation_StreamSessionData
- : Test_I_MediaFoundation_StreamSessionData
+ : Test_I_StreamSessionData
 {
   Test_I_AVStream_MediaFoundation_StreamSessionData ()
-   : Test_I_MediaFoundation_StreamSessionData ()
+   : Test_I_StreamSessionData ()
    , direct3DDevice (NULL)
    , direct3DManagerResetToken (0)
    , rendererNodeId (0)
@@ -190,7 +190,7 @@ struct Test_I_AVStream_MediaFoundation_StreamSessionData
   struct Test_I_AVStream_MediaFoundation_StreamSessionData& operator+= (const struct Test_I_AVStream_MediaFoundation_StreamSessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
-    Test_I_MediaFoundation_StreamSessionData::operator+= (rhs_in);
+    Test_I_StreamSessionData::operator+= (rhs_in);
 
     return *this;
   }

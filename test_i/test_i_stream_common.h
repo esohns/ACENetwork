@@ -152,7 +152,7 @@ struct Test_I_StreamSessionData
 typedef Stream_SessionData_T<struct Test_I_StreamSessionData> Test_I_StreamSessionData_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-class Test_I_DirectShow_StreamSessionData
+class Test_I_DirectShow_StreamSessionDataMedia
  : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                         struct _AMMediaType,
                                         struct Stream_State,
@@ -160,7 +160,7 @@ class Test_I_DirectShow_StreamSessionData
                                         struct Stream_UserData>
 {
  public:
-  Test_I_DirectShow_StreamSessionData ()
+  Test_I_DirectShow_StreamSessionDataMedia ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                    struct _AMMediaType,
                                    struct Stream_State,
@@ -168,7 +168,7 @@ class Test_I_DirectShow_StreamSessionData
                                    struct Stream_UserData> ()
   {}
 
-  Test_I_DirectShow_StreamSessionData& operator+= (const Test_I_DirectShow_StreamSessionData& rhs_in)
+  Test_I_DirectShow_StreamSessionDataMedia& operator+= (const Test_I_DirectShow_StreamSessionDataMedia& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
@@ -179,9 +179,9 @@ class Test_I_DirectShow_StreamSessionData
     return *this;
   }
 };
-typedef Stream_SessionData_T<Test_I_DirectShow_StreamSessionData> Test_I_DirectShow_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_I_DirectShow_StreamSessionDataMedia> Test_I_DirectShow_StreamSessionDataMedia_t;
 
-class Test_I_MediaFoundation_StreamSessionData
+class Test_I_MediaFoundation_StreamSessionDataMedia
  : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                         IMFMediaType*,
                                         struct Stream_State,
@@ -189,7 +189,7 @@ class Test_I_MediaFoundation_StreamSessionData
                                         struct Stream_UserData>
 {
  public:
-  Test_I_MediaFoundation_StreamSessionData ()
+  Test_I_MediaFoundation_StreamSessionDataMedia ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                    IMFMediaType*,
                                    struct Stream_State,
@@ -198,7 +198,7 @@ class Test_I_MediaFoundation_StreamSessionData
    , session (NULL)
   {}
 
-  Test_I_MediaFoundation_StreamSessionData& operator+= (const Test_I_MediaFoundation_StreamSessionData& rhs_in)
+  Test_I_MediaFoundation_StreamSessionDataMedia& operator+= (const Test_I_MediaFoundation_StreamSessionDataMedia& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
@@ -211,9 +211,9 @@ class Test_I_MediaFoundation_StreamSessionData
 
   IMFMediaSession* session;
 };
-typedef Stream_SessionData_T<Test_I_MediaFoundation_StreamSessionData> Test_I_MediaFoundation_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_I_MediaFoundation_StreamSessionDataMedia> Test_I_MediaFoundation_StreamSessionDataMedia_t;
 #else
-class Test_I_ALSA_StreamSessionData
+class Test_I_ALSA_StreamSessionDataMedia
  : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                         struct Stream_MediaFramework_ALSA_MediaType,
                                         struct Stream_State,
@@ -221,7 +221,7 @@ class Test_I_ALSA_StreamSessionData
                                         struct Stream_UserData>
 {
  public:
-  Test_I_ALSA_StreamSessionData ()
+  Test_I_ALSA_StreamSessionDataMedia ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                    struct Stream_MediaFramework_ALSA_MediaType,
                                    struct Stream_State,
@@ -229,7 +229,7 @@ class Test_I_ALSA_StreamSessionData
                                    struct Stream_UserData> ()
   {}
 
-  Test_I_ALSA_StreamSessionData& operator+= (const Test_I_ALSA_StreamSessionData& rhs_in)
+  Test_I_ALSA_StreamSessionDataMedia& operator+= (const Test_I_ALSA_StreamSessionDataMedia& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
@@ -240,9 +240,9 @@ class Test_I_ALSA_StreamSessionData
     return *this;
   }
 };
-typedef Stream_SessionData_T<Test_I_ALSA_StreamSessionData> Test_I_ALSA_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_I_ALSA_StreamSessionDataMedia> Test_I_ALSA_StreamSessionDataMedia_t;
 
-class Test_I_V4L_StreamSessionData
+class Test_I_V4L_StreamSessionDataMedia
  : public Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                         struct Stream_MediaFramework_V4L_MediaType,
                                         struct Stream_State,
@@ -250,7 +250,7 @@ class Test_I_V4L_StreamSessionData
                                         struct Stream_UserData>
 {
  public:
-  Test_I_V4L_StreamSessionData ()
+  Test_I_V4L_StreamSessionDataMedia ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
                                    struct Stream_MediaFramework_V4L_MediaType,
                                    struct Stream_State,
@@ -258,7 +258,7 @@ class Test_I_V4L_StreamSessionData
                                    struct Stream_UserData> ()
   {}
 
-  Test_I_V4L_StreamSessionData& operator+= (const Test_I_V4L_StreamSessionData& rhs_in)
+  Test_I_V4L_StreamSessionDataMedia& operator+= (const Test_I_V4L_StreamSessionDataMedia& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
@@ -269,7 +269,7 @@ class Test_I_V4L_StreamSessionData
     return *this;
   }
 };
-typedef Stream_SessionData_T<Test_I_V4L_StreamSessionData> Test_I_V4L_StreamSessionData_t;
+typedef Stream_SessionData_T<Test_I_V4L_StreamSessionDataMedia> Test_I_V4L_StreamSessionDataMedia_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 struct Test_I_StreamState
@@ -277,10 +277,10 @@ struct Test_I_StreamState
 {
   Test_I_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {};
 
-  struct Test_I_StreamSessionData* sessionData;
+  //struct Test_I_StreamSessionData* sessionData;
 };
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -289,10 +289,10 @@ struct Test_I_DirectShow_StreamState
 {
   Test_I_DirectShow_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_DirectShow_StreamSessionData* sessionData;
+  //Test_I_DirectShow_StreamSessionData* sessionData;
 };
 
 struct Test_I_MediaFoundation_StreamState
@@ -300,10 +300,10 @@ struct Test_I_MediaFoundation_StreamState
 {
   Test_I_MediaFoundation_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_MediaFoundation_StreamSessionData* sessionData;
+  //Test_I_MediaFoundation_StreamSessionData* sessionData;
 };
 #else
 struct Test_I_ALSA_StreamState
@@ -311,10 +311,21 @@ struct Test_I_ALSA_StreamState
 {
   Test_I_ALSA_StreamState ()
    : Stream_State ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  Test_I_ALSA_StreamSessionData* sessionData;
+  //Test_I_ALSA_StreamSessionData* sessionData;
+};
+
+struct Test_I_V4L_StreamState
+ : Stream_State
+{
+  Test_I_V4L_StreamState ()
+   : Stream_State ()
+  //, sessionData (NULL)
+  {}
+
+  // Test_I_V4L_StreamSessionData* sessionData;
 };
 #endif // ACE_WIN32 || ACE_WIN64
 

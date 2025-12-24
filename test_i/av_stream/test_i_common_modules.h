@@ -82,7 +82,7 @@
 
 #include "stream_net_output.h"
 
-//#include "stream_stat_statistic_report.h"
+#include "stream_stat_statistic_report.h"
 
 #include "test_i_common.h"
 #include "test_i_connection_common.h"
@@ -770,73 +770,68 @@ typedef Test_I_Stream_Module_EventHandler_T<struct Stream_ModuleConfiguration,
 
 // target
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Server_DirectShow_Message,
-//                                                      Test_I_AVStream_Server_DirectShow_SessionMessage,
-//                                                      Test_I_CommandType_t,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Server_DirectShow_StreamSessionData,
-//                                                      Test_I_AVStream_Server_DirectShow_StreamSessionData_t> Test_I_AVStream_Server_DirectShow_Module_Statistic_ReaderTask_t;
-//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Server_DirectShow_Message,
-//                                                      Test_I_AVStream_Server_DirectShow_SessionMessage,
-//                                                      Test_I_CommandType_t,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Server_DirectShow_StreamSessionData,
-//                                                      Test_I_AVStream_Server_DirectShow_StreamSessionData_t> Test_I_AVStream_Server_DirectShow_Module_Statistic_WriterTask_t;
-//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Server_MediaFoundation_Message,
-//                                                      Test_I_AVStream_Server_MediaFoundation_SessionMessage,
-//                                                      Test_I_CommandType_t,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Server_MediaFoundation_StreamSessionData,
-//                                                      Test_I_AVStream_Server_MediaFoundation_StreamSessionData_t> Test_I_AVStream_Server_MediaFoundation_Module_Statistic_ReaderTask_t;
-//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Server_MediaFoundation_Message,
-//                                                      Test_I_AVStream_Server_MediaFoundation_SessionMessage,
-//                                                      Test_I_CommandType_t,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Server_MediaFoundation_StreamSessionData,
-//                                                      Test_I_AVStream_Server_MediaFoundation_StreamSessionData_t> Test_I_AVStream_Server_MediaFoundation_Module_Statistic_WriterTask_t;
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_AVStream_Server_DirectShow_Message,
+                                                      Test_I_AVStream_Server_DirectShow_SessionMessage,
+                                                      Stream_CommandType_t,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> Test_I_AVStream_Server_DirectShow_Module_Statistic_ReaderTask_t;
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_AVStream_Server_DirectShow_Message,
+                                                      Test_I_AVStream_Server_DirectShow_SessionMessage,
+                                                      Stream_CommandType_t,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> Test_I_AVStream_Server_DirectShow_Module_Statistic_WriterTask_t;
+
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_AVStream_Server_MediaFoundation_Message,
+                                                      Test_I_AVStream_Server_MediaFoundation_SessionMessage,
+                                                      Stream_CommandType_t,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> Test_I_AVStream_Server_MediaFoundation_Module_Statistic_ReaderTask_t;
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_AVStream_Server_MediaFoundation_Message,
+                                                      Test_I_AVStream_Server_MediaFoundation_SessionMessage,
+                                                      Stream_CommandType_t,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> Test_I_AVStream_Server_MediaFoundation_Module_Statistic_WriterTask_t;
 #else
-//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Server_Message,
-//                                                      Test_I_AVStream_Server_SessionMessage,
-//                                                      Test_I_CommandType_t,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Server_StreamSessionData,
-//                                                      Test_I_AVStream_Server_StreamSessionData_t> Test_I_AVStream_Server_Statistic_ReaderTask_t;
-//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_AVStream_Server_Message,
-//                                                      Test_I_AVStream_Server_SessionMessage,
-//                                                      Test_I_CommandType_t,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      Test_I_AVStream_Server_StreamSessionData,
-//                                                      Test_I_AVStream_Server_StreamSessionData_t> Test_I_AVStream_Server_Statistic_WriterTask_t;
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_AVStream_Server_Message,
+                                                      Test_I_AVStream_Server_SessionMessage,
+                                                      Stream_CommandType_t,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> Test_I_AVStream_Server_Statistic_ReaderTask_t;
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct Test_I_AVStream_Server_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_AVStream_Server_Message,
+                                                      Test_I_AVStream_Server_SessionMessage,
+                                                      Stream_CommandType_t,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> Test_I_AVStream_Server_Statistic_WriterTask_t;
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1364,31 +1359,31 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_ALSA_V4L_StreamSessionData,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-//DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Server_DirectShow_StreamSessionData,                // session data type
-//                          enum Stream_SessionMessageType,                             // session event type
-//                          struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
-//                          libacestream_default_stat_report_module_name_string,
-//                          Stream_INotify_t,                                           // stream notification interface type
-//                          Test_I_AVStream_Server_DirectShow_Module_Statistic_ReaderTask_t,     // reader type
-//                          Test_I_AVStream_Server_DirectShow_Module_Statistic_WriterTask_t,     // writer type
-//                          Test_I_AVStream_Server_DirectShow_StatisticReport);                  // name
-//DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Server_MediaFoundation_StreamSessionData,                // session data type
-//                          enum Stream_SessionMessageType,                                  // session event type
-//                          struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration, // module handler configuration type
-//                          libacestream_default_stat_report_module_name_string,
-//                          Stream_INotify_t,                                                // stream notification interface type
-//                          Test_I_AVStream_Server_MediaFoundation_Module_Statistic_ReaderTask_t,     // reader type
-//                          Test_I_AVStream_Server_MediaFoundation_Module_Statistic_WriterTask_t,     // writer type
-//                          Test_I_AVStream_Server_MediaFoundation_StatisticReport);                  // name
+DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Server_DirectShow_StreamSessionData,                 // session data type
+                          enum Stream_SessionMessageType,                                      // session event type
+                          struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type
+                          libacestream_default_stat_report_module_name_string,
+                          Stream_INotify_t,                                                    // stream notification interface type
+                          Test_I_AVStream_Server_DirectShow_Module_Statistic_ReaderTask_t,     // reader type
+                          Test_I_AVStream_Server_DirectShow_Module_Statistic_WriterTask_t,     // writer type
+                          Test_I_AVStream_Server_DirectShow_StatisticReport);                  // name
+DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Server_MediaFoundation_StreamSessionData,                 // session data type
+                          enum Stream_SessionMessageType,                                           // session event type
+                          struct Test_I_AVStream_Server_MediaFoundation_ModuleHandlerConfiguration, // module handler configuration type
+                          libacestream_default_stat_report_module_name_string,
+                          Stream_INotify_t,                                                         // stream notification interface type
+                          Test_I_AVStream_Server_MediaFoundation_Module_Statistic_ReaderTask_t,     // reader type
+                          Test_I_AVStream_Server_MediaFoundation_Module_Statistic_WriterTask_t,     // writer type
+                          Test_I_AVStream_Server_MediaFoundation_StatisticReport);                  // name
 #else
-//DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Server_StreamSessionData,                // session data type
-//                          enum Stream_SessionMessageType,                  // session event type
-//                          struct Test_I_AVStream_Server_ModuleHandlerConfiguration, // module handler configuration type
-//                          libacestream_default_stat_report_module_name_string,
-//                          Stream_INotify_t,                                // stream notification interface type
-//                          Test_I_AVStream_Server_Statistic_ReaderTask_t,            // reader type
-//                          Test_I_AVStream_Server_Statistic_WriterTask_t,            // writer type
-//                          Test_I_AVStream_Server_StatisticReport);                  // name
+DATASTREAM_MODULE_DUPLEX (Test_I_AVStream_Server_StreamSessionData,                 // session data type
+                          enum Stream_SessionMessageType,                           // session event type
+                          struct Test_I_AVStream_Server_ModuleHandlerConfiguration, // module handler configuration type
+                          libacestream_default_stat_report_module_name_string,
+                          Stream_INotify_t,                                         // stream notification interface type
+                          Test_I_AVStream_Server_Statistic_ReaderTask_t,            // reader type
+                          Test_I_AVStream_Server_Statistic_WriterTask_t,            // writer type
+                          Test_I_AVStream_Server_StatisticReport);                  // name
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

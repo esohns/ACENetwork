@@ -233,32 +233,37 @@ Test_I_Server_EventHandler_T<SessionDataType,
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       // sanity check(s)
-      if (!sessionData_)
-        goto continue_;
+      //if (!sessionData_)
+      //  goto continue_;
 
-      if (sessionData_->lock)
-      {
-        result = sessionData_->lock->acquire ();
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
-      } // end IF
+      //if (sessionData_->lock)
+      //{
+      //  result = sessionData_->lock->acquire ();
+      //  if (result == -1)
+      //    ACE_DEBUG ((LM_ERROR,
+      //                ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
+      //} // end IF
+
+      const typename SessionMessageType::DATA_T& session_message_data_container_r =
+        sessionMessage_in.getR ();
+      const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+        session_message_data_container_r.getR ();
 
 #if defined (GTK_USE)
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
-        CBData_->progressData.statistic = sessionData_->statistic;
+        CBData_->progressData.statistic = session_data_r.statistic;
 #if defined (GTK_USE)
       } // end lock scope
 #endif // GTK_USE
 
-      if (sessionData_->lock)
-      {
-        result = sessionData_->lock->release ();
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-      } // end IF
+      //if (sessionData_->lock)
+      //{
+      //  result = sessionData_->lock->release ();
+      //  if (result == -1)
+      //    ACE_DEBUG ((LM_ERROR,
+      //                ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+      //} // end IF
 
 continue_:
       event_e = COMMON_UI_EVENT_STATISTIC;
