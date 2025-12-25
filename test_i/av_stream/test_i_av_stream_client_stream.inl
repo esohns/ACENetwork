@@ -24,8 +24,6 @@
 
 #include "ace/Log_Msg.h"
 
-#include "stream_macros.h"
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "stream_dev_common.h"
 #include "stream_dev_directshow_tools.h"
@@ -39,6 +37,8 @@
 #include "stream_stat_defines.h"
 #include "stream_vis_defines.h"
 
+#include "net_macros.h"
+
 #include "test_i_common_modules.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -48,7 +48,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
                                            ConnectorType>::Test_I_AVStream_Client_DirectShow_Stream_T ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Stream_T::Test_I_AVStream_Client_DirectShow_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Stream_T::Test_I_AVStream_Client_DirectShow_Stream_T"));
 
 }
 
@@ -59,7 +59,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
                                            ConnectorType>::load (Stream_ILayout* layout_out,
                                                                  bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Stream_T::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Stream_T::load"));
 
   // *TODO*: remove type inference
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
@@ -167,7 +167,7 @@ bool
 Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
                                            ConnectorType>::initialize (const CONFIGURATION_T& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Stream_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -592,7 +592,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
  , inherited2 ()
  , mediaSession_ (NULL)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::Test_I_AVStream_Client_MediaFoundation_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::Test_I_AVStream_Client_MediaFoundation_Stream_T"));
 
 }
 
@@ -601,7 +601,7 @@ template <typename ConnectionManagerType,
 Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
                                                 ConnectorType>::~Test_I_AVStream_Client_MediaFoundation_Stream_T ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::~Test_I_AVStream_Client_MediaFoundation_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::~Test_I_AVStream_Client_MediaFoundation_Stream_T"));
 
   HRESULT result = E_FAIL;
   if (mediaSession_)
@@ -624,7 +624,7 @@ void
 Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
                                                 ConnectorType>::start ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::start"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::start"));
 
   // sanity check(s)
   ACE_ASSERT (mediaSession_);
@@ -669,7 +669,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
                                                                       bool recureUpstream_in,
                                                                       bool highPriority_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::stop"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::stop"));
 
   if (mediaSession_)
   {
@@ -692,7 +692,7 @@ Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
                                                 ConnectorType>::load (Stream_ILayout* layout_inout,
                                                                       bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::load"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
@@ -751,7 +751,7 @@ bool
 Test_I_AVStream_Client_MediaFoundation_Stream_T<ConnectionManagerType,
                                                 ConnectorType>::initialize (const CONFIGURATION_T& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_MediaFoundation_Stream_T::initialize"));
 
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -1065,7 +1065,7 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
                                     ConnectorType>::Test_I_AVStream_Client_V4L_Stream_T ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Stream_T::Test_I_AVStream_Client_V4L_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Stream_T::Test_I_AVStream_Client_V4L_Stream_T"));
 
 }
 
@@ -1076,7 +1076,7 @@ Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
                                     ConnectorType>::load (Stream_ILayout* layout_inout,
                                                           bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Stream_T::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Stream_T::load"));
 
   // *TODO*: remove type inference
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
@@ -1169,7 +1169,7 @@ bool
 Test_I_AVStream_Client_V4L_Stream_T<ConnectionManagerType,
                                     ConnectorType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_V4L_Stream_T::initialize"));
 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;

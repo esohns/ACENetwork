@@ -166,6 +166,7 @@ typedef Stream_Dev_Mic_Source_WASAPI_T<ACE_MT_SYNCH,
                                        Test_I_Client_DirectShow_SessionManager_t,
                                        Common_Timer_Manager_t,
                                        struct Stream_MediaFramework_DirectShow_AudioVideoFormat> Test_I_AVStream_Client_DirectShow_WASAPIIn;
+
 typedef Stream_Dev_Target_WASAPI_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
                                    struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration,
@@ -986,6 +987,7 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Client_DirectShow_StreamSessionDat
                               libacestream_default_dev_mic_source_wasapi_module_name_string,
                               Stream_INotify_t,                                                    // stream notification interface type
                               Test_I_AVStream_Client_DirectShow_WASAPIIn);                         // writer type
+
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_AVStream_Server_DirectShow_StreamSessionData,                 // session data type
                               enum Stream_SessionMessageType,                                      // session event type
                               struct Test_I_AVStream_Server_DirectShow_ModuleHandlerConfiguration, // module handler configuration type

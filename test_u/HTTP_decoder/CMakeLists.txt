@@ -11,7 +11,6 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-add_definitions (-DCOMMON_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -22,8 +21,6 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
-add_definitions (-DSTREAM_HAS_DLL)
-#add_definitions (-DSTREAM_DEC_HAS_DLL)
 
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
@@ -188,22 +185,25 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
                                               ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/HTTP_decoder
+                         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_u/HTTP_decoder
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/gtk2/bin GTK_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ffmpeg/bin FFMPEG_LIB_PATH)
- file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
+ file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIB_PATH)
+ # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
+ file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
+ file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_LIB_PATH)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ImageMagick IMAGEMAGICK_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_LIB_PATH)
+ file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
-                           ${ACE_LIB_PATH}
                            ${GTK_LIB_PATH}
+                           ${VCPKG_LIB_PATH}
                            ${FFMPEG_LIB_PATH}
+                           ${IMAGEMAGICK_LIB_PATH}
                            ${SSL_LIB_PATH}
-                           ${IMAGEMAGICK_LIB_PATH})
+                           ${ACE_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
                          ARGS "-l -r -t -u https://www.tagesschau.de/index.html"

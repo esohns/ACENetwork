@@ -23,8 +23,6 @@
 
 #include "ace/Log_Msg.h"
 
-#include "stream_macros.h"
-
 #include "stream_dev_defines.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "stream_dev_directshow_tools.h"
@@ -34,6 +32,8 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_misc_defines.h"
+
+#include "net_macros.h"
 
 #include "test_i_av_stream_server_session_message.h"
 #include "test_i_common_modules.h"
@@ -45,13 +45,13 @@
 Test_I_AVStream_Server_DirectShow_TCPStream::Test_I_AVStream_Server_DirectShow_TCPStream ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::Test_I_AVStream_Server_DirectShow_TCPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::Test_I_AVStream_Server_DirectShow_TCPStream"));
 
 }
 
 Test_I_AVStream_Server_DirectShow_TCPStream::~Test_I_AVStream_Server_DirectShow_TCPStream ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::~Test_I_AVStream_Server_DirectShow_TCPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::~Test_I_AVStream_Server_DirectShow_TCPStream"));
 
   inherited::shutdown ();
 }
@@ -60,7 +60,7 @@ bool
 Test_I_AVStream_Server_DirectShow_TCPStream::load (Stream_ILayout* layout_in,
                                                    bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::load"));
 
   if (!inherited::load (layout_in,
                         delete_out))
@@ -162,7 +162,7 @@ bool
 Test_I_AVStream_Server_DirectShow_TCPStream::initialize (const CONFIGURATION_T& configuration_in,
                                                          ACE_HANDLE handle_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -251,7 +251,7 @@ Test_I_AVStream_Server_DirectShow_TCPStream::setFormat (IGraphBuilder* builder_i
                                                         const std::wstring& sourceFilterName_in,
                                                         const struct _AMMediaType& mediaType_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::setFormat"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_TCPStream::setFormat"));
 
   // sanity check(s)
   ACE_ASSERT (builder_in);
@@ -318,13 +318,13 @@ error:
 Test_I_AVStream_Server_DirectShow_UDPStream::Test_I_AVStream_Server_DirectShow_UDPStream ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::Test_I_AVStream_Server_DirectShow_UDPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::Test_I_AVStream_Server_DirectShow_UDPStream"));
 
 }
 
 Test_I_AVStream_Server_DirectShow_UDPStream::~Test_I_AVStream_Server_DirectShow_UDPStream ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::~Test_I_AVStream_Server_DirectShow_UDPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::~Test_I_AVStream_Server_DirectShow_UDPStream"));
 
   inherited::shutdown ();
 }
@@ -333,7 +333,7 @@ bool
 Test_I_AVStream_Server_DirectShow_UDPStream::load (Stream_ILayout* layout_in,
                                                    bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::load"));
 
   if (!inherited::load (layout_in,
                         delete_out))
@@ -409,7 +409,7 @@ bool
 Test_I_AVStream_Server_DirectShow_UDPStream::initialize (const CONFIGURATION_T& configuration_in,
                                                          ACE_HANDLE handle_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -498,7 +498,7 @@ Test_I_AVStream_Server_DirectShow_UDPStream::setFormat (IGraphBuilder* builder_i
                                                const std::wstring& sourceFilterName_in,
                                                const struct _AMMediaType& mediaType_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::setFormat"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_DirectShow_UDPStream::setFormat"));
 
   // sanity check(s)
   ACE_ASSERT (builder_in);
@@ -567,13 +567,13 @@ Test_I_AVStream_Server_MediaFoundation_TCPStream::Test_I_AVStream_Server_MediaFo
  , mediaSession_ (NULL)
  , referenceCount_ (1)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::Test_I_AVStream_Server_MediaFoundation_TCPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::Test_I_AVStream_Server_MediaFoundation_TCPStream"));
 
 }
 
 Test_I_AVStream_Server_MediaFoundation_TCPStream::~Test_I_AVStream_Server_MediaFoundation_TCPStream ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::~Test_I_AVStream_Server_MediaFoundation_TCPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::~Test_I_AVStream_Server_MediaFoundation_TCPStream"));
 
   inherited::shutdown ();
 }
@@ -582,7 +582,7 @@ bool
 Test_I_AVStream_Server_MediaFoundation_TCPStream::load (Stream_ILayout* layout_in,
                                                bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::load"));
 
     if (!inherited::load (layout_in,
                           delete_out))
@@ -632,7 +632,7 @@ bool
 Test_I_AVStream_Server_MediaFoundation_TCPStream::initialize (const CONFIGURATION_T& configuration_in,
                                                               ACE_HANDLE handle_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_TCPStream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -934,13 +934,13 @@ Test_I_AVStream_Server_MediaFoundation_UDPStream::Test_I_AVStream_Server_MediaFo
  , mediaSession_ (NULL)
  , referenceCount_ (1)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::Test_I_AVStream_Server_MediaFoundation_UDPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::Test_I_AVStream_Server_MediaFoundation_UDPStream"));
 
 }
 
 Test_I_AVStream_Server_MediaFoundation_UDPStream::~Test_I_AVStream_Server_MediaFoundation_UDPStream ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::~Test_I_AVStream_Server_MediaFoundation_UDPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::~Test_I_AVStream_Server_MediaFoundation_UDPStream"));
 
   inherited::shutdown ();
 }
@@ -949,7 +949,7 @@ bool
 Test_I_AVStream_Server_MediaFoundation_UDPStream::load (Stream_ILayout* layout_in,
                                                         bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::load"));
 
     if (!inherited::load (layout_in,
                           delete_out))
@@ -990,9 +990,9 @@ Test_I_AVStream_Server_MediaFoundation_UDPStream::load (Stream_ILayout* layout_i
 
 bool
 Test_I_AVStream_Server_MediaFoundation_UDPStream::initialize (const CONFIGURATION_T& configuration_in,
-                                                     ACE_HANDLE handle_in)
+                                                              ACE_HANDLE handle_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_MediaFoundation_UDPStream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -1173,7 +1173,7 @@ error:
 Test_I_AVStream_Server_TCPStream::Test_I_AVStream_Server_TCPStream ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::Test_I_AVStream_Server_TCPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::Test_I_AVStream_Server_TCPStream"));
 
 }
 
@@ -1181,7 +1181,7 @@ bool
 Test_I_AVStream_Server_TCPStream::load (Stream_ILayout* layout_in,
                                         bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::load"));
 
   // initialize return value(s)
   delete_out = true;
@@ -1271,7 +1271,7 @@ bool
 Test_I_AVStream_Server_TCPStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
                                               ACE_HANDLE handle_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -1340,7 +1340,7 @@ error:
 void
 Test_I_AVStream_Server_TCPStream::ping ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::ping"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_TCPStream::ping"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -1353,7 +1353,7 @@ Test_I_AVStream_Server_TCPStream::ping ()
 Test_I_AVStream_Server_UDPStream::Test_I_AVStream_Server_UDPStream ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::Test_I_AVStream_Server_UDPStream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::Test_I_AVStream_Server_UDPStream"));
 
 }
 
@@ -1361,7 +1361,7 @@ bool
 Test_I_AVStream_Server_UDPStream::load (Stream_ILayout* layout_in,
                                         bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::load"));
 
 //  // initialize return value(s)
 //  modules_out.clear ();
@@ -1409,7 +1409,7 @@ bool
 Test_I_AVStream_Server_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
                                               ACE_HANDLE handle_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -1478,7 +1478,7 @@ error:
 void
 Test_I_AVStream_Server_UDPStream::ping ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::ping"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Server_UDPStream::ping"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;

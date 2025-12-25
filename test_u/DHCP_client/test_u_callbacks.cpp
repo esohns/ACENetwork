@@ -1248,10 +1248,10 @@ allocate:
   state_r.timeStamp = COMMON_TIME_NOW;
   state_r.xid = DHCP_record.xid;
 
-  // Test_U_InboundConnectionStream& stream_r =
-  //     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
+  Test_U_InboundConnectionStream& stream_r =
+    const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   struct DHCPClient_SessionData& session_data_r =
-    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR ());
+    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR (stream_r.id ()));
   session_data_r.timeStamp = state_r.timeStamp;
   session_data_r.xid = DHCP_record.xid;
 

@@ -25,7 +25,7 @@
 Test_I_AVStream_Client_DirectShow_Audio_Stream::Test_I_AVStream_Client_DirectShow_Audio_Stream ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Audio_Stream::Test_I_AVStream_Client_DirectShow_Audio_Stream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Audio_Stream::Test_I_AVStream_Client_DirectShow_Audio_Stream"));
 
 }
 
@@ -33,7 +33,7 @@ bool
 Test_I_AVStream_Client_DirectShow_Audio_Stream::load (Stream_ILayout* layout_inout,
                                                       bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Audio_Stream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Audio_Stream::load"));
 
   // *TODO*: remove type inference
 //  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
@@ -102,7 +102,7 @@ Test_I_AVStream_Client_DirectShow_Audio_Stream::load (Stream_ILayout* layout_ino
 bool
 Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize"));
 
   //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
@@ -166,7 +166,7 @@ error:
 Test_I_AVStream_Client_ALSA_Stream::Test_I_AVStream_Client_ALSA_Stream ()
     : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_Stream::Test_I_AVStream_Client_ALSA_Stream"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_Stream::Test_I_AVStream_Client_ALSA_Stream"));
 
 }
 
@@ -174,7 +174,7 @@ bool
 Test_I_AVStream_Client_ALSA_Stream::load (Stream_ILayout* layout_inout,
                                           bool& delete_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_Stream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_Stream::load"));
 
   // *TODO*: remove type inference
 //  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
@@ -243,7 +243,7 @@ Test_I_AVStream_Client_ALSA_Stream::load (Stream_ILayout* layout_inout,
 bool
 Test_I_AVStream_Client_ALSA_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_Stream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_ALSA_Stream::initialize"));
 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
