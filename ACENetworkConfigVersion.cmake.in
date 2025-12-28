@@ -1,4 +1,4 @@
-# libACENetworkConfigVersion.cmake.in
+# ACENetworkConfigVersion.cmake.in
 
 set (PACKAGE_VERSION "@VERSION@")
  
