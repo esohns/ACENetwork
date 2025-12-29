@@ -169,7 +169,7 @@ Net_WLAN_Tools::associatedSSID (struct DBusConnection* connection_in,
     if (interface_identifiers_a.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid argument, aborting\n")));
+                  ACE_TEXT ("no WLAN interfaces found, aborting\n")));
       return result;
     } // end IF
     interface_identifier = interface_identifiers_a.front ();

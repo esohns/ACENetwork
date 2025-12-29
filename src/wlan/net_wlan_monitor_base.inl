@@ -652,24 +652,28 @@ Net_WLAN_Monitor_Base_T<AddressType,
         interface_identifier = (*iterator_2).second.first;
       } // end IF
       else
-        ACE_DEBUG ((LM_ERROR,
+        ACE_DEBUG ((LM_WARNING,
                     ACE_TEXT ("SSID (was: %s) not detected (yet); cannot auto-select interface, continuing\n"),
                     ACE_TEXT (SSID_in.c_str ())));
     } // end lock scope
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_ASSERT (!InlineIsEqualGUID (interface_identifier, GUID_NULL));
+  if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
 #else
-  ACE_ASSERT (!interface_identifier.empty ());
+  if (unlikely (interface_identifier.empty ()))
 #endif // ACE_WIN32 || ACE_WIN64
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("no WLAN interface provided/found, aborting\n")));
+    return false;
+  } // end IF
 
 continue_:
   if (unlikely (!current_ssid_s.empty () &&
-                ACE_OS::strcmp (SSID_in.c_str (),
-                                current_ssid_s.c_str ())))
+                ACE_OS::strcmp (SSID_in.c_str (), current_ssid_s.c_str ())))
   {
     try {
-      do_associate (interfaceIdentifier_in,
+      do_associate (interface_identifier,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
                     accessPointLinkLayerAddress_in,
@@ -679,12 +683,12 @@ continue_:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_WLAN_IManager::do_associate(\"%s\",%s), continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_WLAN_IManager::do_associate(\"%s\",%s,%s), continuing\n"),
-                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
+                  ACE_TEXT (interface_identifier.c_str ()),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&const_cast<struct ether_addr&> (accessPointLinkLayerAddress_in).ether_addr_octet)).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64

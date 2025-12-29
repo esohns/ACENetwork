@@ -766,20 +766,17 @@ Net_WLAN_Monitor_T<AddressType,
                                             inherited::socketHandle_,
                                             inherited::familyId_,
                                             protocolFeatures_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::getProtocolFeatures(\"%s\",%@,%d), aborting\n"),
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("failed to Net_WLAN_Tools::getProtocolFeatures(\"%s\",%@,%d), continuing\n"),
                 ACE_TEXT (configuration_in.interfaceIdentifier.c_str ()),
                 inherited::socketHandle_,
                 inherited::familyId_));
-    return false;
-  } // end IF
 
   ACE_ASSERT (inherited::configuration_);
   if (unlikely (inherited::configuration_->wiPhyIdentifier.empty ()))
   {
 //    Net_WLAN_WiPhyIdentifiers_t wiphys_a =
-//        Net_WLAN_Tools::getWiPhys (configuration_in.interfaceIdentifier,
+//        Net_WLAN_Tools::getWiPhys (interface_identifier_string,
 //                                   inherited::socketHandle_,
 //                                   inherited::familyId_,
 //                                   false);
@@ -792,19 +789,19 @@ Net_WLAN_Monitor_T<AddressType,
 //    {
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("\"%s\": failed to retrieve wiphy (index was: %u), aborting\n"),
-//                  ACE_TEXT (configuration_in.interfaceIdentifier.c_str ()),
+//                  ACE_TEXT (interface_identifier_string.c_str ()),
 //                  0));
 //      return false;
 //    } // end IF
 //    inherited::configuration_->wiPhyIdentifier = (*iterator).first;
     inherited::configuration_->wiPhyIdentifier =
-        Net_WLAN_Tools::wiPhyIndexToWiPhyNameString (configuration_in.interfaceIdentifier,
-                                                     inherited::socketHandle_,
-                                                     inherited::familyId_,
-                                                     0);
+      Net_WLAN_Tools::wiPhyIndexToWiPhyNameString (interface_identifier_string,
+                                                   inherited::socketHandle_,
+                                                   inherited::familyId_,
+                                                   0);
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("\"%s\": wiphy unspecified, setting default: \"%s\" (index: %u), continuing\n"),
-                ACE_TEXT (configuration_in.interfaceIdentifier.c_str ()),
+                ACE_TEXT (interface_identifier_string.c_str ()),
                 ACE_TEXT (inherited::configuration_->wiPhyIdentifier.c_str ()),
                 0));
   } // end IF

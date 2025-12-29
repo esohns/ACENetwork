@@ -646,8 +646,6 @@ BitTorrent_Control_T<SessionAsynchType,
                      static_cast<enum BitTorrent_Event> (event_inout->type));
 
       SESSIONS_ITERATOR_T iterator;
-      typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
-      Net_ConnectionId_t id_i;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
         iterator = sessions_.find (event_inout->metaInfoFileName);
         if (iterator == sessions_.end ())
