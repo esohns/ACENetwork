@@ -1061,7 +1061,7 @@ do_work (const std::string& configurationFile_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #else
-  modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_RGB32;
+  modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_BGRA;
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_4b.queue = &av_input_queue;
@@ -1135,8 +1135,10 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_save_converter_4b = modulehandler_configuration_4b;
   modulehandler_configuration_save_converter_4b.flipImage = true;
   modulehandler_configuration_save_converter_4b.handleResize = false;
+#if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_save_converter_4b.outputFormat.video.format =
-    AV_PIX_FMT_BGR24;
+    AV_PIX_FMT_BGR24; // AVI format
+#endif // FFMPEG_SUPPORT
   configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_save_converter_4b)));

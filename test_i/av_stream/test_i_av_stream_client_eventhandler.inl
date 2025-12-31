@@ -209,7 +209,7 @@ Test_I_AVStream_Client_EventHandler_T<SessionDataType,
 #endif // GTK_USE
 
 #if defined (GTK_USE)
-  guint event_source_id = 0;
+  // guint event_source_id = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->progressData.transferred += message_in.total_length ();
     if (message_in.getMediaType () == STREAM_MEDIATYPE_VIDEO)
