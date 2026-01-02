@@ -309,12 +309,14 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType>::notify (Stream_SessionId_t sessionId_in,
-                                                      const enum Stream_SessionMessageType& sessionEvent_in)
+                                                      const enum Stream_SessionMessageType& sessionEvent_in,
+                                                      bool expedite_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -1176,8 +1178,6 @@ IRC_Session_T<ConnectionType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
 
-  int result = -1;
-
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
@@ -1225,6 +1225,6 @@ IRC_Session_T<ConnectionType,
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
 
   std::string message_text = IRC_Tools::RecordToString (record_r);
-  log (std::string (), // --> server log
+  log (ACE_TEXT_ALWAYS_CHAR (""), // --> server log
        message_text);
 }

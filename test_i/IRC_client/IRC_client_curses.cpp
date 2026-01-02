@@ -81,7 +81,7 @@ curses_input (struct Common_UI_Curses_State* state_in,
       } // end IF
       char buffer_a[BUFSIZ];
       ACE_OS::snprintf (buffer_a, sizeof (char[BUFSIZ]),
-                        ACE_TEXT_ALWAYS_CHAR ("0x%08lx"),
+                        ACE_TEXT_ALWAYS_CHAR ("0x%08ux"),
                         mouse_event.bstate);
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("mouse @(%d,%d), state: %s\n"),

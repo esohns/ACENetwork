@@ -140,7 +140,7 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
     case 8:  // MDR
     case 28: // NASA TV
     {
-      ACE_UINT32 index_i = 0, index_2 = 0, date_i = 0;
+      ACE_UINT32 index_i = 0, index_2 = 0;//, date_i = 0;
 
       position_i = last_URI_string.rfind ('/', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
@@ -161,7 +161,7 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
       converter >> index_2;
 
       regex_string =
-          ACE_TEXT_ALWAYS_CHAR ("^(master)(_)([[:alnum:]]+)(_)([[:digit:]]+)(.ts)$");
+        ACE_TEXT_ALWAYS_CHAR ("^(master)(_)([[:alnum:]]+)(_)([[:digit:]]+)(.ts)$");
       regex.assign (regex_string);
       if (unlikely (!std::regex_match (URI_string_tail,
                                        match_results,
@@ -466,7 +466,7 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
     }
     case 14: // Parlamentsfernsehen
     {
-      ACE_UINT32 index_i = 0, date_i = 0;
+      ACE_UINT32 index_i = 0;//, date_i = 0;
 
       position_i = last_URI_string.rfind ('_', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
@@ -521,7 +521,7 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
     }
     case 15: // ANIXE
     {
-      ACE_UINT32 index_i = 0, date_i = 0;
+      ACE_UINT32 index_i = 0;//, date_i = 0;
 
       position_i = last_URI_string.rfind ('_', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
@@ -570,7 +570,7 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
     }
     case 18: // QVC
     {
-      ACE_UINT32 index_i = 0, date_i = 0;
+      ACE_UINT32 index_i = 0;//, date_i = 0;
 
       position_i = last_URI_string.rfind ('_', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
@@ -623,7 +623,7 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
     }
     case 25: // Channel NewsAsia
     {
-      ACE_UINT32 index_i = 0, date_i = 0;
+      ACE_UINT32 index_i = 0;//, date_i = 0;
 
       position_i = last_URI_string.rfind ('_', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);
@@ -674,7 +674,7 @@ Test_I_WebTV_Tools::addSegmentURIs (unsigned int program_in,
     }
     case 35: // ALEX
     {
-      ACE_UINT32 index_i = 0, date_i = 0;
+      ACE_UINT32 index_i = 0;//, date_i = 0;
 
       position_i = last_URI_string.rfind ('_', std::string::npos);
       ACE_ASSERT (position_i != std::string::npos);

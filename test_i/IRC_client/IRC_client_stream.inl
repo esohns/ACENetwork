@@ -105,8 +105,8 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   struct IRC_Client_SessionData* session_data_p = NULL;
-  typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
-  IRC_Client_Module_Bisector_t* bisector_impl_p = NULL;
+  // typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
+  // IRC_Client_Module_Bisector_t* bisector_impl_p = NULL;
   IRC_Client_Connection_Manager_t* connection_manager_p = NULL;
   IRC_Client_IConnection_t* iconnection_p = NULL;
   IRC_Client_SessionManager_t* session_manager_p =

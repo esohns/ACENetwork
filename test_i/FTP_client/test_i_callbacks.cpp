@@ -1423,7 +1423,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                            (start_listening ? GTK_STOCK_DISCONNECT
                                             : GTK_STOCK_CONNECT));
 
-  bool failed = true;
+  // bool failed = true;
   if (start_listening)
   {
     // already listening ? --> stop
@@ -1462,10 +1462,10 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
   return;
 
-error:
-  gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_CONNECT);
-  un_toggling_listen = true;
-  gtk_toggle_action_set_active (toggleAction_in, FALSE);
+// error:
+//   gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_CONNECT);
+//   un_toggling_listen = true;
+//   gtk_toggle_action_set_active (toggleAction_in, FALSE);
 } // toggle_action_listen_toggled_cb
 
 void

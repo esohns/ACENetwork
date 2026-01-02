@@ -156,6 +156,7 @@ FTP_ParserDataDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
 #if YYDEBUG
   //debug_level = parser_.debug_level ();
   debug_level = zzdebug;
+  ACE_UNUSED_ARG (debug_level);
 #endif // YYDEBUG
 
   // parse data fragment

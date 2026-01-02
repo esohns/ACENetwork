@@ -178,33 +178,27 @@ Test_I_Stream_HTMLParser::handleDataMessage (Test_I_Stream_Message*& message_ino
   // sanity check(s)
   ACE_ASSERT (headFragment_);
 
-//  const typename Test_I_Stream_Message::DATA_T& data_container_r =
-//    headFragment_->getR ();
-//  typename Test_I_Stream_Message::DATA_T::DATA_T& data_r =
-//    const_cast<typename Test_I_Stream_Message::DATA_T::DATA_T&> (data_container_r.getR ());
-  int result = -1;
-
   // *IMPORTANT NOTE*: no more data will arrive for this document
-  result = htmlParseChunk (inherited::parserContext_.parserContext,
-                           ACE_TEXT_ALWAYS_CHAR (""),
-                           0,
-                           1); // terminate
+  int result = htmlParseChunk (inherited::parserContext_.parserContext,
+                               ACE_TEXT_ALWAYS_CHAR (""),
+                               0,
+                               1); // terminate
   const xmlError* error_p = xmlGetLastError ();
   if (result)
   {
-    xmlParserErrors parse_errors = static_cast<xmlParserErrors> (result);
+    // xmlParserErrors parse_errors = static_cast<xmlParserErrors> (result);
     ACE_DEBUG ((Stream_HTML_Tools::errorLevelToLogPriority (error_p ? error_p->level : XML_ERR_ERROR),
                 ACE_TEXT ("%s: failed to htmlParseChunk() (result was: %d): \"%s\", continuing\n"),
                 inherited::mod_->name (),
                 result,
                 error_p ? ACE_TEXT (error_p->message) : ACE_TEXT ("")));
   } // end IF
-  if (!inherited::parserContext_.parserContext->wellFormed)
+  if (unlikely (!inherited::parserContext_.parserContext->wellFormed))
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s: document not well-formed, continuing\n"),
                 inherited::mod_->name ()));
-  if (error_p &&
-      error_p->code)
+  if (unlikely (error_p &&
+                error_p->code))
     ACE_DEBUG ((Stream_HTML_Tools::errorLevelToLogPriority (error_p->level),
                 ACE_TEXT ("%s: document had errors (last error was: %d: \"%s\"), continuing\n"),
                 inherited::mod_->name (),

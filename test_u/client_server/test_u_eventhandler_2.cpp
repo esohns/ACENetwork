@@ -167,12 +167,12 @@ Test_U_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
-  const Test_U_StreamSessionData_t& session_data_container_r =
-    sessionMessage_in.getR ();
-  const struct Test_U_StreamSessionData& session_data_r =
-    session_data_container_r.getR ();
+  // const Test_U_StreamSessionData_t& session_data_container_r =
+  //   sessionMessage_in.getR ();
+  // const struct Test_U_StreamSessionData& session_data_r =
+  //   session_data_container_r.getR ();
 
-  enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
+  // enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_CONNECT:

@@ -899,9 +899,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     {
       // sanity check(s)
       ACE_ASSERT (inherited::sessionData_);
-
-      const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-        inherited::sessionData_->getR ();
+      // const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+      //   inherited::sessionData_->getR ();
 
       //// start profile timer
       //profile_.start ();

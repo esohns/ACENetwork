@@ -95,7 +95,8 @@ class IRC_Session_T
   virtual void start (Stream_SessionId_t,
                       const SessionDataType&);
   virtual void notify (Stream_SessionId_t,
-                       const enum Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
   virtual void end (Stream_SessionId_t);
   virtual void notify (Stream_SessionId_t,
                        const MessageType&);

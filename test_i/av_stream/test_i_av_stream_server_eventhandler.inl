@@ -173,7 +173,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
     message_data_container_r.getR ();
 
 #if defined (GTK_USE)
-  guint event_source_id = 0;
+  // guint event_source_id = 0;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     CBData_->progressData.transferred += message_in.total_length ();
 
@@ -220,7 +220,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
-  int result = -1;
+  // int result = -1;
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
   switch (sessionMessage_in.type ())
   {
@@ -265,7 +265,7 @@ Test_I_Server_EventHandler_T<SessionDataType,
       //                ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
       //} // end IF
 
-continue_:
+// continue_:
       event_e = COMMON_UI_EVENT_STATISTIC;
       break;
     }

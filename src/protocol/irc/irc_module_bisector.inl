@@ -485,10 +485,10 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      const typename SessionMessageType::DATA_T& session_data_container_r =
-        message_inout->getR ();
-      const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-        session_data_container_r.getR ();
+      // const typename SessionMessageType::DATA_T& session_data_container_r =
+      //   message_inout->getR ();
+      // const typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+      //   session_data_container_r.getR ();
 
       break;
     }

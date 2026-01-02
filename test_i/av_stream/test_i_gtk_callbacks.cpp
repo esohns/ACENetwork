@@ -6571,11 +6571,11 @@ drawingarea_source_draw_cb (GtkWidget* widget_in,
     static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
   ACE_ASSERT (ui_cb_data_base_p);
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  // Common_UI_GTK_Manager_t* gtk_manager_p =
+  //   COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  // ACE_ASSERT (gtk_manager_p);
+  // Common_UI_GTK_State_t& state_r =
+  //   const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   Stream_Module_t* module_p = NULL;
   Common_IDispatch* dispatch_p = NULL;
@@ -6653,11 +6653,11 @@ drawingarea_target_draw_cb (GtkWidget* widget_in,
     static_cast<struct Test_I_AVStream_UI_CBData*> (userData_in);
   ACE_ASSERT (ui_cb_data_base_p);
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  // Common_UI_GTK_Manager_t* gtk_manager_p =
+  //   COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  // ACE_ASSERT (gtk_manager_p);
+  // Common_UI_GTK_State_t& state_r =
+  //   const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 
   Stream_Module_t* module_p = NULL;
   Common_IDispatch* dispatch_p = NULL;
@@ -6715,9 +6715,9 @@ drawingarea_target_draw_cb (GtkWidget* widget_in,
     }
   } // end SWITCH
 #else
-  // sanity check(s)
-  struct Test_I_AVStream_Server_ALSA_V4L_UI_CBData* ui_cb_data_p =
-    static_cast<struct Test_I_AVStream_Server_ALSA_V4L_UI_CBData*> (userData_in);
+  // // sanity check(s)
+  // struct Test_I_AVStream_Server_ALSA_V4L_UI_CBData* ui_cb_data_p =
+  //   static_cast<struct Test_I_AVStream_Server_ALSA_V4L_UI_CBData*> (userData_in);
 
   Test_I_AVStream_Server_TCPConnectionManager_t* iconnection_manager_p =
     Test_I_AVStream_Server_TCPConnectionManager_t::SINGLETON_T::instance ();

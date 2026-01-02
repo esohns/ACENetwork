@@ -421,7 +421,7 @@ idle_add_session_cb (gpointer userData_in)
 #if defined (GTK2_USE)
   GdkColor black = {0, 0x0000, 0x0000, 0x0000};
 #elif defined (GTK3_USE)
-  GdkRGBA black = { 0.0, 0.0, 0.0, 1.0 };
+  // GdkRGBA black = { 0.0, 0.0, 0.0, 1.0 };
 
   GtkCssProvider* css_provider_p = gtk_css_provider_new ();
   ACE_ASSERT (css_provider_p);

@@ -118,7 +118,6 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
 
-  // update configuration
   inherited::MODULE_T* module_p = inherited::head ();
   ACE_ASSERT (module_p);
   inherited::TASK_T* task_p = module_p->reader ();
@@ -129,15 +128,13 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
   (*iterator).second.second->outboundQueue =
     dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
   ACE_ASSERT ((*iterator).second.second->outboundQueue);
+  // Test_U_SessionManager_t* session_manager_p =
+  //   Test_U_SessionManager_t::SINGLETON_T::instance ();
+  // ACE_ASSERT (session_manager_p);
 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  struct FileServer_SessionData* session_data_p = NULL;
-  Test_U_SessionManager_t* session_manager_p =
-    Test_U_SessionManager_t::SINGLETON_T::instance ();
-
-  // sanity check(s)
-  ACE_ASSERT (session_manager_p);
+  // struct FileServer_SessionData* session_data_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -155,11 +152,8 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
     setup_pipeline;
   reset_setup_pipeline = false;
 
- session_data_p =
-   &const_cast<struct FileServer_SessionData&> (session_manager_p->getR (inherited::id_));
-  //session_data_p->sessionID = configuration_in.sessionID;
-
-  //  configuration_in.moduleConfiguration.streamState = &state_;
+ // session_data_p =
+ //   &const_cast<struct FileServer_SessionData&> (session_manager_p->getR (inherited::id_));
 
   // ---------------------------------------------------------------------------
 
@@ -174,17 +168,13 @@ Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
 
   // -------------------------------------------------------------
 
-  // set (session) message allocator
-  //inherited::allocator_ = configuration_in.messageAllocator;
-
   inherited::isInitialized_ = true;
 
   return true;
 
 error:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      setup_pipeline;
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
 
   return false;
 }
@@ -258,18 +248,14 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
   ACE_ASSERT (!inherited::isInitialized_);
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  Test_U_SessionManager_t* session_manager_p =
-    Test_U_SessionManager_t::SINGLETON_T::instance ();
-
-  // sanity check(s)
   ACE_ASSERT (iterator != const_cast<inherited::CONFIGURATION_T&> (configuration_in).end ());
-  ACE_ASSERT (session_manager_p);
+  // Test_U_SessionManager_t* session_manager_p =
+  //   Test_U_SessionManager_t::SINGLETON_T::instance ();
+  // ACE_ASSERT (session_manager_p);
 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
-  struct FileServer_SessionData* session_data_p = NULL;
-  Stream_Module_t* module_p = NULL;
-  Test_U_FileReaderH* file_source_impl_p = NULL;
+  // struct FileServer_SessionData* session_data_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -288,11 +274,8 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
   reset_setup_pipeline = false;
 
   //(*iterator).second.second->stream = this;
-  session_data_p =
-    &const_cast<struct FileServer_SessionData&> (session_manager_p->getR (inherited::id_));
-  //session_data_p->sessionId = configuration_in.sessionId;
-
-  //  configuration_in.moduleConfiguration.streamState = &state_;
+  // session_data_p =
+  //   &const_cast<struct FileServer_SessionData&> (session_manager_p->getR (inherited::id_));
 
   // ---------------------------------------------------------------------------
 
@@ -307,17 +290,13 @@ Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in
 
   // -------------------------------------------------------------
 
-  // set (session) message allocator
-  //inherited::allocator_ = configuration_in.messageAllocator;
-
   inherited::isInitialized_ = true;
 
   return true;
 
 error:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      setup_pipeline;
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
 
   return false;
 }
