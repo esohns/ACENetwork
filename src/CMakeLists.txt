@@ -375,20 +375,21 @@ install (FILES
          net_udpconnection_base.inl
          net_udpsockethandler.h
          net_udpsockethandler.inl
-         DESTINATION include)
+         DESTINATION "${INSTALL_INCLUDE_DIR}"
+         COMPONENT include)
 install (TARGETS ${PROJECT_NAME}
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
-         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT shlib
-         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-         COMPONENT dev)
+         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
+         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT lib)
 if (UNIX)
  install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
-          DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}" COMPONENT config)
+          DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}"
+          COMPONENT config)
 elseif (WIN32)
  install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
-          DESTINATION "share" COMPONENT config)
-#          DESTINATION "$ENV{APPDATA}/${PROJECT_NAME}" COMPONENT config)
+          DESTINATION "share"
+          COMPONENT config)
 endif ()
 
 # ////////////////////////////////////////
