@@ -208,7 +208,7 @@ set (CPACK_NSIS_DISPLAY_NAME "@PROJECT_NAME@")
 set (CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 #set (CPACK_NSIS_EXECUTABLES_DIRECTORY $INSTDIR)
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "SetOutPath $INSTDIR
-                                        CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk' '$INSTDIR\\\\bin\\\\web_tv.exe' '-l -r' $INSTDIR\\\\include\\\\ACENetwork_icon.ico 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F1 'web TV'")
+                                        CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk' '$INSTDIR\\\\bin\\\\web_tv.exe' '-l -r -z' $INSTDIR\\\\include\\\\ACENetwork_icon.ico 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F1 'web TV'")
 #set (CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\VSXu Player Fullscreen.lnk\\\" \\\"$INSTDIR\\\\.\\\\vsxu_player.exe \\\" -f")
 #set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk\\\")
 

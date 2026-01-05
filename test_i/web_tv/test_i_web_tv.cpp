@@ -1252,18 +1252,18 @@ do_work (const std::string& configurationFile_in,
     } // end IF
 #endif // GTK_USE
 
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    HWND window_p = GetConsoleWindow ();
-//    if (!window_p)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-//      goto clean;
-//    } // end IF
-//    BOOL was_visible_b = false;
-//    was_visible_b = ShowWindow (window_p, SW_HIDE);
-//    ACE_UNUSED_ARG (was_visible_b);
-//#endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    HWND window_p = GetConsoleWindow ();
+    if (!window_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
+      goto clean;
+    } // end IF
+    BOOL was_visible_b = false;
+    was_visible_b = ShowWindow (window_p, SW_HIDE);
+    ACE_UNUSED_ARG (was_visible_b);
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   else
   {
