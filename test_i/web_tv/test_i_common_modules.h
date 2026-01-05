@@ -47,6 +47,7 @@
 #if defined (FFMPEG_SUPPORT)
 #include "stream_dec_libav_audio_decoder.h"
 #include "stream_dec_libav_decoder.h"
+//#include "stream_dec_libav_encoder.h"
 #include "stream_dec_libav_hw_decoder.h"
 #endif // FFMPEG_SUPPORT
 #include "stream_dec_mpeg_ts_decoder.h"
@@ -124,37 +125,6 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_WebTV_SessionData,                // ses
                           Test_I_HTTPStreamer,                                    // reader type
                           Test_I_HTTPParser,                                      // writer type
                           Test_I_HTTPMarshal);                                    // name
-
-//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-//                                                   Common_TimePolicy_t,
-//                                                   struct Test_I_WebTV_ModuleHandlerConfiguration,
-//                                                   Stream_ControlMessage_t,
-//                                                   Test_I_Message,
-//                                                   Test_I_SessionMessage,
-//                                                   HTTP_Method_t,
-//                                                   struct Stream_Statistic,
-//                                                   Common_Timer_Manager_t,
-//                                                   struct Test_I_WebTV_SessionData,
-//                                                   Test_I_WebTV_SessionData_t> Test_I_StatisticReport_ReaderTask_t;
-//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_I_WebTV_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_Message,
-//                                                      Test_I_SessionMessage,
-//                                                      HTTP_Method_t,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      struct Test_I_WebTV_SessionData,
-//                                                      Test_I_WebTV_SessionData_t> Test_I_StatisticReport_WriterTask_t;
-//DATASTREAM_MODULE_DUPLEX (struct Test_I_WebTV_SessionData,                // session data type
-//                          enum Stream_SessionMessageType,                         // session event type
-//                          struct Test_I_WebTV_ModuleHandlerConfiguration, // module handler configuration type
-//                          libacestream_default_stat_report_module_name_string,
-//                          Stream_INotify_t,                                       // stream notification interface type
-//                          Test_I_StatisticReport_ReaderTask_t,                    // reader type
-//                          Test_I_StatisticReport_WriterTask_t,                    // writer type
-//                          Test_I_StatisticReport);                                // name
 
 typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
@@ -586,5 +556,22 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                       
                               Stream_INotify_t,                                  // stream notification interface type
                               Test_I_FileSink);                                  // writer type
 #endif // ACE_WIN32 || ACE_WIN64
+
+//typedef Stream_Decoder_LibAVEncoder_T<ACE_MT_SYNCH,
+//                                      Common_TimePolicy_t,
+//                                      struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+//                                      Stream_ControlMessage_t,
+//                                      Test_I_Message,
+//                                      Test_I_SessionMessage_3,
+//                                      Test_I_WebTV_SessionData_3_t,
+//                                      struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_MP4Encoder;
+//DATASTREAM_MODULE_DUPLEX_A (Test_I_WebTV_SessionData_3,                                // session data type
+//                            enum Stream_SessionMessageType,                            // session event type
+//                            struct Test_I_WebTV_ModuleHandlerConfiguration_3,          // module handler configuration type
+//                            libacestream_default_dec_libav_encoder_module_name_string,
+//                            Stream_INotify_t,                                          // stream notification interface type
+//                            Test_I_MP4Encoder::READER_TASK_T,                          // reader type
+//                            Test_I_MP4Encoder,                                         // writer type
+//                            Test_I_MP4Encoder);                                        // module name
 
 #endif

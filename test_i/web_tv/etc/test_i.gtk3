@@ -40,6 +40,38 @@
       </object>
     </child>
   </object>
+  <object class="GtkListStore" id="liststore_adapter">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name device -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_audio_channel">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="guint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_channel">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="guint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_save">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name value -->
+      <column type="gint"/>
+    </columns>
+  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
@@ -224,6 +256,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">channel</property>
                                     <property name="tooltip_text" translatable="yes">channel</property>
                                     <property name="model">liststore_channel</property>
@@ -270,6 +303,7 @@
                                   <object class="GtkComboBox" id="combobox_audio_channel">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">audio channel</property>
                                     <property name="tooltip_text" translatable="yes">audio channel</property>
                                     <property name="model">liststore_audio_channel</property>
@@ -289,6 +323,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">resolution</property>
                                     <property name="tooltip_text" translatable="yes">resolution</property>
                                     <property name="model">liststore_resolution</property>
@@ -369,6 +404,7 @@
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
+                                    <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">display adapter</property>
                                     <property name="tooltip_text" translatable="yes">display adapter</property>
                                     <property name="model">liststore_adapter</property>
@@ -384,6 +420,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">display</property>
                                     <property name="tooltip_text" translatable="yes">display</property>
                                     <property name="model">liststore_display</property>
@@ -536,6 +573,26 @@
                                 <property name="position">1</property>
                               </packing>
                             </child>
+                            <child>
+                              <object class="GtkComboBox" id="combobox_save">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="has_tooltip">True</property>
+                                <property name="tooltip_markup" translatable="yes">save format</property>
+                                <property name="tooltip_text" translatable="yes">save format</property>
+                                <property name="model">liststore_save</property>
+                                <property name="has_frame">False</property>
+                                <property name="focus_on_click">False</property>
+                                <property name="entry_text_column">0</property>
+                                <signal name="changed" handler="combobox_format_save_changed_cb" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -674,30 +731,6 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkListStore" id="liststore_adapter">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name device -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_audio_channel">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name id -->
-      <column type="guint"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_channel">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name id -->
-      <column type="guint"/>
-    </columns>
   </object>
   <object class="GtkListStore" id="liststore_display">
     <columns>

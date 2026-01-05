@@ -726,7 +726,8 @@ do_work (const std::string& configurationFile_in,
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_AllocatorConfiguration allocator_configuration_2;
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration video_codec_configuration;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration video_codec_configuration; // decoder
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration video_codec_configuration_2; // encoder
   video_codec_configuration.codecId = AV_CODEC_ID_H264;
   // video_codec_configuration.profile = FF_PROFILE_H264_HIGH;
   video_codec_configuration.profile = FF_PROFILE_H264_BASELINE;
@@ -741,6 +742,7 @@ do_work (const std::string& configurationFile_in,
   // video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_VDPAU;
   // video_codec_configuration.format = AV_PIX_FMT_VDPAU;
 #endif // ACE_WIN32 || ACE_WIN64
+  video_codec_configuration_2 = video_codec_configuration;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration;
   audio_codec_configuration.codecId = AV_CODEC_ID_AAC;
 #else
@@ -1005,13 +1007,14 @@ do_work (const std::string& configurationFile_in,
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4a;
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_queue_sink_4a;
-  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4b;
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4b; // video decoder
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_injector_4b; // audio injector
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_decoder_4b; // audio decoder
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_audio_queue_sink_4b; // audio queue
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_queue_source_4b; // save queue
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_converter_4b; // save converter
-  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_audio_injector_4b; // save audio injector
+  //struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_audio_injector_4b; // save audio injector
+  struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_save_encoder_4b; // av encoder
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   modulehandler_configuration_4b.ALSAConfiguration = &ALSA_configuration;
@@ -1133,7 +1136,9 @@ do_work (const std::string& configurationFile_in,
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_save_queue_source_4b)));
   modulehandler_configuration_save_converter_4b = modulehandler_configuration_4b;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_save_converter_4b.flipImage = true;
+#endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_save_converter_4b.handleResize = false;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_save_converter_4b.outputFormat.video.format =
@@ -1148,6 +1153,12 @@ do_work (const std::string& configurationFile_in,
   // configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Injector_2"),
   //                                                                 std::make_pair (&module_configuration,
   //                                                                                 &modulehandler_configuration_save_audio_injector_4b)));
+
+  modulehandler_configuration_save_encoder_4b = modulehandler_configuration_4b;
+  modulehandler_configuration_save_encoder_4b.codecConfiguration = &video_codec_configuration_2;
+  configuration_in.streamConfiguration_4b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_save_encoder_4b)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -1432,6 +1443,7 @@ ACE_TMAIN (int argc_in,
 #if defined (GTK_USE)
   Common_UI_GTK_State_t& state_r =
       const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ui_cb_data.UIState = &state_r;
 #endif // GTK_USE
   Common_Logger_Queue_t logger;
   logger.initialize (&state_r.logQueue,

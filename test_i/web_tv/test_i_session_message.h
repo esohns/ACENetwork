@@ -187,6 +187,7 @@ class Test_I_WebTV_SessionData_3
               static_cast<ACE_UINT32> (INADDR_ANY))
    , connection (NULL)
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   , stream (NULL)
    , targetFileName ()
   {}
 
@@ -201,8 +202,9 @@ class Test_I_WebTV_SessionData_3
                                   struct Stream_UserData>::operator= (rhs_in);
 
     connection = (connection ? connection : rhs_in.connection);
-    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
-                                              : targetFileName);
+    stream = (stream ? stream : rhs_in.stream);
+    targetFileName =
+      (targetFileName.empty () ? rhs_in.targetFileName : targetFileName);
 
     return *this;
   }
@@ -210,6 +212,7 @@ class Test_I_WebTV_SessionData_3
   ACE_INET_Addr                             address;
   Test_I_IConnection_t*                     connection;
   enum Stream_Decoder_CompressionFormatType format; // HTTP parser module
+  Stream_Base_t*                            stream; // used by aggregator modules
   std::string                               targetFileName; // file writer module
 };
 typedef Stream_SessionData_T<Test_I_WebTV_SessionData_3> Test_I_WebTV_SessionData_3_t;

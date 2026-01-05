@@ -52,6 +52,7 @@ G_MODULE_EXPORT gboolean dialog_main_key_press_event_cb (GtkWidget*, GdkEventKey
 G_MODULE_EXPORT void togglebutton_play_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void combobox_channel_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void combobox_resolution_changed_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void combobox_format_save_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void combobox_display_changed_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void filechooserbutton_output_directory_set_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void togglebutton_display_toggled_cb (GtkToggleButton*, gpointer);

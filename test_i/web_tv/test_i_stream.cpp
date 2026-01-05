@@ -25,11 +25,15 @@
 
 #include "stream_dev_defines.h"
 
+#include "stream_lib_common.h"
+#include "stream_lib_tools.h"
+
 #include "stream_misc_defines.h"
 
 #include "stream_vis_defines.h"
 
 #include "test_i_common_modules.h"
+#include "test_i_module_encoder.h"
 
 Test_I_AVStream::Test_I_AVStream ()
     : inherited ()
@@ -48,6 +52,10 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
   bool save_to_file_b = !(*iterator).second.second->targetFileName.empty ();
+  inherited::CONFIGURATION_T::ITERATOR_T iterator_2 =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)); // save converter
+  ACE_ASSERT (iterator_2 != inherited::configuration_->end ());
+
   Stream_Branches_t branches_a;
 
   Stream_Module_t* module_p = NULL;
@@ -275,21 +283,57 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     // layout_in->append (module_p, branch_2, index_2);
     // module_p = NULL;
 
-    ACE_NEW_RETURN (module_p,
-                    Test_I_AVIEncoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_ENCODER_AVI_DEFAULT_NAME_STRING)),
-                    false);
-    layout_in->append (module_p, branch_2, index_2);
-    module_p = NULL;
+    enum Stream_AVContainer_Type container_type_e =
+      Stream_MediaFramework_Tools::fileExtensionToAVContainer (Common_File_Tools::fileExtension ((*iterator).second.second->targetFileName, false));
+    switch (container_type_e)
+    {
+      case STREAM_AVCONTAINERTYPE_AVI:
+      {
+        (*iterator_2).second.second->flipImage = true;
+        (*iterator_2).second.second->outputFormat.video.format = AV_PIX_FMT_BGR24;
+        
+        ACE_NEW_RETURN (module_p,
+                        Test_I_AVIEncoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_ENCODER_AVI_DEFAULT_NAME_STRING)),
+                        false);
+        layout_in->append (module_p, branch_2, index_2);
+        module_p = NULL;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_NEW_RETURN (module_p,
-                    Test_I_FileSink_Module (this,
-                                            ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
-                    false);
-    layout_in->append (module_p, branch_2, index_2);
-    module_p = NULL;
+        ACE_NEW_RETURN (module_p,
+                        Test_I_FileSink_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+                        false);
+        layout_in->append (module_p, branch_2, index_2);
+        module_p = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
+        break;
+      }
+      case STREAM_AVCONTAINERTYPE_MP4:
+      {
+        (*iterator_2).second.second->flipImage = false;
+        (*iterator_2).second.second->outputFormat.video.format =
+          AV_PIX_FMT_NV12;
+        
+        ACE_NEW_RETURN (module_p,
+                        Test_I_Encoder_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING)),
+                        false);
+        layout_in->append (module_p, branch_2, index_2);
+        module_p = NULL;
+
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: invalid/unknown container format (was: %d), aborting\n"),
+                    ACE_TEXT (stream_name_string_4b),
+                    container_type_e));
+        deleteModules_out = true;
+        return false;
+      }
+    } // end SWITCH
 
     ++index_2;
   } // end IF
@@ -316,7 +360,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
   } // end ELSE
-  ++index_i;
+  //++index_i;
 
   deleteModules_out = true;
 
@@ -360,6 +404,7 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
   // *TODO*: remove type inferences
   ACE_ASSERT (session_data_p->formats.empty ());
   session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  session_data_p->stream = this;
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
@@ -489,6 +534,7 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
   // *TODO*: remove type inferences
   ACE_ASSERT (session_data_p->formats.empty ());
   session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  session_data_p->stream = this;
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------

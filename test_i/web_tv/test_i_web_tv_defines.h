@@ -31,7 +31,7 @@
 
 #define TEST_I_WEBTV_CNF_INI_FILE                         "web_tv.ini"
 
-#define TEST_I_WEBTV_DEFAULT_TARGET_FILE                  "output.avi"
+#define TEST_I_WEBTV_DEFAULT_TARGET_FILE                  "output.mp4"
 
 // *NOTE*: compute and add new segments when this value is reached
 #define TEST_I_WEBTV_DEFAULT_SEGMENT_LIST_LWM             10
@@ -67,8 +67,9 @@
 #define TEST_I_UI_GTK_COMBOBOX_ADAPTER_NAME               "combobox_adapter"
 #define TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME          "combobox_audio_channel"
 #define TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME               "combobox_channel"
-#define TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME               "combobox_display"
 #define TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME            "combobox_resolution"
+#define TEST_I_UI_GTK_COMBOBOX_SAVE_NAME                  "combobox_save"
+#define TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME               "combobox_display"
 #define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                   "aboutdialog"
 #define TEST_I_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
 #define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea"
@@ -82,6 +83,7 @@
 #define TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME              "liststore_channel"
 #define TEST_I_UI_GTK_LISTSTORE_DISPLAY_NAME              "liststore_display"
 #define TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME           "liststore_resolution"
+#define TEST_I_UI_GTK_LISTSTORE_SAVE_NAME                 "liststore_save"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                    "progressbar"
 #define TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME         "spinbutton_connections"
 #define TEST_I_UI_GTK_SPINBUTTON_BYTES_NAME               "spinbutton_bytes"

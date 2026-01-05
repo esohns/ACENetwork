@@ -207,6 +207,7 @@ Test_I_SessionMessage_3::Test_I_SessionMessage_3 (Stream_SessionId_t sessionId_i
               sessionData_in,
               userData_in,
               expedited_in) // expedited ?
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_3::Test_I_SessionMessage_3"));
 
@@ -214,6 +215,7 @@ Test_I_SessionMessage_3::Test_I_SessionMessage_3 (Stream_SessionId_t sessionId_i
 
 Test_I_SessionMessage_3::Test_I_SessionMessage_3 (const Test_I_SessionMessage_3& message_in)
  : inherited (message_in)
+ , mediaType_ (message_in.mediaType_)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_3::Test_I_SessionMessage_3"));
 
@@ -223,6 +225,7 @@ Test_I_SessionMessage_3::Test_I_SessionMessage_3 (Stream_SessionId_t sessionId_i
                                                   ACE_Allocator* messageAllocator_in)
  : inherited (sessionId_in,
               messageAllocator_in) // message block allocator
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_3::Test_I_SessionMessage_3"));
 
@@ -234,6 +237,7 @@ Test_I_SessionMessage_3::Test_I_SessionMessage_3 (Stream_SessionId_t sessionId_i
  : inherited (sessionId_in,
               dataBlock_in,        // use (don't own (!) memory of-) this data block
               messageAllocator_in) // message block allocator
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_3::Test_I_SessionMessage_3"));
 

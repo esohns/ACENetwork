@@ -126,22 +126,26 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_web_tv_stream_common.h
      test_i_web_tv_tools.cpp
      test_i_web_tv_tools.h)
+if (FFMPEG_SUPPORT)
+ set (${EXECUTABLE}_EXE_SRCS
+      ${${EXECUTABLE}_EXE_SRCS}
+      test_i_module_encoder.cpp
+      test_i_module_encoder.h)
+endif (FFMPEG_SUPPORT)
 if (GTK_SUPPORT)
  set (${EXECUTABLE}_EXE_SRCS
       ${${EXECUTABLE}_EXE_SRCS}
       test_i_gtk_callbacks.cpp
       test_i_gtk_callbacks.h)
+ set (${EXECUTABLE}_EXE_CFG
+      etc/test_i.gtk2
+      etc/test_i.gtk3)
 endif (GTK_SUPPORT)
-set (${EXECUTABLE}_EXE_CFG
-     etc/test_i.gtk2
-     etc/test_i.gtk3)
-
 
 #if (UNIX)
 # set (CMAKE_ENABLE_EXPORTS ON)
 #endif (UNIX)
 
-#string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE}_EXE_SRCS}
