@@ -1897,18 +1897,15 @@ drawing_area_resize_end (gpointer userData_in)
 
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
-      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   GtkToggleButton* toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
   ACE_ASSERT (toggle_button_p);
   bool is_active_b = gtk_toggle_button_get_active (toggle_button_p);
   GtkDrawingArea* drawing_area_p =
@@ -1941,33 +1938,33 @@ drawing_area_resize_end (gpointer userData_in)
 
   ACE_ASSERT (data_p->AVStream);
   if (!data_p->AVStream->isRunning ())
-    return FALSE;
+    return G_SOURCE_REMOVE;
 
-  // *NOTE*: two things need doing:
-  //         - drop inbound frames until the 'resize' session message is through
+  // *NOTE*: two things need doing (see below):
+  //         [- drop inbound frames until the 'resize' session message is through]
   //         - enqueue a 'resize' session message
 
-  // step1:
-  const Stream_Module_t* module_p =
-    data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
-  ACE_ASSERT (module_p);
-  Stream_Visualization_IResize* iresize_p =
-      dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-  ACE_ASSERT (iresize_p);
-  try {
-    iresize_p->resizing ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), aborting\n")));
-    return FALSE;
-  }
+  //// step1:
+  //const Stream_Module_t* module_p =
+  //  data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+  //ACE_ASSERT (module_p);
+  //Stream_Visualization_IResize* iresize_p =
+  //  dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  //ACE_ASSERT (iresize_p);
+  //try {
+  //  iresize_p->resizing ();
+  //} catch (...) {
+  //  ACE_DEBUG ((LM_ERROR,
+  //             ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), aborting\n")));
+  //  return G_SOURCE_REMOVE;
+  //}
 
   // step2
   data_p->AVStream->notify (STREAM_SESSION_MESSAGE_RESIZE,
-                            false, // recurse upstream ?
-                            true); // expedite ?
+                            false,  // recurse upstream ?
+                            false); // expedite ?
 
-  return FALSE;
+  return G_SOURCE_REMOVE;
 } // drawing_area_resize_end
 
 void
@@ -1980,6 +1977,39 @@ drawingarea_size_allocate_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (allocation_in);
 
+  // sanity check(s)
+  struct Test_I_WebTV_UI_CBData* data_p =
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->AVStream);
+  Stream_Module_t* module_p = NULL;
+  Stream_Visualization_IResize* iresize_p = NULL;
+  if (!data_p->AVStream->isRunning ())
+    goto continue_;
+
+  // *NOTE*: two things need doing:
+  //         - drop inbound frames until the 'resize' session message is through
+  //         - enqueue a 'resize' session message
+  //         The second item is done in a timeout callback to avoid multiple
+  //         messages during resizing
+  // *BUG*: there's still a problem when shrinking the window
+
+  // step1:
+  module_p =
+    const_cast<Stream_Module_t*> (data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)));
+  ACE_ASSERT (module_p);
+  iresize_p =
+    dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  ACE_ASSERT (iresize_p);
+  try {
+    iresize_p->resizing ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), aborting\n")));
+    return;
+  }
+
+continue_:
   static gint timer_id = 0;
   if (timer_id == 0)
   {
