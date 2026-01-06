@@ -368,6 +368,7 @@ if (WIN32)
                  ${LIB_ROOT}/ImageMagick/CORE_RL_lqr_.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_zlib_.dll
                  ${LIB_ROOT}/libepoxy/bin/epoxy-0.dll
+                 ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/bz2.dll
                  ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/iconv-2.dll
                  ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/liblzma.dll
                  ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316_core_vc_x64_custom.dll
