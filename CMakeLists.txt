@@ -274,6 +274,10 @@ endif ()
 #         redistributable files, so if you include this file on a machine with
 #         only VS Express installed, you’ll get the warning. ..."
 include (InstallRequiredSystemLibraries)
+install (FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+         DESTINATION ${INSTALL_BIN_DIR}
+         COMPONENT lib)
+
 #set (CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 #set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 #set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_MICRO})
