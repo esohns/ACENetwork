@@ -21,10 +21,10 @@
 
 #include "test_i_gtk_callbacks.h"
 
-#include "gdk/gdkkeysyms.h"
-
 #include <limits>
 #include <sstream>
+
+#include "gdk/gdkkeysyms.h"
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
