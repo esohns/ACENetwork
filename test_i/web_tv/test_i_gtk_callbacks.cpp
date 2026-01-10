@@ -1226,14 +1226,15 @@ idle_start_session_cb (gpointer userData_in)
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
+  //Common_UI_GTK_Manager_t* gtk_manager_p =
+  //  COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  //ACE_ASSERT (gtk_manager_p);
+  //Common_UI_GTK_State_t& state_r =
+  //  const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_ConnectionManager_3_t::INTERFACE_T* iconnection_manager_2 =
       TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
   ACE_ASSERT (iconnection_manager_2);
@@ -1489,7 +1490,7 @@ continue_2:
   //isetp_p->setP (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)));
 
   if (!data_p->progressData.eventSourceId)
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     data_p->progressData.eventSourceId =
     //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
     //                 idle_update_progress_cb,
@@ -1501,7 +1502,7 @@ continue_2:
                      &data_p->progressData);//,
 //                       NULL);
     if (data_p->progressData.eventSourceId > 0)
-      state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
+      data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1511,14 +1512,33 @@ continue_2:
   } // end IF | lock scope
 
   if (!data_p->videoUpdateEventSourceId) // *TODO*: why is this called several times ?
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    data_p->videoUpdateEventSourceId =
-      g_timeout_add (COMMON_UI_REFRESH_DEFAULT_VIDEO_MS, // ms (?)
-                     idle_update_video_display_cb,
-                     userData_in);
-    ACE_ASSERT (data_p->videoUpdateEventSourceId > 0);
-    state_r.eventSourceIds.insert (data_p->videoUpdateEventSourceId);
-  } // end IF | lock scope
+  { 
+    // get framerate of video stream
+    guint frame_interval_ms_i = COMMON_UI_REFRESH_DEFAULT_VIDEO_MS;
+    for (Test_I_WebTV_Channel_ResolutionsConstIterator_t iterator_8 = (*channel_iterator).second.resolutions.begin ();
+         iterator_8 != (*channel_iterator).second.resolutions.end ();
+         ++iterator_8)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (((*iterator_8).resolution.cx == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cx) &&
+          ((*iterator_8).resolution.cy == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cy))
+#else
+      if (((*iterator_8).resolution.width == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.width) &&
+          ((*iterator_8).resolution.height == data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.height))
+#endif // ACE_WIN32 || ACE_WIN64
+      { ACE_ASSERT ((*iterator_8).frameRate);
+        frame_interval_ms_i = static_cast<guint> (1000 / (*iterator_8).frameRate);
+        break;
+      } // end IF
+
+    { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+      data_p->videoUpdateEventSourceId =
+        g_timeout_add (frame_interval_ms_i, // ms (?)
+                       idle_update_video_display_cb,
+                       userData_in);
+      ACE_ASSERT (data_p->videoUpdateEventSourceId > 0);
+      data_p->UIState->eventSourceIds.insert (data_p->videoUpdateEventSourceId);
+    } // end lock scope
+  } // end IF
 
   GtkToggleButton* toggle_button_p =
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
