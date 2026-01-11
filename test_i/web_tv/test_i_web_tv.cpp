@@ -723,14 +723,12 @@ do_work (const std::string& configurationFile_in,
   Test_I_MessageHandler_3_Module event_handler_module_3 (NULL,
                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
-  struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
+  struct Common_AllocatorConfiguration allocator_configuration;
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_AllocatorConfiguration allocator_configuration_2;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration video_codec_configuration; // decoder
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration video_codec_configuration_2; // encoder
   video_codec_configuration.codecId = AV_CODEC_ID_H264;
-  // video_codec_configuration.profile = FF_PROFILE_H264_HIGH;
-  video_codec_configuration.profile = FF_PROFILE_H264_BASELINE;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_DXVA2;
   //video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
@@ -743,12 +741,17 @@ do_work (const std::string& configurationFile_in,
   // video_codec_configuration.format = AV_PIX_FMT_VDPAU;
 #endif // ACE_WIN32 || ACE_WIN64
   video_codec_configuration_2 = video_codec_configuration;
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration;
+  // video_codec_configuration_2.profile = FF_PROFILE_H264_HIGH;
+  video_codec_configuration_2.profile = FF_PROFILE_H264_BASELINE;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration; // decoder
   audio_codec_configuration.codecId = AV_CODEC_ID_AAC;
+  //audio_codec_configuration.useParser = false;
 #else
   struct Stream_AllocatorConfiguration allocator_configuration_2;
 #endif // FFMPEG_SUPPORT
   allocator_configuration.defaultBufferSize = TEST_I_WEBTV_DEFAULT_BUFFER_SIZE;
+  allocator_configuration.paddingBytes =
+    COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
   allocator_configuration_2.defaultBufferSize =
     TEST_I_WEBTV_DEFAULT_BUFFER_SIZE;
 
@@ -760,21 +763,21 @@ do_work (const std::string& configurationFile_in,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
     return;
   } // end IF
-  Test_I_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+  Test_I_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers --> unlimited
                                                &heap_allocator,         // heap allocator handle
                                                true);                   // block ?
-  Test_I_MessageAllocator_3_t message_allocator_3 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+  Test_I_MessageAllocator_3_t message_allocator_3 (NET_STREAM_MAX_MESSAGES, // maximum #buffers --> unlimited
                                                    &heap_allocator,         // heap allocator handle
                                                    true);                   // block ?
-  Test_I_WebTV_MessageQueue_t av_input_queue (STREAM_QUEUE_MAX_SLOTS,
+  Test_I_WebTV_MessageQueue_t av_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                               NULL);
-  Test_I_WebTV_MessageQueue_t audio_input_queue (STREAM_QUEUE_MAX_SLOTS,
+  Test_I_WebTV_MessageQueue_t audio_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                                  NULL);
-  Test_I_WebTV_MessageQueue_t audio_output_queue (STREAM_QUEUE_MAX_SLOTS,
+  Test_I_WebTV_MessageQueue_t audio_output_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                                   NULL);
-  Test_I_WebTV_MessageQueue_t save_queue (STREAM_QUEUE_MAX_SLOTS,
+  Test_I_WebTV_MessageQueue_t save_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                           NULL);
-  // Test_I_WebTV_MessageQueue_t save_audio_queue (STREAM_QUEUE_MAX_SLOTS,
+  // Test_I_WebTV_MessageQueue_t save_audio_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
   //                                               NULL); // inject (decoded) audio messages
   Test_I_AVStream av_input_stream;
   Test_I_AudioStream audio_input_stream;
@@ -1028,9 +1031,10 @@ do_work (const std::string& configurationFile_in,
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_4b.computeThroughput = true;
   modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
+  delay_configuration.catchUp = true;
+  delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
 //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
-  delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
   modulehandler_configuration_4b.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_4b.deviceIdentifier.identifierDiscriminator =
@@ -1077,6 +1081,7 @@ do_work (const std::string& configurationFile_in,
     outputFileName_in;
 
   modulehandler_configuration_4a = modulehandler_configuration_4b;
+  //modulehandler_configuration_4a.defragmentMode = STREAM_DEFRAGMENT_CLONE;
   modulehandler_configuration_4a.queue = &audio_input_queue;
   struct Test_I_WebTV_StreamConfiguration_3 stream_configuration_4a; // audio input-
   stream_configuration_4a.messageAllocator = &message_allocator_3;

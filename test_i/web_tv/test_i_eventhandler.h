@@ -122,11 +122,11 @@ class Test_I_EventHandler_3 // content
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3 (const Test_I_EventHandler_3&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3& operator= (const Test_I_EventHandler_3&))
 
-  typedef std::map<Stream_SessionId_t, Test_I_WebTV_SessionData_3*> SESSION_DATA_MAP_T;
-  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
+  //typedef std::map<Stream_SessionId_t, Test_I_WebTV_SessionData_3*> SESSION_DATA_MAP_T;
+  //typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
   struct Test_I_WebTV_UI_CBData* CBData_;
-  SESSION_DATA_MAP_T             sessionDataMap_;
+  //SESSION_DATA_MAP_T             sessionDataMap_;
 };
 
 #endif

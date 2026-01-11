@@ -481,6 +481,13 @@ Test_I_AudioStream::load (Stream_ILayout* layout_in,
 //layout_in->append (module_p, NULL, 0);
 
   ACE_NEW_RETURN (module_p,
+                  Test_I_Defragment_3_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
                   Test_I_Audio_Tagger_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
                   false);

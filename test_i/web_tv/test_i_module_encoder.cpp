@@ -69,18 +69,20 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
   NETWORK_TRACE (ACE_TEXT ("Test_I_Encoder::handleDataMessage"));
 
   // sanity check(s)
-  if (unlikely (!inherited::headerWritten_))
-    return; // --> not fully initialized (yet)
-  if (unlikely (!inherited::formatContext_))
-    return; // --> disregard 'late' messages
+  //if (unlikely (!inherited::headerWritten_))
+  //  return; // --> not fully initialized (yet)
+  //if (unlikely (!inherited::formatContext_))
+  //  return; // --> disregard 'late' messages
 
-  int result;
+  int result /*, result_2*/;
   ACE_Message_Block* message_block_p = message_inout;
   AVCodecContext* codec_context_p;
   AVFrame* frame_p;
   AVStream* stream_p;
+  enum Stream_MediaType_Type message_type_e = message_inout->getMediaType ();
+  //bool write_black_or_silence_b = false;
 
-  switch (message_inout->getMediaType ())
+  switch (message_type_e)
   {
     case STREAM_MEDIATYPE_AUDIO:
     {
@@ -118,7 +120,7 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: invalid/unknown message media type (was: %d), aborting\n"),
                   inherited::mod_->name (),
-                  message_inout->getMediaType ()));
+                  message_type_e));
       goto error;
     }
   } // end SWITCH
@@ -126,22 +128,17 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
 
   do
   { ACE_ASSERT (message_block_p);
-    switch (message_inout->getMediaType ())
+    switch (message_type_e)
     {
       case STREAM_MEDIATYPE_AUDIO:
       {
-        //frame_p->buf[0] =
-        //  av_buffer_create (reinterpret_cast<uint8_t*> (message_block_p->rd_ptr ()), message_block_p->length (), av_buffer_default_free, NULL, 0);
-        ////frame_p->data[0] = reinterpret_cast<uint8_t*> (message_block_p->rd_ptr ());
-        //frame_p->buf[0]->data = frame_p->data[0];
-        //frame_p->buf[0]->size = message_block_p->length ();
         result =
           av_samples_fill_arrays (frame_p->data,
                                   frame_p->linesize,
                                   reinterpret_cast<uint8_t*> (message_block_p->rd_ptr ()),
                                   codec_context_p->ch_layout.nb_channels,
                                   frame_p->nb_samples,
-                                  static_cast<AVSampleFormat> (codec_context_p->sample_fmt),
+                                  codec_context_p->sample_fmt,
                                   1);
         ACE_ASSERT (result >= 0);
         break;
@@ -168,7 +165,7 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: invalid/unknown message media type (was: %d), aborting\n"),
                     inherited::mod_->name (),
-                    message_inout->getMediaType ()));
+                    message_type_e));
         goto error;
       }
     } // end SWITCH
@@ -193,9 +190,91 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
       if (unlikely (result < 0))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to avcodec_receive_packet(): \"%s\", aborting\n"),
+                    ACE_TEXT ("%s: failed to avcodec_receive_packet(): \"%s\", continuing\n"),
                     inherited::mod_->name (),
                     ACE_TEXT (Common_Image_Tools::errorToString (result).c_str ())));
+
+        //// fill packet with empty frame/silence to avoid skips/desynchronizing the streams
+        //int line_sizes_a[AV_NUM_DATA_POINTERS];
+        //uint8_t* data_a[AV_NUM_DATA_POINTERS];
+        //ACE_OS::memset (&line_sizes_a, 0, sizeof (int[AV_NUM_DATA_POINTERS]));
+        //ACE_OS::memset (&data_a, 0, sizeof (uint8_t*[AV_NUM_DATA_POINTERS]));
+        //switch (message_type_e)
+        //{
+        //  case STREAM_MEDIATYPE_AUDIO:
+        //  {
+        //    result_2 = av_samples_get_buffer_size (NULL,
+        //                                          codec_context_p->ch_layout.nb_channels,
+        //                                          frame_p->nb_samples,
+        //                                          codec_context_p->sample_fmt,
+        //                                          1);
+        //    result = av_new_packet (&packet_s, result_2);
+        //    ACE_ASSERT (result >= 0);
+
+        //    result = av_samples_fill_arrays (data_a,
+        //                                     NULL,
+        //                                     packet_s.data,
+        //                                     codec_context_p->ch_layout.nb_channels,
+        //                                     frame_p->nb_samples,
+        //                                     codec_context_p->sample_fmt,
+        //                                     1);
+        //    ACE_ASSERT (result >= 0);
+        //    result = av_samples_set_silence (data_a,
+        //                                     0,
+        //                                     frame_p->nb_samples,
+        //                                     codec_context_p->ch_layout.nb_channels,
+        //                                     codec_context_p->sample_fmt);
+        //    ACE_ASSERT (result >= 0);
+
+        //    write_black_or_silence_b = true;
+
+        //    break;
+        //  }
+        //  case STREAM_MEDIATYPE_VIDEO:
+        //  {
+        //    result_2 = av_image_get_buffer_size (codec_context_p->pix_fmt,
+        //                                         codec_context_p->width,
+        //                                         codec_context_p->height,
+        //                                         1);
+
+        //    result = av_new_packet (&packet_s, result_2);
+        //    ACE_ASSERT (result >= 0);
+
+        //    result =
+        //      av_image_fill_linesizes (line_sizes_a,
+        //                               codec_context_p->pix_fmt,
+        //                               codec_context_p->width);
+        //    ACE_ASSERT (result >= 0);
+        //    result =
+        //      av_image_fill_pointers (data_a,
+        //                              codec_context_p->pix_fmt,
+        //                              codec_context_p->height,
+        //                              packet_s.data,
+        //                              line_sizes_a);
+        //    ACE_ASSERT (result >= 0);
+        //    ptrdiff_t line_sizes_2[4] = { line_sizes_a[0], line_sizes_a[1], line_sizes_a[2], line_sizes_a[3] };
+        //    result = av_image_fill_black (data_a,
+        //                                  line_sizes_2,
+        //                                  codec_context_p->pix_fmt,
+        //                                  AVCOL_RANGE_UNSPECIFIED,
+        //                                  codec_context_p->width,
+        //                                  codec_context_p->height);
+        //    ACE_ASSERT (result >= 0);
+
+        //    write_black_or_silence_b = true;
+
+        //    break;
+        //  }
+        //  default:
+        //  {
+        //    ACE_DEBUG ((LM_ERROR,
+        //                ACE_TEXT ("%s: invalid/unknown message media type (was: %d), aborting\n"),
+        //                inherited::mod_->name (),
+        //                message_type_e));
+        //    goto error;
+        //  }
+        //} // end SWITCH
+
         goto error;
       } // end ELSE IF
 
@@ -213,7 +292,7 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
                           static_cast<enum AVRounding> (AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX));
 
       packet_s.time_base = stream_p->time_base;
-      switch (message_inout->getMediaType ())
+      switch (message_type_e)
       {
         case STREAM_MEDIATYPE_AUDIO:
           packet_s.duration = frame_p->nb_samples;
@@ -228,7 +307,7 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("%s: invalid/unknown message media type (was: %d), aborting\n"),
                       inherited::mod_->name (),
-                      message_inout->getMediaType ()));
+                      message_type_e));
           goto error;
         }
       } // end SWITCH
@@ -254,7 +333,14 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
         av_packet_unref (&packet_s);
         goto error;
       } // end IF
+
       av_packet_unref (&packet_s);
+
+      //if (unlikely (write_black_or_silence_b))
+      //{
+      //  write_black_or_silence_b = false;
+      //  break; // try next message block
+      //} // end IF
     } // end WHILE
 
     message_block_p = message_block_p->cont ();
@@ -436,6 +522,13 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_3*& message_inout,
       inherited::audioFrame_->sample_rate =
         inherited::audioCodecContext_->sample_rate;
       inherited::audioFrame_->time_base = inherited::audioCodecContext_->time_base;
+
+      /**
+        * Some container formats (like MP4) require global headers to be present.
+        * Mark the encoder so that it behaves accordingly
+        */
+      if (inherited::formatContext_->oformat->flags & AVFMT_GLOBALHEADER)
+        inherited::audioCodecContext_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
       result = avcodec_open2 (inherited::audioCodecContext_,
                               inherited::formatContext_->audio_codec,

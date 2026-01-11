@@ -93,14 +93,17 @@ struct Test_I_WebTV_MessageData
   Test_I_WebTV_MessageData ()
    : HTTP_Record ()
    , M3UPlaylist (NULL)
-  {};
+  {}
+
   ~Test_I_WebTV_MessageData ()
   {
-    //if (M3UPlaylist)
-    //  delete M3UPlaylist;
-  };
+    if (M3UPlaylist)
+      delete M3UPlaylist;
+  }
+
   inline void operator= (const struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); }
-  inline void operator+= (Test_I_WebTV_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+  inline void operator= (const Test_I_WebTV_MessageData& rhs_in) { HTTP_Record::operator= (rhs_in); }
+  inline void operator+= (const Test_I_WebTV_MessageData& rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   struct M3U_Playlist* M3UPlaylist;
 };
@@ -144,10 +147,10 @@ struct Test_I_WebTV_StreamState
 {
   Test_I_WebTV_StreamState ()
    : Test_I_StreamState ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  struct Test_I_WebTV_SessionData* sessionData;
+  //struct Test_I_WebTV_SessionData* sessionData;
 };
 
 //////////////////////////////////////////

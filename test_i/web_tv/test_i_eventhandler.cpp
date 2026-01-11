@@ -790,7 +790,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 
 Test_I_EventHandler_3::Test_I_EventHandler_3 (struct Test_I_WebTV_UI_CBData* CBData_in)
  : CBData_ (CBData_in)
- , sessionDataMap_ ()
+ //, sessionDataMap_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_3::Test_I_EventHandler_3"));
 
@@ -813,11 +813,11 @@ Test_I_EventHandler_3::start (Stream_SessionId_t sessionId_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
-  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  ACE_ASSERT (iterator == sessionDataMap_.end ());
+  //SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
+  //ACE_ASSERT (iterator == sessionDataMap_.end ());
 
-  sessionDataMap_.insert (std::make_pair (sessionId_in,
-                                          &const_cast<Test_I_WebTV_SessionData_3&> (sessionData_in)));
+  //sessionDataMap_.insert (std::make_pair (sessionId_in,
+  //                                        &const_cast<Test_I_WebTV_SessionData_3&> (sessionData_in)));
 
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
@@ -853,7 +853,7 @@ Test_I_EventHandler_3::end (Stream_SessionId_t sessionId_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-//  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
+  //SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
@@ -887,6 +887,7 @@ Test_I_EventHandler_3::end (Stream_SessionId_t sessionId_in)
       ACE_ASSERT (event_source_id);
       state_r.eventSourceIds.insert (event_source_id);
     } // end IF
+
     state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
   } // end lock scope
 #endif // GTK_USE
@@ -932,8 +933,8 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  ACE_ASSERT (iterator != sessionDataMap_.end ());
+  //SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
+  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
