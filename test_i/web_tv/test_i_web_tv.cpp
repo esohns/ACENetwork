@@ -733,10 +733,12 @@ do_work (const std::string& configurationFile_in,
   video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_DXVA2;
   //video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   //video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_D3D12VA;
-  video_codec_configuration.format = AV_PIX_FMT_DXVA2_VLD;
+  video_codec_configuration.format.videoFormat =
+    useHardwareDecoder_in ? AV_PIX_FMT_DXVA2_VLD : AV_PIX_FMT_BGR24;
 #else
   video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_VAAPI;
-  video_codec_configuration.format = AV_PIX_FMT_VAAPI;
+  video_codec_configuration.format.videoFormat =
+    useHardwareDecoder_in ? AV_PIX_FMT_VAAPI : AV_PIX_FMT_BGR24;
   // video_codec_configuration.deviceType = AV_HWDEVICE_TYPE_VDPAU;
   // video_codec_configuration.format = AV_PIX_FMT_VDPAU;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -745,6 +747,7 @@ do_work (const std::string& configurationFile_in,
   video_codec_configuration_2.profile = FF_PROFILE_H264_BASELINE;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration; // decoder
   audio_codec_configuration.codecId = AV_CODEC_ID_AAC;
+  audio_codec_configuration.format.audioFormat = AV_SAMPLE_FMT_FLT;
   //audio_codec_configuration.useParser = false;
 #else
   struct Stream_AllocatorConfiguration allocator_configuration_2;
@@ -1031,7 +1034,7 @@ do_work (const std::string& configurationFile_in,
       STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_4b.computeThroughput = true;
   modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
-  delay_configuration.catchUp = true;
+  //delay_configuration.catchUp = true;
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
 //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;

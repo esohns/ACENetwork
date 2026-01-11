@@ -40,6 +40,14 @@
       </object>
     </child>
   </object>
+  <object class="GtkListStore" id="liststore_save">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name value -->
+      <column type="gint"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="liststore_adapter">
     <columns>
       <!-- column-name text -->
@@ -64,17 +72,29 @@
       <column type="guint"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="liststore_save">
+  <object class="GtkListStore" id="liststore_display">
     <columns>
       <!-- column-name text -->
       <column type="gchararray"/>
-      <!-- column-name value -->
-      <column type="gint"/>
+      <!-- column-name device -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_resolution">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name width -->
+      <column type="guint"/>
+      <!-- column-name height -->
+      <column type="guint"/>
     </columns>
   </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
     <property name="type_hint">dialog</property>
     <signal name="key-press-event" handler="dialog_main_key_press_event_cb" swapped="no"/>
     <child internal-child="vbox">
@@ -87,10 +107,14 @@
           <object class="GtkBox" id="box_main_3">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <child>
               <object class="GtkBox" id="box_main_4">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="valign">start</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkBox" id="box_main_5">
@@ -220,7 +244,7 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
+                        <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
@@ -490,7 +514,6 @@
                   <object class="GtkFrame" id="frame_save">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">start</property>
                     <property name="label_xalign">0</property>
                     <child>
                       <object class="GtkAlignment" id="aligment_save">
@@ -561,7 +584,7 @@
                                     <signal name="file-set" handler="filechooserbutton_save_file_set_cb" swapped="no"/>
                                   </object>
                                   <packing>
-                                    <property name="expand">False</property>
+                                    <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
@@ -622,6 +645,8 @@
                 <property name="app_paintable">True</property>
                 <property name="can_focus">False</property>
                 <property name="double_buffered">False</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
                 <signal name="draw" handler="drawingarea_draw_cb" swapped="no"/>
                 <signal name="size-allocate" handler="drawingarea_size_allocate_cb" swapped="no"/>
               </object>
@@ -731,24 +756,6 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkListStore" id="liststore_display">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name device -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_resolution">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name width -->
-      <column type="guint"/>
-      <!-- column-name height -->
-      <column type="guint"/>
-    </columns>
   </object>
   <object class="GtkWindow" id="window_fullscreen">
     <property name="width_request">1920</property>

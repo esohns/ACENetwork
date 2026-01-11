@@ -504,6 +504,7 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_3*& message_inout,
 
       inherited::audioFrameSize_ =
         (audio_media_type_s.channels * av_get_bytes_per_sample (audio_media_type_s.format));
+
       av_channel_layout_default (&inherited::audioCodecContext_->ch_layout,
                                  audio_media_type_s.channels);
       inherited::audioCodecContext_->sample_fmt = audio_media_type_s.format;
@@ -529,6 +530,9 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_3*& message_inout,
         */
       if (inherited::formatContext_->oformat->flags & AVFMT_GLOBALHEADER)
         inherited::audioCodecContext_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+      //inherited::audioCodecContext_->profile =
+      //  inherited::configuration_->codecConfiguration->profile;
 
       result = avcodec_open2 (inherited::audioCodecContext_,
                               inherited::formatContext_->audio_codec,
@@ -605,6 +609,8 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_3*& message_inout,
       inherited::videoCodecContext_->time_base = inherited::videoFrame_->time_base;
       //inherited::videoCodecContext_->pkt_timebase = inherited::videoFrame_->time_base;
       inherited::videoCodecContext_->frame_size = inherited::videoFrameSize_;
+      inherited::videoCodecContext_->profile =
+        inherited::configuration_->codecConfiguration->profile;
 
       result = avcodec_open2 (inherited::videoCodecContext_,
                               inherited::formatContext_->video_codec,
