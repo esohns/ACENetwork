@@ -819,13 +819,11 @@ Test_I_EventHandler_3::start (Stream_SessionId_t sessionId_in,
   //sessionDataMap_.insert (std::make_pair (sessionId_in,
   //                                        &const_cast<Test_I_WebTV_SessionData_3&> (sessionData_in)));
 
-#if defined (GTK_USE)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_USE
-
-#if defined (GTK_USE)
 //  CBData_->progressData.transferred = 0;
-  state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
+#if defined (GTK_USE)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
+  } // end lock scope
 #endif // GTK_USE
 }
 
@@ -911,11 +909,12 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 
 #if defined (GTK_USE)
-  state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+  } // end lock scope
 #endif // GTK_USE
 
 #if defined (GTK_USE)
@@ -942,7 +941,6 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
@@ -1022,6 +1020,8 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
     }
   } // end SWITCH
 #if defined (GTK_USE)
-  state_r.eventStack.push (event_e);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (event_e);
+  } // end lock scope
 #endif // GTK_USE
 }
