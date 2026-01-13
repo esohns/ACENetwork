@@ -1032,10 +1032,10 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.codecConfiguration = &video_codec_configuration;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_4b.concurrency =
-      STREAM_HEADMODULECONCURRENCY_ACTIVE;
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_4b.computeThroughput = true;
   modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
-  //delay_configuration.catchUp = true;
+  //delay_configuration.catchUp = true; // *TODO*: why does this introduce stuttering ?
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
 //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
@@ -1052,17 +1052,16 @@ do_work (const std::string& configurationFile_in,
     Stream_MediaFramework_ALSA_Tools::getDeviceName (STREAM_LIB_ALSA_DEVICE_DEFAULT,
                                                      SND_PCM_STREAM_PLAYBACK);
   if (modulehandler_configuration_4b.deviceIdentifier.identifier.empty ())
-    modulehandler_configuration_4b.deviceIdentifier.identifier =
-      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
+    modulehandler_configuration_4b.deviceIdentifier.identifier = ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_4b.outputFormat.audio.format =
-      Stream_Module_Decoder_Tools::to (*waveformatex_p);
+    Stream_Module_Decoder_Tools::to (*waveformatex_p);
   modulehandler_configuration_4b.outputFormat.audio.channels =
-      waveformatex_p->nChannels;
+    waveformatex_p->nChannels;
   modulehandler_configuration_4b.outputFormat.audio.sampleRate =
-      waveformatex_p->nSamplesPerSec;
+    waveformatex_p->nSamplesPerSec;
   CoTaskMemFree (waveformatex_p); waveformatex_p = NULL;
 #else
   modulehandler_configuration_4b.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;

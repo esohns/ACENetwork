@@ -113,10 +113,7 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   Test_I_Message* message_p = NULL;
   ACE_Message_Block* message_block_p = NULL;
 
-  if (is_URI_b)
-    URL_string = segmentURL_;
-  else
-    URL_string = current_URL;
+  URL_string = is_URI_b ? segmentURL_ : current_URL;
   if (!HTTP_Tools::parseURL (URL_string,
                              host_address,
                              hostname_string,
@@ -142,17 +139,17 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
   // send HTTP request
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
 #else
-      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
 #endif // ACE_WIN32 || ACE_WIN64
   if (unlikely (!iconnection_p))
     return;
   istream_connection_p =
-      dynamic_cast<Test_I_IStreamConnection_3*> (iconnection_p);
+    dynamic_cast<Test_I_IStreamConnection_3*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
   const Test_I_IStreamConnection_3::STREAM_T& stream_r =
-      istream_connection_p->stream ();
+    istream_connection_p->stream ();
 
   ACE_NEW_NORETURN (HTTP_record_p,
                     struct HTTP_Record ());
@@ -188,7 +185,7 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
 
 allocate:
   message_p =
-      static_cast<Test_I_Message*> (messageAllocator_->malloc (allocatorConfiguration_->defaultBufferSize));
+    static_cast<Test_I_Message*> (messageAllocator_->malloc (allocatorConfiguration_->defaultBufferSize));
   // keep retrying ?
   if (!message_p &&
       !messageAllocator_->block ())
@@ -209,9 +206,9 @@ allocate:
   message_block_p = message_p;
   istream_connection_p->send (message_block_p);
   message_p = NULL;
-  ACE_DEBUG ((LM_DEBUG,
-             ACE_TEXT ("requesting: \"%s\"\n"),
-             ACE_TEXT (URI_string.c_str ())));
+  //ACE_DEBUG ((LM_DEBUG,
+  //           ACE_TEXT ("requesting: \"%s\"\n"),
+  //           ACE_TEXT (URI_string.c_str ())));
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;

@@ -52,7 +52,7 @@ Test_I_MessageDataContainer::setPR (struct HTTP_Record*& record_inout)
   struct Test_I_WebTV_MessageData* data_p = NULL;
   ACE_NEW_NORETURN (data_p,
                     struct Test_I_WebTV_MessageData ());
-  if (!data_p)
+  if (unlikely (!data_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
