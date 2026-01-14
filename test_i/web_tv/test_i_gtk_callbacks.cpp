@@ -108,14 +108,10 @@ idle_end_session_cb (gpointer userData_in)
   struct Test_I_WebTV_UI_CBData* data_p =
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // stop progress reporting ?
   // *NOTE*: only disable the progressbar when not currently playing...
@@ -134,12 +130,12 @@ idle_end_session_cb (gpointer userData_in)
 //  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
   if (data_p->progressData.eventSourceId)
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     if (!g_source_remove (data_p->progressData.eventSourceId))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
                   data_p->progressData.eventSourceId));
-    state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
+    data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
     data_p->progressData.eventSourceId = 0;
   } // end IF | lock scope
 
@@ -163,14 +159,10 @@ idle_end_session_2 (gpointer userData_in)
   struct Test_I_WebTV_UI_CBData* data_p =
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -185,14 +177,14 @@ idle_end_session_2 (gpointer userData_in)
 //  gtk_spinner_stop (spinner_p);
 //  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     if (data_p->progressData.eventSourceId)
     {
       if (!g_source_remove (data_p->progressData.eventSourceId))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
                     data_p->progressData.eventSourceId));
-      state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
+      data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
       data_p->progressData.eventSourceId = 0;
     } // end IF
     if (data_p->videoUpdateEventSourceId)
@@ -201,7 +193,7 @@ idle_end_session_2 (gpointer userData_in)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
                     data_p->videoUpdateEventSourceId));
-      state_r.eventSourceIds.erase (data_p->videoUpdateEventSourceId);
+      data_p->UIState->eventSourceIds.erase (data_p->videoUpdateEventSourceId);
       data_p->videoUpdateEventSourceId = 0;
     } // end IF
   } // end lock scope
@@ -279,9 +271,9 @@ load_audio_channels (GtkListStore* listStore_in,
                        0, (*iterator_2).description.c_str (),
                        1, index_i,
                        -1);
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("loaded audio channel \"%s\"\n"),
-                ACE_TEXT ((*iterator_2).description.c_str ())));
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("loaded audio channel \"%s\"\n"),
+    //            ACE_TEXT ((*iterator_2).description.c_str ())));
   } // end FOR
 }
 
@@ -373,17 +365,17 @@ load_resolutions (GtkListStore* listStore_in,
                        -1);
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("loaded resolution %ux%u\n"),
-                (*iterator_2).resolution.cx,
-                (*iterator_2).resolution.cy));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("loaded resolution %ux%u\n"),
-                (*iterator_2).resolution.width,
-                (*iterator_2).resolution.height));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("loaded resolution %ux%u\n"),
+//                (*iterator_2).resolution.cx,
+//                (*iterator_2).resolution.cy));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("loaded resolution %ux%u\n"),
+//                (*iterator_2).resolution.width,
+//                (*iterator_2).resolution.height));
+//#endif // ACE_WIN32 || ACE_WIN64
   } // end FOR
 }
 
@@ -398,17 +390,13 @@ idle_load_channel_configuration_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->channels);
   ACE_ASSERT (data_p->currentChannel);
+  ACE_ASSERT (data_p->UIState);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
       data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // close connection
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
@@ -528,16 +516,16 @@ idle_load_channel_configuration_cb (gpointer userData_in)
   // auto-play ?
   if (data_p->nextChannel != -1)
   { ACE_ASSERT (data_p->nextChannel == static_cast<int> (data_p->currentChannel));
-    guint event_source_id = g_idle_add (idle_start_session_2,
-                                        userData_in);
-    if (unlikely (event_source_id == 0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add(idle_start_session_2): ""\"%m\", returning\n")));
-      return G_SOURCE_REMOVE;
-    } // end IF
-    { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-      state_r.eventSourceIds.insert (event_source_id);
+    { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+      guint event_source_id = g_idle_add (idle_start_session_2,
+                                          userData_in);
+      if (unlikely (event_source_id == 0))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_start_session_2): ""\"%m\", returning\n")));
+        return G_SOURCE_REMOVE;
+      } // end IF
+      data_p->UIState->eventSourceIds.insert (event_source_id);
     } // end lock scope
   
     data_p->nextChannel = -1;
@@ -555,14 +543,9 @@ idle_finalize_UI_cb (gpointer userData_in)
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
-  state_r.eventSourceIds.clear ();
+  data_p->UIState->eventSourceIds.clear ();
 
   gtk_main_quit ();
 
@@ -602,14 +585,10 @@ idle_initialize_UI_cb (gpointer userData_in)
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
     data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
@@ -884,17 +863,17 @@ idle_initialize_UI_cb (gpointer userData_in)
   guint context_id =
     gtk_statusbar_get_context_id (statusbar_p,
                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_CONTEXT_DATA));
-  state_r.contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_DATA,
-                                             context_id));
+  data_p->UIState->contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_DATA,
+                                                      context_id));
   context_id =
     gtk_statusbar_get_context_id (statusbar_p,
                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_CONTEXT_INFORMATION));
-  state_r.contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_INFORMATION,
-                                             context_id));
+  data_p->UIState->contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_INFORMATION,
+                                                      context_id));
 
   // step5: initialize updates
   guint event_source_id = 0;
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     //// schedule asynchronous updates of the log view
     //event_source_id = g_timeout_add_seconds (1,
     //                                         idle_update_log_display_cb,
@@ -914,7 +893,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                      idle_update_info_display_cb,
                      data_p);
     if (event_source_id > 0)
-      state_r.eventSourceIds.insert (event_source_id);
+      data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -925,7 +904,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   // step6: disable some functions ?
   toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
   gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), FALSE);
@@ -936,8 +915,8 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   // step6a: connect custom signals
   GtkDialog* dialog_p =
-      GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (dialog_p);
   gulong result = g_signal_connect (G_OBJECT (dialog_p),
                                     ACE_TEXT_ALWAYS_CHAR ("destroy"),
@@ -957,8 +936,8 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
 
   dialog_p =
-      GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_ABOUT_NAME)));
+    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_ABOUT_NAME)));
   ACE_ASSERT (dialog_p);
   result = g_signal_connect_swapped (G_OBJECT (dialog_p),
                                      ACE_TEXT_ALWAYS_CHAR ("response"),
@@ -975,14 +954,14 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   // step9: draw main dialog
   dialog_p =
-      GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (dialog_p);
   gtk_widget_show_all (GTK_WIDGET (dialog_p));
 
   GtkDrawingArea* drawing_area_p =
-      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
   ACE_ASSERT (!(*iterator_4b).second.second->window.gdk_window);
   (*iterator_4b).second.second->window.gdk_window =
@@ -1001,8 +980,8 @@ idle_initialize_UI_cb (gpointer userData_in)
   {
     data_p->nextChannel = data_p->currentChannel; // auto-play
     combo_box_p =
-        GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_CHANNEL_NAME)));
     ACE_ASSERT (combo_box_p);
     g_value_init (&value, G_TYPE_UINT);
     g_value_set_uint (&value,
@@ -1033,8 +1012,8 @@ idle_initialize_UI_cb (gpointer userData_in)
   g_value_unset (&value);
 
   combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME)));
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME)));
   ACE_ASSERT (combo_box_p);
 #if GTK_CHECK_VERSION (2,30,0)
   value = G_VALUE_INIT;
@@ -1069,7 +1048,7 @@ idle_segment_download_complete_cb (gpointer userData_in)
   ACE_ASSERT (!(*channel_iterator).second.videoSegment.URLs.empty ());
   ACE_ASSERT (data_p->videoTimeoutHandler->lock_);
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
-      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
 
   { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, *data_p->videoTimeoutHandler->lock_, G_SOURCE_REMOVE);
@@ -1102,15 +1081,10 @@ idle_update_video_display_cb (gpointer userData_in)
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   GtkDrawingArea* drawing_area_p =
     GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
@@ -1119,23 +1093,24 @@ idle_update_video_display_cb (gpointer userData_in)
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
   ACE_ASSERT (drawing_area_2);
-
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
   ACE_ASSERT (toggle_button_p);
+
   drawing_area_p =
     (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
                                                     : drawing_area_p);
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
-  if (unlikely (!window_p))
-    goto continue_;
+  ACE_ASSERT (window_p);
+  //if (unlikely (!window_p))
+  //  goto continue_;
 
   gdk_window_invalidate_rect (window_p,
                               NULL,
                               FALSE);
 
-continue_:
+//continue_:
   return G_SOURCE_CONTINUE;
 }
 
@@ -1147,21 +1122,16 @@ idle_notify_segment_data_cb (gpointer userData_in)
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->channels);
   ACE_ASSERT (data_p->currentChannel);
+  ACE_ASSERT (data_p->UIState);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
-      data_p->channels->find (data_p->currentChannel);
+    data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
-      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
-
   if ((*channel_iterator).second.videoSegment.URLs.empty () ||
       (((data_p->currentAudioStream != -1) && (*channel_iterator).second.audioSegment.URLs.empty ()) &&
        ((data_p->currentAudioStream != -1) && !(*stream_iterator_3a).second.second->URL.empty ()))) // e.g. RBB
@@ -1169,7 +1139,7 @@ idle_notify_segment_data_cb (gpointer userData_in)
 
   // close connection(s)
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-      TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+    TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   ACE_ASSERT (data_p->audioHandle);
@@ -1177,9 +1147,9 @@ idle_notify_segment_data_cb (gpointer userData_in)
 
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->audioHandle));
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->audioHandle));
 #else
-      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->audioHandle));
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->audioHandle));
 #endif // ACE_WIN32 || ACE_WIN64
   if (iconnection_p)
   {
@@ -1190,9 +1160,9 @@ idle_notify_segment_data_cb (gpointer userData_in)
 
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->videoHandle));
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->videoHandle));
 #else
-      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->videoHandle));
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->videoHandle));
 #endif // ACE_WIN32 || ACE_WIN64
   if (iconnection_p)
   {
@@ -1202,16 +1172,16 @@ idle_notify_segment_data_cb (gpointer userData_in)
   data_p->videoHandle = ACE_INVALID_HANDLE;
 
   // got both A/V segment data; schedule session start
-  guint event_source_id = g_idle_add (idle_start_session_cb,
-                                      userData_in);
-  if (unlikely (event_source_id == 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): ""\"%m\", returning\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    state_r.eventSourceIds.insert (event_source_id);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+    guint event_source_id = g_idle_add (idle_start_session_cb,
+                                        userData_in);
+    if (unlikely (event_source_id == 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): ""\"%m\", returning\n")));
+      return G_SOURCE_REMOVE;
+    } // end IF
+    data_p->UIState->eventSourceIds.insert (event_source_id);
   } // end lock scope
 
   return G_SOURCE_REMOVE;
@@ -1227,39 +1197,34 @@ idle_start_session_cb (gpointer userData_in)
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
-  //Common_UI_GTK_Manager_t* gtk_manager_p =
-  //  COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  //ACE_ASSERT (gtk_manager_p);
-  //Common_UI_GTK_State_t& state_r =
-  //  const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersConstIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_ConnectionManager_3_t::INTERFACE_T* iconnection_manager_2 =
-      TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
+    TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
   ACE_ASSERT (iconnection_manager_2);
   Net_ConnectionConfigurationsIterator_t iterator_3a =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("3a"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("3a"));
   ACE_ASSERT (iterator_3a != data_p->configuration->connectionConfigurations.end ());
   Net_ConnectionConfigurationsIterator_t iterator_3b =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("3b"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("3b"));
   ACE_ASSERT (iterator_3b != data_p->configuration->connectionConfigurations.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
-      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_marshal_3a =
-      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
+    data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
   ACE_ASSERT (stream_iterator_marshal_3a != data_p->configuration->streamConfiguration_3a.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3b =
-      data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (stream_iterator_3b != data_p->configuration->streamConfiguration_3b.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_marshal_3b =
-      data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
+    data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
   ACE_ASSERT (stream_iterator_marshal_3b != data_p->configuration->streamConfiguration_3b.end ());
   ACE_ASSERT (data_p->channels);
   ACE_ASSERT (data_p->currentChannel);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
-      data_p->channels->find (data_p->currentChannel);
+    data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
   ACE_ASSERT (!(*channel_iterator).second.videoSegment.URLs.empty ());
   ACE_ASSERT (data_p->audioTimeoutHandler);
@@ -1289,13 +1254,10 @@ idle_start_session_cb (gpointer userData_in)
       (*stream_iterator_3a).second.second->URL.empty ())
     goto continue_;
   current_URL_1 =
-      (*channel_iterator).second.audioSegment.URLs.front ();
+    (*channel_iterator).second.audioSegment.URLs.front ();
   (*channel_iterator).second.audioSegment.URLs.pop_front ();
   is_URI_b = HTTP_Tools::URLIsURI (current_URL_1);
-  if (is_URI_b)
-    URL_string = (*stream_iterator_3a).second.second->URL;
-  else
-    URL_string = current_URL_1;
+  URL_string = is_URI_b ? (*stream_iterator_3a).second.second->URL : current_URL_1;
   if (!HTTP_Tools::parseURL (URL_string,
                              host_address,
                              hostname_string,
@@ -1308,9 +1270,9 @@ idle_start_session_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address =
-      host_address;
+    host_address;
   static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.hostname =
-      hostname_string;
+    hostname_string;
   if (is_URI_b)
   {
     size_t position = URI_string.find_last_of ('/', std::string::npos);
@@ -1323,13 +1285,10 @@ idle_start_session_cb (gpointer userData_in)
 
 continue_:
   current_URL_2 =
-      (*channel_iterator).second.videoSegment.URLs.front ();
+    (*channel_iterator).second.videoSegment.URLs.front ();
   (*channel_iterator).second.videoSegment.URLs.pop_front ();
   is_URI_2 = HTTP_Tools::URLIsURI (current_URL_2);
-  if (is_URI_2)
-    URL_string_2 = (*stream_iterator_3b).second.second->URL;
-  else
-    URL_string_2 = current_URL_2;
+  URL_string_2 = is_URI_2 ? (*stream_iterator_3b).second.second->URL : current_URL_2;
   if (!HTTP_Tools::parseURL (URL_string_2,
                              host_address,
                              hostname_string,
@@ -1342,9 +1301,9 @@ continue_:
     return G_SOURCE_REMOVE;
   } // end IF
   static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address =
-      host_address;
+    host_address;
   static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.hostname =
-      hostname_string;
+    hostname_string;
   if (is_URI_2)
   {
     size_t position = URI_string_2.find_last_of ('/', std::string::npos);
@@ -1404,17 +1363,17 @@ continue_:
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address).c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: opened socket to %s\n"),
-              data_p->audioHandle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address).c_str ())));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: opened socket to %s\n"),
-              data_p->audioHandle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("0x%@: opened socket to %s\n"),
+//              data_p->audioHandle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address).c_str ())));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%d: opened socket to %s\n"),
+//              data_p->audioHandle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address).c_str ())));
+//#endif // ACE_WIN32 || ACE_WIN64
 
 continue_2:
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
@@ -1462,30 +1421,30 @@ continue_2:
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address).c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: opened socket to %s\n"),
-              data_p->videoHandle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address).c_str ())));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: opened socket to %s\n"),
-              data_p->videoHandle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("0x%@: opened socket to %s\n"),
+//              data_p->videoHandle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address).c_str ())));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%d: opened socket to %s\n"),
+//              data_p->videoHandle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address).c_str ())));
+//#endif // ACE_WIN32 || ACE_WIN64
 
   const Stream_Module_t* module_p =
-      data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+    data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
   ACE_ASSERT (module_p);
   data_p->dispatch =
-      dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   ACE_ASSERT (data_p->dispatch);
   Common_ISetP_T<GdkWindow>* isetp_p =
-      dynamic_cast<Common_ISetP_T<GdkWindow>*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    dynamic_cast<Common_ISetP_T<GdkWindow>*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   ACE_ASSERT (isetp_p);
   GtkDrawingArea* drawing_area_p =
-      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
   //isetp_p->setP (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)));
 
@@ -1571,10 +1530,10 @@ continue_2:
                                                                   ACE_Time_Value ((*channel_iterator).second.audioSegment.length / 2, 0),
                                                                   data_p->audioTimeoutHandler->interval_);
   ACE_ASSERT (data_p->audioTimeoutHandler->timerId_);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("scheduled audio segment download interval timer (id: %d, interval: %#T)\n"),
-              data_p->audioTimeoutHandler->timerId_,
-              &data_p->audioTimeoutHandler->interval_));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("scheduled audio segment download interval timer (id: %d, interval: %#T)\n"),
+  //            data_p->audioTimeoutHandler->timerId_,
+  //            &data_p->audioTimeoutHandler->interval_));
 
 continue_3:
   data_p->videoTimeoutHandler->initialize (data_p->videoHandle,
@@ -1592,10 +1551,10 @@ continue_3:
                                                                   ACE_Time_Value ((*channel_iterator).second.videoSegment.length / 2, 0),
                                                                   data_p->videoTimeoutHandler->interval_);
   ACE_ASSERT (data_p->videoTimeoutHandler->timerId_);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("scheduled video segment download interval timer (id: %d, interval: %#T)\n"),
-              data_p->videoTimeoutHandler->timerId_,
-              &data_p->videoTimeoutHandler->interval_));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("scheduled video segment download interval timer (id: %d, interval: %#T)\n"),
+  //            data_p->videoTimeoutHandler->timerId_,
+  //            &data_p->videoTimeoutHandler->interval_));
 
   return G_SOURCE_REMOVE;
 }
@@ -1608,23 +1567,25 @@ idle_start_session_2 (gpointer userData_in)
   ACE_UNUSED_ARG (userData_in);
 
   // sanity check(s)
-  //struct Test_I_WebTV_UI_CBData* data_p =
-  //  static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-  //ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  struct Test_I_WebTV_UI_CBData* data_p =
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  //Common_UI_GTK_Manager_t* gtk_manager_p =
+  //  COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  //ACE_ASSERT (gtk_manager_p);
+  //Common_UI_GTK_State_t& state_r =
+  //  const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
-  gtk_toggle_button_set_active (toggle_button_p, TRUE);
+  gtk_toggle_button_set_active (toggle_button_p,
+                                TRUE);
 
   return G_SOURCE_REMOVE;
 }
@@ -1638,18 +1599,10 @@ idle_update_progress_cb (gpointer userData_in)
   struct Test_I_WebTV_UI_ProgressData* data_p =
     static_cast<struct Test_I_WebTV_UI_ProgressData*> (userData_in);
   ACE_ASSERT (data_p);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
+  ACE_ASSERT (data_p->state);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
@@ -1658,7 +1611,7 @@ idle_update_progress_cb (gpointer userData_in)
   int result = -1;
   float speed = 0.0F;
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_CONTINUE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
     speed = data_p->statistic.bytesPerSecond;
   } // end lock scope
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
@@ -1695,10 +1648,14 @@ idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
-         // sanity check(s)
+  // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkSpinButton* spin_button_p = NULL;
   bool is_session_message = false;
@@ -1706,19 +1663,8 @@ idle_update_info_display_cb (gpointer userData_in)
   int result = -1;
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    for (Common_UI_Events_t::ITERATOR iterator_2 (state_r.eventStack);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+    for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->UIState->eventStack);
          iterator_2.next (event_p);
          iterator_2.advance ())
     { ACE_ASSERT (event_p);
@@ -1824,10 +1770,10 @@ idle_update_info_display_cb (gpointer userData_in)
       event_p = NULL;
     } // end FOR
 
-           // clean up
-    while (!state_r.eventStack.is_empty ())
+    // clean up
+    while (!data_p->UIState->eventStack.is_empty ())
     {
-      result = state_r.eventStack.pop (event_e);
+      result = data_p->UIState->eventStack.pop (event_e);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Unbounded_Stack::pop(): \"%m\", continuing\n")));
@@ -1865,8 +1811,6 @@ drawingarea_draw_cb (GtkWidget* widget_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
   }
-
-  //gtk_widget_queue_draw (widget_in);
 
   return TRUE; // do not propagate further
 }
@@ -2054,17 +1998,13 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
-      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
@@ -2511,7 +2451,7 @@ continue_4:
     gtk_progress_bar_set_show_text (progressbar_p, TRUE);
 
     if (!data_p->progressData.eventSourceId)
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
       data_p->progressData.eventSourceId =
         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
         //                 idle_update_progress_cb,
@@ -2523,7 +2463,7 @@ continue_4:
                        &data_p->progressData);//,
 //                       NULL);
       if (data_p->progressData.eventSourceId > 0)
-        state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
+        data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
       else
       {
         ACE_DEBUG ((LM_ERROR,
@@ -2610,16 +2550,12 @@ button_load_clicked_cb (GtkWidget* widget_in,
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-      TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+    TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
   ACE_ASSERT (data_p->channels);
@@ -2628,13 +2564,13 @@ button_load_clicked_cb (GtkWidget* widget_in,
   channel_iterator = data_p->channels->find (data_p->currentChannel);
   ACE_ASSERT (channel_iterator != data_p->channels->end ());
   Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
   Test_I_WebTV_StreamConfiguration_t::ITERATOR_T iterator_4 =
-      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
   ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration.end ());
   Net_ConnectionConfigurationsIterator_t iterator_2 =
-      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
   data_p->configuration->parserConfiguration.messageQueue = NULL;
@@ -2668,9 +2604,9 @@ button_load_clicked_cb (GtkWidget* widget_in,
   } // end IF
   (*iterator_3).second.second->URL = (*channel_iterator).second.mainURL;
   static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address =
-      host_address;
+    host_address;
   static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
-      hostname_string;
+    hostname_string;
 
   // select connector
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
@@ -2739,7 +2675,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
   gtk_progress_bar_set_show_text (progressbar_p, TRUE);
 
   if (!data_p->progressData.eventSourceId) // *TODO*: why oh why ?
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, FALSE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, FALSE);
     data_p->progressData.eventSourceId =
     //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
     //                 idle_update_progress_cb,
@@ -2750,13 +2686,14 @@ button_load_clicked_cb (GtkWidget* widget_in,
                        idle_update_progress_cb,
                        &data_p->progressData);
     ACE_ASSERT (data_p->progressData.eventSourceId > 0);
-    state_r.eventSourceIds.insert (data_p->progressData.eventSourceId);
+    data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
   } // end lock scope
 
   return FALSE;
 
 error:
-  gtk_widget_set_sensitive (widget_in, TRUE);
+  gtk_widget_set_sensitive (widget_in,
+                            TRUE);
 
   return FALSE;
 } // button_load_clicked_cb
@@ -2771,14 +2708,10 @@ combobox_channel_changed_cb (GtkWidget* widget_in,
   struct Test_I_WebTV_UI_CBData* data_p =
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkTreeIter iterator_2;
   gboolean result = gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget_in),
@@ -2843,16 +2776,12 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
   struct Test_I_WebTV_UI_CBData* data_p =
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
-      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
   ACE_ASSERT ((*iterator_4b).second.second->delayConfiguration);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator;
@@ -2867,8 +2796,8 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
   if (result == FALSE)
     return; // changed channel ?
   GtkListStore* list_store_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
   ACE_ASSERT (list_store_p);
 #if GTK_CHECK_VERSION (2,30,0)
   GValue value = G_VALUE_INIT;
@@ -2916,7 +2845,7 @@ combobox_resolution_changed_cb (GtkWidget* widget_in,
       (*iterator_4b).second.second->delayConfiguration->interval.msec (static_cast<long> (1000 / (*iterator_3).frameRate));
       (*iterator_4b).second.second->delayConfiguration->averageTokensPerInterval = 1;
       data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.frameRate.num =
-          (*iterator_3).frameRate;
+        (*iterator_3).frameRate;
       break;
     } // end IF
 } // combobox_resolution_changed_cb
@@ -2934,7 +2863,6 @@ combobox_format_save_changed_cb (GtkWidget* widget_in,
   Common_UI_GTK_BuildersIterator_t iterator =
     ui_cb_data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != ui_cb_data_p->UIState->builders.end ());
-
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_2 =
     ui_cb_data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING));
   ACE_ASSERT (iterator_2 != ui_cb_data_p->configuration->streamConfiguration_4b.end ());
@@ -2996,14 +2924,10 @@ combobox_display_changed_cb (GtkWidget* widget_in,
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
     data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
@@ -3080,23 +3004,19 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
-      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
-  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
-      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
-  ACE_ASSERT ((*iterator_4b).second.second->window.type == Common_UI_Window::TYPE_GTK);
   ACE_ASSERT (data_p->AVStream);
   if (!data_p->AVStream->isRunning ())
     return;
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
+    data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
+  ACE_ASSERT ((*iterator_4b).second.second->window.type == Common_UI_Window::TYPE_GTK);
 
   GtkDrawingArea* drawing_area_p =
       GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
@@ -3133,25 +3053,7 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
     gtk_window_maximize (window_2);
     //  gtk_window_fullscreen (window_2);
 
-// #if GTK_CHECK_VERSION (3,0,0)
-//     g_signal_handlers_block_by_func (G_OBJECT (drawing_area_p),
-//                                      (gpointer)G_CALLBACK (drawingarea_size_allocate_cb),
-//                                      userData_in);
-// #elif GTK_CHECK_VERSION (2,0,0)
-//     gtk_signal_handler_block_by_func (GTK_OBJECT (drawing_area_p),
-//                                       G_CALLBACK (drawingarea_size_allocate_cb),
-//                                       userData_in);
-// #endif // GTK_CHECK_VERSION (x,0,0)
     gtk_window_iconify (window_p);
-// #if GTK_CHECK_VERSION (3,0,0)
-//     g_signal_handlers_unblock_by_func (G_OBJECT (drawing_area_p),
-//                                        (gpointer)G_CALLBACK (drawingarea_size_allocate_cb),
-//                                        userData_in);
-// #elif GTK_CHECK_VERSION (2,0,0)
-//     gtk_signal_handler_unblock_by_func (GTK_OBJECT (drawing_area_p),
-//                                         G_CALLBACK (drawingarea_size_allocate_cb),
-//                                         userData_in);
-// #endif // GTK_CHECK_VERSION (x,0,0)
 
     (*iterator_4b).second.second->window.gdk_window =
       gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
@@ -3170,23 +3072,11 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
     g_signal_emit_by_name (G_OBJECT (drawing_area_p),
                            ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
                            userData_in);
-
-    // drop frames until resize signal AND session message have been processed
-    Stream_Visualization_IResize* iresize_p =
-        dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-    ACE_ASSERT (iresize_p);
-    try {
-      iresize_p->resizing ();
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                 ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), returning\n")));
-      return;
-    }
   } // end ELSE
   ACE_ASSERT ((*iterator_4b).second.second->window.gdk_window);
 
   Common_UI_IFullscreen* ifullscreen_p =
-      dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   if (unlikely (!ifullscreen_p))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -3248,14 +3138,10 @@ key_cb (GtkWidget* widget_in,
   struct Test_I_WebTV_UI_CBData* data_p =
       reinterpret_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR());
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   switch (eventKey_in->keyval)
   {
@@ -3408,13 +3294,10 @@ button_about_clicked_cb (GtkWidget* widget_in,
   struct Test_I_WebTV_UI_CBData* data_p =
       static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // retrieve about dialog handle
   GtkDialog* about_dialog =
@@ -3454,16 +3337,12 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  ACE_ASSERT (data_p->UIState);
 
   // step1: remove all event sources
-  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, state_r.lock, FALSE);
-    for (Common_UI_GTK_EventSourceIdsIterator_t iterator = state_r.eventSourceIds.begin ();
-         iterator != state_r.eventSourceIds.end ();
+  { ACE_GUARD_RETURN (ACE_Thread_Mutex, aGuard, data_p->UIState->lock, FALSE);
+    for (Common_UI_GTK_EventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
+         iterator != data_p->UIState->eventSourceIds.end ();
          iterator++)
       if (!g_source_remove (*iterator))
         ACE_DEBUG ((LM_ERROR,
@@ -3473,7 +3352,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("removed event source (id: %u)\n"),
                     *iterator));
-    state_r.eventSourceIds.clear ();
+    data_p->UIState->eventSourceIds.clear ();
   } // end lock scope
 
   // step2: initiate shutdown sequence
