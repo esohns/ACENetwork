@@ -480,25 +480,25 @@ idle_load_channel_configuration_cb (gpointer userData_in)
 
   // update configuration
   GtkListStore* liststore_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
   ACE_ASSERT (liststore_p);
   load_audio_channels (liststore_p,
                        (*channel_iterator).second.audioChannels);
   GtkComboBox* combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
   ACE_ASSERT (combo_box_p);
   gtk_combo_box_set_active (combo_box_p, 0);
   liststore_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
   ACE_ASSERT (liststore_p);
   load_resolutions (liststore_p,
                     (*channel_iterator).second.resolutions);
   combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
   ACE_ASSERT (combo_box_p);
   gtk_combo_box_set_active (combo_box_p, 0);
 
@@ -508,7 +508,7 @@ idle_load_channel_configuration_cb (gpointer userData_in)
   //ACE_ASSERT (button_p);
   //gtk_widget_set_sensitive (GTK_WIDGET (button_p), TRUE);
   GtkToggleButton* toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
   gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), TRUE);
@@ -540,12 +540,10 @@ idle_finalize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
   // sanity check(s)
-  struct Test_I_WebTV_UI_CBData* data_p =
-    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->UIState);
-
-  data_p->UIState->eventSourceIds.clear ();
+  //struct Test_I_WebTV_UI_CBData* data_p =
+  //  static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+  //ACE_ASSERT (data_p);
+  //ACE_ASSERT (data_p->UIState);
 
   gtk_main_quit ();
 
@@ -891,7 +889,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     event_source_id =
       g_timeout_add (COMMON_UI_REFRESH_DEFAULT_WIDGET_MS,
                      idle_update_info_display_cb,
-                     data_p);
+                     userData_in);
     if (event_source_id > 0)
       data_p->UIState->eventSourceIds.insert (event_source_id);
     else
@@ -1571,11 +1569,6 @@ idle_start_session_2 (gpointer userData_in)
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
-  //Common_UI_GTK_Manager_t* gtk_manager_p =
-  //  COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  //ACE_ASSERT (gtk_manager_p);
-  //Common_UI_GTK_State_t& state_r =
-  //  const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersConstIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -1608,17 +1601,15 @@ idle_update_progress_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  int result = -1;
-  float speed = 0.0F;
-
+  float speed;
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
     speed = data_p->statistic.bytesPerSecond;
   } // end lock scope
-  std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
   if (speed)
   {
-    ACE_TCHAR buffer_a[BUFSIZ];
-    ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+    char buffer_a[BUFSIZ];
+    ACE_OS::memset (buffer_a, 0, sizeof (char[BUFSIZ]));
+    std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
     if (speed >= 1024.0F)
     {
       speed /= 1024.0F;
@@ -1629,13 +1620,13 @@ idle_update_progress_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
-                              speed, magnitude_string.c_str ());
+    int result = ACE_OS::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%.2f %s"),
+                                  speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
     gtk_progress_bar_set_text (progress_bar_p,
-                               ACE_TEXT_ALWAYS_CHAR (buffer_a));
+                               buffer_a);
   } // end IF
   gtk_progress_bar_pulse (progress_bar_p);
 
@@ -2012,9 +2003,6 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
   ACE_ASSERT (iconnection_manager_2);
 
-//  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-//  bool success = false;
-
   if (gtk_toggle_button_get_active (toggleButton_in))
   {
     // --> download segment playlist
@@ -2028,7 +2016,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (frame_p);
     gtk_widget_set_sensitive (GTK_WIDGET (frame_p), FALSE);
     frame_p =
-        GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+      GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME)));
     ACE_ASSERT (frame_p);
     gtk_widget_set_sensitive (GTK_WIDGET (frame_p), FALSE);
@@ -2060,23 +2048,23 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->configuration->streamConfiguration_2b.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
     ACE_ASSERT (stream_iterator_marshal_2b != data_p->configuration->streamConfiguration_2b.end ());
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3a =
-        data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
+      data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_3a != data_p->configuration->streamConfiguration_3a.end ());
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_marshal_3a =
       data_p->configuration->streamConfiguration_3a.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
     ACE_ASSERT (stream_iterator_marshal_3a != data_p->configuration->streamConfiguration_3a.end ());
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_3b =
-        data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
+      data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_3b != data_p->configuration->streamConfiguration_3b.end ());
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_marshal_3b =
       data_p->configuration->streamConfiguration_3b.find (ACE_TEXT_ALWAYS_CHAR ("Marshal"));
     ACE_ASSERT (stream_iterator_marshal_3b != data_p->configuration->streamConfiguration_3b.end ());
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_4b =
-        data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (stream_iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
     ACE_ASSERT ((*stream_iterator_4b).second.second->delayConfiguration);
     Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T stream_iterator_4b_2 =
-        data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING));
+      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING));
     ACE_ASSERT (stream_iterator_4b_2 != data_p->configuration->streamConfiguration_4b.end ());
     ACE_ASSERT ((*stream_iterator_4b_2).second.second->delayConfiguration);
 
@@ -2113,8 +2101,8 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // retrieve stream URLs
     GtkComboBox* combo_box_p =
-        GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
     ACE_ASSERT (combo_box_p);
     if (!gtk_combo_box_get_active_iter (combo_box_p,
                                         &iterator_7))
@@ -2124,7 +2112,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       return;
     } // end IF
     GtkListStore* list_store_p =
-        GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
     ACE_ASSERT (list_store_p);
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
@@ -2134,10 +2122,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cx =
-        g_value_get_uint (&value);
+      g_value_get_uint (&value);
 #else
     data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.width =
-        g_value_get_uint (&value);
+      g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
@@ -2146,10 +2134,10 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.cy =
-        g_value_get_uint (&value);
+      g_value_get_uint (&value);
 #else
     data_p->configuration->streamConfiguration_4b.configuration_->mediaType.video.resolution.height =
-        g_value_get_uint (&value);
+      g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     ACE_ASSERT (data_p->channels);
@@ -2158,8 +2146,8 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (channel_iterator != data_p->channels->end ());
 
     combo_box_p =
-        GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
     ACE_ASSERT (combo_box_p);
     if (!gtk_combo_box_get_active_iter (combo_box_p,
                                         &iterator_7))
@@ -2170,8 +2158,8 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
       goto continue_;
     } // end IF
     list_store_p =
-        GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
+      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
     ACE_ASSERT (list_store_p);
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                               &iterator_7,
@@ -2228,12 +2216,11 @@ continue_:
       (*stream_iterator_2b).second.second->URL += URI_string;
     } // end IF
     else
-      (*stream_iterator_2b).second.second->URL =
-        (!URI_string.empty () ? URI_string : (*channel_iterator).second.mainURL);
+      (*stream_iterator_2b).second.second->URL = (!URI_string.empty () ? URI_string : (*channel_iterator).second.mainURL);
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address =
-        host_address;
+      host_address;
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.hostname =
-        hostname_string;
+      hostname_string;
     //static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address =
     //  host_address;
     //static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.hostname =
@@ -2365,17 +2352,17 @@ continue_3:
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address).c_str ())));
       goto error;
     } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: opened socket to %s\n"),
-                data_p->audioHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address).c_str ())));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened socket to %s\n"),
-                data_p->audioHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: opened socket to %s\n"),
+//                data_p->audioHandle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address).c_str ())));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: opened socket to %s\n"),
+//                data_p->audioHandle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address).c_str ())));
+//#endif // ACE_WIN32 || ACE_WIN64
 
 continue_4:
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
@@ -2423,17 +2410,17 @@ continue_4:
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address).c_str ())));
       goto error;
     } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: opened socket to %s\n"),
-                data_p->videoHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address).c_str ())));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened socket to %s\n"),
-                data_p->videoHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address).c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: opened socket to %s\n"),
+//                data_p->videoHandle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address).c_str ())));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: opened socket to %s\n"),
+//                data_p->videoHandle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address).c_str ())));
+//#endif // ACE_WIN32 || ACE_WIN64
 
     // step3: start progress reporting
 //    spinner_p =
@@ -2443,8 +2430,8 @@ continue_4:
 //    gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), TRUE);
 //    gtk_spinner_start (spinner_p);
     progressbar_p =
-        GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
+      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
     ACE_ASSERT (progressbar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
     gtk_progress_bar_set_text (progressbar_p, ACE_TEXT_ALWAYS_CHAR (""));
@@ -2486,10 +2473,10 @@ continue_4:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
                   data_p->audioTimeoutHandler->timerId_));
-    else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("cancelled interval timer (id: %d)\n"),
-                  data_p->audioTimeoutHandler->timerId_));
+    //else
+    //  ACE_DEBUG ((LM_DEBUG,
+    //              ACE_TEXT ("cancelled audio interval timer (id: %d)\n"),
+    //              data_p->audioTimeoutHandler->timerId_));
     data_p->audioTimeoutHandler->timerId_ = 0;
   } // end IF
   if (likely (data_p->videoTimeoutHandler->timerId_))
@@ -2501,10 +2488,10 @@ continue_4:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
                   data_p->videoTimeoutHandler->timerId_));
-    else
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("cancelled interval timer (id: %d)\n"),
-                  data_p->videoTimeoutHandler->timerId_));
+    //else
+    //  ACE_DEBUG ((LM_DEBUG,
+    //              ACE_TEXT ("cancelled video interval timer (id: %d)\n"),
+    //              data_p->videoTimeoutHandler->timerId_));
     data_p->videoTimeoutHandler->timerId_ = 0;
   } // end IF
 
