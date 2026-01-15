@@ -1872,9 +1872,9 @@ drawing_area_resize_end (gpointer userData_in)
   GtkAllocation allocation_s;
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation_s);
-  ACE_DEBUG ((LM_DEBUG,
-             ACE_TEXT ("window resized to %dx%d\n"),
-             allocation_s.width, allocation_s.height));
+  //ACE_DEBUG ((LM_DEBUG,
+  //           ACE_TEXT ("window resized to %dx%d\n"),
+  //           allocation_s.width, allocation_s.height));
 
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
       data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -1947,7 +1947,6 @@ drawingarea_size_allocate_cb (GtkWidget* widget_in,
   //         - enqueue a 'resize' session message
   //         The second item is done in a timeout callback to avoid multiple
   //         messages during resizing
-  // *BUG*: there's still a problem when shrinking the window
 
   // step1:
   module_p =
