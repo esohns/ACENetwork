@@ -1037,7 +1037,8 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
   //delay_configuration.catchUp = true; // *TODO*: why does this introduce stuttering ?
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
-//  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
+  delay_configuration.isMultimediaTask = true;
+    //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   modulehandler_configuration_4b.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
