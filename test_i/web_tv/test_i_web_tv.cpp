@@ -1208,9 +1208,6 @@ do_work (const std::string& configurationFile_in,
     goto clean;
   } // end IF
 
-  // Common_Timer_Manager_t* timer_manager_p =
-  //   COMMON_TIMERMANAGER_SINGLETON::instance ();
-  // ACE_ASSERT (timer_manager_p);
   // intialize timers
   Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
     //useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR;
@@ -1238,7 +1235,8 @@ do_work (const std::string& configurationFile_in,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
     goto clean;
   } // end IF
-  if (!Common_Signal_Tools::initialize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+  if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                       : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -1317,7 +1315,6 @@ do_work (const std::string& configurationFile_in,
 #endif // GTK_USE
 
   // step3: clean up
-  // timer_manager_p->stop ();
   Common_Timer_Tools::finalize ();
 
   connection_manager_p->stop (false, // wait ?
@@ -1373,7 +1370,6 @@ clean:
                         false,  // recurse ?
                         false); // high priority
 
-  // timer_manager_p->stop ();
   Common_Timer_Tools::finalize ();
 }
 
