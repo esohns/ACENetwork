@@ -1212,9 +1212,13 @@ do_work (const std::string& configurationFile_in,
   //   COMMON_TIMERMANAGER_SINGLETON::instance ();
   // ACE_ASSERT (timer_manager_p);
   // intialize timers
-  Common_Timer_Tools::configuration_.dispatch =
-    useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR;
+  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+    //useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR;
   Common_Timer_Tools::configuration_.publishSeconds = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Timer_Tools::configuration_.taskType = ACE_TEXT_ALWAYS_CHAR ("Playback");
+  Common_Timer_Tools::configuration_.taskPriority = AVRT_PRIORITY_HIGH;
+#endif // ACE_WIN32 || ACE_WIN64
   Common_Timer_Tools::initialize ();
 
   event_dispatch_state_s.configuration =
