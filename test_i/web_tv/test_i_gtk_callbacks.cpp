@@ -1872,12 +1872,13 @@ drawing_area_resize_end (gpointer userData_in)
   GtkAllocation allocation_s;
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation_s);
+
   //ACE_DEBUG ((LM_DEBUG,
   //           ACE_TEXT ("window resized to %dx%d\n"),
   //           allocation_s.width, allocation_s.height));
 
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
-      data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_4b != data_p->configuration->streamConfiguration_4b.end ());
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   (*iterator_4b).second.second->outputFormat.video.resolution.cy =
@@ -1886,9 +1887,9 @@ drawing_area_resize_end (gpointer userData_in)
     allocation_s.width;
 #else
   (*iterator_4b).second.second->outputFormat.video.resolution.height =
-      allocation_s.height;
+    allocation_s.height;
   (*iterator_4b).second.second->outputFormat.video.resolution.width =
-      allocation_s.width;
+    allocation_s.width;
 #endif // ACE_WIN32 || ACE_WIN64
 
   ACE_ASSERT (data_p->AVStream);
@@ -1929,16 +1930,30 @@ drawingarea_size_allocate_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::drawingarea_size_allocate_cb"));
 
-  ACE_UNUSED_ARG (widget_in);
-  ACE_UNUSED_ARG (allocation_in);
-
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->AVStream);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkDrawingArea* drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  ACE_ASSERT (drawing_area_p);
+
+  bool delay_resize_b = true;
   Stream_Module_t* module_p = NULL;
   Stream_Visualization_IResize* iresize_p = NULL;
+
+  if (widget_in == GTK_WIDGET (drawing_area_p))
+  {
+    if (allocation_in->width <= 1 || allocation_in->height <= 1) // minimized ?
+      return;
+    delay_resize_b = false;
+  } // end IF
+
   if (!data_p->AVStream->isRunning ())
     goto continue_;
 
@@ -1964,6 +1979,12 @@ drawingarea_size_allocate_cb (GtkWidget* widget_in,
   }
 
 continue_:
+  if (unlikely (!delay_resize_b))
+  {
+    drawing_area_resize_end (userData_in);
+    return;
+  } // end IF
+
   static gint timer_id = 0;
   if (timer_id == 0)
   {
@@ -2993,8 +3014,6 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
     static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->AVStream);
-  if (!data_p->AVStream->isRunning ())
-    return;
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -3005,80 +3024,87 @@ togglebutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT ((*iterator_4b).second.second->window.type == Common_UI_Window::TYPE_GTK);
 
   GtkDrawingArea* drawing_area_p =
-      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
   GtkDrawingArea* drawing_area_2 =
-      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
   ACE_ASSERT (drawing_area_2);
 
   GtkWindow* window_p =
-      GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
   ACE_ASSERT (window_p);
   GtkWindow* window_2 =
-      GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)));
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)));
   ACE_ASSERT (window_2);
-
-  const Stream_Module_t* module_p = NULL;
-  module_p =
-    data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("%s: failed to Stream_IStream::find(\"Display\"), returning\n"),
-               ACE_TEXT (data_p->AVStream->name ().c_str ())));
-    return;
-  } // end IF
 
   if (gtk_toggle_button_get_active (toggleButton_in))
   {
     gtk_widget_show (GTK_WIDGET (window_2));
-    gtk_window_maximize (window_2);
-    //  gtk_window_fullscreen (window_2);
-
-    gtk_window_iconify (window_p);
 
     (*iterator_4b).second.second->window.gdk_window =
       gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
+
+    gtk_window_maximize (window_2);
+    //  gtk_window_fullscreen (window_2);
+    gtk_window_present (window_2);
+
+    gtk_window_iconify (window_p);
   } // end IF
   else
   {
-    //  gtk_window_unfullscreen (window_2);
-    gtk_window_unmaximize (window_2);
-    gtk_widget_hide (GTK_WIDGET (window_2));
-
-    gtk_window_deiconify (window_p);
-
     (*iterator_4b).second.second->window.gdk_window =
       gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+
+    gtk_window_deiconify (window_p);
+    gtk_window_present (window_p);
 
     g_signal_emit_by_name (G_OBJECT (drawing_area_p),
                            ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
                            userData_in);
+
+    //  gtk_window_unfullscreen (window_2);
+    gtk_window_unmaximize (window_2);
+
+    gtk_widget_hide (GTK_WIDGET (window_2));
   } // end ELSE
   ACE_ASSERT ((*iterator_4b).second.second->window.gdk_window);
 
-  Common_UI_IFullscreen* ifullscreen_p =
-    dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-  if (unlikely (!ifullscreen_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("%s:%s: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
-               ACE_TEXT (data_p->AVStream->name ().c_str ()),
-               module_p->name (),
-               const_cast<Stream_Module_t*> (module_p)->writer ()));
-    return;
-  } // end IF
-  try {
-    ifullscreen_p->toggle ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("caught exception in Common_UI_IFullscreen::toggle(), returning\n")));
-    return;
-  }
+  // if (!data_p->AVStream->isRunning ())
+  //   return;
+
+  // const Stream_Module_t* module_p = NULL;
+  // module_p =
+  //   data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+  // if (!module_p)
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s: failed to Stream_IStream::find(\"Display\"), returning\n"),
+  //              ACE_TEXT (data_p->AVStream->name ().c_str ())));
+  //   return;
+  // } // end IF
+
+  // Common_UI_IFullscreen* ifullscreen_p =
+  //   dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  // if (unlikely (!ifullscreen_p))
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s:%s: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
+  //              ACE_TEXT (data_p->AVStream->name ().c_str ()),
+  //              module_p->name (),
+  //              const_cast<Stream_Module_t*> (module_p)->writer ()));
+  //   return;
+  // } // end IF
+  // try {
+  //   ifullscreen_p->toggle ();
+  // } catch (...) {
+  //   ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("caught exception in Common_UI_IFullscreen::toggle(), returning\n")));
+  //   return;
+  // }
 } // togglebutton_fullscreen_toggled_cb
 
 void
@@ -3122,11 +3148,11 @@ key_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (eventKey_in);
   struct Test_I_WebTV_UI_CBData* data_p =
-      reinterpret_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+    reinterpret_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   switch (eventKey_in->keyval)
@@ -3278,7 +3304,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
-      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =

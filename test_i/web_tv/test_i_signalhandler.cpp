@@ -49,6 +49,7 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 // *PORTABILITY*: on Windows SIGQUIT is not defined
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+    case SIGABRT:
     case SIGQUIT:
 #endif // ACE_WIN32 || ACE_WIN64
     {
@@ -96,9 +97,6 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal (was: %d --> \"%S\"), returning\n"),
                   signal_in.signal, signal_in.signal));
-
-      ACE_OS::last_error (EINVAL);
-
       return;
     }
   } // end SWITCH
@@ -146,7 +144,7 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // step2: stop/abort(/wait) for connections
     Test_I_IConnectionManager_t* iconnection_manager_p =
-        TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+      TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
     iconnection_manager_p->stop (false,  // wait ?
                                  false); // high priority ?
