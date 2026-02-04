@@ -2979,22 +2979,27 @@ combobox_display_changed_cb (GtkWidget* widget_in,
   g_value_unset (&value);
 
   // move active display window to corresponding monitor ?
+  GtkWindow* window_p =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+  ACE_ASSERT (window_p);
+  GtkWindow* window_2 =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)));
+  ACE_ASSERT (window_2);
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
   ACE_ASSERT (toggle_button_p);
   bool is_active_b = gtk_toggle_button_get_active (toggle_button_p);
-  GtkWindow* window_p =
-    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                        is_active_b ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)
-                                                    : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
-  ACE_ASSERT (window_p);
+  GtkWindow* active_window_p = is_active_b ? window_2 : window_p;
+  GtkWindow* inactive_window_p = is_active_b ? window_p : window_2;
 
-  GdkScreen* screen_p = gtk_window_get_screen (window_p);
+  GdkScreen* screen_p = gtk_window_get_screen (active_window_p);
   ACE_ASSERT (screen_p);
   gint monitor_i =
     gdk_screen_get_monitor_at_window (screen_p,
-                                      gtk_widget_get_window (GTK_WIDGET (window_p)));
+                                      gtk_widget_get_window (GTK_WIDGET (active_window_p)));
   GdkRectangle geometry_s;
   if (monitor_i == selected_monitor_i)
     goto continue_; // already on the correct monitor
@@ -3002,7 +3007,8 @@ combobox_display_changed_cb (GtkWidget* widget_in,
                                    selected_monitor_i,
                                    &geometry_s);
   // move to top-left of that monitor
-  gtk_window_move (window_p, geometry_s.x, geometry_s.y);
+  gtk_window_move (inactive_window_p, geometry_s.x, geometry_s.y);
+  gtk_window_move (active_window_p, geometry_s.x, geometry_s.y);
 
 continue_:
   // select corresponding adapter
