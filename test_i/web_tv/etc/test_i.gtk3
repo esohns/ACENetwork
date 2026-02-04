@@ -78,6 +78,8 @@
       <column type="gchararray"/>
       <!-- column-name device -->
       <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="gint"/>
     </columns>
   </object>
   <object class="GtkListStore" id="liststore_resolution">

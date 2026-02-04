@@ -314,14 +314,25 @@ load_displays (GtkListStore* listStore_in)
 
   GtkTreeIter iterator;
   Common_UI_DisplayDevices_t displays_a = Common_UI_Tools::getDisplays ();
+
+  // *TODO*: how to associate displays to gtk monitors correctly ?
+  GdkDisplay* display_p = gdk_display_get_default ();
+  ACE_ASSERT (display_p);
+  GdkScreen* screen_p = gdk_display_get_default_screen (display_p);
+  ACE_ASSERT (screen_p);
+  gint number_of_monitors_i = gdk_screen_get_n_monitors (screen_p);
+  ACE_ASSERT (number_of_monitors_i > 0 && number_of_monitors_i == displays_a.size ());
+  gint i = 0;
+
   for (Common_UI_DisplayDevicesIterator_t iterator_2 = displays_a.begin ();
        iterator_2 != displays_a.end ();
-       ++iterator_2)
+       ++iterator_2, ++i)
   {
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
                         0, (*iterator_2).description.c_str (),
                         1, (*iterator_2).device.c_str (),
+                        2, i,
                         -1);
   } // end FOR
 }
@@ -2928,12 +2939,12 @@ combobox_display_changed_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
-      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_WebTV_StreamConfiguration_3_t::ITERATOR_T iterator_4b =
     data_p->configuration->streamConfiguration_4b.find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -2960,7 +2971,40 @@ combobox_display_changed_cb (GtkWidget* widget_in,
   (*iterator_4b).second.second->display =
     Common_UI_Tools::getDisplay (g_value_get_string (&value));
   g_value_unset (&value);
+  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                            &iterator_2,
+                            2, &value);
+  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_INT);
+  gint selected_monitor_i = g_value_get_int (&value);
+  g_value_unset (&value);
 
+  // move active display window to corresponding monitor ?
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  bool is_active_b = gtk_toggle_button_get_active (toggle_button_p);
+  GtkWindow* window_p =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        is_active_b ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)
+                                                    : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+  ACE_ASSERT (window_p);
+
+  GdkScreen* screen_p = gtk_window_get_screen (window_p);
+  ACE_ASSERT (screen_p);
+  gint monitor_i =
+    gdk_screen_get_monitor_at_window (screen_p,
+                                      gtk_widget_get_window (GTK_WIDGET (window_p)));
+  GdkRectangle geometry_s;
+  if (monitor_i == selected_monitor_i)
+    goto continue_; // already on the correct monitor
+  gdk_screen_get_monitor_geometry (screen_p,
+                                   selected_monitor_i,
+                                   &geometry_s);
+  // move to top-left of that monitor
+  gtk_window_move (window_p, geometry_s.x, geometry_s.y);
+
+continue_:
   // select corresponding adapter
   GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
