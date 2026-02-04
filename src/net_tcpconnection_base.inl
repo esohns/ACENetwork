@@ -326,7 +326,7 @@ continue_:
         break; // there's more data
 
       ACE_Message_Block* message_block_p = inherited::writeBuffer_->cont ();
-      if (inherited::writeBuffer_->cont ())
+      if (message_block_p)
         inherited::writeBuffer_->cont (NULL);
       inherited::writeBuffer_->release (); inherited::writeBuffer_ = NULL;
       if (message_block_p)
@@ -495,18 +495,18 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
 #endif // ACE_WIN32 || ACE_WIN64
   static ACE_Time_Value no_wait = ACE_OS::gettimeofday ();
 
+  // sanity check(s)
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
-      inherited::stream_.upstream (true);
+    inherited::stream_.upstream (true);
   if (likely (!stream_p))
     stream_p = &(inherited::stream_);
-
-  // sanity check(s)
   ACE_ASSERT (stream_p);
 
   // dequeue message from the stream
   // *IMPORTANT NOTE*: this should NEVER block as available outbound data has
   //                   been notified
-  result = stream_p->get (message_block_p, &no_wait);
+  result = stream_p->get (message_block_p,
+                          &no_wait);
   if (unlikely (result == -1))
   { // *NOTE*: most probable reason: socket has been closed by the peer, which
     //         close()s the processing stream (see: handle_close()),
