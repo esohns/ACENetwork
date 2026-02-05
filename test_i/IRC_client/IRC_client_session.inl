@@ -879,8 +879,6 @@ IRC_Client_Session_T<ConnectionType>::log (const std::string& channel_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::log"));
 
-  int result = -1;
-
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);

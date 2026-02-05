@@ -360,11 +360,22 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end IF
   rc_style_p->font_desc = font_description_p;
   GdkColor base_colour, text_colour;
-  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PANGO_LOG_COLOR_BASE),
-                   &base_colour);
+  // gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PANGO_LOG_COLOR_BASE),
+  //                  &base_colour);
+  GdkRGBA base_color_2, text_colour_2;
+  gdk_rgba_parse (&base_color_2,
+                  ACE_TEXT_ALWAYS_CHAR ("#FFFFFFFF"));
+  base_colour.red = (guint16)(base_color_2.red * 65535.0);
+  base_colour.green = (guint16)(base_color_2.green * 65535.0);
+  base_colour.blue = (guint16)(base_color_2.blue * 65535.0);
   rc_style_p->base[GTK_STATE_NORMAL] = base_colour;
-  gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PANGO_LOG_COLOR_TEXT),
-                   &text_colour);
+  // gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PANGO_LOG_COLOR_TEXT),
+  //                  &text_colour);
+  gdk_rgba_parse (&text_colour_2,
+                  ACE_TEXT_ALWAYS_CHAR ("#000000FF"));
+  text_colour.red = (guint16)(text_colour_2.red * 65535.0);
+  text_colour.green = (guint16)(text_colour_2.green * 65535.0);
+  text_colour.blue = (guint16)(text_colour_2.blue * 65535.0);
   rc_style_p->text[GTK_STATE_NORMAL] = text_colour;
   rc_style_p->color_flags[GTK_STATE_NORMAL] =
     static_cast<GtkRcFlags> (GTK_RC_BASE |
