@@ -748,6 +748,7 @@ do_work (const std::string& configurationFile_in,
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration; // decoder
   audio_codec_configuration.codecId = AV_CODEC_ID_AAC;
   audio_codec_configuration.format.audioFormat = AV_SAMPLE_FMT_FLT;
+  audio_codec_configuration.profile = FF_PROFILE_AAC_LOW;
   //audio_codec_configuration.useParser = false;
 #else
   struct Stream_AllocatorConfiguration allocator_configuration_2;

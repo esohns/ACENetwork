@@ -2105,7 +2105,7 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
 #endif // SSL_SUPPORT
     Test_I_AsynchTCPConnector_t asynch_connector (true);
 //    GtkSpinner* spinner_p = NULL;
-    GtkProgressBar* progressbar_p = NULL;
+    GtkProgressBar* progress_bar_p = NULL;
     GtkTreeIter iterator_7;
 #if GTK_CHECK_VERSION (2,30,0)
     struct _GValue value = G_VALUE_INIT;
@@ -2237,7 +2237,7 @@ continue_:
     {
       (*stream_iterator_2b).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
       (*stream_iterator_2b).second.second->URL +=
-          (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
+        (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
       (*stream_iterator_2b).second.second->URL += ACE_TEXT_ALWAYS_CHAR ("://");
       (*stream_iterator_2b).second.second->URL += hostname_string;
       size_t position = URI_string_2.find_last_of ('/', std::string::npos);
@@ -2270,7 +2270,7 @@ continue_:
     {
       (*stream_iterator_2a).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
       (*stream_iterator_2a).second.second->URL +=
-          (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
+        (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
       (*stream_iterator_2a).second.second->URL += ACE_TEXT_ALWAYS_CHAR ("://");
       (*stream_iterator_2a).second.second->URL += hostname_string;
       (*stream_iterator_2a).second.second->URL += URI_string_2;
@@ -2291,8 +2291,8 @@ continue_:
 continue_2:
     // save to file ?
     toggle_button_p =
-        GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_SAVE_NAME)));
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_SAVE_NAME)));
     ACE_ASSERT (toggle_button_p);
     if (!gtk_toggle_button_get_active (toggle_button_p))
     {
@@ -2300,12 +2300,12 @@ continue_2:
       goto continue_3;
     } // end IF
     entry_p =
-        GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_SAVE_NAME)));
+      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_SAVE_NAME)));
     ACE_ASSERT (entry_p);
     file_chooser_button_p =
-        GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
+      GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
     ACE_ASSERT (file_chooser_button_p);
     (*stream_iterator_4b).second.second->targetFileName =
       gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
@@ -2342,24 +2342,22 @@ continue_3:
     {
 #if defined (SSL_SUPPORT)
       if (use_SSL)
-        data_p->audioHandle =
-            Net_Client_Common_Tools::connect (ssl_connector,
-                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second),
-                                              user_data_s,
-                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
-                                              false, // wait ?
-                                              true,  // peer address ?
-                                              3);    // #retries
+        data_p->audioHandle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                                *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second),
+                                                                user_data_s,
+                                                                static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
+                                                                false, // wait ?
+                                                                true,  // peer address ?
+                                                                3);    // #retries
       else
 #endif // SSL_SUPPORT
-        data_p->audioHandle =
-            Net_Client_Common_Tools::connect (connector,
-                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second),
-                                              user_data_s,
-                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
-                                              false, // wait ?
-                                              true,  // peer address ?
-                                              3);    // #retries
+        data_p->audioHandle = Net_Client_Common_Tools::connect (connector,
+                                                                *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second),
+                                                                user_data_s,
+                                                                static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
+                                                                false, // wait ?
+                                                                true,  // peer address ?
+                                                                3);    // #retries
     } // end IF
     else
     {
@@ -2367,14 +2365,13 @@ continue_3:
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
-      data_p->audioHandle =
-          Net_Client_Common_Tools::connect (asynch_connector,
-                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second),
-                                            user_data_s,
-                                            static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
-                                            false, // wait ?
-                                            true,  // peer address ?
-                                            3);    // #retries
+      data_p->audioHandle = Net_Client_Common_Tools::connect (asynch_connector,
+                                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second),
+                                                              user_data_s,
+                                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address,
+                                                              false, // wait ?
+                                                              true,  // peer address ?
+                                                              3);    // #retries
     } // end ELSE
     if (data_p->audioHandle == ACE_INVALID_HANDLE)
     {
@@ -2400,24 +2397,22 @@ continue_4:
     {
 #if defined (SSL_SUPPORT)
       if (use_SSL)
-        data_p->videoHandle =
-            Net_Client_Common_Tools::connect (ssl_connector,
-                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second),
-                                              user_data_s,
-                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
-                                              false, // wait ?
-                                              true,  // peer address ?
-                                              3);    // #retries
+        data_p->videoHandle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                                *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second),
+                                                                user_data_s,
+                                                                static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
+                                                                false, // wait ?
+                                                                true,  // peer address ?
+                                                                3);    // #retries
       else
 #endif // SSL_SUPPORT
-        data_p->videoHandle =
-            Net_Client_Common_Tools::connect (connector,
-                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second),
-                                              user_data_s,
-                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
-                                              false, // wait ?
-                                              true,  // peer address ?
-                                              3);    // #retries
+        data_p->videoHandle = Net_Client_Common_Tools::connect (connector,
+                                                                *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second),
+                                                                user_data_s,
+                                                                static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
+                                                                false, // wait ?
+                                                                true,  // peer address ?
+                                                                3);    // #retries
     } // end IF
     else
     {
@@ -2425,14 +2420,13 @@ continue_4:
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
-      data_p->videoHandle =
-          Net_Client_Common_Tools::connect (asynch_connector,
-                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second),
-                                            user_data_s,
-                                            static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
-                                            false, // wait ?
-                                            true,  // peer address ?
-                                            3);    // #retries
+      data_p->videoHandle = Net_Client_Common_Tools::connect (asynch_connector,
+                                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second),
+                                                              user_data_s,
+                                                              static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2b).second)->socketConfiguration.address,
+                                                              false, // wait ?
+                                                              true,  // peer address ?
+                                                              3);    // #retries
     } // end ELSE
     if (data_p->videoHandle == ACE_INVALID_HANDLE)
     {
@@ -2460,13 +2454,17 @@ continue_4:
 //    ACE_ASSERT (spinner_p);
 //    gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), TRUE);
 //    gtk_spinner_start (spinner_p);
-    progressbar_p =
+    progress_bar_p =
       GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
-    ACE_ASSERT (progressbar_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
-    gtk_progress_bar_set_text (progressbar_p, ACE_TEXT_ALWAYS_CHAR (""));
-    gtk_progress_bar_set_show_text (progressbar_p, TRUE);
+    ACE_ASSERT (progress_bar_p);
+    gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
+    gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+#if GTK_CHECK_VERSION (3,0,0)
+    gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
+#else
+    gtk_progress_set_show_text (GTK_PROGRESS (progress_bar_p), TRUE);
+#endif // GTK_CHECK_VERSION (3,0,0) 
 
     if (!data_p->progressData.eventSourceId)
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
@@ -2495,11 +2493,15 @@ continue_4:
 
   // --> disconnect
 
+  Common_ITimer_Manager_t* itimer_manager_p =
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (itimer_manager_p);
+  int result;
   if (likely (data_p->audioTimeoutHandler->timerId_))
   {
-    int result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->audioTimeoutHandler->timerId_,
-                                                                NULL);
+    result =
+      itimer_manager_p->cancel_timer (data_p->audioTimeoutHandler->timerId_,
+                                      NULL);
     if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
@@ -2512,9 +2514,9 @@ continue_4:
   } // end IF
   if (likely (data_p->videoTimeoutHandler->timerId_))
   {
-    int result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (data_p->videoTimeoutHandler->timerId_,
-                                                                NULL);
+    result =
+      itimer_manager_p->cancel_timer (data_p->videoTimeoutHandler->timerId_,
+                                      NULL);
     if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel interval timer (id: %d): \"%m\", continuing\n"),
