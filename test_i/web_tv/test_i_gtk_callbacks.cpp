@@ -2033,6 +2033,11 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
   Test_I_ConnectionManager_3_t::INTERFACE_T* iconnection_manager_2 =
       TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
   ACE_ASSERT (iconnection_manager_2);
+  Common_ITimer_Manager_t* itimer_manager_p =
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (itimer_manager_p);
+
+  int result;
 
   if (gtk_toggle_button_get_active (toggleButton_in))
   {
@@ -2493,10 +2498,6 @@ continue_4:
 
   // --> disconnect
 
-  Common_ITimer_Manager_t* itimer_manager_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (itimer_manager_p);
-  int result;
   if (likely (data_p->audioTimeoutHandler->timerId_))
   {
     result =
