@@ -54,9 +54,6 @@ set (${EXECUTABLE}_EXE_SRCS
      test_u_session_message.h
      test_u_signalhandler.cpp
      test_u_signalhandler.h)
-#     test_u_stream.cpp
-#     test_u_stream.h
-#     test_u_stream.inl)
 #  test_u_template_instantiations.cpp
 if (GTK_SUPPORT)
  set (${EXECUTABLE}_EXE_SRCS
@@ -74,17 +71,16 @@ if (WXWIDGETS_SUPPORT)
 #       test_u_wxwidgets_ui_base.h)
 endif (WXWIDGETS_SUPPORT)
 
-set (${PROJECT_NAME}_DHCPClient_EXE_CFG
+set (${EXECUTABLE}_EXE_CFG
      etc/test_u.gtk2
-     etc/test_u.gtk3
-     etc/resources.rc)
+     etc/test_u.gtk3)
+#     etc/resources.rc)
 
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE}_EXE_SRCS}
-                etc/test_u.gtk2
-                etc/test_u.gtk3)
+                ${${EXECUTABLE}_EXE_CFG})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
@@ -104,17 +100,9 @@ add_dependencies (${EXECUTABLE} ACEStream_Statistic)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
-target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
-# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS -nostartfiles)
-elseif (WIN32)
- ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
-# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
-endif ()
-
-#if (UNIX)
-# target_link_libraries (${EXECUTABLE} PUBLIC X11)
-#endif (UNIX)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+endif (UNIX)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
@@ -180,11 +168,6 @@ if (UNIX)
                          ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
-                                              ${PROJECT_SOURCE_DIR}/../Common/${BUILD_PATH_SUFFIX}/src/${CMAKE_BUILD_TYPE}
-                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/${BUILD_PATH_SUFFIX}/src/modules/dev/${CMAKE_BUILD_TYPE}
-                                              /usr/local/lib
                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                          ENVIRONMENT foo=bar)
 elseif (WIN32)

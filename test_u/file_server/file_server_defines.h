@@ -32,13 +32,11 @@
 
 //////////////////////////////////////////
 
-#if defined (GTK_SUPPORT)
 #if defined (GTK2_USE)
-#define FILE_SERVER_UI_FILE                                "file_server.glade"
-#else
+#define FILE_SERVER_UI_FILE                                "file_server.gtk2"
+#elif defined (GTK3_USE)
 #define FILE_SERVER_UI_FILE                                "file_server.gtk3"
 #endif // GTK2_USE
-#endif // GTK_SUPPORT
 
 // glade/GTKBuilder definitions
 #define FILE_SERVER_GTK_ABOUTDIALOG_NAME                   "aboutdialog"

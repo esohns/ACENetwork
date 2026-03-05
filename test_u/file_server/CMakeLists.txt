@@ -7,7 +7,7 @@ endif (UNIX)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -15,11 +15,9 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
-endif ()
-add_definitions (-DCOMMON_HAS_DLL)
-add_definitions (-DCOMMON_UI_HAS_DLL)
+endif (NOT EXISTS ${Common_DIR})
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -27,8 +25,7 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
-endif ()
-add_definitions (-DACESTREAM_HAS_DLL)
+endif (NOT EXISTS ${ACEStream_DIR})
 
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src)
@@ -108,7 +105,7 @@ endif (GTK_SUPPORT)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${file_server_SRCS}
-                etc/file_server.glade
+                etc/file_server.gtk2
                 etc/file_server.gtk3)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
@@ -132,13 +129,10 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-if (UNIX)
- target_link_libraries (${EXECUTABLE} PUBLIC X11)
+#if (UNIX)
+# target_link_libraries (${EXECUTABLE} PUBLIC X11)
+#endif (UNIX)
 
-# target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
-elseif (WIN32)
-# target_link_libraries (${EXECUTABLE} ntdll.lib)
-endif ()
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
@@ -167,10 +161,10 @@ install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_u)
 if (UNIX)
- install (FILES etc/file_server.glade
+ install (FILES etc/file_server.gtk2 etc/file_server.gtk3
           DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
 elseif (WIN32)
- install (FILES etc/file_server.glade
+ install (FILES etc/file_server.gtk2 etc/file_server.gtk3
           DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 endif ()
 
