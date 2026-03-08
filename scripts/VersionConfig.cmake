@@ -56,14 +56,14 @@ set (${PROJECT_NAME}_VERSION_DEVEL ${VERSION_DEVEL})
 
 set (PACKAGE_DESCRIPTION "\
 user-space wrapper library for networking, based on the ACE \
-framework (see: http://www.cs.wustl.edu/~schmidt/ACE.html).")
+framework (see: https://www.cs.wustl.edu/~schmidt/ACE.html).")
 set (${PROJECT_NAME}_PACKAGE_DESCRIPTION ${PACKAGE_DESCRIPTION})
-set (PACKAGE_DESCRIPTION_SUMMARY "(wrapper) library for network functionality, based on the ACE framework (see: http://www.cs.wustl.edu/~schmidt/ACE.html)")
+set (PACKAGE_DESCRIPTION_SUMMARY "(wrapper) library for network functionality, based on the ACE framework (see: https://www.cs.wustl.edu/~schmidt/ACE.html)")
 set (${PROJECT_NAME}_PACKAGE_DESCRIPTION_SUMMARY ${PACKAGE_DESCRIPTION_SUMMARY})
 
 ##########################################
 
 # cpack
-# Package section (see http://packages.debian.org/stable/)
+# Package section (see https://packages.debian.org/stable/)
 set (PACKAGE_SECTION "devel") # Debian
 #set (PACKAGE_SECTION "Development/Libraries")
