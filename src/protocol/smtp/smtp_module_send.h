@@ -67,8 +67,8 @@ class SMTP_Module_Send_T
   virtual ~SMTP_Module_Send_T ();
 
   // override (part of) Stream_IModuleHandler_T
-  //virtual bool initialize (const ConfigurationType&,
-  //                         Stream_IAllocator* = NULL);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -82,6 +82,8 @@ class SMTP_Module_Send_T
   ACE_UNIMPLEMENTED_FUNC (SMTP_Module_Send_T& operator= (const SMTP_Module_Send_T&))
 
   SMTP_IConnection_t* connection_;
+  SMTP_To_t           recipients_;
+  bool                STARTTLSSent_;
 };
 
 // include template definition

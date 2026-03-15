@@ -167,6 +167,8 @@ SMTP_Tools::CommandToString (SMTP_Command_t command_in)
     //////////////////////////////////////
     case SMTP_Codes::SMTP_COMMAND_AUTH:
       result = ACE_TEXT_ALWAYS_CHAR ("AUTH"); break;
+    case SMTP_Codes::SMTP_COMMAND_STARTTLS:
+      result = ACE_TEXT_ALWAYS_CHAR ("STARTTLS"); break;
     //////////////////////////////////////
     case SMTP_Codes::SMTP_COMMAND_DATA_2:
       result = ACE_TEXT_ALWAYS_CHAR ("DATA_2"); break;
@@ -224,6 +226,34 @@ SMTP_Tools::StateToString (enum SMTP_ProtocolState state_in)
       break;
     }
   } // end SWITCH
+
+  return result;
+}
+
+std::string
+SMTP_Tools::getHeaderDateString ()
+{
+  NETWORK_TRACE (ACE_TEXT ("SMTP_Tools::getHeaderDateString"));
+
+  std::string result;
+
+  // step1: get time
+  time_t time_seconds = std::time (NULL);
+  // *PORTABILITY*: the man page suggests calling this first...
+  ACE_OS::tzset ();
+
+  // step2: create string
+  char buffer_a[BUFSIZ];
+  if (unlikely (std::strftime (buffer_a,
+                               sizeof (char[BUFSIZ]),
+                               ACE_TEXT_ALWAYS_CHAR (SMTP_DEFAULT_DATE_STRFTIME_FORMAT_STRING),
+                               std::localtime (&time_seconds)) <= 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to std::strftime(): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  result = buffer_a;
 
   return result;
 }

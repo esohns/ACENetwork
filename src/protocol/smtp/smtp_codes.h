@@ -35,6 +35,7 @@ class SMTP_Codes
     SMTP_COMMAND_QUIT,
     /////////////////////////////////////
     SMTP_COMMAND_AUTH, // rfc4954
+    SMTP_COMMAND_STARTTLS, // rfc2595
     /////////////////////////////////////
     SMTP_COMMAND_DATA_2, // pseudo-command: actual message
     /////////////////////////////////////

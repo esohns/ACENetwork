@@ -52,4 +52,6 @@
 #define SMTP_DEFAULT_SERVER_PORT_2                        587 // TCP / STARTTLS
 #define SMTP_DEFAULT_TLS_SERVER_PORT                      465 // SMTPS
 
+#define SMTP_DEFAULT_DATE_STRFTIME_FORMAT_STRING          "%a, %d %b %Y %H:%M:%S %z"
+
 #endif

@@ -60,17 +60,21 @@ struct SMTP_Request
    , domain (static_cast<u_short> (0),
              ACE_TEXT_ALWAYS_CHAR (ACE_LOCALHOST),
              AF_INET)
+   , useSTARTTLS (false)
    , from ()
    , parameters ()
    , to ()
+   , subject ()
    , data ()
   {}
 
   SMTP_Command_t    command;
   ACE_INET_Addr     domain;
+  bool              useSTARTTLS; // rfc2595
   std::string       from;
   SMTP_Parameters_t parameters;
   SMTP_To_t         to;
+  std::string       subject;
   std::string       data;
 };
 
@@ -101,6 +105,7 @@ enum SMTP_ProtocolState
 {
   SMTP_STATE_GREETING_RECEIVED = 0,
   SMTP_STATE_EHLO_SENT,
+  SMTP_STATE_STARTTLS_SENT,
   SMTP_STATE_AUTH_SENT, // rfc4954
   SMTP_STATE_AUTH_LOGIN_USER_SENT, // rfc4954
   SMTP_STATE_AUTH_LOGIN_PASSWORD_SENT, // rfc4954

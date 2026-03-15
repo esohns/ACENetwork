@@ -49,6 +49,8 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
                    ConnectionStateType>::SMTP_Module_Send_T (typename inherited::ISTREAM_T* stream_in)
  : inherited (stream_in)
  , connection_ (NULL)
+ , recipients_ ()
+ , STARTTLSSent_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::SMTP_Module_Send_T"));
 
@@ -75,6 +77,39 @@ SMTP_Module_Send_T<ACE_SYNCH_USE,
   {
     connection_->decrease (); connection_ = NULL;
   } // end IF
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ConfigurationType,
+          typename ConnectionStateType>
+bool
+SMTP_Module_Send_T<ACE_SYNCH_USE,
+                   TimePolicyType,
+                   ControlMessageType,
+                   DataMessageType,
+                   SessionMessageType,
+                   ConfigurationType,
+                   ConnectionStateType>::initialize (const ConfigurationType& configuration_in,
+                                                     Stream_IAllocator* allocator_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("SMTP_Module_Send_T::initialize"));
+
+  if (inherited::isInitialized_)
+  {
+    if (unlikely (connection_))
+    {
+      connection_->decrease (); connection_ = NULL;
+    } // end IF
+    recipients_.clear ();
+    STARTTLSSent_ = false;
+  } // end IF
+
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -136,6 +171,7 @@ continue_:
   switch (state_r.protocolState)
   {
     case SMTP_STATE_INVALID:
+    case SMTP_STATE_GREETING_RECEIVED:
     {
       if (!SMTP_Tools::isSuccess (data_r.code))
         goto protocol_error;
@@ -144,6 +180,7 @@ continue_:
       state_r.protocolState = SMTP_STATE_GREETING_RECEIVED;
       ++state_r.protocolState;
 
+send_ehlo:
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_EHLO;
       data_p->request.domain =
         inherited::configuration_->protocolConfiguration->domain;
@@ -154,7 +191,14 @@ continue_:
       if (!SMTP_Tools::isSuccess (data_r.code))
         goto protocol_error;
 
-      // --> EHLO has been sent; send AUTH/MAIL ?
+      // --> EHLO has been sent; send STARTTLS/AUTH/MAIL ?
+      ++state_r.protocolState;
+      if (inherited::configuration_->request->useSTARTTLS && !STARTTLSSent_)
+      {
+        data_p->request.command = SMTP_Codes::SMTP_COMMAND_STARTTLS;
+        STARTTLSSent_ = true;
+        break;
+      } // end IF
       ++state_r.protocolState;
 
       // retrieve any supported authentication mechanisms
@@ -204,6 +248,15 @@ no_authentication_:
       data_p->request.parameters = inherited::configuration_->request->parameters;
       break;
     }
+    case SMTP_STATE_STARTTLS_SENT:
+    {
+      if (!SMTP_Tools::isSuccess (data_r.code))
+        goto protocol_error;
+
+      state_r.protocolState = SMTP_STATE_EHLO_SENT;
+
+      goto send_ehlo;
+    }
     case SMTP_STATE_AUTH_SENT:
     {
       if (data_r.code != SMTP_Codes::SMTP_CODE_SERVER_CHALLENGE)
@@ -252,10 +305,11 @@ no_authentication_:
       ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_RCPT;
-      ACE_ASSERT (!inherited::configuration_->request->to.empty ());
-      data_p->request.to.push_back (inherited::configuration_->request->to.front ());
+      recipients_ = inherited::configuration_->request->to;
+      ACE_ASSERT (!recipients_.empty ());
+      data_p->request.to.push_back (recipients_.front ());
       data_p->request.parameters = inherited::configuration_->request->parameters;
-      inherited::configuration_->request->to.erase (inherited::configuration_->request->to.begin ());
+      recipients_.erase (recipients_.begin ());
       break;
     }
     case SMTP_STATE_RCPT_SENT:
@@ -265,7 +319,7 @@ no_authentication_:
 
       // --> RCPT has been sent; send any other RCPT(s)
 
-      if (inherited::configuration_->request->to.empty ())
+      if (recipients_.empty ())
       {
         // --> RCPT(s) have been sent; send DATA
 
@@ -274,9 +328,9 @@ no_authentication_:
       } // end IF
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_RCPT;
-      data_p->request.to.push_back (inherited::configuration_->request->to.front ());
+      data_p->request.to.push_back (recipients_.front ());
       data_p->request.parameters = inherited::configuration_->request->parameters;
-      inherited::configuration_->request->to.erase (inherited::configuration_->request->to.begin ());
+      recipients_.erase (recipients_.begin ());
       break;
     }
     case SMTP_STATE_RCPTS_SENT:
@@ -296,6 +350,8 @@ no_authentication_:
       ++state_r.protocolState;
 
       data_p->request.command = SMTP_Codes::SMTP_COMMAND_DATA_2;
+      data_p->request.from = inherited::configuration_->request->from;
+      data_p->request.to = inherited::configuration_->request->to;
       data_p->request.data = inherited::configuration_->request->data;
       break;
     }

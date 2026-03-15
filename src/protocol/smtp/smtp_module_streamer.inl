@@ -92,6 +92,15 @@ SMTP_Module_Streamer_T<ACE_SYNCH_USE,
         goto error;
       break;
     }
+    case SMTP_Codes::SMTP_COMMAND_STARTTLS:
+    {
+      text_string = ACE_TEXT_ALWAYS_CHAR ("STARTTLS\r\n");
+      result = message_inout->copy (text_string.c_str (),
+                                    text_string.size ());
+      if (result == -1)
+        goto error;
+      break;
+    }
     case SMTP_Codes::SMTP_COMMAND_MAIL:
     {
       text_string = ACE_TEXT_ALWAYS_CHAR ("MAIL FROM:<");
@@ -160,7 +169,26 @@ SMTP_Module_Streamer_T<ACE_SYNCH_USE,
     }
     case SMTP_Codes::SMTP_COMMAND_DATA_2:
     {
-      std::string end_sequence = ACE_TEXT_ALWAYS_CHAR ("\r\n.\r\n");
+      std::string message_header;
+      // *TODO*: find out which of these headers are optional
+      message_header += ACE_TEXT_ALWAYS_CHAR ("From: \"\" <");
+      message_header += data_r.request.from;
+      message_header += ACE_TEXT_ALWAYS_CHAR (">\r\n");
+      message_header += ACE_TEXT_ALWAYS_CHAR ("To: \"\" <");
+      message_header += data_r.request.to.front ();
+      message_header += ACE_TEXT_ALWAYS_CHAR (">\r\n");
+      message_header += ACE_TEXT_ALWAYS_CHAR ("Date: ");
+      message_header += SMTP_Tools::getHeaderDateString ();
+      message_header += ACE_TEXT_ALWAYS_CHAR ("\r\n");
+      if (!data_r.request.subject.empty ())
+      {
+        message_header += ACE_TEXT_ALWAYS_CHAR ("Subject: ");
+        message_header += data_r.request.subject;
+        message_header += ACE_TEXT_ALWAYS_CHAR ("\r\n");
+      } // end IF
+      message_header += ACE_TEXT_ALWAYS_CHAR ("\r\n"); // empty line to separate header from body
+
+      static std::string end_sequence = ACE_TEXT_ALWAYS_CHAR ("\r\n.\r\n");
       // sanity check(s)
       std::string::size_type position =
         data_r.request.data.find (end_sequence, std::string::npos);
@@ -175,6 +203,7 @@ SMTP_Module_Streamer_T<ACE_SYNCH_USE,
       } // end IF
       else
         text_string = data_r.request.data;
+      text_string = message_header + text_string;
       text_string += end_sequence;
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
