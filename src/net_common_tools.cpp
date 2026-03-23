@@ -3373,11 +3373,13 @@ Net_Common_Tools::IPAddressToString (const ACE_INET_Addr& address_in,
   // remove "[]" from IPv6 addresses
   if (address_in.get_type () == AF_INET6)
   {
-    result.erase (result.begin ());
-    std::string::size_type last_bracket_pos =
-      result.rfind (']', std::string::npos); // begin searching at the end !
-    ACE_ASSERT (last_bracket_pos != std::string::npos);
-    result.erase (last_bracket_pos, 1);
+    std::string::size_type bracket_pos =
+      result.find ('[', 0);
+    if (likely (bracket_pos == 0))
+      result.erase (result.begin ());
+    bracket_pos = result.rfind (']', std::string::npos); // begin searching at the end !
+    if (likely (bracket_pos != std::string::npos))
+      result.erase (bracket_pos, 1);
   } // end IF
 
   // clean up: if port number was 0, cut off the trailing ":0" !
