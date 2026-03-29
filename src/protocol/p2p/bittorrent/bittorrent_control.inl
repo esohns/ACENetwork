@@ -24,6 +24,7 @@
 #include "ace/OS_Memory.h"
 #include "ace/Time_Value.h"
 
+#include "common_file_tools.h"
 #include "common_string_tools.h"
 
 #include "common_parser_bencoding_tools.h"
