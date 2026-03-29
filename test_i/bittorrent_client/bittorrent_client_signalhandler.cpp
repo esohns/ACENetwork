@@ -127,7 +127,7 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   if (rerequest_peers_from_tracker)
   { ACE_ASSERT (inherited::configuration_->controller);
     inherited::configuration_->controller->notifyTracker (ACE_TEXT_ALWAYS_CHAR (""),
-                                                          BITTORRENT_EVENT_TRACKER_REREQUEST);
+                                                          BITTORRENT_EVENT_TRACKER_REREQUEST_PEERS);
   } // end IF
 
   // ...shutdown ?

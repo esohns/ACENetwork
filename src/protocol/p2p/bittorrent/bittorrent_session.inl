@@ -232,7 +232,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   try {
     inherited::configuration_->controller->notifyTracker (Common_File_Tools::basename (inherited::configuration_->metaInfoFileName, false),
-                                                          BITTORRENT_EVENT_TRACKER_REREQUEST);
+                                                          BITTORRENT_EVENT_TRACKER_REREQUEST_PEERS);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in BitTorrent_IControl_T::notifyTracker(), continuing\n")));

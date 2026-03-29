@@ -1,12 +1,3 @@
-include (ffmpeg)
-include (ImageMagick)
-
-# disable GUI support
-is_UI_graphical (${UI_FRAMEWORK})
-if (NOT UI_FRAMEWORK STREQUAL "")
-
-endif (NOT UI_FRAMEWORK STREQUAL "")
-
 set (FLEX_LIB_FILE libfl.so)
 if (UNIX)
  find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
@@ -19,24 +10,16 @@ elseif (WIN32)
  find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
                DOC "searching for ${FLEX_LIB_FILE} (system paths)")
 endif ()
-#if (NOT EXISTS ACE_LIBRARY)
 if (NOT FLEX_LIBRARY)
 # message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
-endif ()
+endif (NOT FLEX_LIBRARY)
 
-include (FindPkgConfig)
+#include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
-if (UNIX)
-# *NOTE*: Common requires libcap
- pkg_check_modules (PKG_CAP REQUIRED libcap)
-# pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
-# *TODO*: repair WIN32 pkgconfig support
-elseif (WIN32)
-endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -46,7 +29,7 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -60,7 +43,7 @@ if (SSL_SUPPORT)
  include_directories (${SSL_INCLUDE_DIRS})
 endif (SSL_SUPPORT)
 if (UNIX)
- include_directories (${PKG_CAP_INCLUDE_DIRS})
+# include_directories (${PKG_CAP_INCLUDE_DIRS})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/log)
@@ -160,6 +143,8 @@ add_dependencies (${EXECUTABLE} CommonTimer)
 
 add_dependencies (${EXECUTABLE} ACEStream)
 add_dependencies (${EXECUTABLE} ACEStream_Decoder)
+add_dependencies (${EXECUTABLE} ACEStream_Network)
+add_dependencies (${EXECUTABLE} ACEStream_Statistic)
 
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
@@ -174,13 +159,13 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 if (UNIX)
 # target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
- target_link_libraries (${EXECUTABLE} PUBLIC X11)
+# target_link_libraries (${EXECUTABLE} PUBLIC X11)
 elseif (WIN32)
- set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
+# set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
 # target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 
- target_link_libraries (${EXECUTABLE} PUBLIC mf.lib)
- target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
+# target_link_libraries (${EXECUTABLE} PUBLIC mf.lib)
+# target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
 endif ()
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
@@ -192,10 +177,6 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
-target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
-if (WIN32)
- target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
-endif (WIN32)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
 
@@ -204,12 +185,6 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
-
-if (WIN32)
- ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
-# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
-# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /SAFESEH:NO)
-endif (WIN32)
 
 # add PCH
 target_precompile_headers (${EXECUTABLE}
@@ -257,19 +232,18 @@ if (GTK_SUPPORT)
       bittorrent_client_gui_callbacks.cpp
       bittorrent_client_gui_callbacks.h)
  if (GTK2_USE)
-  set (${EXECUTABLE_GUI}_EXE_SRCS
-       ${${EXECUTABLE_GUI}_EXE_SRCS}
+  set (${EXECUTABLE_GUI}_CFG_SRCS
        etc/bittorrent_client_main.glade
        etc/bittorrent_client_session.glade)
  elseif (GTK3_USE)
-  set (${EXECUTABLE_GUI}_EXE_SRCS
-       ${${EXECUTABLE_GUI}_EXE_SRCS}
+  set (${EXECUTABLE_GUI}_CFG_SRCS
        etc/bittorrent_client_main.gtk3
        etc/bittorrent_client_session.gtk3)
  endif ()
+ set (${EXECUTABLE_GUI}_EXE_SRCS
+      ${${EXECUTABLE_GUI}_EXE_SRCS}
+      ${${EXECUTABLE_GUI}_CFG_SRCS})
 endif (GTK_SUPPORT)
-
-#set_source_files_properties (${bittorrent_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
@@ -293,6 +267,9 @@ add_dependencies (${EXECUTABLE_GUI} CommonSignal)
 add_dependencies (${EXECUTABLE_GUI} CommonTimer)
 
 add_dependencies (${EXECUTABLE_GUI} ACEStream)
+add_dependencies (${EXECUTABLE_GUI} ACEStream_Decoder)
+add_dependencies (${EXECUTABLE_GUI} ACEStream_Network)
+add_dependencies (${EXECUTABLE_GUI} ACEStream_Statistic)
 
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
@@ -307,7 +284,7 @@ target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${ACE_LIBRARY})
 
 if (UNIX)
- target_link_libraries (${EXECUTABLE_GUI} PUBLIC X11)
+# target_link_libraries (${EXECUTABLE_GUI} PUBLIC X11)
 endif (UNIX)
 
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC Common)
@@ -319,10 +296,6 @@ target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonTimer)
 
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Decoder)
-#target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Device)
-#if (WIN32)
-# target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
-#endif (WIN32)
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ACEStream_Statistic)
 
@@ -342,8 +315,7 @@ install (TARGETS ${EXECUTABLE_GUI}
 install (FILES
          etc/bittorrent_client.ini
          etc/bittorrent_client.rc
-         etc/bittorrent_client_main.glade
-         etc/bittorrent_client_session.glade
+         ${${EXECUTABLE_GUI}_CFG_SRCS}
          DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 
 ##########################################
@@ -353,24 +325,12 @@ if (UNIX)
                          ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
-                                              /usr/local/lib
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_GUI}
                          ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../Common/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
-                                              /usr/local/lib
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
@@ -407,7 +367,7 @@ elseif (WIN32)
                          ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_GUI}
                          COMMAND ${COMMAND_2}
-                         ARGS "-f C:\\\\Users\\\\eriks\\\\Downloads\\\\KNOPPIX_V9.1CD-2021-01-25-EN.torrent -l -t"
+                         ARGS "-l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test_i/bittorrent_client

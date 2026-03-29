@@ -530,8 +530,9 @@ BitTorrent_Control_T<SessionAsynchType,
   converter << 1;
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
                                        converter.str ()));
-  if ((event_in != BITTORRENT_EVENT_NO_MORE_PEERS) &&
-      (event_in != BITTORRENT_EVENT_TRACKER_REREQUEST))
+  if ((event_in != BITTORRENT_EVENT_NO_MORE_PEERS)           &&
+      (event_in != BITTORRENT_EVENT_TRACKER_REREQUEST_PEERS) &&
+      (event_in != BITTORRENT_EVENT_TRACKER_REDIRECTED))
     data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                          ((event_in == BITTORRENT_EVENT_CANCELLED) ? ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STOPPED_STRING)
                                                                                    : ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_COMPLETED_STRING))));
