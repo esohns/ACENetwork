@@ -815,7 +815,10 @@ Net_Common_Tools::stringToIPAddress (std::string& address_in,
   std::string::size_type position_i =
     ip_address_string.find_last_of (':', std::string::npos);
   if (unlikely (position_i != std::string::npos))
-  { ACE_ASSERT (!portNumber_in); // *TODO*
+  {
+    if (unlikely (portNumber_in))
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("given address string contains port number; overriding given port\n")));
     std::string port_number_string =
       ip_address_string.substr (position_i + 1, std::string::npos);
     std::istringstream converter;

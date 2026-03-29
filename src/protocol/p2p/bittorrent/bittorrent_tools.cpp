@@ -1055,10 +1055,18 @@ BitTorrent_Tools::receivedBytes (const BitTorrent_Pieces_t& pieces_in)
   for (BitTorrent_PiecesConstIterator_t iterator = pieces_in.begin ();
        iterator != pieces_in.end ();
        ++iterator)
+  {
+    if ((*iterator).onDisk)
+    {
+      result += (*iterator).length;
+      continue;
+    } // end IF
+
     for (BitTorrent_PieceChunksConstIterator_t iterator_2 = (*iterator).chunks.begin ();
          iterator_2 != (*iterator).chunks.end ();
          ++iterator_2)
       result += BitTorrent_Tools::chunkLength (*iterator_2);
+  } // end FOR
 
   return result;
 }

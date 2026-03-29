@@ -24,32 +24,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/Thread_Manager.h"
 
-void
-net_bittorrent_session_cleanup_nmlock_function (void* object_in, void* arg_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::net_bittorrent_session_cleanup_nmlock_function"));
-
-  // sanity check(s)
-  Net_IConnectionManagerBase* i_connection_manager_p =
-    static_cast<Net_IConnectionManagerBase*> (arg_in);
-  ACE_ASSERT (i_connection_manager_p);
-
-  i_connection_manager_p->unlock (false);
-}
-
-void
-net_bittorrent_session_cleanup_data_function (void* object_in, void* arg_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::net_bittorrent_session_cleanup_data_function"));
-
-  // sanity check(s)
-  struct BitTorrent_SessionInitiationThreadData* data_p =
-    static_cast<struct BitTorrent_SessionInitiationThreadData*> (arg_in);
-  ACE_ASSERT (data_p);
-
-  delete data_p;
-}
-
 ACE_THR_FUNC_RETURN
 net_bittorrent_session_setup_function (void* arg_in)
 {
@@ -70,7 +44,9 @@ net_bittorrent_session_setup_function (void* arg_in)
     static_cast<struct BitTorrent_SessionInitiationThreadData*> (arg_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->lock);
+  ACE_ASSERT (data_p->peerConnectionManager);
   ACE_ASSERT (data_p->session);
+  ACE_ASSERT (data_p->state);
 
   ACE_INET_Addr peer_address;
   bool delete_thread_data_b = false;
@@ -79,53 +55,14 @@ net_bittorrent_session_setup_function (void* arg_in)
     data_p->addresses.pop_back ();
     delete_thread_data_b = data_p->addresses.empty ();
   } // end lock scope
-  if (delete_thread_data_b)
-  {
-    ACE_At_Thread_Exit_Func* at_thread_exit_p = NULL;
-    ACE_hthread_t handle_h;
-    ACE_OS::thr_self (handle_h);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_NEW_NORETURN (at_thread_exit_p,
-                      ACE_At_Thread_Exit_Func (handle_h,
-                                               net_bittorrent_session_cleanup_data_function,
-                                               arg_in));
-#else
-    ACE_NEW_NORETURN (at_thread_exit_p,
-                      ACE_At_Thread_Exit_Func (&handle_h,
-                                               net_bittorrent_session_cleanup_data_function,
-                                               arg_in));
-#endif // ACE_WIN32 || ACE_WIN64
-    ACE_ASSERT (at_thread_exit_p);
-    ACE_Thread_Manager::instance ()->at_exit (at_thread_exit_p);
-  } // end IF
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connecting to peer \"%s\"...\n"),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address, false, false).c_str ())));
 
-  ACE_ASSERT (data_p->peerConnectionManager);
   data_p->peerConnectionManager->lock (true);
-  ACE_At_Thread_Exit_Func* at_thread_exit_p = NULL;
-  ACE_hthread_t handle_h;
-  ACE_OS::thr_self (handle_h);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_NEW_NORETURN (at_thread_exit_p,
-                    ACE_At_Thread_Exit_Func (handle_h,
-                                             net_bittorrent_session_cleanup_nmlock_function,
-                                             data_p->peerConnectionManager));
-#else
-  ACE_NEW_NORETURN (at_thread_exit_p,
-                    ACE_At_Thread_Exit_Func (&handle_h,
-                                             net_bittorrent_session_cleanup_nmlock_function,
-                                             data_p->peerConnectionManager));
-#endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (at_thread_exit_p);
-  ACE_Thread_Manager::instance ()->at_exit (at_thread_exit_p);
-
-  ACE_ASSERT (data_p->session);
   data_p->session->connect (peer_address);
-
-  //data_p->peerConnectionManager->unlock (false);
+  data_p->peerConnectionManager->unlock (false);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = 0;
@@ -133,13 +70,15 @@ net_bittorrent_session_setup_function (void* arg_in)
   result = NULL;
 #endif // ACE_WIN32 || ACE_WIN64
 
+  data_p->barrier.wait (); // *NOTE*: wait for all threads to connect before cleaning up thread data
   if (unlikely (delete_thread_data_b))
   {
     { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *data_p->lock, result);
       data_p->state->connecting = false;
     } // end lock scope
 
-    //delete data_p; data_p = NULL;
+    ACE_OS::sleep (ACE_Time_Value (1, 0)); // *NOTE*: give other threads the chance to leave the barrier before cleaning up thread data
+    delete data_p; data_p = NULL;
   } // end IF
 
   return result;

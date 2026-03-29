@@ -505,10 +505,9 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
-
   // sanity check(s)
-  ACE_ASSERT (iterator != sessionData_.end ());
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
+  //ACE_ASSERT (iterator != sessionData_.end ());
 }
 
 template <typename SessionDataType,

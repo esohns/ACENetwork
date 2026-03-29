@@ -110,12 +110,12 @@ BitTorrent_Control_T<SessionAsynchType,
   typename SessionType::ITRACKER_STREAM_CONNECTION_T* istream_connection_p = NULL;
   std::ostringstream converter;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
-      NULL;
+    NULL;
   ACE_Message_Block* message_block_p = NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
-      NULL;
+    NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
-      NULL;
+    NULL;
   std::string user_agent;
   ACE_INET_Addr host_address;
   std::string host_name_string;
@@ -260,7 +260,7 @@ BitTorrent_Control_T<SessionAsynchType,
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter <<
-      BitTorrent_Tools::MetaInfoToLength (*session_context.configuration.metaInfo);
+    BitTorrent_Tools::MetaInfoToLength (*session_context.configuration.metaInfo);
   data_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
                                        converter.str ()));
   if (likely (sessionConfigurationBase_->requestCompactPeerAddresses))
@@ -411,12 +411,12 @@ BitTorrent_Control_T<SessionAsynchType,
   typename SessionType::ITRACKER_STREAM_CONNECTION_T* istream_connection_p = NULL;
   std::ostringstream converter;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
-      NULL;
+    NULL;
   ACE_Message_Block* message_block_p = NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
-      NULL;
+    NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
-      NULL;
+    NULL;
   std::string user_agent;
   std::string info_hash;
 
@@ -640,17 +640,25 @@ BitTorrent_Control_T<SessionAsynchType,
   switch (event_inout->type)
   {
     case BITTORRENT_EVENT_CANCELLED:
-    case BITTORRENT_EVENT_COMPLETE:
     {
       notifyTracker (event_inout->metaInfoFileName,
                      static_cast<enum BitTorrent_Event> (event_inout->type));
-
+      // *WARNING*: control falls through here
+      ACE_FALLTHROUGH;
+    }
+    case BITTORRENT_EVENT_COMPLETE:
+    {
+      SessionStateType* session_state_p = NULL;
       SESSIONS_ITERATOR_T iterator;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
         iterator = sessions_.find (event_inout->metaInfoFileName);
         if (iterator == sessions_.end ())
           goto continue_;
         ACE_ASSERT ((*iterator).second.session);
+
+        session_state_p =
+          &const_cast<SessionStateType&> ((*iterator).second.session->state ());
+        session_state_p->complete = true;
 
         // close all session (tracker|peer) connections and wait for thread(s)
         (*iterator).second.session->close (true); // wait ?
@@ -663,6 +671,7 @@ BitTorrent_Control_T<SessionAsynchType,
         Common_Parser_Bencoding_Tools::free ((*iterator).second.configuration.metaInfo);
         delete (*iterator).second.session;
         sessions_.erase (iterator);
+
 continue_:
         if (!sessions_.empty ())
           break;

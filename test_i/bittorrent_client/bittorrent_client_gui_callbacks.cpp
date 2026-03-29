@@ -117,7 +117,6 @@ wait_retry:
   // *NOTE*: this schedules addition of a new session page
   //         --> make sure to remove it again if things go wrong
   BitTorrent_Client_GUI_Session_t* session_p = NULL;
-
   ACE_NEW_NORETURN (session_p,
                     BitTorrent_Client_GUI_Session_t (*data_p->CBData,
                                                      context_id,
@@ -143,7 +142,7 @@ wait_retry:
   result = 0;
 #else
   result = NULL;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 clean:
   // clean up
@@ -298,7 +297,6 @@ idle_add_session_cb (gpointer userData_in)
   struct BitTorrent_Client_UI_SessionCBData* session_cb_data_p =
     static_cast<struct BitTorrent_Client_UI_SessionCBData*> (userData_in);
   ACE_ASSERT (session_cb_data_p);
-  ACE_ASSERT (session_cb_data_p->session);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -400,6 +398,11 @@ idle_add_session_cb (gpointer userData_in)
                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_GRID_PIECES)));
   ACE_ASSERT (grid_p);
 #endif // GTK2_USE || GTK3_USE
+  if (unlikely (!session_cb_data_p->session))
+  { // *NOTE*: most probable cause: session already completed
+    // *TODO*: this should not happen, i.e. the client should support sharing data with its' peers even if downloading the data is complete
+    return G_SOURCE_REMOVE;
+  } // end IF
   unsigned int number_of_pieces_i =
     session_cb_data_p->session->numberOfPieces ();
   unsigned int number_of_colummns_and_rows_i =
@@ -416,8 +419,8 @@ idle_add_session_cb (gpointer userData_in)
   const struct BitTorrent_Client_SessionState& session_state_r =
     session_cb_data_p->session->state ();
   std::vector<unsigned int> complete_piece_indexes_a =
-    BitTorrent_Tools ::getPieceIndexes (session_state_r.pieces,
-                                        false);
+    BitTorrent_Tools::getPieceIndexes (session_state_r.pieces,
+                                       false);
 #if defined (GTK2_USE)
   GdkColor black = {0, 0x0000, 0x0000, 0x0000};
 #elif defined (GTK3_USE)

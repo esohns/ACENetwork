@@ -501,11 +501,10 @@ BitTorrent_Client_TrackerStreamHandler_T<SessionDataType,
   inherited::notify (sessionId_in,
                      sessionMessage_in);
 
+  // sanity check(s)
   typename inherited::SESSION_DATA_ITERATOR_T iterator =
       inherited::sessionData_.find (sessionId_in);
-
-  // sanity check(s)
-  ACE_ASSERT (iterator != inherited::sessionData_.end ());
+  //ACE_ASSERT (iterator != inherited::sessionData_.end ());
 
   int result = -1;
 

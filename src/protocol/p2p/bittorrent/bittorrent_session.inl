@@ -2368,7 +2368,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
     if (inherited::state_.trackerRequestResponse)
       Common_Parser_Bencoding_Tools::free (inherited::state_.trackerRequestResponse);
     inherited::state_.trackerRequestResponse =
-        &const_cast<Bencoding_Dictionary_t&> (record_in);
+      &const_cast<Bencoding_Dictionary_t&> (record_in);
 
     Bencoding_DictionaryIterator_t iterator =
       inherited::state_.trackerRequestResponse->begin ();
@@ -2552,9 +2552,11 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 
   inherited::state_.connecting = true;
 
+  size_t number_of_threads_i = peer_addresses_a.size ();
+  ACE_ASSERT (number_of_threads_i);
   struct BitTorrent_SessionInitiationThreadData* thread_data_p = NULL;
   ACE_NEW_NORETURN (thread_data_p,
-                    struct BitTorrent_SessionInitiationThreadData ());
+                    struct BitTorrent_SessionInitiationThreadData (number_of_threads_i));
   ACE_ASSERT (thread_data_p);
   thread_data_p->addresses = peer_addresses_a;
   thread_data_p->lock = &(inherited::lock_);
@@ -2568,8 +2570,6 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   char* thread_name_p = NULL;
   std::string buffer;
   std::ostringstream converter;
-  size_t number_of_threads_i = peer_addresses_a.size ();
-  ACE_ASSERT (number_of_threads_i);
   ACE_thread_t* thread_ids_p = NULL;
   ACE_hthread_t* thread_handles_p = NULL;
   // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes

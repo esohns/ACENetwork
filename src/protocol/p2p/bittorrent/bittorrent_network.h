@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include "ace/Barrier.h"
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
@@ -166,8 +167,9 @@ typedef std::vector<ACE_INET_Addr> BitTorrent_PeerAddresses_t;
 typedef BitTorrent_PeerAddresses_t::const_iterator BitTorrent_PeerAddressesIterator_t;
 struct BitTorrent_SessionInitiationThreadData
 {
-  BitTorrent_SessionInitiationThreadData ()
+  BitTorrent_SessionInitiationThreadData (unsigned int numberOfThreads_in)
    : addresses ()
+   , barrier (numberOfThreads_in, NULL, NULL)
    , lock (NULL)
    , peerConnectionManager (NULL)
    , session (NULL)
@@ -175,6 +177,7 @@ struct BitTorrent_SessionInitiationThreadData
   {}
 
   BitTorrent_PeerAddresses_t      addresses;
+  ACE_Barrier                     barrier;
   ACE_SYNCH_MUTEX*                lock;
   Net_IConnectionManagerBase*     peerConnectionManager;
   Net_IInetSession_t*             session;
@@ -271,6 +274,7 @@ struct BitTorrent_SessionState
 {
   BitTorrent_SessionState ()
    : aborted (false)
+   , complete (false) // do not auto-connect to peers when receiving a tracker reply
    , connecting (false)
    , connectingGroupId (-1)
    , connections ()
@@ -299,7 +303,7 @@ struct BitTorrent_SessionState
   {}
 
   bool                                      aborted;
-
+  bool                                      complete;
   bool                                      connecting;
   int                                       connectingGroupId; // 'connecting' group
 

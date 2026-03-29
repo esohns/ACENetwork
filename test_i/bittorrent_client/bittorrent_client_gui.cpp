@@ -453,7 +453,7 @@ do_work (bool requestCompactPeerAddresses_in,
       BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX;
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                        struct Common_AllocatorConfiguration> heap_allocator;
+                         struct Common_AllocatorConfiguration> heap_allocator;
   //Stream_CachedAllocatorHeap_T<struct Common_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
   //                                                                                   BITTORRENT_PEER_REQUEST_BLOCK_LENGTH_MAX + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (allocator_configuration))
@@ -527,7 +527,7 @@ do_work (bool requestCompactPeerAddresses_in,
   peer_modulehandler_configuration.statisticReportingInterval =
     (*iterator).second->statisticReportingInterval;
   peer_modulehandler_configuration.streamConfiguration =
-      &CBData_in.configuration->peerStreamConfiguration;
+    &CBData_in.configuration->peerStreamConfiguration;
   peer_modulehandler_configuration.parserConfiguration =
     &CBData_in.configuration->peerParserConfiguration;
 //  peer_modulehandler_configuration.protocolConfiguration =
@@ -542,7 +542,7 @@ do_work (bool requestCompactPeerAddresses_in,
   tracker_modulehandler_configuration.statisticReportingInterval =
     (*iterator_2).second->statisticReportingInterval;
   tracker_modulehandler_configuration.streamConfiguration =
-      &CBData_in.configuration->trackerStreamConfiguration;
+    &CBData_in.configuration->trackerStreamConfiguration;
   tracker_modulehandler_configuration.parserConfiguration =
     &CBData_in.configuration->trackerParserConfiguration;
   CBData_in.configuration->trackerStreamConfiguration.initialize (module_configuration,
@@ -560,8 +560,8 @@ do_work (bool requestCompactPeerAddresses_in,
   CBData_in.configuration->sessionConfiguration.trackerConnectionConfiguration =
     &tracker_connection_configuration;
   CBData_in.configuration->sessionConfiguration.dispatch =
-      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                     : COMMON_EVENT_DISPATCH_PROACTOR);
+    (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
+                   : COMMON_EVENT_DISPATCH_PROACTOR);
   // CBData_in.configuration->sessionConfiguration.allowMultipleConnectionsPerPeer =
   //   allowMultiplerConnectionsPerPeer_in;
   CBData_in.configuration->sessionConfiguration.requestCompactPeerAddresses =
@@ -588,14 +588,14 @@ do_work (bool requestCompactPeerAddresses_in,
 
   // step3a: initialize connection manager
   BitTorrent_Client_PeerConnection_Manager_t* peer_connection_manager_p =
-      BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                          ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   peer_connection_manager_p->set (*static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
                                   NULL);
   BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =
-      BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
+    BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (tracker_connection_manager_p);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
@@ -604,7 +604,7 @@ do_work (bool requestCompactPeerAddresses_in,
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
-      COMMON_TIMERMANAGER_SINGLETON::instance ();
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
@@ -688,8 +688,8 @@ do_work (bool requestCompactPeerAddresses_in,
 #endif // GTK_USE
 
   // step8: clean up
-  bittorrent_control.stop (true,  // wait ?
-                           true); // high priority ?
+  bittorrent_control.stop (true,   // wait ?
+                           false); // high priority ?
 
   // wait for connection processing to complete
   peer_connection_manager_p->abort ();
