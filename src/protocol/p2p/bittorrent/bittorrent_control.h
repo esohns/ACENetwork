@@ -84,7 +84,8 @@ class BitTorrent_Control_T
 
   // implement BitTorrent_IControl_T
   inline virtual const SESSIONS_T& getR () const { return sessions_; }
-  virtual void request (const std::string&); // metainfo (aka '.torrent') file URI
+  virtual void request (const std::string&); // metainfo (aka '.torrent') file URL (must be fq-path !)
+  virtual void cancel (const std::string&); // metainfo (aka '.torrent') file URI
   virtual SessionInterfaceType* get (const std::string&); // metainfo (aka '.torrent') file URI
   virtual void notifyTracker (const std::string&,     // metainfo (aka '.torrent') file URI
                               enum BitTorrent_Event); // event

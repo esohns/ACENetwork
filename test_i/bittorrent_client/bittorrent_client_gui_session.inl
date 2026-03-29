@@ -197,8 +197,9 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::close"));
 
   // sanity check(s)
-  if (likely (CBData_.session))
-    CBData_.session->close (false);
+  ACE_ASSERT (CBData_.controller);
+
+  CBData_.controller->cancel (CBData_.label);
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -245,10 +246,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   cb_data_p->message = message_in;
 
   guint event_source_id =
-      g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
-                       idle_log_progress_cb,
-                       cb_data_p,
-                       NULL);
+    g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+                     idle_log_progress_cb,
+                     cb_data_p,
+                     NULL);
   ACE_ASSERT (event_source_id);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     state_r.eventSourceIds.insert (event_source_id);

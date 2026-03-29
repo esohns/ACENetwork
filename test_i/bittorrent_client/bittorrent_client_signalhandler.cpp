@@ -80,7 +80,7 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     case SIGUSR1:
 #endif
     {
-      // (try to) connect to tracjer and rerequst peers
+      // (try to) connect to tracker and re-request peers
       rerequest_peers_from_tracker = true;
 
       break;
@@ -112,10 +112,10 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   } // end SWITCH
 
   BitTorrent_Client_IPeerConnection_Manager_t* connection_manager_p =
-      BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   BitTorrent_Client_ITrackerConnection_Manager_t* connection_manager_2 =
-      BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
+    BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_2);
 
   // ...abort one ?

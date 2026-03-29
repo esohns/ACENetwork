@@ -123,6 +123,8 @@ BitTorrent_Control_T<SessionAsynchType,
   bool use_SSL = false;
   std::string info_hash_sha1_string;
   std::pair<SESSIONS_ITERATOR_T, bool> result_s;
+  std::string label_string =
+    Common_File_Tools::basename (metaInfoFileName_in, false);
 
   // step0: prepare session configuration
   session_context.configuration = *sessionConfigurationBase_;
@@ -153,7 +155,7 @@ BitTorrent_Control_T<SessionAsynchType,
   } // end IF
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    result_s = sessions_.insert (std::make_pair (metaInfoFileName_in,
+    result_s = sessions_.insert (std::make_pair (label_string,
                                                  session_context));
   } // end lock scope
   ACE_ASSERT (result_s.second);
@@ -189,9 +191,9 @@ BitTorrent_Control_T<SessionAsynchType,
     goto error;
   } // end IF
   session_state_p->trackerAddress =
-      Net_Common_Tools::stringToIPAddress (host_name_string,
-                                           (use_SSL ? HTTPS_DEFAULT_SERVER_PORT
-                                                    : HTTP_DEFAULT_SERVER_PORT));
+    Net_Common_Tools::stringToIPAddress (host_name_string,
+                                         (use_SSL ? HTTPS_DEFAULT_SERVER_PORT
+                                                  : HTTP_DEFAULT_SERVER_PORT));
   if (unlikely (session_state_p->trackerAddress.is_any ()))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -211,7 +213,7 @@ BitTorrent_Control_T<SessionAsynchType,
     if (session_context.configuration.subscriber)
       session_context.configuration.subscriber->complete (false);
 
-    notify (metaInfoFileName_in,
+    notify (label_string,
             BITTORRENT_EVENT_COMPLETE,
             ACE_TEXT_ALWAYS_CHAR (""));
     return;
@@ -333,7 +335,7 @@ error:
     delete session_context.session;
   if (remove_session)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-    SESSIONS_ITERATOR_T iterator = sessions_.find (metaInfoFileName_in);
+    SESSIONS_ITERATOR_T iterator = sessions_.find (label_string);
     ACE_ASSERT (iterator != sessions_.end ());
     sessions_.erase (iterator);
   } // end IF && lock scope
@@ -358,6 +360,49 @@ template <typename SessionAsynchType,
           typename SessionConfigurationType,
           typename SessionInterfaceType,
           typename SessionStateType>
+void
+BitTorrent_Control_T<SessionAsynchType,
+                     SessionType,
+                     SessionConfigurationType,
+                     SessionInterfaceType,
+                     SessionStateType>::cancel (const std::string& metaInfoFileName_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::cancel"));
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+    SESSIONS_ITERATOR_T iterator = sessions_.find (metaInfoFileName_in);
+    if (unlikely (iterator == sessions_.end ()))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to retrieve session handle (metainfo file was: \"%s\"), returning\n"),
+                  ACE_TEXT (metaInfoFileName_in.c_str ())));
+      return;
+    } // end IF
+    ACE_ASSERT ((*iterator).second.session);
+
+    // close all session (tracker|peer) connections and wait for thread(s)
+    (*iterator).second.session->close (true); // wait ?
+
+    // clean up
+    Common_Parser_Bencoding_Tools::free ((*iterator).second.configuration.metaInfo);
+    delete (*iterator).second.session;
+    sessions_.erase (iterator);
+    if (!sessions_.empty ())
+      return;
+
+    // awaken any waiter(s)
+    int result = condition_.broadcast ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
+  } // end lock scope
+}
+
+template <typename SessionAsynchType,
+          typename SessionType,
+          typename SessionConfigurationType,
+          typename SessionInterfaceType,
+          typename SessionStateType>
 SessionInterfaceType*
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
@@ -370,7 +415,8 @@ BitTorrent_Control_T<SessionAsynchType,
   SessionInterfaceType* result_p = NULL;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, NULL);
-    SESSIONS_ITERATOR_T iterator = sessions_.find (metaInfoFileName_in);
+    SESSIONS_ITERATOR_T iterator =
+      sessions_.find (Common_File_Tools::basename (metaInfoFileName_in, false));
     if (iterator == sessions_.end ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -404,7 +450,7 @@ BitTorrent_Control_T<SessionAsynchType,
 
   SESSIONS_ITERATOR_T iterator;
   std::string tracker_base_uri;
-  unsigned int uploaded_bytes_i = 0, downloaded_bytes_i = 0, left_bytes_i = 0;
+  unsigned int uploaded_bytes_i = 0, downloaded_bytes_i, left_bytes_i;
   std::string key_string, peer_id_string, tracker_id_string;
   SessionStateType* session_state_p = NULL;
   Bencoding_DictionaryIterator_t iterator_2;
@@ -425,7 +471,7 @@ BitTorrent_Control_T<SessionAsynchType,
     if (unlikely (iterator == sessions_.end ()))
     { // *NOTE*: possible cause: tracker error
       ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("failed to retrieve session handle (torrent was: \"%s\"), returning\n"),
+                  ACE_TEXT ("failed to retrieve session handle (metainfo file was: \"%s\"), returning\n"),
                   ACE_TEXT (metaInfoFileName_in.c_str ())));
       goto error;
     } // end IF
@@ -573,6 +619,10 @@ BitTorrent_Control_T<SessionAsynchType,
       }
     } // end FOR
   } // end lock scope
+  if (sessions_i)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("cancelled %d session(s)\n"),
+                sessions_i));
 
   // stop worker thread
   inherited::stop (false,
@@ -580,11 +630,6 @@ BitTorrent_Control_T<SessionAsynchType,
 
   if (waitForCompletion_in)
     wait (true); // wait for queue ?
-
-  if (sessions_i)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("cancelled %d session(s)\n"),
-                sessions_i));
 }
 
 template <typename SessionAsynchType,
@@ -606,7 +651,7 @@ BitTorrent_Control_T<SessionAsynchType,
     while (!sessions_.empty ())
     {
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("waiting (session count: %u)...\n"),
+                  ACE_TEXT ("waiting (session count: %Q)...\n"),
                   sessions_.size ()));
       result = condition_.wait ();
       if (result == -1)
@@ -640,47 +685,25 @@ BitTorrent_Control_T<SessionAsynchType,
   switch (event_inout->type)
   {
     case BITTORRENT_EVENT_CANCELLED:
+    case BITTORRENT_EVENT_COMPLETE:
     {
       notifyTracker (event_inout->metaInfoFileName,
                      static_cast<enum BitTorrent_Event> (event_inout->type));
-      // *WARNING*: control falls through here
-      ACE_FALLTHROUGH;
-    }
-    case BITTORRENT_EVENT_COMPLETE:
-    {
+
       SessionStateType* session_state_p = NULL;
       SESSIONS_ITERATOR_T iterator;
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
         iterator = sessions_.find (event_inout->metaInfoFileName);
-        if (iterator == sessions_.end ())
-          goto continue_;
+        ACE_ASSERT (iterator != sessions_.end ());
         ACE_ASSERT ((*iterator).second.session);
 
         session_state_p =
           &const_cast<SessionStateType&> ((*iterator).second.session->state ());
         session_state_p->complete = true;
 
-        // close all session (tracker|peer) connections and wait for thread(s)
-        (*iterator).second.session->close (true); // wait ?
-
-        // notify torrent complete to event subscriber
+        // notify torrent finished to event subscriber
         if ((*iterator).second.configuration.subscriber)
           (*iterator).second.configuration.subscriber->finalize ();
-
-        // clean up
-        Common_Parser_Bencoding_Tools::free ((*iterator).second.configuration.metaInfo);
-        delete (*iterator).second.session;
-        sessions_.erase (iterator);
-
-continue_:
-        if (!sessions_.empty ())
-          break;
-
-        // awaken any waiter(s)
-        result = condition_.broadcast ();
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
       } // end lock scope
 
       break;

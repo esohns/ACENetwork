@@ -231,7 +231,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   ACE_ASSERT (inherited::configuration_->controller);
 
   try {
-    inherited::configuration_->controller->notifyTracker (inherited::configuration_->metaInfoFileName,
+    inherited::configuration_->controller->notifyTracker (Common_File_Tools::basename (inherited::configuration_->metaInfoFileName, false),
                                                           BITTORRENT_EVENT_TRACKER_REREQUEST);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
@@ -819,7 +819,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   if (notify_controller_b)
   { ACE_ASSERT (inherited::configuration_->controller);
     try {
-      inherited::configuration_->controller->notify (inherited::configuration_->metaInfoFileName,
+      inherited::configuration_->controller->notify (Common_File_Tools::basename (inherited::configuration_->metaInfoFileName, false),
                                                      BITTORRENT_EVENT_NO_MORE_PEERS,
                                                      ACE_TEXT_ALWAYS_CHAR (""));
     } catch (...) {

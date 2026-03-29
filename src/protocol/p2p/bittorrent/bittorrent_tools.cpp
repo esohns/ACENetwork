@@ -847,7 +847,7 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
   pieces_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   pieces_path += metaInfoFileName_in;
   pieces_path += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_PIECES_DIRECTORY_SUFFIX);
-  Common_File_IdentifierList_t piece_files =
+  Common_File_IdentifierList_t piece_files_a =
     Common_File_Tools::files (pieces_path,
                               BitTorrent_Tools::selector);
   // sanity check(s)
@@ -855,8 +855,8 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
 
   // step2: sort by name
   struct common_file_identifier_less file_identifier_less;
-  std::sort (piece_files.begin (),
-             piece_files.end (),
+  std::sort (piece_files_a.begin (),
+             piece_files_a.end (),
              file_identifier_less);
 
   // step3: process piece(s)
@@ -952,8 +952,8 @@ BitTorrent_Tools::assembleFiles (const std::string& metaInfoFileName_in,
   } // end ELSE
   unsigned int bytes_to_write = 0;
   std::string current_piece_file;
-  for (Common_File_IdentifierListIterator_t iterator_5 = piece_files.begin ();
-       iterator_5 != piece_files.end ();
+  for (Common_File_IdentifierListConstIterator_t iterator_5 = piece_files_a.begin ();
+       iterator_5 != piece_files_a.end ();
        ++iterator_5)
   {
     current_piece_file = pieces_path;
@@ -1040,7 +1040,17 @@ write_file:
   } // end FOR
 
   // clean up
-  Common_File_Tools::deleteFiles (piece_files);
+  // *NOTE*: need to prepend base path to filenames
+  for (Common_File_IdentifierListIterator_t iterator_5 = piece_files_a.begin ();
+       iterator_5 != piece_files_a.end ();
+       ++iterator_5)
+  {
+    std::string fq_path = pieces_path;
+    fq_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    fq_path += (*iterator_5).identifier;
+    (*iterator_5).identifier = fq_path;
+  } // end FOR
+  Common_File_Tools::deleteFiles (piece_files_a);
 
   return true;
 }

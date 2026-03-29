@@ -1285,7 +1285,7 @@ button_start_clicked_cb (GtkWidget* widget_in,
     session_thread_data_p->configuration = data_p->configuration;
     session_thread_data_p->controller = data_p->controller;
     session_thread_data_p->filename =
-        data_p->configuration->sessionConfiguration.metaInfoFileName;
+      data_p->configuration->sessionConfiguration.metaInfoFileName;
     ACE_thread_t thread_id = -1;
     ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
     char thread_name_a[BUFSIZ];
