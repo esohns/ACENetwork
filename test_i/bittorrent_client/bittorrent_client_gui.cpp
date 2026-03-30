@@ -33,7 +33,6 @@
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN64
 #include "ace/POSIX_Proactor.h"
-//#include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
@@ -70,19 +69,16 @@
 
 #include "net_defines.h"
 
-//#include "http_scanner.h"
-
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 
 #include "test_i_defines.h"
 
-//#include "ace/Synch.h"
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_defines.h"
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
 #include "bittorrent_client_gui_callbacks.h"
-#endif // GTK_USE
+#endif // GTK_SUPPORT
 #include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_gui_defines.h"
 #include "bittorrent_client_network.h"

@@ -188,7 +188,6 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
-                     //bool& requestBroadcastReplies_out,
                      bool& debugParser_out,
 #if defined (GTK_USE)
                      std::string& GtkRcFileName_out,
@@ -206,7 +205,6 @@ do_processArguments (int argc_in,
                      std::string& interfaceIdentifier_out,
 #endif // ACE_WIN32 || ACE_WIN64
                      //bool& useLoopback_out,
-                     //bool& sendRequestOnOffer_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -219,12 +217,11 @@ do_processArguments (int argc_in,
     Common_File_Tools::getWorkingDirectory ();
 
   // initialize results
-  //requestBroadcastReplies_out = FTP_Client_DEFAULT_FLAGS_BROADCAST;
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GTK_USE)
   GtkRcFileName_out = configuration_path;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -249,7 +246,7 @@ do_processArguments (int argc_in,
   //useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   //sendRequestOnOffer_out = Test_I_DEFAULT_FTP_Client_SEND_REQUEST_ON_OFFER;
   useReactor_out =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   traceInformation_out = false;
@@ -960,11 +957,12 @@ do_work (//bool requestBroadcastReplies_in,
 
   configuration_in.listener->stop (true,   // wait for completion ?
                                    false); // high priority ?
-  //timer_manager_p->stop ();
+  connection_manager_p->stop ();
   connection_manager_p->wait ();
   if (!UIDefinitionFileName_in.empty ())
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
+                                               true,   // wait ?
+                                               false); // release singletons ?
 }
 
 void
