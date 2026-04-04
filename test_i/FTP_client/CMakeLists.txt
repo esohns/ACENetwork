@@ -149,13 +149,11 @@ add_dependencies (${EXECUTABLE} ACEStream_Statistic)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_FTP)
 
+if (UNIX)
+ target_link_options (${EXECUTABLE} PUBLIC "-rdynamic")
+endif (UNIX)
+
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-#if (UNIX)
-# target_link_libraries (${EXECUTABLE} PUBLIC X11)
-#endif (UNIX)
-#if (LIBXML2_SUPPORT)
-# target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
-#endif (LIBXML2_SUPPORT)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 

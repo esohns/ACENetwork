@@ -682,8 +682,6 @@ BitTorrent_Control_T<SessionAsynchType,
   // sanity check(s)
   ACE_ASSERT (event_inout);
 
-  int result = -1;
-
   switch (event_inout->type)
   {
     case BITTORRENT_EVENT_CANCELLED:
