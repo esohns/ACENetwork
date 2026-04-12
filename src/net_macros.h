@@ -47,17 +47,17 @@
    ((ACENetwork_VERSION_MAJOR == major) && (ACENetwork_VERSION_MINOR > minor))                                        || \
    ((ACENetwork_VERSION_MAJOR == major) && (ACENetwork_VERSION_MINOR == minor) && (ACENetwork_VERSION_MICRO >= micro)))
 
-// *NOTE*: arguments must be strings
-#define NETWORK_MAKE_VERSION_STRING_VARIABLE(program,version,variable)                                                          \
-  std::string variable = program; variable += ACE_TEXT_ALWAYS_CHAR (\\" \\");                                                   \
-  variable += version; variable += ACE_TEXT_ALWAYS_CHAR (\\" compiled on \\");                                                  \
-  variable += ACE_TEXT_ALWAYS_CHAR (COMPILATION_DATE_TIME);                                                                     \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" host platform \\"); variable += Common_Tools::compilerPlatformName ();                  \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" with \\"); variable += Common_Tools::compilerName ();                                   \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" \\"); variable += Common_Tools::compilerVersion ();                                     \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" against ACE \\"); variable += Common_Tools::compiledVersion_ACE ();                     \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" , Common \\"); variable += ACE_TEXT_ALWAYS_CHAR (Common_PACKAGE_VERSION_FULL);       \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" , ACEStream \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACEStream_PACKAGE_VERSION_FULL); \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" , ACENetwork \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL);
+#define NETWORK_MAKE_VERSION_STRING_VARIABLE(program,version,variable) std::string variable; do {                          \
+  variable = program; variable += ACE_TEXT_ALWAYS_CHAR (" ");                                                              \
+  variable += version; variable += ACE_TEXT_ALWAYS_CHAR (" compiled on ");                                                 \
+  variable += ACE_TEXT_ALWAYS_CHAR (COMPILATION_DATE_TIME);                                                                \
+  variable += ACE_TEXT_ALWAYS_CHAR (" host platform "); variable += Common_Tools::compilerPlatformName ();                 \
+  variable += ACE_TEXT_ALWAYS_CHAR (" with "); variable += Common_Tools::compilerName ();                                  \
+  variable += ACE_TEXT_ALWAYS_CHAR (" "); variable += Common_Tools::compilerVersion ();                                    \
+  variable += ACE_TEXT_ALWAYS_CHAR (" against ACE "); variable += Common_Tools::compiledVersion_ACE ();                    \
+  variable += ACE_TEXT_ALWAYS_CHAR (" , Common "); variable += ACE_TEXT_ALWAYS_CHAR (Common_PACKAGE_VERSION_FULL);         \
+  variable += ACE_TEXT_ALWAYS_CHAR (" , ACEStream "); variable += ACE_TEXT_ALWAYS_CHAR (ACEStream_PACKAGE_VERSION_FULL);   \
+  variable += ACE_TEXT_ALWAYS_CHAR (" , ACENetwork "); variable += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL); \
+} while (0)
 
 #endif

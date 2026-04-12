@@ -1373,53 +1373,7 @@ clean:
   Common_Timer_Tools::finalize ();
 }
 
-void
-do_print_version (const std::string& programName_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::do_print_version"));
-
-  std::ostringstream converter;
-
-  // compiler version string
-  converter << ACE::compiler_major_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::compiler_minor_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::compiler_beta_version ();
-
-  std::cout << programName_in
-            << ACE_TEXT (" compiled on ")
-            << ACE::compiler_name ()
-            << ACE_TEXT (" ")
-            << converter.str ()
-            << std::endl << std::endl;
-
-  std::cout << ACE_TEXT ("libraries: ")
-            << std::endl
-#if defined (HAVE_CONFIG_H)
-            << ACE_TEXT (ACENetwork_PACKAGE_NAME)
-            << ACE_TEXT (": ")
-            << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
-            << std::endl
-#endif // HAVE_CONFIG_H
-            ;
-
-  converter.str ("");
-  // ACE version string
-  converter << ACE::major_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::minor_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::beta_version ();
-
-  // *NOTE*: cannot use ACE_VERSION, as it doesn't contain the (potential) beta
-  // version number... Need this, as the library soname is compared to this
-  // string
-  std::cout << ACE_TEXT ("ACE: ")
-//             << ACE_VERSION
-            << converter.str ()
-            << std::endl;
-}
+COMMON_DEFINE_PRINTVERSION_FUNCTION (do_print_version, NETWORK_MAKE_VERSION_STRING_VARIABLE (programName_in, ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL), version_string), version_string)
 
 int
 ACE_TMAIN (int argc_in,
@@ -1455,11 +1409,11 @@ ACE_TMAIN (int argc_in,
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
 #endif // GTK_SUPPORT
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
   Common_UI_GTK_State_t& state_r =
       const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   ui_cb_data.UIState = &state_r;
-#endif // GTK_USE
+#endif // GTK_SUPPORT
   Common_Logger_Queue_t logger;
   logger.initialize (&state_r.logQueue,
                      &state_r.logQueueLock);
@@ -1473,7 +1427,7 @@ ACE_TMAIN (int argc_in,
 //  lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
   Test_I_SignalHandler signal_handler;
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
   configuration.GTKConfiguration.argc = argc_in;
   configuration.GTKConfiguration.argv = argv_in;
@@ -1483,7 +1437,7 @@ ACE_TMAIN (int argc_in,
   configuration.GTKConfiguration.eventHooks.initHook =
       idle_initialize_UI_cb;
   configuration.GTKConfiguration.definition = &gtk_ui_definition;
-#endif // GTK_USE
+#endif // GTK_SUPPORT
   ACE_High_Res_Timer timer;
   std::string working_time_string;
   ACE_Time_Value working_time;
@@ -1504,9 +1458,13 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
   process_profile.start ();
 
+  Common_Log_Tools::packageName = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Common_Tools::initialize (true,   // COM ?
                             false); // RNG ?
+//#if defined (_DEBUG)
+//  Common_Error_Tools::initialize (true); // debug heap ?
+//#endif // _DEBUG
 #else
 #if defined (LIBPIPEWIRE_SUPPORT)
   pw_init (&argc_in, &argv_in);
@@ -1571,8 +1529,7 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
                              use_hardware_decoder_b))
   {
-    do_print_usage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                          ACE_DIRECTORY_SEPARATOR_CHAR)));
+    do_print_usage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
     goto error;
   } // end IF
 
@@ -1605,8 +1562,7 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
-    do_print_usage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                         ACE_DIRECTORY_SEPARATOR_CHAR)));
+    do_print_usage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
     goto error;
   } // end IF
 
@@ -1614,9 +1570,8 @@ ACE_TMAIN (int argc_in,
   if (log_to_file)
   {
     log_file_name =
-      Common_Log_Tools::getLogFilename (std::string (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME)),
-                                        std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                                          ACE_DIRECTORY_SEPARATOR_CHAR))));
+      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
     if (log_file_name.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1624,8 +1579,7 @@ ACE_TMAIN (int argc_in,
       goto error;
     } // end IF
   } // end IF
-  if (!Common_Log_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                          ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
+  if (!Common_Log_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
                                      log_file_name,                                                       // log file name
                                      false,                                                               // log to syslog ?
                                      false,                                                               // trace messages ?
@@ -1658,8 +1612,7 @@ ACE_TMAIN (int argc_in,
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
-    do_print_version (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                        ACE_DIRECTORY_SEPARATOR_CHAR))));
+    do_print_version (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR))));
 
     Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
@@ -1687,11 +1640,11 @@ ACE_TMAIN (int argc_in,
     goto error;
   } // end IF
 
-#if defined (GTK_USE)
+#if defined (GTK_SUPPORT)
   // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
   if (!gtk_rc_file.empty ())
     ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
-#endif // GTK_USE
+#endif // GTK_SUPPORT
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   if (!ui_definition_file.empty ())
@@ -1799,6 +1752,9 @@ ACE_TMAIN (int argc_in,
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  previous_signal_actions,
                                  previous_signal_mask);
+//#if defined (_DEBUG)
+//  Common_Error_Tools::finalize ();
+//#endif // _DEBUG
   Common_Log_Tools::finalize ();
   Common_Tools::finalize ();
 
