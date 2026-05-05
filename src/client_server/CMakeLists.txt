@@ -9,8 +9,8 @@ if (SSL_SUPPORT)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC ${SSL_INCLUDE_DIRS})
 endif (SSL_SUPPORT)
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Client PUBLIC ${BIND9_CFLAGS})
- target_include_directories (${PROJECT_NAME}_Server PUBLIC ${BIND9_CFLAGS})
+# target_include_directories (${PROJECT_NAME}_Client PUBLIC ${BIND9_CFLAGS})
+# target_include_directories (${PROJECT_NAME}_Server PUBLIC ${BIND9_CFLAGS})
 endif (UNIX)
 
 target_include_directories (${PROJECT_NAME}_Client PUBLIC

@@ -28,7 +28,7 @@ endif ()
 
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${BIND9_CFLAGS})
- target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC /usr/include/bind9)
+# target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC /usr/include/bind9)
 
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/${BUILD_PATH_SUFFIX}>)

@@ -67,7 +67,7 @@ if (UNIX)
   string (REGEX REPLACE "^-I(.+)$" "\\1" BIND9_CFLAGS "${BIND9_CFLAGS}")
 #  message (STATUS "BIND9_CFLAGS: ${BIND9_CFLAGS}")
   target_include_directories (${PROJECT_NAME} PUBLIC ${BIND9_CFLAGS})
-  target_include_directories (${PROJECT_NAME} PUBLIC /usr/include/bind9)
+#  target_include_directories (${PROJECT_NAME} PUBLIC /usr/include/bind9)
  endif (DHCLIENT_SUPPORT)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
