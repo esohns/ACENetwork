@@ -30,15 +30,13 @@ endif (UNIX)
 include (PrePreToolChain)
 
 # *NOTE*: sets CMAKE_TOOLCHAIN_FILE, so include BEFORE project()
-include (vcpkg)
+include (vcpkg_support)
 
 # project
 cmake_policy (SET CMP0048 NEW) # allow project VERSION
-#cmake_policy (SET CMP0056 OLD) # honor per-config flags in try_compile()
-#cmake_policy (SET CMP0066 OLD) # honor per-config flags in try_compile()
 project (${PROJECT_NAME}
          VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
-         LANGUAGES CXX C)
+         LANGUAGES CXX)
 
 include (PreToolChain)
 include (SetToolChain)
