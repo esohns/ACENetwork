@@ -3,27 +3,38 @@
   "dependencies": [
     {
       "name": "ace",
-      "features": [ "ssl", "xml" ]
+      "features": [ "ssl", "xml" ],
+      "platform": "windows"
     },
     "assimp",
-    "directxsdk",
+    {
+      "name": "directxsdk",
+      "platform": "windows"
+    },
     "ffmpeg",
     "freeglut",
     "glew",
     "glfw3",
     "glm",
     "graphicsmagick",
+    "gstreamer",
     "gtk3",
     "libiconv",
     "libnoise",
     "libxml2",
-    "pdcurses",
+    {
+      "name": "pdcurses",
+      "platform": "windows"
+    },
     "stb",
     "tinyobjloader",
     "vulkan",
     "vulkan-utility-libraries",
     "box2d",
-    "directx-headers",
+    {
+      "name": "directx-headers",
+      "platform": "windows"
+    },
     "faad2",
     "mpg123",
     "opencv",

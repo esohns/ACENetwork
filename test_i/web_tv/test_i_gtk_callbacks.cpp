@@ -2610,7 +2610,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
   Test_I_AsynchTCPConnector_t asynch_connector (true);
   struct Net_UserData user_data_s;
 
-  GtkProgressBar* progressbar_p = NULL;
+  GtkProgressBar* progress_bar_p = NULL;
 
   if (!HTTP_Tools::parseURL ((*channel_iterator).second.mainURL,
                              host_address,
@@ -2687,13 +2687,17 @@ button_load_clicked_cb (GtkWidget* widget_in,
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
 //#endif // ACE_WIN32 || ACE_WIN64
 
-  progressbar_p =
+  progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
-  ACE_ASSERT (progressbar_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
-  gtk_progress_bar_set_text (progressbar_p, ACE_TEXT_ALWAYS_CHAR (""));
-  gtk_progress_bar_set_show_text (progressbar_p, TRUE);
+  ACE_ASSERT (progress_bar_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
+  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+#if GTK_CHECK_VERSION (3,0,0)
+  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
+#else
+  gtk_progress_set_show_text (GTK_PROGRESS (progress_bar_p), TRUE);
+#endif // GTK_CHECK_VERSION (3,0,0)
 
   if (!data_p->progressData.eventSourceId) // *TODO*: why oh why ?
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, FALSE);
