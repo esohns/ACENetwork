@@ -1162,8 +1162,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     int result = -1;
     GtkCheckButton* check_button_p = NULL;
     GtkFileChooserButton* file_chooser_button_p = NULL;
-    gchar* URI_p, *directory_p, *hostname_p = NULL;
-    GError* error_p = NULL;
+    gchar* directory_p = NULL;
     Net_ConnectionConfigurationsIterator_t iterator_2 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
@@ -1212,7 +1211,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                use_SSL))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                  ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
                   ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
       goto error;
     } // end IF
@@ -1259,31 +1258,14 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
         GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
     ACE_ASSERT (file_chooser_button_p);
-    URI_p =
-        gtk_file_chooser_get_uri (GTK_FILE_CHOOSER (file_chooser_button_p));
-    if (!URI_p)
+    directory_p =
+      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_button_p));
+    if (!directory_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to gtk_file_chooser_get_uri(), aborting\n")));
+                  ACE_TEXT ("failed to gtk_file_chooser_get_filename(), aborting\n")));
       goto error;
     } // end IF
-    directory_p = g_filename_from_uri (URI_p,
-                                       &hostname_p,
-                                       &error_p);
-    g_free (URI_p); URI_p = NULL;
-    if (!directory_p)
-    { ACE_ASSERT (error_p);
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_filename_from_uri(): \"%s\", returning\n"),
-                  ACE_TEXT (error_p->message)));
-
-      // clean up
-      g_error_free (error_p);
-
-      goto error;
-    } // end IF
-    ACE_ASSERT (!hostname_p);
-    ACE_ASSERT (!error_p);
     directory_string =
       ACE_TEXT_ALWAYS_CHAR (ACE::dirname (directory_p,
                                           ACE_DIRECTORY_SEPARATOR_CHAR));
