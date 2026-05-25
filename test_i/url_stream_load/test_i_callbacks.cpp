@@ -94,7 +94,7 @@ idle_end_session_cb (gpointer userData_in)
     GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME)));
   ACE_ASSERT (box_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (box_p), true);
+  gtk_widget_set_sensitive (GTK_WIDGET (box_p), TRUE);
 
   // stop progress reporting
   GtkSpinner* spinner_p =
@@ -102,7 +102,7 @@ idle_end_session_cb (gpointer userData_in)
                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
   ACE_ASSERT (spinner_p);
   gtk_spinner_stop (spinner_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), false);
+  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
   //ACE_ASSERT (data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
@@ -113,13 +113,14 @@ idle_end_session_cb (gpointer userData_in)
     state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
     data_p->progressData.eventSourceId = 0;
   } // end lock scope
-  GtkProgressBar* progressbar_p =
+  GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
-  ACE_ASSERT (progressbar_p);
+  ACE_ASSERT (progress_bar_p);
   // *NOTE*: this disables "activity mode" (in Gtk2)
-  gtk_progress_bar_set_fraction (progressbar_p, 0.0);
-  gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), false);
+  gtk_progress_bar_set_fraction (progress_bar_p, 0.0);
+  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
+  //gtk_progress_bar_set_show_text (progress_bar_p, FALSE);
 
   un_toggling_connect = true;
   gtk_toggle_button_toggled (toggle_button_p);
@@ -824,8 +825,8 @@ idle_update_progress_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  ACE_TCHAR buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
   int result = -1;
   float speed = 0.0F;
 
@@ -845,15 +846,16 @@ idle_update_progress_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer, ACE_TEXT ("%.2f %s"),
+    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
                               speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
   } // end IF
-  gtk_progress_bar_set_text (progress_bar_p,
-                             ACE_TEXT_ALWAYS_CHAR (buffer));
   gtk_progress_bar_pulse (progress_bar_p);
+  gtk_progress_bar_set_text (progress_bar_p,
+                             ACE_TEXT_ALWAYS_CHAR (buffer_a));
+  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
 
   // --> reschedule
   return G_SOURCE_CONTINUE;
@@ -1183,7 +1185,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_Message* message_p = NULL;
 //    ACE_Message_Block* message_block_p = NULL;
     GtkSpinner* spinner_p = NULL;
-    GtkProgressBar* progressbar_p = NULL;
+    GtkProgressBar* progress_bar_p = NULL;
     size_t pdu_size_i = 0;
     struct Net_UserData user_data_s;
 
@@ -1409,11 +1411,12 @@ continue_:
     ACE_ASSERT (spinner_p);
     gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), TRUE);
     gtk_spinner_start (spinner_p);
-    progressbar_p =
+    progress_bar_p =
         GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
-    ACE_ASSERT (progressbar_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
+    ACE_ASSERT (progress_bar_p);
+    gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
+    gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
 
     ACE_ASSERT (!data_p->progressData.eventSourceId);
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);

@@ -1616,6 +1616,8 @@ idle_update_progress_cb (gpointer userData_in)
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
     speed = data_p->statistic.bytesPerSecond;
   } // end lock scope
+
+  gtk_progress_bar_pulse (progress_bar_p);
   if (speed)
   {
     char buffer_a[BUFSIZ];
@@ -1636,10 +1638,14 @@ idle_update_progress_cb (gpointer userData_in)
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
+#if GTK_CHECK_VERSION (3,0,0)
+    gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
+#else
+    gtk_progress_set_show_text (GTK_PROGRESS (progress_bar_p), TRUE);
+#endif // GTK_CHECK_VERSION (3,0,0) 
     gtk_progress_bar_set_text (progress_bar_p,
                                buffer_a);
   } // end IF
-  gtk_progress_bar_pulse (progress_bar_p);
 
   // --> reschedule
   return G_SOURCE_CONTINUE;
