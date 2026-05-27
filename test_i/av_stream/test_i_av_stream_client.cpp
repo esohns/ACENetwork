@@ -997,6 +997,7 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
   struct Stream_ModuleConfiguration module_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration;
+  struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_1; // convert for network io (flip image)
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2; // convert for display
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2a; // resize for display
   struct Test_I_AVStream_Client_DirectShow_ModuleHandlerConfiguration directshow_modulehandler_configuration_2b; // visualization
@@ -1041,6 +1042,9 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       directshow_modulehandler_configuration.filterConfiguration =
         &directShowCBData_in.configuration->filterConfiguration;
 
+      directshow_modulehandler_configuration_1 =
+        directshow_modulehandler_configuration;
+      directshow_modulehandler_configuration_1.flipImage = true;
       directshow_modulehandler_configuration_2 =
         directshow_modulehandler_configuration;
       directshow_modulehandler_configuration_2a =
@@ -1072,6 +1076,9 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                                   directshow_stream_configuration_2);
 
       directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
+                                                              std::make_pair (&module_configuration,
+                                                                              &directshow_modulehandler_configuration_1)));
+      directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Converter_2"),
                                                               std::make_pair (&module_configuration,
                                                                               &directshow_modulehandler_configuration_2)));
       directshow_stream_configuration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Resize_2"),
@@ -1394,6 +1401,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
                                   (*directshow_stream_iterator).second->configuration_->format.audio,
                                   (*directshow_stream_iterator).second->configuration_->format.video,
                                   directshow_modulehandler_configuration.outputFormat);
+      Stream_MediaFramework_DirectShow_Tools::copy (directshow_modulehandler_configuration.outputFormat,
+                                                    directshow_modulehandler_configuration_1.outputFormat);
       Stream_MediaFramework_DirectShow_Tools::copy (directshow_modulehandler_configuration.outputFormat,
                                                     directshow_modulehandler_configuration_2.outputFormat);
       Stream_MediaFramework_DirectShow_Tools::setFormat (MEDIASUBTYPE_RGB24,

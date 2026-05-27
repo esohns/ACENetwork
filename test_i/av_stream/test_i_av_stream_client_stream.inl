@@ -80,11 +80,12 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
                   false);
   layout_out->append (module_p, NULL, 0);
   module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_AVStream_Client_DirectShow_Converter_Module (this,
-  //                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_out->append (module_p, NULL, 0);
+  // merely flip image
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AVStream_Client_DirectShow_Converter_Module (this,
+                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_out->append (module_p, NULL, 0);
   ACE_NEW_RETURN (module_p,
                   Test_I_AVStream_Client_DirectShow_Resize_Module (this,
                                                                    ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
@@ -115,7 +116,7 @@ Test_I_AVStream_Client_DirectShow_Stream_T<ConnectionManagerType,
 
     ACE_NEW_RETURN (module_p,
                     Test_I_AVStream_Client_DirectShow_Converter_Module (this,
-                                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
+                                                                        ACE_TEXT_ALWAYS_CHAR ("LibAV_Converter_2")),
                     false);
     layout_out->append (module_p, branch_p, index_i);
     module_p = NULL;

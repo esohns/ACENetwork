@@ -282,7 +282,7 @@ error:
       {
         ACE_OS::memset (buffer_a, 0, sizeof (WCHAR[BUFSIZ]));
         length = 0;
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0601) // _WIN32_WINNT_WIN7
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0601) // _WIN32_WINNT_WIN7
         result_2 =
           devices_pp[index]->GetString (MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME,
                                         buffer_a, sizeof (WCHAR[BUFSIZ]),
