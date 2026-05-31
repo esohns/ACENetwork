@@ -1,0 +1,179 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "msvc-windows-base",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "toolset": "host=x64",
+            "architecture": "x64",
+            "binaryDir": "${sourceDir}/build/msvc",
+            "installDir": "${sourceDir}/install/msvc",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/msvc",
+                "BUILD_TEST_I": true,
+                "BUILD_TEST_U": true,
+                "UI_FRAMEWORK": "gtk"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "msvc-x64-debug",
+            "displayName": "MSVC x64 Debug",
+            "inherits": "msvc-windows-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "msvc-x64-release",
+            "displayName": "MSVC x64 Release",
+            "inherits": "msvc-windows-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "gcc-linux-base",
+            "hidden": true,
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/gcc",
+            "installDir": "${sourceDir}/install/gcc",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/gcc",
+                "CMAKE_CXX_COMPILER": "/usr/bin/g++",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/gcc",
+                "BUILD_TEST_I": true,
+                "BUILD_TEST_U": true,
+                "UI_FRAMEWORK": "gtk"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "gcc-x64-debug",
+            "displayName": "GCC x64 Debug",
+            "inherits": "gcc-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "gcc-x64-release",
+            "displayName": "GCC x64 Release",
+            "inherits": "gcc-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "llvm-linux-base",
+            "hidden": true,
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/linux_llvm",
+            "installDir": "${sourceDir}/install/linux_llvm",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+                "CMAKE_LINKER_TYPE": "LLD",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/linux_llvm",
+                "BUILD_TEST_I": true,
+                "BUILD_TEST_U": true,
+                "UI_FRAMEWORK": "gtk",
+                "TOOLCHAIN": "llvm"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "llvm-x64-debug",
+            "displayName": "LLVM x64 Debug",
+            "inherits": "llvm-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "llvm-x64-release",
+            "displayName": "LLVM x64 Release",
+            "inherits": "llvm-linux-base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "MSVC x64 Debug",
+            "configurePreset": "msvc-x64-debug",
+            "configuration": "Debug",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "MSVC x64 Release",
+            "configurePreset": "msvc-x64-release",
+            "configuration": "Release",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "GCC x64 Debug",
+            "configurePreset": "gcc-x64-debug",
+            "configuration": "Debug",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "GCC x64 Release",
+            "configurePreset": "gcc-x64-release",
+            "configuration": "Release",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "LLVM x64 Debug",
+            "configurePreset": "llvm-x64-debug",
+            "configuration": "Debug",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
+            "name": "LLVM x64 Release",
+            "configurePreset": "llvm-x64-release",
+            "configuration": "Release",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        }
+    ]
+}

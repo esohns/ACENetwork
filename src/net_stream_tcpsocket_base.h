@@ -26,6 +26,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "net_common.h"
+#include "net_connection_configuration.h"
 #include "net_iconnection.h"
 
 // forward declarations
