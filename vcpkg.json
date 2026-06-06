@@ -22,6 +22,7 @@
     "libiconv",
     "libnoise",
     "libxml2",
+    "openal-soft",
     {
       "name": "pdcurses",
       "platform": "windows"
