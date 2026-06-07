@@ -717,12 +717,15 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
 
   int result = -1;
+  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
+  if (unlikely (!sessionId_in)) // out-of-session message
+    goto continue_;
   ACE_ASSERT (iterator != sessionDataMap_.end ());
 
+continue_:
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();

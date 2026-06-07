@@ -167,8 +167,10 @@ idle_load_segment_cb (gpointer userData_in)
                ACE_TEXT (data_p->URL.c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-  if (HTTP_Tools::URLIsURI (data_p->URL))
-  {
+  bool URI_is_relative_b;
+  if (HTTP_Tools::URLIsURI (data_p->URL,
+                            URI_is_relative_b))
+  { ACE_ASSERT (URI_is_relative_b);
     URL_string = ACE_TEXT_ALWAYS_CHAR ("http");
     URL_string +=
         (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));

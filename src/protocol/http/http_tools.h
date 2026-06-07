@@ -58,7 +58,10 @@ class HTTP_Tools
                         std::string&,       // return value: host name
                         std::string&,       // return value: URI
                         bool&);             // return value: use SSL ?
-  static bool URLIsURI (const std::string&); // URL
+  // *NOTE*: this checks the input string and returns whether it is a URI
+  //         i.e. a (relative or absolute) path
+  static bool URLIsURI (const std::string&, // URL
+                        bool&);             // return value: is URI relative path ? : absolute
   static bool URLRequiresSSL (const std::string&); // URL
 
   // *NOTE*: this 'escapes' the input so it can be sent in an URL

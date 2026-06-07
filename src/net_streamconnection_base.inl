@@ -330,7 +330,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     inherited2::state_.status = NET_CONNECTION_STATUS_OK;
   } // end lock scope
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
-                  true); // recurse upstream (if any) ?
+                  true,   // recurse upstream (if any) ?
+                  false); // expedited ?
 
   inherited2::decrease ();
 
@@ -1486,7 +1487,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited2::state_.status = NET_CONNECTION_STATUS_OK;
   } // end lock scope
   stream_.notify (STREAM_SESSION_MESSAGE_CONNECT,
-                  true); // recurse upstream (if any) ?
+                  true,   // recurse upstream (if any) ?
+                  false); // expedite ?
 
   return;
 
@@ -1565,7 +1567,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     {
       notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
-                      true); // recurse upstream (if any) ?
+                      true,   // recurse upstream (if any) ?
+                      false); // expedite ?
     } // end IF
 
     // step1: shut down the processing stream

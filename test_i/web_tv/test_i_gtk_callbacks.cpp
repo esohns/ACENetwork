@@ -1257,7 +1257,7 @@ idle_start_session_cb (gpointer userData_in)
   //            !(*channel_iterator).second.videoSegment.URLs.empty ());
 
   std::string current_URL_1, current_URL_2;
-  bool is_URI_b, is_URI_2;
+  bool is_URI_b, is_URI_2, URI_is_relative_b;
 
   if ((data_p->currentAudioStream == -1) ||
       (*stream_iterator_3a).second.second->URL.empty ())
@@ -1265,7 +1265,9 @@ idle_start_session_cb (gpointer userData_in)
   current_URL_1 =
     (*channel_iterator).second.audioSegment.URLs.front ();
   (*channel_iterator).second.audioSegment.URLs.pop_front ();
-  is_URI_b = HTTP_Tools::URLIsURI (current_URL_1);
+
+  is_URI_b = HTTP_Tools::URLIsURI (current_URL_1,
+                                   URI_is_relative_b);
   URL_string = is_URI_b ? (*stream_iterator_3a).second.second->URL : current_URL_1;
   if (!HTTP_Tools::parseURL (URL_string,
                              host_address,
@@ -1296,7 +1298,8 @@ continue_:
   current_URL_2 =
     (*channel_iterator).second.videoSegment.URLs.front ();
   (*channel_iterator).second.videoSegment.URLs.pop_front ();
-  is_URI_2 = HTTP_Tools::URLIsURI (current_URL_2);
+  is_URI_2 = HTTP_Tools::URLIsURI (current_URL_2,
+                                   URI_is_relative_b);
   URL_string_2 = is_URI_2 ? (*stream_iterator_3b).second.second->URL : current_URL_2;
   if (!HTTP_Tools::parseURL (URL_string_2,
                              host_address,
@@ -1331,24 +1334,22 @@ continue_:
   {
 #if defined (SSL_SUPPORT)
     if (use_SSL)
-      data_p->audioHandle =
-          Net_Client_Common_Tools::connect (ssl_connector,
-                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second),
-                                            user_data_s,
-                                            static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
-                                            false, // wait ?
-                                            true,  // peer address ?
-                                            3);    // #retries
+      data_p->audioHandle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second),
+                                                              user_data_s,
+                                                              static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
+                                                              false, // wait ?
+                                                              true,  // peer address ?
+                                                              3);    // #retries
     else
 #endif // SSL_SUPPORT
-      data_p->audioHandle =
-          Net_Client_Common_Tools::connect (connector,
-                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second),
-                                            user_data_s,
-                                            static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
-                                            false, // wait ?
-                                            true,  // peer address ?
-                                            3);    // #retries
+      data_p->audioHandle = Net_Client_Common_Tools::connect (connector,
+                                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second),
+                                                              user_data_s,
+                                                              static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
+                                                              false, // wait ?
+                                                              true,  // peer address ?
+                                                              3);    // #retries
   } // end IF
   else
   {
@@ -1357,13 +1358,13 @@ continue_:
     ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
     data_p->audioHandle =
-        Net_Client_Common_Tools::connect (asynch_connector,
-                                          *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second),
-                                          user_data_s,
-                                          static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
-                                          false, // wait ?
-                                          true,  // peer address ?
-                                          3);    // #retries
+      Net_Client_Common_Tools::connect (asynch_connector,
+                                        *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second),
+                                        user_data_s,
+                                        static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3a).second)->socketConfiguration.address,
+                                        false, // wait ?
+                                        true,  // peer address ?
+                                        3);    // #retries
   } // end ELSE
   if (data_p->audioHandle == ACE_INVALID_HANDLE)
   {
@@ -1389,24 +1390,22 @@ continue_2:
   {
 #if defined (SSL_SUPPORT)
     if (use_SSL)
-      data_p->videoHandle =
-          Net_Client_Common_Tools::connect (ssl_connector,
-                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second),
-                                            user_data_s,
-                                            static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
-                                            false, // wait ?
-                                            true,  // peer address ?
-                                            3);    // #retries
+      data_p->videoHandle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second),
+                                                              user_data_s,
+                                                              static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
+                                                              false, // wait ?
+                                                              true,  // peer address ?
+                                                              3);    // #retries
     else
 #endif // SSL_SUPPORT
-      data_p->videoHandle =
-          Net_Client_Common_Tools::connect (connector,
-                                            *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second),
-                                            user_data_s,
-                                            static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
-                                            false, // wait ?
-                                            true,  // peer address ?
-                                            3);    // #retries
+      data_p->videoHandle = Net_Client_Common_Tools::connect (connector,
+                                                              *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second),
+                                                              user_data_s,
+                                                              static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
+                                                              false, // wait ?
+                                                              true,  // peer address ?
+                                                              3);    // #retries
   } // end IF
   else
   {
@@ -1415,13 +1414,13 @@ continue_2:
     ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
     data_p->videoHandle =
-        Net_Client_Common_Tools::connect (asynch_connector,
-                                          *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second),
-                                          user_data_s,
-                                          static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
-                                          false, // wait ?
-                                          true,  // peer address ?
-                                          3);    // #retries
+      Net_Client_Common_Tools::connect (asynch_connector,
+                                        *static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second),
+                                        user_data_s,
+                                        static_cast<Test_I_WebTV_ConnectionConfiguration_3_t*> ((*iterator_3b).second)->socketConfiguration.address,
+                                        false, // wait ?
+                                        true,  // peer address ?
+                                        3);    // #retries
   } // end ELSE
   if (data_p->videoHandle == ACE_INVALID_HANDLE)
   {
@@ -2242,8 +2241,10 @@ continue_:
                  ACE_TEXT ((*channel_iterator).second.mainURL.c_str ())));
       return;
     } // end IF
+    bool URI_is_relative_b = false;
     bool is_URI_b =
-      (URI_string.empty () ? false : HTTP_Tools::URLIsURI (URI_string));
+      (URI_string.empty () ? false : HTTP_Tools::URLIsURI (URI_string,
+                                                           URI_is_relative_b));
     if (is_URI_b)
     {
       (*stream_iterator_2b).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
@@ -2251,10 +2252,13 @@ continue_:
         (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
       (*stream_iterator_2b).second.second->URL += ACE_TEXT_ALWAYS_CHAR ("://");
       (*stream_iterator_2b).second.second->URL += hostname_string;
-      size_t position = URI_string_2.find_last_of ('/', std::string::npos);
-      ACE_ASSERT (position != std::string::npos);
-      URI_string_2.erase (position + 1, std::string::npos);
-      (*stream_iterator_2b).second.second->URL += URI_string_2;
+      if (URI_is_relative_b)
+      {
+        size_t position = URI_string_2.find_last_of ('/', std::string::npos);
+        ACE_ASSERT (position != std::string::npos);
+        URI_string_2.erase (position + 1, std::string::npos);
+        (*stream_iterator_2b).second.second->URL += URI_string_2;
+      } // end IF
       (*stream_iterator_2b).second.second->URL += URI_string;
     } // end IF
     else
@@ -2275,8 +2279,8 @@ continue_:
     URI_string =
       (*channel_iterator).second.audioChannels[data_p->currentAudioStream].URI;
     //ACE_ASSERT (!URI_string.empty ()); // e.g. RBB (default audio)
-    is_URI_b =
-      (URI_string.empty () ? false : HTTP_Tools::URLIsURI (URI_string));
+    is_URI_b = HTTP_Tools::URLIsURI (URI_string,
+                                     URI_is_relative_b);
     if (is_URI_b)
     {
       (*stream_iterator_2a).second.second->URL = ACE_TEXT_ALWAYS_CHAR ("http");
@@ -2284,15 +2288,16 @@ continue_:
         (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
       (*stream_iterator_2a).second.second->URL += ACE_TEXT_ALWAYS_CHAR ("://");
       (*stream_iterator_2a).second.second->URL += hostname_string;
-      (*stream_iterator_2a).second.second->URL += URI_string_2;
+      if (URI_is_relative_b)
+        (*stream_iterator_2a).second.second->URL += URI_string_2;
       (*stream_iterator_2a).second.second->URL += URI_string;
     } // end IF
     else
       (*stream_iterator_2a).second.second->URL = URI_string;
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address =
-        host_address;
+      host_address;
     static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.hostname =
-        hostname_string;
+      hostname_string;
     //static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.address =
     //  host_address;
     //static_cast<Test_I_WebTV_ConnectionConfiguration_t*> ((*iterator_2a).second)->socketConfiguration.hostname =

@@ -39,6 +39,15 @@
 
 #define HTTP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 
+#define HTTP_URL_REGEX_STRING                     "^(?:(http(s)?|(s)?ftp)(?:\\://))?([^\\/]*)(.*)$"
+// *NOTE*: matches a an (absolute) URI path, i.e. a string that starts with a
+//         slash and is followed by one ore more path segments, where each
+//         segment is a string of characters that does not contain a slash
+//         followed by a slash, and the last segment is optionally followed by a
+//         string of characters
+#define HTTP_ABSOLUTE_URI_REGEX_STRING            "^(?:\\/)(?:[^\\/]+\\/)*(?:[^\\/]*)?$"
+#define HTTP_RELATIVE_URI_REGEX_STRING            "^(?:[^\\/]+)(?:\\/)?(?:[^\\/]+\\/)*(?:[^\\/]*)?$"
+
 // protocol
 #define HTTP_DEFAULT_SERVER_HOSTNAME              ACE_LOCALHOST
 #define HTTP_DEFAULT_SERVER_PORT                  ACE_DEFAULT_HTTP_PORT

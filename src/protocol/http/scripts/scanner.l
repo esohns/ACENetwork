@@ -544,7 +544,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              struct HTTP_Record& record_r =
                                iparser_p->current ();
                              HTTP_HeadersIterator_t iterator =
-                                 record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                               record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              if (iterator != record_r.headers.end ())
                              {
                                converter.str (ACE_TEXT_ALWAYS_CHAR (""));
@@ -562,31 +562,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                    record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
                                if (iterator != record_r.headers.end ())
                                {
-                                 // *NOTE*: the default locale is the 'C' locale (as in:
-                                 //         'std::setlocale(LC_ALL, "C")')
-                                 //         --> replace with (C++-)US-ASCII
-//                                 std::locale locale;
-//                                 //  std::locale locale (ACE_TEXT_ALWAYS_CHAR (""));
-//                                 try {
-//                                   std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
-//                                   locale = us_ascii_locale;
-//                                 } catch (std::runtime_error exception_in) {
-//                                   ACE_DEBUG ((LM_ERROR,
-//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
-//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
-//                                               ACE_TEXT (exception_in.what ())));
-//                                   Common_Tools::printLocales ();
-//                                   yyterminate ();
-//                                 } catch (...) {
-//                                   ACE_DEBUG ((LM_ERROR,
-//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
-//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
-//                                   Common_Tools::printLocales ();
-//                                   yyterminate ();
-//                                 }
-//                                 ACE_ASSERT (std::has_facet<std::ctype<char> >(locale));
                                  std::string value_string =
-                                     Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
+                                   Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
                                  if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                    BEGIN (chunked_body);
                                  else
@@ -607,7 +584,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              struct HTTP_Record& record_r =
                                iparser_p->current ();
                              HTTP_HeadersIterator_t iterator =
-                                 record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                               record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              ACE_ASSERT (iterator != record_r.headers.end ());
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();

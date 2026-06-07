@@ -466,7 +466,6 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (fragment_);
-  ACE_ASSERT (scannerState_);
 
   if (!fragment_->cont ())
   {

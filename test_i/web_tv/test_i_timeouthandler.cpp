@@ -97,7 +97,9 @@ Test_I_TimeoutHandler::handle (const void* arg_in)
     current_URL = segment_->URLs.front ();
     segment_->URLs.pop_front ();
   } // end lock scope
-  bool is_URI_b = HTTP_Tools::URLIsURI (current_URL);
+  bool URI_is_relative_b;
+  bool is_URI_b = HTTP_Tools::URLIsURI (current_URL,
+                                        URI_is_relative_b);
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URI_string_2, URL_string;
   bool use_SSL = false;

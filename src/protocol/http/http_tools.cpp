@@ -421,9 +421,8 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   int result = -1;
   std::string hostname_no_port_string;
 
-  // step1: split protocol/hostname/port/URI
-  std::string regex_string =
-    ACE_TEXT_ALWAYS_CHAR ("^(?:http|ftp)(s){0,1}(?:\\://)([^/]*)(.*)$");
+  // step1: split [protocol://][hostname[:port]]/URI
+  std::string regex_string = ACE_TEXT_ALWAYS_CHAR (HTTP_URL_REGEX_STRING);
   std::regex regex (regex_string,
                     std::regex::ECMAScript);
   std::smatch match_results;
@@ -439,16 +438,27 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   } // end IF
   ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
-  //ACE_ASSERT (match_results[1].matched);
-  std::string match_string = match_results[1];
+  // step2: protocol ?
+  std::string protocol_string;
+  if (match_results[1].matched)
+    protocol_string += match_results[1];
+
+  // step3: SSL ?
+  std::string match_string;
+  if (match_results[2].matched)
+    match_string += match_results[2];
+  if (match_results[3].matched)
+    match_string += match_results[3];
   if (!match_string.empty ())
     useSSL_out = true;
-  ACE_ASSERT (match_results[2].matched);
-  match_string = match_results[2];
+
+  // step4: hostname[:port] ?
+  ACE_ASSERT (match_results[4].matched);
+  match_string = match_results[4];
   if (!match_string.empty ())
-  {
+  { // step4a: split hostname[:port]
     regex_string =
-        ACE_TEXT_ALWAYS_CHAR ("^([[:alnum:].-]+)(?:\\:([[:digit:]]{1,5})){0,1}$");
+      ACE_TEXT_ALWAYS_CHAR ("^([[:alnum:].-]+)(?:\\:([[:digit:]]{1,5}))?$");
     regex.assign (regex_string,
                   std::regex::ECMAScript);
     std::smatch match_results_2;
@@ -478,46 +488,19 @@ HTTP_Tools::parseURL (const std::string& URL_in,
       hostName_out += match_string;
     } // end IF
   } // end IF
-  ACE_ASSERT (match_results[3].matched);
-  match_string = match_results[3];
+
+  // step5: URI path
+  ACE_ASSERT (match_results[5].matched);
+  match_string = match_results[5];
   if (!match_string.empty ())
     URI_out = match_string;
   else
-    URI_out = ACE_TEXT_ALWAYS_CHAR ("/");
+    URI_out = ACE_TEXT_ALWAYS_CHAR ("/"); // *TODO*: or "index.html" ?
 
-  // step2: validate address/verify host name exists
-  //        --> resolve
-  // *TODO*: support IPv6 as well
-  //regex_string =
-  //  ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{1,3}\\.){4}$");
-  //regex = regex_string;
-  //std::smatch match_results_2;
-  //if (std::regex_match (hostname,
-  //                      match_results_2,
-  //                      regex,
-  //                      std::regex_constants::match_default))
-  //{
-  //  ACE_ASSERT (match_results_2.ready () &&
-  //              !match_results_2.empty () &&
-  //              match_results_2[1].matched);
-  //  dotted_decimal_string = hostname;
-  //} // end IF
-//  result = address_out.set (port,
-//                            hostname.c_str (),
-//                            1,
-//                            AF_INET);
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set (): \"%m\", aborting\n")));
-//    return false;
-//  } // end IF
-
-  // step3: validate URI
-  regex_string = ACE_TEXT_ALWAYS_CHAR ("^\\/([^\\/]+\\/)*(.*?)$");
+  // step5a: validate URI
+  regex_string = ACE_TEXT_ALWAYS_CHAR (HTTP_ABSOLUTE_URI_REGEX_STRING);
   regex.assign (regex_string,
-                (std::regex_constants::ECMAScript |
-                 std::regex_constants::icase));
+                std::regex_constants::ECMAScript);
   std::smatch match_results_3;
   if (!std::regex_match (URI_out,
                          match_results_3,
@@ -529,23 +512,17 @@ HTTP_Tools::parseURL (const std::string& URL_in,
                 ACE_TEXT (URI_out.c_str ())));
     return false;
   } // end IF
-//  ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
-  ACE_ASSERT (!match_results_3.empty ());
 
   if (!hostname_no_port_string.empty ())
-    result =
-      address_out.set ((port ? port : (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT)),
-                       hostname_no_port_string.c_str (),
-                       1, // encode port number
-                       AF_INET);
+    result = address_out.set ((port ? port : (useSSL_out ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT)),
+                              hostname_no_port_string.c_str (),
+                              1, // encode port number
+                              AF_INET);
   else
-    result =
-      address_out.set ((port ? static_cast<u_short> (port) 
-                             : (useSSL_out ? static_cast<u_short> (HTTPS_DEFAULT_SERVER_PORT) 
-                                           : static_cast<u_short> (HTTP_DEFAULT_SERVER_PORT))),
-                       static_cast<ACE_UINT32> (INADDR_ANY),
-                       1,  // encode port number
-                       0); // do not map
+    result = address_out.set ((port ? static_cast<u_short> (port) : (useSSL_out ? static_cast<u_short> (HTTPS_DEFAULT_SERVER_PORT) : static_cast<u_short> (HTTP_DEFAULT_SERVER_PORT))),
+                              static_cast<ACE_UINT32> (INADDR_ANY),
+                              1,  // encode port number
+                              0); // do not map
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -557,20 +534,42 @@ HTTP_Tools::parseURL (const std::string& URL_in,
 }
 
 bool
-HTTP_Tools::URLIsURI (const std::string& URL_in)
+HTTP_Tools::URLIsURI (const std::string& URL_in,
+                      bool& URIIsRelativePath_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLIsURI"));
 
   // sanity check(s)
   ACE_ASSERT (!URL_in.empty ());
 
-  std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^[^/]+(?:/(?:[^/])+)*(?:/)?$");
-  std::regex regex (regex_string);
+  std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR (HTTP_ABSOLUTE_URI_REGEX_STRING);
+  std::regex regex (regex_string,
+                    std::regex_constants::ECMAScript);
   std::smatch match_results;
-  return std::regex_match (URL_in,
-                           match_results,
-                           regex,
-                           std::regex_constants::match_default);
+  if (std::regex_match (URL_in,
+                        match_results,
+                        regex,
+                        std::regex_constants::match_default))
+  {
+    URIIsRelativePath_out = false;
+    return true;
+  } // end IF
+
+  // --> not an absolute URI path; check if it is a relative URI path
+  regex_string = ACE_TEXT_ALWAYS_CHAR (HTTP_RELATIVE_URI_REGEX_STRING);
+  regex.assign (regex_string,
+                std::regex_constants::ECMAScript);
+  if (std::regex_match (URL_in,
+                        match_results,
+                        regex,
+                        std::regex_constants::match_default))
+  {
+    URIIsRelativePath_out = true;
+    return true;
+  } // end IF
+
+  return false;
 }
 
 bool

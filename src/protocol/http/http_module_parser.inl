@@ -145,11 +145,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleDataMessage"));
 
-  ACE_Message_Block* message_block_p = NULL;
+  ACE_Message_Block *message_block_p = NULL, *message_block_2 = NULL;
   int result = -1;
-  bool release_inbound_message = true; // message_inout
   typename SessionMessageType::DATA_T* session_data_container_p =
     inherited::sessionData_;
+  size_t content_length_i, total_length_i;
 
   // initialize return value(s)
   passMessageDownstream_out = false;
@@ -174,7 +174,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end lock scope
   ACE_ASSERT (message_block_p);
   message_inout = NULL;
-  release_inbound_message = false;
 
   { // *NOTE*: protect scanner/parser state
     //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
@@ -193,34 +192,49 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                   ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
                   inherited::mod_->name (),
                   dynamic_cast<DataMessageType*> (message_block_p)->id ()));
-      goto error;
+      headFragment_->release (); headFragment_ = NULL;
+      return;
     } // end IF
     // the message fragment has been parsed successfully
 
     if (!this->hasFinished ())
-      goto continue_; // --> wait for more data to arrive
+      return; // --> wait for more data to arrive
   } // end lock scope
 
-  // *NOTE*: the message has been parsed successfully
-  //         --> pass the data (chain) downstream
-  {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-    //// *NOTE*: new data fragments may have arrived by now
-    ////         --> set the next head fragment ?
-    //message_2 = dynamic_cast<DataMessageType*> (message_block_p->cont ());
-    //if (message_2)
-    //  message_block_p->cont (NULL);
-
-    result = inherited::put_next (headFragment_, NULL);
-    if (unlikely (result == -1))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
-                  inherited::mod_->name ()));
-      headFragment_->release (); headFragment_ = NULL;
-      goto error;
-    } // end IF
+  // *NOTE*: the complete document has been parsed successfully,
+  //         but the headFragment_ MAY have additional data appended to it
+  //         --> re-frame the document body, if necessary
+  content_length_i = getContentLength ();
+  total_length_i = headFragment_->total_length ();
+  if (!content_length_i || content_length_i == total_length_i)
+  {
+    message_block_p = headFragment_;
     headFragment_ = NULL;
-  } // end lock scope
+    goto continue_;
+  } // end IF
+  ACE_ASSERT (total_length_i > content_length_i);
+
+  message_block_p = Stream_Tools::get (content_length_i,
+                                       headFragment_,
+                                       message_block_2);
+  ACE_ASSERT (message_block_p);
+  headFragment_ = static_cast<DataMessageType*> (message_block_2);
+
+continue_:
+  ACE_ASSERT (message_block_p);
+  chunks_.clear ();
+
+  // *NOTE*: the message has been parsed/framed successfully
+  //         --> pass the data (chain) downstream
+  result = inherited::put_next (message_block_p, NULL);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
+                inherited::mod_->name ()));
+    message_block_p->release ();
+    return;
+  } // end IF
 
   // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
   //                   that the complete document data has arrived
@@ -234,13 +248,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
                 inherited::mod_->name (),
                 STREAM_SESSION_MESSAGE_STEP));
-
-continue_:
-error:
-  if (unlikely (release_inbound_message))
-  { ACE_ASSERT (message_inout);
-    message_inout->release (); message_inout = NULL;
-  } // end IF
 }
 
 template <ACE_SYNCH_DECL,
@@ -330,9 +337,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // set session data format
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
   HTTP_HeadersIterator_t iterator =
-      record_inout->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
+    record_inout->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
   if (iterator != record_inout->headers.end ())
   {
     session_data_r.format =
@@ -347,7 +354,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   DataMessageType* message_p = NULL;
   DATA_T* data_p = NULL;
   ACE_Message_Block* message_block_p = headFragment_;
-  unsigned int bytes_to_skip = 0;
+  size_t bytes_to_skip = 0;
 
   ACE_NEW_NORETURN (data_p,
                     DATA_T ());
@@ -372,7 +379,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
   data_container_2 = data_container_p;
   headFragment_->initialize (data_container_2,
-                             headFragment_->sessionId (),
+                             session_data_r.sessionId,
                              NULL);
 
   // make sure the whole fragment chain references the same data record
@@ -402,20 +409,25 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       message_block_p->rd_ptr (message_block_p->length ());
       message_block_p = message_block_p->cont ();
     } while (true);
+    ACE_ASSERT (message_block_p->length () >= bytes_to_skip);
     message_block_p->rd_ptr (bytes_to_skip);
+    //if (!message_block_p->length ())
+    //  message_block_p = message_block_p->cont ();
+
+    // sanity check(s)
     iterator =
-        data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+      data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
     if (iterator != data_p->headers.end ())
     {
       std::istringstream converter;
       converter.str ((*iterator).second);
       converter >> bytes_to_skip;
-      if (bytes_to_skip == 0)
+      if (unlikely (bytes_to_skip == 0))
       {
         ACE_DEBUG ((LM_WARNING,
                     ACE_TEXT ("%s: content length was 0, continuing\n"),
                     inherited::mod_->name ()));
-        bytes_to_skip = static_cast<unsigned int> (headFragment_->total_length ());
+        bytes_to_skip = headFragment_->total_length ();
       } // end IF
     } // end IF
     else
@@ -423,16 +435,21 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("%s: no content length header, continuing\n"),
                   inherited::mod_->name ()));
-      bytes_to_skip = static_cast<unsigned int> (headFragment_->total_length ());
+      bytes_to_skip = headFragment_->total_length ();
     } // end ELSE
-    ACE_ASSERT (headFragment_->total_length () <= bytes_to_skip); // *NOTE*: might not have received all of the body...
+    // *NOTE*: might not have received ALL of the body; OTOH may have received
+    //         MORE than the body (if the client sent more data than specified
+    //         in the content length header; i.e. the next response may already
+    //         have been (partially) received and appended to the fragment chain
+    //         --> do this in the handleDataMessage() method
+    //ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
   } // end IF
   else
   { // --> chunked transfer
     ACE_Message_Block* message_block_2 = NULL;
     CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
     CHUNKS_ITERATOR_T iterator_3;
-    unsigned int total_data = 0;
+    size_t total_data = 0;
     bytes_to_skip = (*iterator_2).first; // skip HTTP header + first chunk line
     do
     { ACE_ASSERT (message_block_p);
@@ -512,8 +529,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
         message_block_p->rd_ptr (bytes_to_skip);
       } // end ELSE
     } // end FOR
-    ACE_ASSERT (headFragment_->total_length () == total_data);
-    chunks_.clear ();
+    // *NOTE*: might not have received ALL of the body; OTOH may have received
+    //         MORE than the body (if the client sent more data than specified
+    //         in the content length header; i.e. the next response may already
+    //         have been (partially) received and appended to the fragment chain
+    //         --> do this in the handleDataMessage() method
+    //ACE_ASSERT (headFragment_->total_length () == total_data);
   } // end ELSE
 
   inherited2::finished_ = true;
@@ -572,6 +593,67 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   return inherited::put (messageBlock_in,
                          timeValue_in);
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+size_t
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType>::getContentLength ()
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::getContentLength"));
+
+  // sanity check(s)
+  ACE_ASSERT (headFragment_);
+
+  size_t result = 0;
+
+  if (chunks_.empty ())
+  {
+    const typename DataMessageType::DATA_T& data_container_r =
+      headFragment_->getR ();
+    const typename DataMessageType::DATA_T::DATA_T& data_r =
+      data_container_r.getR ();
+    HTTP_HeadersConstIterator_t iterator =
+      data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+    if (iterator != data_r.headers.end ())
+    {
+      std::istringstream converter;
+      converter.str ((*iterator).second);
+      converter >> result;
+      if (result == 0)
+      {
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("%s: content length was 0, continuing\n"),
+                    inherited::mod_->name ()));
+        result = headFragment_->total_length ();
+      } // end IF
+    } // end IF
+    else
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("%s: no content length header, continuing\n"),
+                  inherited::mod_->name ()));
+      result = headFragment_->total_length ();
+    } // end ELSE
+  } // end IF
+  else
+  { // --> chunked transfer
+    for (CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
+         iterator_2 != chunks_.end ();
+         ++iterator_2)
+      result += (*iterator_2).second;
+  } // end ELSE
+
+  return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
