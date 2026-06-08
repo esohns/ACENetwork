@@ -160,46 +160,39 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-    if (!headFragment_)
-      headFragment_ = message_inout;
-    else
-    {
-      for (message_block_p = headFragment_;
-           message_block_p->cont ();
-           message_block_p = message_block_p->cont ());
-      message_block_p->cont (message_inout);
-    } // end ELSE
-    message_block_p = headFragment_;
-  } // end lock scope
+  if (!headFragment_)
+    headFragment_ = message_inout;
+  else
+  {
+    for (message_block_p = headFragment_;
+          message_block_p->cont ();
+          message_block_p = message_block_p->cont ());
+    message_block_p->cont (message_inout);
+  } // end ELSE
+  message_block_p = headFragment_;
   ACE_ASSERT (message_block_p);
   message_inout = NULL;
 
-  { // *NOTE*: protect scanner/parser state
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+  // OK: parse the message (fragment)
 
-    // OK: parse the message (fragment)
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("parsing message (id:%u (%u byte(s))...\n"),
+  //              dynamic_cast<DataMessageType*> (message_block_p)->id (),
+  //              message_block_p->total_length ()));
+parse:
+  if (!this->parse (message_block_p))
+  { // *NOTE*: most probable reason: connection
+    //         has been closed --> session end
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
+                inherited::mod_->name (),
+                dynamic_cast<DataMessageType*> (message_block_p)->id ()));
+    return;
+  } // end IF
+  // the message fragment has been parsed successfully
 
-    //  ACE_DEBUG ((LM_DEBUG,
-    //              ACE_TEXT ("parsing message (id:%u (%u byte(s))...\n"),
-    //              dynamic_cast<DataMessageType*> (message_block_p)->id (),
-    //              message_block_p->total_length ()));
-
-    if (!this->parse (message_block_p))
-    { // *NOTE*: most probable reason: connection
-      //         has been closed --> session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
-                  inherited::mod_->name (),
-                  dynamic_cast<DataMessageType*> (message_block_p)->id ()));
-      headFragment_->release (); headFragment_ = NULL;
-      return;
-    } // end IF
-    // the message fragment has been parsed successfully
-
-    if (!this->hasFinished ())
-      return; // --> wait for more data to arrive
-  } // end lock scope
+  if (!this->hasFinished ())
+    return; // --> wait for more data to arrive
 
   // *NOTE*: the complete document has been parsed successfully,
   //         but the headFragment_ MAY have additional data appended to it
@@ -220,6 +213,19 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (message_block_p);
   headFragment_ = static_cast<DataMessageType*> (message_block_2);
 
+  if (headFragment_)
+  { // *TODO*: remove this ASAP
+    // repair broken data; flex may have clobbered the first few bytes
+    if (likely (headFragment_->length () >= 1))
+      *headFragment_->rd_ptr () = 'H';
+    if (likely (headFragment_->length () >= 2))
+      *(headFragment_->rd_ptr () + 1) = 'T';
+    if (likely (headFragment_->length () >= 3))
+      *(headFragment_->rd_ptr () + 2) = 'T';
+    if (likely (headFragment_->length () >= 4))
+      *(headFragment_->rd_ptr () + 3) = 'P';
+  } // end IF
+
 continue_:
   ACE_ASSERT (message_block_p);
   chunks_.clear ();
@@ -230,10 +236,10 @@ continue_:
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
+                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", aborting\n"),
                 inherited::mod_->name ()));
     message_block_p->release ();
-    return;
+    goto error;
   } // end IF
 
   // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
@@ -248,6 +254,17 @@ continue_:
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
                 inherited::mod_->name (),
                 STREAM_SESSION_MESSAGE_STEP));
+
+  if (headFragment_)
+  {
+    message_block_p = headFragment_;
+    goto parse;
+  } // end IF
+
+  return;
+
+error:
+  inherited::notify (STREAM_SESSION_MESSAGE_ABORT);
 }
 
 template <ACE_SYNCH_DECL,
@@ -328,7 +345,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (headFragment_);
-  ACE_ASSERT (!headFragment_->isInitialized ());
 
   //if (unlikely (inherited2::configuration_->debugParser))
   //  ACE_DEBUG ((LM_DEBUG,
@@ -343,7 +359,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   if (iterator != record_inout->headers.end ())
   {
     session_data_r.format =
-        HTTP_Tools::EncodingToCompressionFormat ((*iterator).second);
+      HTTP_Tools::EncodingToCompressionFormat ((*iterator).second);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: set compression format: \"%s\"\n"),
                 inherited::mod_->name (),

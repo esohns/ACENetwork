@@ -3506,7 +3506,7 @@ yyerror (YYLTYPE* location_in,
 
   try {
     iparser_in->error (*location_in,
-                       std::string (message_in));
+                       message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in HTTP_IParser::error(), continuing\n")));
