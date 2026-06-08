@@ -243,7 +243,7 @@ class HTTP_Module_ParserH_T
   //                            offset        size
   typedef std::vector<std::pair<unsigned int, unsigned int> > CHUNKS_T;
   typedef CHUNKS_T::const_iterator CHUNKS_ITERATOR_T;
-  CHUNKS_T chunks_;
+  CHUNKS_T         chunks_;
 };
 
 // include template definition

@@ -107,7 +107,19 @@ struct HTTP_Record
    , URI ()
    , version (HTTP_Codes::HTTP_VERSION_INVALID)
   {}
+  
   inline void operator+= (struct HTTP_Record rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+
+  void reset ()
+  {
+    form.clear ();
+    headers.clear ();
+    method = HTTP_Codes::HTTP_METHOD_INVALID;
+    reason.clear ();
+    status = HTTP_Codes::HTTP_STATUS_INVALID;
+    URI.clear ();
+    version = HTTP_Codes::HTTP_VERSION_INVALID;
+  }
 
   HTTP_Form_t             form; // request
   HTTP_Headers_t          headers;

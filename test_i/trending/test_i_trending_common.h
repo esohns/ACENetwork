@@ -56,6 +56,7 @@ struct Test_I_StockItem
    , WKN ()
    , isStock (true)
   {}
+
   inline bool operator== (const struct Test_I_StockItem& rhs_in) { return (ISIN == rhs_in.ISIN); }
 
   //std::string description;
@@ -73,6 +74,7 @@ struct Test_I_StockRecord
    , timeStamp (ACE_Time_Value::zero)
    , value (0.0)
   {}
+
   inline bool operator== (const struct Test_I_StockRecord& rhs_in) { ACE_ASSERT (rhs_in.item); ACE_ASSERT (item); return (*item == *rhs_in.item); }
 
   double                   change;
@@ -94,7 +96,9 @@ struct Test_I_Trending_MessageData
     if (HTMLDocument)
       xmlFreeDoc (HTMLDocument);
   }
-  inline void operator+= (Test_I_Trending_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
+  inline void operator= (const struct HTTP_Record& rhs_in) { *((HTTP_Record*)this) = rhs_in; }
+  inline void operator+= (const struct Test_I_Trending_MessageData& rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   xmlDocPtr               HTMLDocument;
   struct Test_I_StockItem stockItem;

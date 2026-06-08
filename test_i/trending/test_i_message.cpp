@@ -44,32 +44,32 @@ Test_I_Stream_MessageData::Test_I_Stream_MessageData (struct Test_I_Trending_Mes
 
 }
 
-void
-Test_I_Stream_MessageData::setPR (struct HTTP_Record*& record_inout)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::setPR"));
-
-  Test_I_Trending_MessageData* data_p = NULL;
-  ACE_NEW_NORETURN (data_p,
-                    Test_I_Trending_MessageData ());
-  if (!data_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate Test_I_MessageData: \"%m\", returning\n")));
-    return;
-  } // end IF
-  data_p->form = record_inout->form; // request
-  data_p->headers = record_inout->headers;
-  data_p->method = record_inout->method;
-  data_p->reason = record_inout->reason; // response
-  data_p->status = record_inout->status; // response
-  data_p->URI = record_inout->URI;
-  data_p->version = record_inout->version;
-
-  delete record_inout; record_inout= NULL;
-
-  inherited::setPR (data_p);
-}
+//void
+//Test_I_Stream_MessageData::setPR (struct Test_I_Trending_MessageData*& record_inout)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_MessageData::setPR"));
+//
+//  Test_I_Trending_MessageData* data_p = NULL;
+//  ACE_NEW_NORETURN (data_p,
+//                    Test_I_Trending_MessageData ());
+//  if (!data_p)
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate Test_I_MessageData: \"%m\", returning\n")));
+//    return;
+//  } // end IF
+//  data_p->form = record_inout->form; // request
+//  data_p->headers = record_inout->headers;
+//  data_p->method = record_inout->method;
+//  data_p->reason = record_inout->reason; // response
+//  data_p->status = record_inout->status; // response
+//  data_p->URI = record_inout->URI;
+//  data_p->version = record_inout->version;
+//
+//  delete record_inout; record_inout= NULL;
+//
+//  inherited::setPR (data_p);
+//}
 
 //////////////////////////////////////////
 

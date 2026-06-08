@@ -63,7 +63,7 @@ class HTTP_ParserDriver_T
   virtual bool initialize (const struct HTTP_ParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
   inline virtual bool debug () const { return HTTP_Scanner_get_debug (scannerState_); }
-  inline virtual bool isBlocking () const { return blockInParse_; }
+  inline virtual bool isBlocking () const { ACE_ASSERT (configuration_); return configuration_->block; }
   virtual void error (const struct YYLTYPE&, // location
                       const std::string&); // message
   virtual void error (const yy::location&, // location
@@ -79,7 +79,7 @@ class HTTP_ParserDriver_T
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer ();
-  inline virtual struct HTTP_Record& current () { ACE_ASSERT (record_); return *record_; }
+  inline virtual struct HTTP_Record& current () { return record_; }
 //  inline virtual void finished () { finished_ = true; };
   inline virtual bool hasFinished () const { return finished_; }
 
@@ -91,7 +91,7 @@ class HTTP_ParserDriver_T
   ACE_Message_Block*               fragment_;
   Stream_ITask*                    itask_;
   size_t                           offset_; // parsed entity bytes
-  struct HTTP_Record*              record_;
+  struct HTTP_Record               record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T ())
@@ -109,20 +109,17 @@ class HTTP_ParserDriver_T
   inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool lex (yyscan_t state_in) { ACE_ASSERT (false); return false; /*HTTP_Scanner_lex (NULL, NULL, this, state_in);*/ };
 
-  bool                               blockInParse_;
-  bool                               isFirst_;
+  bool                             isFirst_;
 
   //// parser
-  //yy::HTTP_Parser                    parser_;
+  //yy::HTTP_Parser                  parser_;
 
   // scanner
-  yyscan_t                           scannerState_;
-  std::string                        scannerTables_;
-  YY_BUFFER_STATE                    bufferState_;
-  ACE_Message_Queue_Base*            messageQueue_;
-  bool                               useYYScanBuffer_;
+  yyscan_t                         scannerState_;
+  std::string                      scannerTables_;
+  YY_BUFFER_STATE                  bufferState_;
 
-  bool                               isInitialized_;
+  bool                             isInitialized_;
 };
 
 // include template definition

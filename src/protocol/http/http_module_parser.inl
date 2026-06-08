@@ -109,20 +109,20 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     chunks_.clear ();
   } // end IF
 
-//  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
+  ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-      inherited::msg_queue_;
+    inherited::msg_queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to HTTP_ParserDriver_T::initialize(), aborting\n"),
                 inherited::mod_->name ()));
-    const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-        NULL;
+    //const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+        //NULL;
     return false;
   } // end IF
-  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-      NULL;
+  //const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      //NULL;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -215,7 +215,7 @@ parse:
 
   if (headFragment_)
   { // *TODO*: remove this ASAP
-    // repair broken data; flex may have clobbered the first few bytes
+    // repair broken data; flex may (!) have clobbered the first few bytes
     if (likely (headFragment_->length () >= 1))
       *headFragment_->rd_ptr () = 'H';
     if (likely (headFragment_->length () >= 2))
@@ -341,7 +341,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (record_inout);
-  ACE_ASSERT (record_inout == inherited2::record_);
+  ACE_ASSERT (record_inout == &(inherited2::record_));
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (headFragment_);
@@ -378,11 +378,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    delete record_inout; record_inout = NULL;
     goto error;
   } // end IF
   *data_p = *record_inout;
-  delete record_inout; record_inout = NULL;
 
   ACE_NEW_NORETURN (data_container_p,
                     DATA_CONTAINER_T (data_p,
@@ -555,7 +553,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   inherited2::finished_ = true;
 error:
-  inherited2::record_ = NULL;
+  ;
 }
 
 template <ACE_SYNCH_DECL,
@@ -1115,11 +1113,11 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (record_inout);
-  ACE_ASSERT (record_inout == inherited2::record_);
+  ACE_ASSERT (record_inout == &(inherited2::record_));
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (headFragment_);
-  ACE_ASSERT (!headFragment_->isInitialized ());
+  //ACE_ASSERT (!headFragment_->isInitialized ());
 
   //if (unlikely (inherited2::configuration_->debugParser))
   //  ACE_DEBUG ((LM_DEBUG,
@@ -1148,17 +1146,26 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_Message_Block* message_block_p = headFragment_;
   unsigned int bytes_to_skip = 0;
 
+  ACE_NEW_NORETURN (data_p,
+                    DATA_T ());
+  if (!data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    goto error;
+  } // end IF
+  *data_p = *record_inout;
+  record_inout = NULL;
+
   ACE_NEW_NORETURN (data_container_p,
                     DATA_CONTAINER_T ());
   if (!data_container_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-    delete record_inout; record_inout = NULL;
     goto error;
   } // end IF
-  data_container_p->setPR (record_inout);
-  record_inout = NULL;
+  data_container_p->setPR (data_p);
   data_container_2 = data_container_p;
   headFragment_->initialize (data_container_2,
                              headFragment_->sessionId (),
@@ -1193,7 +1200,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     } while (true);
     message_block_p->rd_ptr (bytes_to_skip);
     iterator =
-        data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+      data_p->headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
     ACE_ASSERT (iterator != data_p->headers.end ());
     std::istringstream converter;
     converter.str ((*iterator).second);
@@ -1286,7 +1293,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   inherited2::finished_ = true;
 error:
-  inherited2::record_ = NULL;
+  ;
 }
 
 template <ACE_SYNCH_DECL,

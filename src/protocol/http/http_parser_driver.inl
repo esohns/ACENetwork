@@ -50,14 +50,11 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
  , fragment_ (NULL)
  , itask_ (itask_in)
  , offset_ (0)
- , record_ (NULL)
- , blockInParse_ (false)
+ , record_ ()
  , isFirst_ (true)
  , scannerState_ (NULL)
  , scannerTables_ (scannerTables_in)
  , bufferState_ (NULL)
- , messageQueue_ (NULL)
- , useYYScanBuffer_ (COMMON_PARSER_DEFAULT_FLEX_USE_YY_SCAN_BUFFER)
  , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::HTTP_ParserDriver_T"));
@@ -73,7 +70,7 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
   if (result)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yylex_init_extra: \"%m\", returning\n")));
+                ACE_TEXT ("failed to HTTP_Scanner_lex_init_extra(): \"%m\", returning\n")));
     return;
   } // end IF
   ACE_ASSERT (scannerState_);
@@ -172,10 +169,7 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 
   if (HTTP_Scanner_lex_destroy (scannerState_))
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yylex_destroy(): \"%m\", continuing\n")));
-
-  if (record_)
-    delete record_;
+                ACE_TEXT ("failed to HTTP_Scanner_lex_destroy(): \"%m\", continuing\n")));
 }
 
 template <ACE_SYNCH_DECL,
@@ -188,19 +182,14 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::initialize"));
 
-  //int result = -1;
-
   if (isInitialized_)
   {
     configuration_ = NULL;
     finished_ = false;
     fragment_ = NULL;
     offset_ = 0;
-    if (record_)
-      delete record_;
-    record_ = NULL;
+    record_.reset ();
 
-    blockInParse_ = false;
     isFirst_ = true;
 
     //if (!scannerTables_.empty ())
@@ -227,17 +216,11 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
     //  scannerState_ = NULL;
     //} // end IF
 
-    messageQueue_ = NULL;
-    useYYScanBuffer_ = COMMON_PARSER_DEFAULT_FLEX_USE_YY_SCAN_BUFFER;
-
     isInitialized_ = false;
   } // end IF
 
   configuration_ =
-      &const_cast<struct HTTP_ParserConfiguration&> (configuration_in);
-  blockInParse_ = configuration_->block;
-  messageQueue_ = configuration_->messageQueue;
-  useYYScanBuffer_ = configuration_->useYYScanBuffer;
+    &const_cast<struct HTTP_ParserConfiguration&> (configuration_in);
 
 #if defined (_DEBUG)
   HTTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
@@ -280,11 +263,11 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 //              message_in.c_str ()));
 
   // dump message
-  ACE_Message_Block* message_block_p = fragment_;
-  while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
-  ACE_ASSERT (message_block_p);
+  //ACE_Message_Block* message_block_p = fragment_;
+  //while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
+  //ACE_ASSERT (message_block_p);
   Common_IDumpState* idump_state_p =
-    dynamic_cast<Common_IDumpState*> (message_block_p);
+    dynamic_cast<Common_IDumpState*> (fragment_);
   ACE_ASSERT (idump_state_p);
   try {
     idump_state_p->dump_state ();
@@ -324,11 +307,11 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 //              message_in.c_str ()));
 
   // dump message
-  ACE_Message_Block* message_block_p = fragment_;
-  while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
-  ACE_ASSERT (message_block_p);
+  //ACE_Message_Block* message_block_p = fragment_;
+  //while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
+  //ACE_ASSERT (message_block_p);
   Common_IDumpState* idump_state_p =
-    dynamic_cast<Common_IDumpState*> (message_block_p);
+    dynamic_cast<Common_IDumpState*> (fragment_);
   ACE_ASSERT (idump_state_p);
   try {
     idump_state_p->dump_state ();
@@ -379,23 +362,11 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
   int result = -1;
   bool do_scan_end = false;
 
+  finished_ = false;
   // retain a handle to the 'current' fragment
   fragment_ = data_in;
   offset_ = 0;
-//  if (record_)
-//  {
-//    delete record_;
-//    record_ = NULL;
-//  } // end IF
-  record_ = NULL;
-  ACE_NEW_NORETURN (record_,
-                    struct HTTP_Record);
-  if (!record_)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    goto error;
-  } // end IF
+  record_.reset ();
 
   if (!begin (NULL, 0))
   {
@@ -465,12 +436,13 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (unlink_in);
 
   // sanity check(s)
+  ACE_ASSERT (configuration_);
   ACE_ASSERT (fragment_);
 
   if (!fragment_->cont ())
   {
     // sanity check(s)
-    if (!blockInParse_)
+    if (!configuration_->block)
       return false; // not enough data, cannot proceed
 
     waitBuffer (); // <-- wait for data
@@ -526,13 +498,15 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
   // *IMPORTANT NOTE*: 'this' is the parser thread currently in yylex() context
 
   // sanity check(s)
-  ACE_ASSERT (blockInParse_); // *TODO*
-  ACE_ASSERT (messageQueue_);
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->block);
+  ACE_ASSERT (configuration_->messageQueue);
 
   // 1. wait for data
   do
   {
-    result_i = messageQueue_->dequeue_head (message_block_p, NULL);
+    result_i = configuration_->messageQueue->dequeue_head (message_block_p,
+                                                           NULL);
     if (unlikely (result_i == -1))
     { int error = ACE_OS::last_error ();
       if (unlikely (error != ESHUTDOWN))
@@ -583,7 +557,8 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
     } // end IF
     else
     {
-      result_i = messageQueue_->enqueue_tail (message_block_p, NULL);
+      result_i = configuration_->messageQueue->enqueue_tail (message_block_p,
+                                                             NULL);
       if (unlikely (result_i == -1))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -644,10 +619,11 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (!bufferState_);
+  ACE_ASSERT (configuration_);
   ACE_ASSERT (fragment_);
 
   // create/initialize a new buffer state
-  if (useYYScanBuffer_)
+  if (configuration_->useYYScanBuffer)
   {
     bufferState_ =
       HTTP_Scanner__scan_buffer (fragment_->rd_ptr (),

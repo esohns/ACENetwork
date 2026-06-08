@@ -46,7 +46,7 @@ template <ACE_SYNCH_DECL,
 
 class Test_I_Stream_MessageData
  : public Stream_DataBase_T<struct Test_I_Trending_MessageData>
- , public Common_ISetPR_T<struct HTTP_Record>
+ //, public Common_ISetPR_T<struct HTTP_Record>
 {
   typedef Stream_DataBase_T<struct Test_I_Trending_MessageData> inherited;
 
@@ -58,7 +58,7 @@ class Test_I_Stream_MessageData
   inline virtual ~Test_I_Stream_MessageData () {}
 
   // implement Common_ISetPR_T
-  virtual void setPR (struct HTTP_Record*&);
+  //virtual void setPR (struct Test_I_Trending_MessageData*&);
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_Stream_MessageData (const Test_I_Stream_MessageData&))
