@@ -48,6 +48,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
  , headFragment_ (NULL)
  , chunks_ ()
+ , contentLengthOrChunkSize_ (0)
+ , bodyOrChunkBytesToSkip_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::HTTP_Module_Parser_T"));
 
@@ -702,8 +704,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
  , inherited2 (this,
                ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
  , headFragment_ (NULL)
- //, crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  , chunks_ ()
+ , contentLengthOrChunkSize_ (0)
+ , bodyOrChunkBytesToSkip_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
 

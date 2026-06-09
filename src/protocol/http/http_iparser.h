@@ -23,6 +23,8 @@
 
 #include <string>
 
+#include "ace/Basic_Types.h"
+
 #include "common.h"
 
 #include "common_iscanner.h"
@@ -44,12 +46,16 @@ class HTTP_IParser
   using IPARSER_T::error;
 
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
-  virtual unsigned int currentChunkSize () = 0; // returns: current chunk size
+  virtual ACE_UINT32 currentChunkSize () = 0; // returns: current chunk size
+  virtual ACE_UINT64 contentLengthOrChunkSize () = 0;
+  virtual ACE_UINT64 bodyOrChunkBytesToSkip () = 0;
 
   ////////////////////////////////////////
   // callbacks
   virtual void encoding (const std::string&) = 0; // encoding
-  virtual void chunk (unsigned int) = 0; // size
+  virtual void chunk (ACE_UINT32) = 0; // size
+  virtual void contentLengthOrChunkSize (ACE_UINT64) = 0; // size
+  virtual void bodyOrChunkBytesSkipped (ACE_UINT64) = 0; // content bytes skipped
 };
 
 #endif

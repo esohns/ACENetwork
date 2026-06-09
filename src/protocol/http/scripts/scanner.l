@@ -344,13 +344,6 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 
 %%
 %{
-  std::string regex_string;
-  std::regex::flag_type regex_flags = std::regex_constants::ECMAScript;
-  std::regex regex;
-  std::smatch match_results;
-  std::istringstream converter;
-  unsigned int content_length_or_chunk_size = 0;
-  unsigned int missing_bytes = 0;
 %}
 
 <INITIAL>{
@@ -426,13 +419,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              struct HTTP_Record& record_r =
                                iparser_p->current ();
                              HTTP_HeadersIterator_t iterator =
-                                 record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                               record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              if (iterator != record_r.headers.end ())
                              {
-                               converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-                               converter.clear ();
+                               std::istringstream converter;
                                converter.str ((*iterator).second);
+                               ACE_UINT64 content_length_or_chunk_size = 0;
                                converter >> content_length_or_chunk_size;
+                               iparser_p->contentLengthOrChunkSize (content_length_or_chunk_size);
                                if (!content_length_or_chunk_size)
                                  BEGIN (INITIAL); // no data
                                else
@@ -441,34 +435,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              else
                              {
                                iterator =
-                                   record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
+                                 record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
                                if (iterator != record_r.headers.end ())
                                {
                                  // *NOTE*: the default locale is the 'C' locale (as in:
                                  //         'std::setlocale(LC_ALL, "C")')
                                  //         --> replace with (C++-)US-ASCII
-//                                 std::locale locale;
-//                                 //  std::locale locale (ACE_TEXT_ALWAYS_CHAR (""));
-//                                 try {
-//                                   std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
-//                                   locale = us_ascii_locale;
-//                                 } catch (std::runtime_error exception_in) {
-//                                   ACE_DEBUG ((LM_ERROR,
-//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
-//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
-//                                               ACE_TEXT (exception_in.what ())));
-//                                   Common_Tools::printLocales ();
-//                                   yyterminate ();
-//                                 } catch (...) {
-//                                   ACE_DEBUG ((LM_ERROR,
-//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
-//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
-//                                   Common_Tools::printLocales ();
-//                                   yyterminate ();
-//                                 }
-//                                 ACE_ASSERT (std::has_facet<std::ctype<char> >(locale));
                                  std::string value_string =
-                                     Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
+                                   Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
                                  if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                    BEGIN (chunked_body);
                                  else
@@ -547,10 +521,11 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              if (iterator != record_r.headers.end ())
                              {
-                               converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-                               converter.clear ();
+                               std::istringstream converter;
                                converter.str ((*iterator).second);
+                               ACE_UINT64 content_length_or_chunk_size = 0;
                                converter >> content_length_or_chunk_size;
+                               iparser_p->contentLengthOrChunkSize (content_length_or_chunk_size);
                                if (!content_length_or_chunk_size)
                                  BEGIN (INITIAL); // no data
                                else
@@ -580,23 +555,25 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                            }
 } // end <response_headers>
 <body>{
-{OCTET}{1}                 { ACE_ASSERT (!content_length_or_chunk_size);
+{OCTET}{1}                 {
                              struct HTTP_Record& record_r =
                                iparser_p->current ();
                              HTTP_HeadersIterator_t iterator =
                                record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                              ACE_ASSERT (iterator != record_r.headers.end ());
-                             converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-                             converter.clear ();
+                             std::istringstream converter;
                              converter.str ((*iterator).second);
+                             ACE_UINT64 content_length_or_chunk_size = 0;
                              converter >> content_length_or_chunk_size;
-                             missing_bytes = content_length_or_chunk_size;
+                             iparser_p->contentLengthOrChunkSize (content_length_or_chunk_size);
+                             ACE_UINT64 missing_bytes = content_length_or_chunk_size;
                              if (yy_flex_debug)
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found body @%d of %d byte(s)\n"),
                                            iparser_p->offset (),
                                            content_length_or_chunk_size));
                              --missing_bytes;
+                             iparser_p->bodyOrChunkBytesSkipped (1);
 /*                             char c = 0;
                              for (unsigned int i = 0;
                                   i < missing_bytes;
@@ -610,13 +587,12 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                            }
 } // end <body>
 <data>{
-{OCTET}{1}                 { ACE_ASSERT (content_length_or_chunk_size);
-                             ACE_ASSERT (missing_bytes);
-                             --missing_bytes;
-                             if (unlikely (!missing_bytes))
+{OCTET}{1}                 {
+                             iparser_p->bodyOrChunkBytesSkipped (1);
+                             if (unlikely (!iparser_p->bodyOrChunkBytesToSkip ()))
                              {
                                BEGIN (INITIAL);
-                               yylval->ival = content_length_or_chunk_size;
+                               yylval->ival = iparser_p->contentLengthOrChunkSize ();
 //                               return yy::HTTP_Parser::token::BODY;
                                return yytokentype::BODY;
                              } // end IF
@@ -626,9 +602,10 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 {CHUNK_LINE}{CRLF}         { if (iparser_p->currentChunkSize ()) // *IMPORTANT NOTE*: 0 the first time around
                                iparser_p->offset (iparser_p->currentChunkSize () + 2);
                              // *TODO*: let the scanner parse this (it does it anyway)
-                             regex.assign (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE),
-                                           regex_flags);
+                             std::regex regex (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE),
+                                               std::regex_constants::ECMAScript);
                              std::string input_string = yytext;
+                             std::smatch match_results;
                              if (!std::regex_match (input_string,
                                                     match_results,
                                                     regex,
@@ -641,11 +618,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              } // end IF
                              ACE_ASSERT (match_results.ready () && !match_results.empty ());
                              ACE_ASSERT (match_results[1].matched);
+                             std::istringstream converter;
                              converter.setf (std::ios::hex,
                                              std::ios::basefield);
                              converter.clear ();
                              converter.str (match_results[1].str ());
+                             ACE_UINT64 content_length_or_chunk_size = 0;
                              converter >> content_length_or_chunk_size;
+                             iparser_p->contentLengthOrChunkSize (content_length_or_chunk_size);
                              converter.setf (std::ios::dec,
                                              std::ios::basefield);
                              BEGIN (chunk);
@@ -675,42 +655,22 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 } // end <chunked_body>
 <chunk>{
 {CHUNK_LINE}{CRLF}         { iparser_p->offset (yyleng);
-                             if (content_length_or_chunk_size)
+                             if (iparser_p->contentLengthOrChunkSize ())
                              {
 /*                               ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found entity chunk @%d: %u byte(s)\n"),
                                            iparser_p->offset (),
                                            content_length_or_chunk_size)); */
-
-/*                               char c = 0;
-                               for (unsigned int i = 0;
-                                    i < content_length_or_chunk_size;
-                                    ++i)
-                               {
-                                 c = yyinput (yyscanner);
-                                 // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-                                 *(yyg->yy_c_buf_p - 1) = c;
-                               } // end FOR
-                               // gobble trailing delimiter (CRLF)
-                               c = yyinput (yyscanner);
-                               ACE_ASSERT (c == '\r');
-                               // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-                               *(yyg->yy_c_buf_p - 1) = c;
-                               c = yyinput (yyscanner);
-                               ACE_ASSERT (c == '\n');
-                               // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-                               *(yyg->yy_c_buf_p - 1) = c;*/
-                               missing_bytes = content_length_or_chunk_size;
                                BEGIN (data_2);
                              } // end IF
                              else
                              {
-                               ACE_DEBUG ((LM_DEBUG,
+/*                               ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found last entity chunk @%d: 0 byte(s)\n"),
-                                           iparser_p->offset ()));
+                                           iparser_p->offset ())); */
                                // *NOTE*: do not consume the terminating CRLF
                                //         here; this happens in <chunked_body>
-                               yylval->ival = content_length_or_chunk_size;
+                               yylval->ival = iparser_p->contentLengthOrChunkSize ();
                                BEGIN (chunked_body);
 /*                             return yy::HTTP_Parser::token::CHUNK; */
                                return yytokentype::CHUNK;
@@ -718,9 +678,9 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                            }
 } // end <chunk>
 <data_2>{
-{OCTET}{1}                 { ACE_ASSERT (missing_bytes);
-                             --missing_bytes;
-                             if (unlikely (!missing_bytes))
+{OCTET}{1}                 {
+                             iparser_p->bodyOrChunkBytesSkipped (1);
+                             if (unlikely (!iparser_p->bodyOrChunkBytesToSkip ()))
                              {
                                // gobble trailing delimiter (CRLF)
                                char c = yyinput (yyscanner);
@@ -732,7 +692,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
                                *(yyg->yy_c_buf_p - 1) = c;
                                BEGIN (chunked_body);
-                               yylval->ival = content_length_or_chunk_size;
+                               yylval->ival = iparser_p->contentLengthOrChunkSize ();
 /*                             return yy::HTTP_Parser::token::CHUNK; } */
                                return yytokentype::CHUNK;
                              } // end IF
