@@ -25,6 +25,7 @@
 
 #include "stream_common.h"
 
+#include "http_parser_driver.h"
 #include "http_stream.h"
 
 #include "bittorrent_common.h"
@@ -63,7 +64,10 @@ class BitTorrent_TrackerStream_T
                         DataMessageType,
                         SessionMessageType,
                         ConnectionManagerType,
-                        UserDataType>
+                        UserDataType,
+                        HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                                            Common_TimePolicy_t,
+                                            SessionMessageType> >
 {
   typedef HTTP_Stream_T<StreamStateType,
                         ConfigurationType,
@@ -75,7 +79,10 @@ class BitTorrent_TrackerStream_T
                         DataMessageType,
                         SessionMessageType,
                         ConnectionManagerType,
-                        UserDataType> inherited;
+                        UserDataType,
+                        HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                                            Common_TimePolicy_t,
+                                            SessionMessageType> > inherited;
 
  public:
   BitTorrent_TrackerStream_T ();

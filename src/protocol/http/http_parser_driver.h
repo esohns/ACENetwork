@@ -38,12 +38,6 @@
 class ACE_Message_Block;
 class ACE_Message_Queue_Base;
 class Stream_ITask;
-typedef void* yyscan_t;
-typedef struct yy_buffer_state* YY_BUFFER_STATE;
-int HTTP_Scanner_get_debug  (yyscan_t);
-void HTTP_Scanner_set_debug (int  _bdebug , yyscan_t);
-void HTTP_Scanner_set_column (int, yyscan_t);
-void HTTP_Scanner_set_lineno ( int _line_number , yyscan_t yyscanner );
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -55,11 +49,10 @@ class HTTP_ParserDriver_T
   // convenient types
   typedef ACE_Task<ACE_SYNCH_USE, TimePolicyType> TASK_T;
 
-  HTTP_ParserDriver_T (Stream_ITask*,
-                       const std::string&); // scanner tables file (if any)
+  HTTP_ParserDriver_T (Stream_ITask*);
   virtual ~HTTP_ParserDriver_T ();
 
-  // implement (part of) HTTP_IParser
+  // implement (part of) HTTP_IParser_T
   virtual bool initialize (const struct HTTP_ParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
   inline virtual bool debug () const { return HTTP_Scanner_get_debug (scannerState_); }
@@ -105,7 +98,7 @@ class HTTP_ParserDriver_T
   inline virtual void reset () { HTTP_Scanner_set_lineno (1, scannerState_); HTTP_Scanner_set_column (1, scannerState_); }
   inline virtual bool initialize (yyscan_t&, HTTP_IParser* extra_in) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  inline virtual YY_BUFFER_STATE create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+  inline virtual struct yy_buffer_state* create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool lex (yyscan_t state_in) { ACE_ASSERT (false); return false; /*HTTP_Scanner_lex (NULL, NULL, this, state_in);*/ };
 
@@ -116,8 +109,8 @@ class HTTP_ParserDriver_T
 
   // scanner
   yyscan_t                         scannerState_;
-  std::string                      scannerTables_;
-  YY_BUFFER_STATE                  bufferState_;
+  //std::string                      scannerTables_;
+  struct yy_buffer_state*          bufferState_;
 
   bool                             isInitialized_;
 };

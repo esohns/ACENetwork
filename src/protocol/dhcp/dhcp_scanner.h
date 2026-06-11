@@ -357,7 +357,7 @@ void DHCP_Scanner_free (void * ,yyscan_t yyscanner );
 /* %endif */
 #endif
 
-#define YY_EXTRA_TYPE DHCP_ParserDriver*
+#define YY_EXTRA_TYPE_ DHCP_ParserDriver*
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
 /* %if-reentrant */
@@ -370,7 +370,7 @@ void DHCP_Scanner_free (void * ,yyscan_t yyscanner );
 
 int DHCP_Scanner_lex_init (yyscan_t* scanner);
 
-int DHCP_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int DHCP_Scanner_lex_init_extra (YY_EXTRA_TYPE_ user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -385,9 +385,9 @@ int DHCP_Scanner_get_debug (yyscan_t yyscanner );
 
 void DHCP_Scanner_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE DHCP_Scanner_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE_ DHCP_Scanner_get_extra (yyscan_t yyscanner );
 
-void DHCP_Scanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void DHCP_Scanner_set_extra (YY_EXTRA_TYPE_ user_defined ,yyscan_t yyscanner );
 
 FILE *DHCP_Scanner_get_in (yyscan_t yyscanner );
 

@@ -36,7 +36,8 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConnectionManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
@@ -47,7 +48,8 @@ HTTP_Stream_T<StreamStateType,
               DataMessageType,
               SessionMessageType,
               ConnectionManagerType,
-              UserDataType>::HTTP_Stream_T ()
+              UserDataType,
+              ParserDriverType>::HTTP_Stream_T ()
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::HTTP_Stream_T"));
@@ -64,7 +66,8 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConnectionManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 bool
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -76,8 +79,9 @@ HTTP_Stream_T<StreamStateType,
               DataMessageType,
               SessionMessageType,
               ConnectionManagerType,
-              UserDataType>::load (Stream_ILayout* layout_out,
-                                   bool& deleteModules_out)
+              UserDataType,
+              ParserDriverType>::load (Stream_ILayout* layout_out,
+                                       bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::load"));
 
@@ -113,7 +117,8 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType,
           typename ConnectionManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 bool
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -125,8 +130,9 @@ HTTP_Stream_T<StreamStateType,
               DataMessageType,
               SessionMessageType,
               ConnectionManagerType,
-              UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
-                                         ACE_HANDLE handle_in)
+              UserDataType,
+              ParserDriverType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+                                             ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::initialize"));
 

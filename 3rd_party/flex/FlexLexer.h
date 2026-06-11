@@ -53,7 +53,8 @@
 extern "C++" {
 
 struct yy_buffer_state;
-typedef int yy_state_type;
+#define yy_state_type int
+//typedef int yy_state_type;
 
 class FlexLexer
 {

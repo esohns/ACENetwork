@@ -1,3 +1,6 @@
+include (flex)
+include (reflex)
+
 add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
@@ -22,6 +25,10 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
+if (REFLEX_SUPPORT)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${REFLEX_INCLUDE_DIRS}>)
+endif (REFLEX_SUPPORT)
 if (UNIX)
 # target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
 
@@ -94,15 +101,6 @@ set (source_files
      http_iparser.h
      http_message.cpp
      http_message.h
-     http_parser.cpp
-     http_parser.h
-     http_parser_driver.cpp
-     http_parser_driver.h
-     http_parser_driver.inl
-     http_scanner.cpp
-     http_scanner.h
-     http_message.cpp
-     http_message.h
      http_message.inl
      http_module_bisector.cpp
      http_module_bisector.h
@@ -114,6 +112,13 @@ set (source_files
      http_module_streamer.h
      http_module_streamer.inl
      http_network.h
+     http_parser.cpp
+     http_parser.h
+     http_parser_driver.cpp
+     http_parser_driver.h
+     http_parser_driver.inl
+     http_scanner.cpp
+     http_scanner.h
      http_sessionmessage.cpp
      http_sessionmessage.h
      http_sessionmessage.inl
@@ -122,28 +127,26 @@ set (source_files
      http_stream.inl
      http_stream_common.h
      http_tools.cpp
-     http_tools.h
-#     HTTPParser.cpp
-#     HTTPParser.h
-#     HTTPParserBaseListener.cpp
-#     HTTPParserBaseListener.h
-#     HTTPParserBaseVisitor.cpp
-#     HTTPParserBaseVisitor.h
-#     HTTPParserListener.cpp
-#     HTTPParserListener.h
-#     HTTPParserVisitor.cpp
-#     HTTPParserVisitor.h
-#     HTTPScanner.cpp
-#     HTTPScanner.h
-     )
+     http_tools.h)
+if (REFLEX_SUPPORT)
+ set (source_files
+      ${source_files}
+      http_reflex_iparser.h
+      http_reflex_parser.cpp
+      http_reflex_parser.h
+      http_reflex_parser_driver.cpp
+      http_reflex_parser_driver.h
+      http_reflex_parser_driver.inl
+      http_reflex_scanner.cpp
+      http_reflex_scanner.h)
+endif (REFLEX_SUPPORT)
 set (script_files
 #     scripts/bisector.l
      scripts/scanner.l
+     scripts/reflex_scanner.l
      scripts/parser.y)
 set (table_files)
 #     etc/http_scanner.tab)
-
-#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 unset (absolute_source_files)
 foreach (source_file ${source_files})
@@ -196,6 +199,9 @@ if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
 endif (WIN32 AND MSVC)
 
+if (REFLEX_SUPPORT)
+ target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${REFLEX_LIB})
+endif (REFLEX_SUPPORT)
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
@@ -217,12 +223,6 @@ install (FILES
          http_defines.h
          http_iparser.h
          http_message.h
-         http_parser.h
-         http_parser_driver.h
-         http_parser_driver.inl
-         http_scanner.h
-#         http_scanner.tab
-         http_message.h
          http_message.inl
          http_module_bisector.h
          http_module_bisector.inl
@@ -231,6 +231,11 @@ install (FILES
          http_module_streamer.h
          http_module_streamer.inl
          http_network.h
+         http_parser.h
+         http_parser_driver.h
+         http_parser_driver.inl
+         http_scanner.h
+#         http_scanner.tab
          http_sessionmessage.h
          http_sessionmessage.inl
          http_stream.h
@@ -238,6 +243,15 @@ install (FILES
          http_stream_common.h
          http_tools.h
          DESTINATION include)
+if (REFLEX_SUPPORT)
+ install (FILES
+          http_reflex_iparser.h
+          http_reflex_parser.h
+          http_reflex_parser_driver.h
+          http_reflex_parser_driver.inl
+          http_reflex_scanner.h
+          DESTINATION include)
+endif (REFLEX_SUPPORT)
 install (TARGETS ${PROJECT_NAME}_Protocol_HTTP
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib

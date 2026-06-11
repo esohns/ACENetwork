@@ -32,8 +32,22 @@
 
 #include "ftp_common.h"
 
+// forward declarations
+#if !defined YYLTYPE && !defined YYLTYPE_IS_DECLARED
+struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
+#define YYLTYPE_IS_DECLARED 1
+#define YYLTYPE_IS_TRIVIAL 1
+#endif
+
 class FTP_IParser
  : public Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      struct FTP_Record>
  , public Common_ILexScanner_T<struct Common_FlexScannerState,
                                FTP_IParser>
@@ -41,6 +55,7 @@ class FTP_IParser
  public:
   // convenient types
   typedef Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      struct FTP_Record> IPARSER_T;
 
   using IPARSER_T::error;
@@ -52,6 +67,7 @@ struct FTP_IParserDataDummy
 {};
 class FTP_IParserData
  : public Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      struct FTP_IParserDataDummy>
  , public Common_ILexScanner_T<struct Common_FlexScannerState,
                                FTP_IParserData>
@@ -60,6 +76,7 @@ class FTP_IParserData
  public:
   // convenient types
   typedef Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      struct FTP_IParserDataDummy> IPARSER_T;
 
   using IPARSER_T::error;

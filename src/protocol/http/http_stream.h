@@ -65,7 +65,8 @@ template <typename StreamStateType,
           typename SessionMessageType,
           ////////////////////////////////
           typename ConnectionManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 class HTTP_Stream_T
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -131,7 +132,8 @@ class HTTP_Stream_T
                                ModuleHandlerConfigurationType,
                                ControlMessageType,
                                DataMessageType,
-                               SessionMessageType> PARSER_T;
+                               SessionMessageType,
+                               ParserDriverType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 typename SessionMessageType::DATA_T::DATA_T,

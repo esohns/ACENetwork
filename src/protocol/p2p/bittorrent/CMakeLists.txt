@@ -1,3 +1,6 @@
+include (flex)
+include (reflex)
+
 add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
 
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
@@ -24,6 +27,10 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
+if (REFLEX_SUPPORT)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${REFLEX_INCLUDE_DIRS}>)
+endif (REFLEX_SUPPORT)
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FLEX_INCLUDE_DIRS}>)

@@ -34,17 +34,13 @@
 #include "stream_module_xmlparser.h"
 #include "stream_module_xpathquery.h"
 
-//#include "stream_misc_dump.h"
 #include "stream_misc_messagehandler.h"
-
-//#include "stream_stat_statistic_report.h"
-
-//#include "stream_net_io.h"
 
 #include "net_connection_manager.h"
 
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
+#include "http_parser_driver.h"
 
 #include "ssdp_module_streamer.h"
 
@@ -140,7 +136,10 @@ typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              struct UPnP_Client_ModuleHandlerConfiguration,
                              Stream_ControlMessage_t,
                              Test_U_Message,
-                             Test_U_SessionMessage> UPnP_Client_Module_Parser;
+                             Test_U_SessionMessage,
+                             HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                                                 Common_TimePolicy_t,
+                                                 Test_U_SessionMessage> > UPnP_Client_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct UPnP_Client_ModuleHandlerConfiguration,

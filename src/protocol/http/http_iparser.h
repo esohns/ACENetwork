@@ -32,8 +32,22 @@
 
 #include "http_common.h"
 
+// forward declarations
+#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
+struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
+# define YYLTYPE_IS_DECLARED 1
+# define YYLTYPE_IS_TRIVIAL 1
+#endif
+
 class HTTP_IParser
  : public Common_IYaccRecordParser_T<struct HTTP_ParserConfiguration,
+                                     struct YYLTYPE,
                                      struct HTTP_Record>
  , public Common_ILexScanner_T<struct Common_FlexScannerState,
                                HTTP_IParser>
@@ -41,6 +55,7 @@ class HTTP_IParser
  public:
   // convenient types
   typedef Common_IYaccRecordParser_T<struct HTTP_ParserConfiguration,
+                                     struct YYLTYPE,
                                      struct HTTP_Record> IPARSER_T;
 
   using IPARSER_T::error;

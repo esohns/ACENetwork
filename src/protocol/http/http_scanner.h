@@ -675,7 +675,7 @@ void yyfree ( void * , yyscan_t yyscanner );
 
 
 
-#define YY_EXTRA_TYPE HTTP_IParser*
+#define YY_EXTRA_TYPE_ HTTP_IParser*
 
 
 /* %if-c-only Reentrant structure and macros (non-C++). */
@@ -694,7 +694,7 @@ void yyfree ( void * , yyscan_t yyscanner );
 
 int yylex_init (yyscan_t* scanner);
 
-int yylex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
+int yylex_init_extra ( YY_EXTRA_TYPE_ user_defined, yyscan_t* scanner);
 
 /* %endif */
 
@@ -716,11 +716,11 @@ void yyset_debug ( int debug_flag , yyscan_t yyscanner );
 
 
 
-YY_EXTRA_TYPE yyget_extra ( yyscan_t yyscanner );
+YY_EXTRA_TYPE_ yyget_extra ( yyscan_t yyscanner );
 
 
 
-void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
+void yyset_extra ( YY_EXTRA_TYPE_ user_defined , yyscan_t yyscanner );
 
 
 

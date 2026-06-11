@@ -36,15 +36,13 @@
 #include "http_common.h"
 #include "http_defines.h"
 #include "http_message.h"
-#include "http_scanner.h"
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename SessionMessageType>
 HTTP_ParserDriver_T<ACE_SYNCH_USE,
                     TimePolicyType,
-                    SessionMessageType>::HTTP_ParserDriver_T (Stream_ITask* itask_in,
-                                                              const std::string& scannerTables_in)
+                    SessionMessageType>::HTTP_ParserDriver_T (Stream_ITask* itask_in)
  : configuration_ (NULL)
  , finished_ (false)
  , fragment_ (NULL)
@@ -53,7 +51,7 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
  , record_ ()
  , isFirst_ (true)
  , scannerState_ (NULL)
- , scannerTables_ (scannerTables_in)
+ //, scannerTables_ ()
  , bufferState_ (NULL)
  , isInitialized_ (false)
 {
@@ -221,6 +219,7 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
 
   configuration_ =
     &const_cast<struct HTTP_ParserConfiguration&> (configuration_in);
+  ACE_ASSERT (configuration_->messageQueue);
 
 #if defined (_DEBUG)
   HTTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),

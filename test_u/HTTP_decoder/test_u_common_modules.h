@@ -40,16 +40,14 @@
 #include "http_codes.h"
 #include "http_common.h"
 #include "http_configuration.h"
-//#include "http_module_bisector.h"
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
+#include "http_parser_driver.h"
 
 #include "test_u_common.h"
-//#include "test_u_stream_common.h"
 
 #include "test_u_message.h"
 #include "test_u_session_message.h"
-//#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declarations
 struct Test_U_HTTPDecoder_ModuleHandlerConfiguration;
@@ -62,7 +60,10 @@ typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,
                              Stream_ControlMessage_t,
                              Test_U_Message,
-                             Test_U_SessionMessage> Test_U_Module_Parser;
+                             Test_U_SessionMessage,
+                             HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                                                 Common_TimePolicy_t,
+                                                 Test_U_SessionMessage> > Test_U_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct Test_U_HTTPDecoder_ModuleHandlerConfiguration,

@@ -32,8 +32,6 @@
 
 #include "http_common.h"
 #include "http_defines.h"
-#include "http_iparser.h"
-#include "http_parser_driver.h"
 
 extern const char libacenetwork_protocol_default_http_parser_module_name_string[];
 
@@ -47,7 +45,8 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 class HTTP_Module_Parser_T
  : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -58,9 +57,7 @@ class HTTP_Module_Parser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   struct Stream_UserData>
- , public HTTP_ParserDriver_T<ACE_SYNCH_USE,
-                              TimePolicyType,
-                              SessionMessageType>
+ , public ParserDriverType
 {
   typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -71,9 +68,7 @@ class HTTP_Module_Parser_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   struct Stream_UserData> inherited;
-  typedef HTTP_ParserDriver_T<ACE_SYNCH_USE,
-                              TimePolicyType,
-                              SessionMessageType> inherited2;
+  typedef ParserDriverType inherited2;
 
  public:
   HTTP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
@@ -151,7 +146,8 @@ template <ACE_SYNCH_DECL,
           typename SessionManagerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 class HTTP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -166,9 +162,7 @@ class HTTP_Module_ParserH_T
                                       SessionManagerType,
                                       TimerManagerType,
                                       UserDataType>
- , public HTTP_ParserDriver_T<ACE_SYNCH_USE,
-                              TimePolicyType,
-                              SessionMessageType>
+ , public ParserDriverType
 {
   typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -183,9 +177,7 @@ class HTTP_Module_ParserH_T
                                       SessionManagerType,
                                       TimerManagerType,
                                       UserDataType> inherited;
-  typedef HTTP_ParserDriver_T<ACE_SYNCH_USE,
-                              TimePolicyType,
-                              SessionMessageType> inherited2;
+  typedef ParserDriverType inherited2;
 
  public:
   HTTP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle

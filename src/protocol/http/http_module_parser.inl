@@ -36,16 +36,17 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::HTTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
+                     SessionMessageType,
+                     ParserDriverType>::HTTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
  : inherited (stream_in)
- , inherited2 (this,
-               ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
+ , inherited2 (this)
  , headFragment_ (NULL)
  , chunks_ ()
  , contentLengthOrChunkSize_ (0)
@@ -60,13 +61,15 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::~HTTP_Module_Parser_T ()
+                     SessionMessageType,
+                     ParserDriverType>::~HTTP_Module_Parser_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::~HTTP_Module_Parser_T"));
 
@@ -79,15 +82,17 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 bool
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::initialize (const ConfigurationType& configuration_in,
-                                                      Stream_IAllocator* allocator_in)
+                     SessionMessageType,
+                     ParserDriverType>::initialize (const ConfigurationType& configuration_in,
+                                                    Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::initialize"));
 
@@ -119,12 +124,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to HTTP_ParserDriver_T::initialize(), aborting\n"),
                 inherited::mod_->name ()));
-    //const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-        //NULL;
     return false;
   } // end IF
-  //const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-      //NULL;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -135,15 +136,17 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 void
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
-                                                             bool& passMessageDownstream_out)
+                     SessionMessageType,
+                     ParserDriverType>::handleDataMessage (DataMessageType*& message_inout,
+                                                           bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleDataMessage"));
 
@@ -274,15 +277,17 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 void
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                bool& passMessageDownstream_out)
+                     SessionMessageType,
+                     ParserDriverType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                              bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleSessionMessage"));
 
@@ -330,14 +335,16 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 void
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::record (struct HTTP_Record*& record_inout)
+                     SessionMessageType,
+                     ParserDriverType>::record (struct HTTP_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::record"));
 
@@ -563,15 +570,17 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 int
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::put (ACE_Message_Block* messageBlock_in,
-                                               ACE_Time_Value* timeValue_in)
+                     SessionMessageType,
+                     ParserDriverType>::put (ACE_Message_Block* messageBlock_in,
+                                             ACE_Time_Value* timeValue_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::put"));
 
@@ -616,14 +625,16 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename ParserDriverType>
 size_t
 HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      TimePolicyType,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::getContentLength ()
+                     SessionMessageType,
+                     ParserDriverType>::getContentLength ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::getContentLength"));
 
@@ -686,7 +697,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
@@ -699,10 +711,10 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
+                      UserDataType,
+                      ParserDriverType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
  : inherited (stream_in) // stream handle
- , inherited2 (this,
-               ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME)) // scanner tables file (if any)
+ , inherited2 (this)
  , headFragment_ (NULL)
  , chunks_ ()
  , contentLengthOrChunkSize_ (0)
@@ -724,7 +736,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
@@ -737,7 +750,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::~HTTP_Module_ParserH_T ()
+                      UserDataType,
+                      ParserDriverType>::~HTTP_Module_ParserH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::~HTTP_Module_ParserH_T"));
 
@@ -757,7 +771,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 bool
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -771,8 +786,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::initialize (const ConfigurationType& configuration_in,
-                                                 Stream_IAllocator* allocator_in)
+                      UserDataType,
+                      ParserDriverType>::initialize (const ConfigurationType& configuration_in,
+                                                     Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::initialize"));
 
@@ -790,18 +806,14 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-      inherited::msg_queue_;
+    inherited::msg_queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to initialize parser driver: \"%m\", aborting\n"),
                 inherited::mod_->name ()));
-    const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-        NULL;
     return false;
   } // end IF
-  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-      NULL;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -819,7 +831,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 void
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -833,8 +846,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::handleDataMessage (DataMessageType*& message_inout,
-                                                        bool& passMessageDownstream_out)
+                      UserDataType,
+                      ParserDriverType>::handleDataMessage (DataMessageType*& message_inout,
+                                                            bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleDataMessage"));
 
@@ -948,7 +962,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 void
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -962,8 +977,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                           bool& passMessageDownstream_out)
+                      UserDataType,
+                      ParserDriverType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleSessionMessage"));
 
@@ -1046,7 +1062,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 bool
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -1060,7 +1077,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::collect (StatisticContainerType& data_out)
+                      UserDataType,
+                      ParserDriverType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::collect"));
 
@@ -1096,7 +1114,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 void
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -1110,7 +1129,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::record (struct HTTP_Record*& record_inout)
+                      UserDataType,
+                      ParserDriverType>::record (struct HTTP_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::record"));
 
@@ -1311,7 +1331,8 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename SessionManagerType,
           typename TimerManagerType,
-          typename UserDataType>
+          typename UserDataType,
+          typename ParserDriverType>
 int
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -1325,8 +1346,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StatisticContainerType,
                       SessionManagerType,
                       TimerManagerType,
-                      UserDataType>::put (ACE_Message_Block* messageBlock_in,
-                                          ACE_Time_Value* timeValue_in)
+                      UserDataType,
+                      ParserDriverType>::put (ACE_Message_Block* messageBlock_in,
+                                              ACE_Time_Value* timeValue_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::put"));
 

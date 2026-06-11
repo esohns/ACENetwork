@@ -30,8 +30,22 @@
 
 #include "common_parser_bencoding_common.h"
 
+// forward declarations
+#if !defined YYLTYPE && !defined YYLTYPE_IS_DECLARED
+struct YYLTYPE
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
+#define YYLTYPE_IS_DECLARED 1
+#define YYLTYPE_IS_TRIVIAL 1
+#endif
+
 class BitTorrent_Bencoding_IParser
  : public Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      struct Bencoding_Element>
  , virtual public Common_ILexScanner_T<struct Common_FlexScannerState,
                                        BitTorrent_Bencoding_IParser>
@@ -41,6 +55,7 @@ class BitTorrent_Bencoding_IParser
  public:
   // convenient types
   typedef Common_IYaccRecordParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      struct Bencoding_Element> IPARSER_T;
   typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                                BitTorrent_Bencoding_IParser> ISCANNER_T;
@@ -59,6 +74,7 @@ class BitTorrent_Bencoding_IParser
 template <typename RecordType>
 class BitTorrent_IParser_T
  : public Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      RecordType>
  , virtual public Common_ILexScanner_T<struct Common_FlexScannerState,
                                        BitTorrent_IParser_T<RecordType> >
@@ -66,6 +82,7 @@ class BitTorrent_IParser_T
  public:
   // convenient types
   typedef Common_IYaccStreamParser_T<struct Common_FlexBisonParserConfiguration,
+                                     struct YYLTYPE,
                                      RecordType> IPARSER_T;
   typedef Common_ILexScanner_T<struct Common_FlexScannerState,
                                BitTorrent_IParser_T<RecordType> > ISCANNER_T;

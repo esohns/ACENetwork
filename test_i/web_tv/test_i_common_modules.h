@@ -78,6 +78,11 @@
 
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
+#if defined (REFLEX_SUPPORT)
+#include "http_reflex_parser_driver.h"
+#else
+#include "http_parser_driver.h"
+#endif // REFLEX_SUPPORT
 
 #include "test_i_message.h"
 #include "test_i_module_converter.h"
@@ -111,12 +116,22 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Stream_ControlMessage_t,
                                Test_I_Message,
                                Test_I_SessionMessage> Test_I_HTTPStreamer;
+#if defined (REFLEX_SUPPORT)
+typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
+                                  Common_TimePolicy_t,
+                                  Test_I_SessionMessage> HTTP_ParserDriver_t;
+#else
+typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                            Common_TimePolicy_t,
+                            Test_I_SessionMessage> HTTP_ParserDriver_t;
+#endif // REFLEX_SUPPORT
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct Test_I_WebTV_ModuleHandlerConfiguration,
                              Stream_ControlMessage_t,
                              Test_I_Message,
-                             Test_I_SessionMessage> Test_I_HTTPParser;
+                             Test_I_SessionMessage,
+                             HTTP_ParserDriver_t> Test_I_HTTPParser;
 DATASTREAM_MODULE_DUPLEX (struct Test_I_WebTV_SessionData,                // session data type
                           enum Stream_SessionMessageType,                         // session event type
                           struct Test_I_WebTV_ModuleHandlerConfiguration, // module handler configuration type
@@ -147,12 +162,22 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Stream_ControlMessage_t,
                                Test_I_Message,
                                Test_I_SessionMessage_3> Test_I_HTTPStreamer_3;
+#if defined (REFLEX_SUPPORT)
+typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
+                                  Common_TimePolicy_t,
+                                  Test_I_SessionMessage_3> HTTP_ParserDriver_3;
+#else
+typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                            Common_TimePolicy_t,
+                            Test_I_SessionMessage_3> HTTP_ParserDriver_3;
+#endif // REFLEX_SUPPORT
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,
                              Stream_ControlMessage_t,
                              Test_I_Message,
-                             Test_I_SessionMessage_3> Test_I_HTTPParser_3;
+                             Test_I_SessionMessage_3,
+                             HTTP_ParserDriver_3> Test_I_HTTPParser_3;
 DATASTREAM_MODULE_DUPLEX (Test_I_WebTV_SessionData_3,                                    // session data type
                           enum Stream_SessionMessageType,                                // session event type
                           struct Test_I_WebTV_ModuleHandlerConfiguration_3,              // module handler configuration type

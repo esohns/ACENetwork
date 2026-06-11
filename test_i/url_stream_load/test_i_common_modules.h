@@ -46,6 +46,7 @@
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
 #include "http_network.h"
+#include "http_parser_driver.h"
 
 #include "test_i_common.h"
 
@@ -67,7 +68,10 @@ typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
                              Stream_ControlMessage_t,
                              Test_I_Message,
-                             Test_I_SessionMessage> Test_I_HTTPParser;
+                             Test_I_SessionMessage,
+                             HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                                                 Common_TimePolicy_t,
+                                                 Test_I_SessionMessage> > Test_I_HTTPParser;
 DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
                          enum Stream_SessionMessageType,                         // session event type
                          struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
@@ -145,7 +149,10 @@ typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
                              Stream_ControlMessage_t,
                              Test_I_Message,
-                             Test_I_SessionMessage_2> Test_I_HTTPParser_2;
+                             Test_I_SessionMessage_2,
+                             HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                                                 Common_TimePolicy_t,
+                                                 Test_I_SessionMessage_2> > Test_I_HTTPParser_2;
 DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData_2,                // session data type
                          enum Stream_SessionMessageType,                         // session event type
                          struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2, // module handler configuration type

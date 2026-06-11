@@ -28,7 +28,6 @@
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
-// #include "stream_session_manager.h"
 #include "stream_streammodule_base.h"
 
 #include "stream_dec_zip_decoder.h"
@@ -43,6 +42,7 @@
 
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
+#include "http_parser_driver.h"
 
 #include "test_i_common.h"
 
@@ -99,7 +99,10 @@ typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
                               struct Stream_Statistic,
                               Test_I_SessionManager_t,
                               Common_Timer_Manager_t,
-                              struct Stream_UserData> Test_I_HTTPParser;
+                              struct Stream_UserData,
+                              HTTP_ParserDriver_T<ACE_MT_SYNCH,
+                                                  Common_TimePolicy_t,
+                                                  Test_I_Stream_SessionMessage> > Test_I_HTTPParser;
 DATASTREAM_MODULE_DUPLEX (struct Test_I_Trending_SessionData,                // session data type
                           enum Stream_SessionMessageType,                   // session event type
                           struct Test_I_Trending_ModuleHandlerConfiguration, // module handler configuration type
