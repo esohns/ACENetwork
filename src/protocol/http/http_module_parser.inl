@@ -179,11 +179,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   message_inout = NULL;
 
   // OK: parse the message (fragment)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: parsing message (id:%u (%u byte(s))...\n"),
+              inherited::mod_->name (),
+              static_cast<DataMessageType*> (message_block_p)->id (),
+              message_block_p->total_length ()));
 
-  //  ACE_DEBUG ((LM_DEBUG,
-  //              ACE_TEXT ("parsing message (id:%u (%u byte(s))...\n"),
-  //              dynamic_cast<DataMessageType*> (message_block_p)->id (),
-  //              message_block_p->total_length ()));
 parse:
   if (!this->parse (message_block_p))
   { // *NOTE*: most probable reason: connection
@@ -191,7 +192,7 @@ parse:
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
                 inherited::mod_->name (),
-                dynamic_cast<DataMessageType*> (message_block_p)->id ()));
+                static_cast<DataMessageType*> (message_block_p)->id ()));
     return;
   } // end IF
   // the message fragment has been parsed successfully

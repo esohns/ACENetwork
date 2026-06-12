@@ -106,7 +106,7 @@ class HTTP_ReflexParserDriver_T
 
   // scanner
   yyscan_t                         scannerState_;
-  yy_buffer_state*                 bufferState_;
+  YY_BUFFER_STATE                  bufferState_;
 
   bool                             isInitialized_;
 };

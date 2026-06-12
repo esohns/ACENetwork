@@ -289,8 +289,8 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   if (isFirst_)
   {
     isFirst_ = false;
-    HTTP_Reflex_Scanner_set_column (1, scannerState_);
-    HTTP_Reflex_Scanner_set_lineno (1, scannerState_);
+    //HTTP_Reflex_Scanner_set_column (1, scannerState_);
+    //HTTP_Reflex_Scanner_set_lineno (1, scannerState_);
   } // end IF
 
   // parse data fragment
@@ -540,14 +540,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     bufferState_ = yy_scan_bytes (fragment_->rd_ptr (),
                                   static_cast<int> (fragment_->length ()),
                                   scannerState_);
-  if (!bufferState_)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yy_scan_buffer/bytes(0x%@, %d), aborting\n"),
-                fragment_->rd_ptr (),
-                fragment_->length ()));
-    return false;
-  } // end IF
+
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("parsing fragment #%d --> %d byte(s)\n"),
 //              counter++,
@@ -567,10 +560,8 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("HTTP_ReflexParserDriver_T::end"));
 
   // sanity check(s)
-  ACE_ASSERT (bufferState_);
   ACE_ASSERT (scannerState_);
 
   // clean state
-  static_cast<FlexLexer*> (scannerState_)->del_matcher (bufferState_);
-  bufferState_ = NULL;
+  yy_delete_buffer (bufferState_, scannerState_); bufferState_ = NULL;
 }

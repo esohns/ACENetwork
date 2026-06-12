@@ -555,7 +555,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              converter >> content_length_or_chunk_size;
                              yyextra->contentLengthOrChunkSize (content_length_or_chunk_size);
                              ACE_UINT64 missing_bytes = content_length_or_chunk_size;
-                             if (debug())
+                             if (debug ())
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found body @%d of %d byte(s)\n"),
                                            yyextra->offset (),
@@ -711,7 +711,8 @@ HTTP_Reflex_Scanner_lex (HTTP_STYPE* yylval, HTTP_LTYPE* yylloc, yyscan_t scanne
 void
 HTTP_Reflex_Scanner_set_column (int n, yyscan_t scanner)
 {
-  static_cast<yyscanner_t*>(scanner)->matcher().columno(n);
+  if (static_cast<yyscanner_t*> (scanner)->has_matcher ())
+    static_cast<yyscanner_t*>(scanner)->matcher ().columno (n);
 }
 
 int
