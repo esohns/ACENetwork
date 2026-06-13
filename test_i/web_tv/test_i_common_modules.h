@@ -82,7 +82,7 @@
 #include "http_reflex_parser_driver.h"
 #else
 #include "http_parser_driver.h"
-#endif // REFLEX_SUPPORT
+#endif // REFLEX_USE
 
 #include "test_i_message.h"
 #include "test_i_module_converter.h"
@@ -124,7 +124,7 @@ typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
 typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,
                             Test_I_SessionMessage> HTTP_ParserDriver_t;
-#endif // REFLEX_SUPPORT
+#endif // REFLEX_USE
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct Test_I_WebTV_ModuleHandlerConfiguration,

@@ -79,12 +79,12 @@ class HTTP_ReflexParserDriver_T
   virtual void dump_state () const;
 
  protected:
-  struct HTTP_ParserConfiguration* configuration_;
-  bool                             finished_; // processed the whole entity ?
-  ACE_Message_Block*               fragment_;
-  Stream_ITask*                    itask_;
-  size_t                           offset_; // parsed entity bytes
-  struct HTTP_Record               record_;
+  struct HTTP_ParserConfiguration*       configuration_;
+  bool                                   finished_; // processed the whole entity ?
+  ACE_Message_Block*                     fragment_;
+  Stream_ITask*                          itask_;
+  size_t                                 offset_; // parsed entity bytes
+  struct HTTP_Record                     record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ReflexParserDriver_T ())
@@ -102,11 +102,13 @@ class HTTP_ReflexParserDriver_T
   inline virtual void destroy (yyscan_t, void*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool lex (yyscan_t state_in) { ACE_ASSERT (false); return false; /*HTTP_Scanner_lex (NULL, NULL, this, state_in);*/ };
 
-  YY_BUFFER_STATE                  bufferState_;
-  bool                             isFirst_;
-  bool                             isInitialized_;
-  ACE_Message_Queue_Base*          messageQueue_;
-  yyscan_t                         scannerState_;
+  YY_BUFFER_STATE                        bufferState_;
+  //reflex::Input                          input_;
+  bool                                   isFirst_;
+  bool                                   isInitialized_;
+  FlexLexer::AbstractBaseLexer::Matcher* matcher_;
+  ACE_Message_Queue_Base*                messageQueue_;
+  yyscan_t                               scannerState_;
 };
 
 // include template definition

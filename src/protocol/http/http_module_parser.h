@@ -28,7 +28,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
-#include "stream_task_base_asynch.h"
+#include "stream_task_base_synch.h"
 
 #include "http_common.h"
 #include "http_defines.h"
@@ -48,26 +48,26 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType,
           typename ParserDriverType>
 class HTTP_Module_Parser_T
- : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
-                                  TimePolicyType,
-                                  ConfigurationType,
-                                  ControlMessageType,
-                                  DataMessageType,
-                                  SessionMessageType,
-                                  enum Stream_ControlType,
-                                  enum Stream_SessionMessageType,
-                                  struct Stream_UserData>
+ : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+                                 TimePolicyType,
+                                 ConfigurationType,
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType,
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_UserData>
  , public ParserDriverType
 {
-  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
-                                  TimePolicyType,
-                                  ConfigurationType,
-                                  ControlMessageType,
-                                  DataMessageType,
-                                  SessionMessageType,
-                                  enum Stream_ControlType,
-                                  enum Stream_SessionMessageType,
-                                  struct Stream_UserData> inherited;
+  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+                                 TimePolicyType,
+                                 ConfigurationType,
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType,
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_UserData> inherited;
   typedef ParserDriverType inherited2;
 
  public:
@@ -89,14 +89,22 @@ class HTTP_Module_Parser_T
                                      bool&);               // return value: pass message downstream ?
 
  protected:
-  DataMessageType* headFragment_;
+  DataMessageType*                    headFragment_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
 
+  // enqueue MB_STOP --> stop worker thread(s)
+  virtual void stop (bool = true,   // wait for completion ?
+                     bool = false); // high priority ? (i.e. do not wait for queued messages)
+
+  // override (part of) ACE_Task_Base
+  virtual int svc (void);
+
   // helper methods
+  void dispatch (ACE_Message_Block*);
   size_t getContentLength ();
 
   // override (part of) Common_IScannerBase
@@ -117,13 +125,14 @@ class HTTP_Module_Parser_T
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-
   //                            offset      size
   typedef std::vector<std::pair<ACE_UINT64, ACE_UINT32> > CHUNKS_T;
   typedef CHUNKS_T::const_iterator CHUNKS_ITERATOR_T;
-  CHUNKS_T         chunks_;
-  ACE_UINT64       contentLengthOrChunkSize_;
-  ACE_UINT64       bodyOrChunkBytesToSkip_;
+
+  ACE_UINT64                          bodyOrChunkBytesToSkip_;
+  CHUNKS_T                            chunks_;
+  ACE_UINT64                          contentLengthOrChunkSize_;
+  typename inherited::MESSAGE_QUEUE_T queue_; // parser-
 };
 
 ////////////////////////////////////////////////////////////////////////////////

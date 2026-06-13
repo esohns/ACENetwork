@@ -53,6 +53,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
  , bufferState_ (NULL)
  , isFirst_ (true)
  , isInitialized_ (false)
+ , matcher_ (NULL)
  , messageQueue_ (NULL)
  , scannerState_ (NULL)
 {
@@ -107,6 +108,9 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ReflexParserDriver_T::initialize"));
 
+  // sanity check(s)
+  ACE_ASSERT (scannerState_);
+
   if (isInitialized_)
   {
     configuration_ = NULL;
@@ -118,19 +122,35 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     isFirst_ = true;
 
     if (bufferState_)
-    {
-      ACE_ASSERT (scannerState_);
+    { ACE_ASSERT (scannerState_);
       yy_delete_buffer (bufferState_,
                         scannerState_);
       bufferState_ = NULL;
     } // end IF
 
     isInitialized_ = false;
+    if (matcher_)
+    { ACE_ASSERT (scannerState_);
+      yy_delete_buffer (matcher_, scannerState_);
+      matcher_ = NULL;
+    } // end IF
     messageQueue_ = NULL;
   } // end IF
 
   configuration_ =
     &const_cast<struct HTTP_ParserConfiguration&> (configuration_in);
+
+  //extern const reflex::Pattern::Opcode reflex_code_HTTP_Reflex_Scanner_INITIAL[];
+  extern void reflex_code_HTTP_Reflex_Scanner_INITIAL (reflex::Matcher&);
+  static reflex::Pattern PATTERN_INITIAL (reflex_code_HTTP_Reflex_Scanner_INITIAL);
+  ACE_NEW_NORETURN (matcher_,
+                    FlexLexer::AbstractBaseLexer::Matcher (PATTERN_INITIAL,
+                                                           reflex::Input (),
+                                                           static_cast<yyscanner_t*> (scannerState_),
+                                                           NULL));
+  ACE_ASSERT (matcher_);
+  static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
+
   messageQueue_ = configuration_->messageQueue;
   ACE_ASSERT (messageQueue_);
 
@@ -280,21 +300,34 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   offset_ = 0;
   record_.reset ();
 
-  if (!begin (NULL, 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_ReflexParserDriver_T::begin(), aborting\n")));
-    goto error;
-  } // end IF
-  do_scan_end = true;
-
   // initialize scanner ?
   if (isFirst_)
   {
     isFirst_ = false;
-    //HTTP_Reflex_Scanner_set_column (1, scannerState_);
-    //HTTP_Reflex_Scanner_set_lineno (1, scannerState_);
+    // HTTP_Reflex_Scanner_set_column (1, scannerState_);
+    // HTTP_Reflex_Scanner_set_lineno (1, scannerState_);
+
+    reflex::Input input (fragment_->rd_ptr (),
+                         fragment_->length ());
+    matcher_ = static_cast<yyscanner_t*> (scannerState_)->new_matcher (input,
+                                                                       NULL);
+    ACE_ASSERT (matcher_);
+    static_cast<yyscanner_t*> (scannerState_)->pop_matcher ();
+    static_cast<yyscanner_t*> (scannerState_)->buffer (fragment_->rd_ptr (),
+                                                       fragment_->length () + 1);
+    static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
+    matcher_->buffer (fragment_->length ());
+    matcher_->set_end (false);
+    matcher_->set_reserve (fragment_->size ());
   } // end IF
+
+  //if (!begin (NULL, 0))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to HTTP_ReflexParserDriver_T::begin(), aborting\n")));
+  //  goto error;
+  //} // end IF
+  //do_scan_end = true;
 
   // parse data fragment
   try {
@@ -435,25 +468,25 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
         done_b = true;
         break;
       }
-      case STREAM_MESSAGE_CONTROL:
-      {
-        handle_message_inline_b = true;
-        break;
-      }
+      //case STREAM_MESSAGE_CONTROL:
+      //{
+      //  handle_message_inline_b = true;
+      //  break;
+      //}
       case ACE_Message_Block::MB_DATA:
       case ACE_Message_Block::MB_PROTO:
         is_data_b = true;
         break;
-      case STREAM_MESSAGE_SESSION:
-      {
-        SessionMessageType* session_message_p =
-          static_cast<SessionMessageType*> (message_block_p);
-        if (unlikely (session_message_p->type () == STREAM_SESSION_MESSAGE_END))
-          done_b = true; // session has finished --> leave
-        else
-          handle_message_inline_b = true;
-        break;
-      }
+      //case STREAM_MESSAGE_SESSION:
+      //{
+      //  SessionMessageType* session_message_p =
+      //    static_cast<SessionMessageType*> (message_block_p);
+      //  if (unlikely (session_message_p->type () == STREAM_SESSION_MESSAGE_END))
+      //    done_b = true; // session has finished --> leave
+      //  else
+      //    handle_message_inline_b = true;
+      //  break;
+      //}
       default:
         break;
     } // end SWITCH
@@ -461,7 +494,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
       break;
 
     // requeue message ?
-    if (handle_message_inline_b)
+    if (unlikely (handle_message_inline_b))
     { ACE_ASSERT (itask_);
       itask_->handleMessage (message_block_p,
                              done_b);
@@ -480,7 +513,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     } // end ELSE
     message_block_p = NULL;
 
-    if (unlikely (done_b))
+    if (done_b)
       break;
   } while (true);
 
@@ -536,9 +569,17 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
 
   // create/initialize a new buffer state
   if (configuration_->useYYScanBuffer)
-    bufferState_ = yy_scan_buffer (fragment_->rd_ptr (),
-                                   fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
-                                   scannerState_);
+  {
+    //bufferState_ = yy_scan_buffer (fragment_->rd_ptr (),
+    //                               fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+    //                               scannerState_);
+    ACE_ASSERT (matcher_);
+    matcher_->buffer (fragment_->rd_ptr (),
+                      fragment_->length () + 1);
+    matcher_->buffer (fragment_->length ());
+    matcher_->set_end (false);
+    matcher_->set_reserve (fragment_->size ());
+  } // end IF
   else
     bufferState_ = yy_scan_bytes (fragment_->rd_ptr (),
                                   static_cast<int> (fragment_->length ()),
@@ -566,5 +607,11 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   ACE_ASSERT (scannerState_);
 
   // clean state
-  yy_delete_buffer (bufferState_, scannerState_); bufferState_ = NULL;
+  if (bufferState_)
+  {
+    yy_delete_buffer (bufferState_, scannerState_); bufferState_ = NULL;
+  } // end IF
+  //else
+    //yy_delete_buffer (YY_CURRENT_BUFFER);
+    //yy_delete_buffer (static_cast<yyscanner_t*> (scannerState_)->ptr_matcher (), scannerState_);
 }

@@ -723,7 +723,6 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (CBData_);
   if (unlikely (!sessionId_in)) // out-of-session message
     goto continue_;
-  ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 continue_:
 #if defined (GTK_USE)
@@ -750,7 +749,7 @@ continue_:
     case STREAM_SESSION_MESSAGE_STEP_DATA:
       event_e = COMMON_UI_EVENT_DATA; break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
-    {
+    { ACE_ASSERT (iterator != sessionDataMap_.end ());
       if ((*iterator).second->lock)
       {
         result = (*iterator).second->lock->acquire ();

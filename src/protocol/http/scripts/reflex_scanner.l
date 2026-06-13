@@ -66,7 +66,7 @@ void HTTP_Reflex_Scanner_set_column (int, yyscan_t);
 %option reentrant pointer
 /* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
-%option full
+%option full fast
 %option debug perf-report verbose warn
 /* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
                      ansi-definitions, ansi-prototypes, trace header-file extra-type'
@@ -555,23 +555,22 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              converter >> content_length_or_chunk_size;
                              yyextra->contentLengthOrChunkSize (content_length_or_chunk_size);
                              ACE_UINT64 missing_bytes = content_length_or_chunk_size;
-                             if (debug ())
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found body @%d of %d byte(s)\n"),
-                                           yyextra->offset (),
-                                           content_length_or_chunk_size));
+                             ACE_DEBUG ((LM_DEBUG,
+                                         ACE_TEXT ("found body @%u of %Q byte(s)\n"),
+                                         yyextra->offset (),
+                                         content_length_or_chunk_size));
                              --missing_bytes;
                              yyextra->bodyOrChunkBytesSkipped (1);
-/*                             char c = 0;
-                             for (unsigned int i = 0;
+                             for (ACE_UINT64 i = 0;
                                   i < missing_bytes;
                                   ++i)
-                             {
-                               c = yyinput (yyscanner);
-                               // *IMPORTANT NOTE*: yyinput() zeroes the buffer --> put the data back
-                               *(yyg->yy_c_buf_p - 1) = c;
-                             } // end FOR */
-                             BEGIN (data_);
+                               yyinput (yyscanner);
+                             yyextra->bodyOrChunkBytesSkipped (missing_bytes);
+                             BEGIN (INITIAL);
+                             yylval.ival = content_length_or_chunk_size;
+//                               return yy::HTTP_Parser::token::BODY;
+                             return http_tokentype::BODY;
+                             /*BEGIN (data_);*/
                            }
 } // end <body>
 <data_>{
@@ -643,22 +642,38 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 } // end <chunked_body>
 <chunk>{
 {CHUNK_LINE}{CRLF}         { yyextra->offset (yyleng);
-                             if (yyextra->contentLengthOrChunkSize ())
+                             ACE_UINT64 content_length_or_chunk_size =
+                               yyextra->contentLengthOrChunkSize ();
+                             if (content_length_or_chunk_size)
                              {
-/*                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found entity chunk @%d: %u byte(s)\n"),
+                               ACE_DEBUG ((LM_DEBUG,
+                                           ACE_TEXT ("found entity chunk @%u: %Q byte(s)\n"),
                                            yyextra->offset (),
-                                           content_length_or_chunk_size)); */
-                               BEGIN (data_2);
+                                           content_length_or_chunk_size));
+
+                               for (ACE_UINT64 i = 0;
+                                    i < content_length_or_chunk_size;
+                                    ++i)
+                                 yyinput (yyscanner);
+                               // gobble trailing delimiter (CRLF)
+                               char c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\r');
+                               c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\n');
+                               BEGIN (chunked_body);
+                               yylval.ival = content_length_or_chunk_size;
+/*                             return yy::HTTP_Parser::token::CHUNK; } */
+                               return http_tokentype::CHUNK;
+/*                               BEGIN (data_2);*/
                              } // end IF
                              else
                              {
-/*                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found last entity chunk @%d: 0 byte(s)\n"),
-                                           yyextra->offset ())); */
+                               ACE_DEBUG ((LM_DEBUG,
+                                           ACE_TEXT ("found last entity chunk @%u: 0 byte(s)\n"),
+                                           yyextra->offset ()));
                                // *NOTE*: do not consume the terminating CRLF
                                //         here; this happens in <chunked_body>
-                               yylval.ival = yyextra->contentLengthOrChunkSize ();
+                               yylval.ival = 0;
                                BEGIN (chunked_body);
 /*                             return yy::HTTP_Parser::token::CHUNK; */
                                return http_tokentype::CHUNK;

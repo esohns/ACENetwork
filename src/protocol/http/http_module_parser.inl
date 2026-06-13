@@ -48,9 +48,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
  : inherited (stream_in)
  , inherited2 (this)
  , headFragment_ (NULL)
+ , bodyOrChunkBytesToSkip_ (0)
  , chunks_ ()
  , contentLengthOrChunkSize_ (0)
- , bodyOrChunkBytesToSkip_ (0)
+ , queue_ (0,    // max # slots --> unlimited
+           NULL) // notification handle
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::HTTP_Module_Parser_T"));
 
@@ -117,8 +119,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
 
   ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
-  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
-    inherited::msg_queue_;
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue = &queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -154,134 +155,16 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleDataMessage"));
 
-  ACE_Message_Block *message_block_p = NULL, *message_block_2 = NULL;
-  int result = -1;
-  typename SessionMessageType::DATA_T* session_data_container_p =
-    inherited::sessionData_;
-  size_t content_length_i, total_length_i;
-
-  // initialize return value(s)
   passMessageDownstream_out = false;
 
-  // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT ((message_inout->capacity () - message_inout->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
-  *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
-  *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
-  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
-
-  if (!headFragment_)
-    headFragment_ = message_inout;
-  else
-  {
-    for (message_block_p = headFragment_;
-          message_block_p->cont ();
-          message_block_p = message_block_p->cont ());
-    message_block_p->cont (message_inout);
-  } // end ELSE
-  message_block_p = headFragment_;
-  ACE_ASSERT (message_block_p);
-  message_inout = NULL;
-
-  // OK: parse the message (fragment)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: parsing message (id:%u (%u byte(s))...\n"),
-              inherited::mod_->name (),
-              static_cast<DataMessageType*> (message_block_p)->id (),
-              message_block_p->total_length ()));
-
-parse:
-  if (!this->parse (message_block_p))
-  { // *NOTE*: most probable reason: connection
-    //         has been closed --> session end
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
-                inherited::mod_->name (),
-                static_cast<DataMessageType*> (message_block_p)->id ()));
-    return;
-  } // end IF
-  // the message fragment has been parsed successfully
-
-  if (!this->hasFinished ())
-    return; // --> wait for more data to arrive
-
-  // *NOTE*: the complete document has been parsed successfully,
-  //         but the headFragment_ MAY have additional data appended to it
-  //         --> re-frame the document body, if necessary
-  content_length_i = getContentLength ();
-  total_length_i = headFragment_->total_length ();
-  if (!content_length_i || content_length_i == total_length_i)
-  {
-    message_block_p = headFragment_;
-    headFragment_ = NULL;
-    goto continue_;
-  } // end IF
-  ACE_ASSERT (total_length_i > content_length_i);
-
-  message_block_p = Stream_Tools::get (content_length_i,
-                                       headFragment_,
-                                       message_block_2);
-  ACE_ASSERT (message_block_p);
-  headFragment_ = static_cast<DataMessageType*> (message_block_2);
-
-  if (headFragment_)
-  { // *TODO*: remove this ASAP
-    bool bytes_repaired_b = false;
-    // repair broken data; flex may (!) have clobbered the first few bytes
-    if ((headFragment_->length () >= 1) && (*headFragment_->rd_ptr () != 'H'))
-    { bytes_repaired_b = true;
-      *headFragment_->rd_ptr () = 'H';
-    } // end IF
-    if ((headFragment_->length () >= 2) && ((*headFragment_->rd_ptr () + 1) != 'T'))
-    { bytes_repaired_b = true;
-      *(headFragment_->rd_ptr () + 1) = 'T';
-    } // end IF
-    if ((headFragment_->length () >= 3) && ((*headFragment_->rd_ptr () + 2) != 'T'))
-    { bytes_repaired_b = true;
-      *(headFragment_->rd_ptr () + 2) = 'T';
-    } // end IF
-    if ((headFragment_->length () >= 4) && ((*headFragment_->rd_ptr () + 3) != 'P'))
-    { bytes_repaired_b = true;
-      *(headFragment_->rd_ptr () + 3) = 'P';
-    } // end IF
-    if (unlikely (bytes_repaired_b))
-      ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("%s: repaired HTTP header...\n"),
-                  inherited::mod_->name ()));
-  } // end IF
-
-continue_:
-  ACE_ASSERT (message_block_p);
-  chunks_.clear ();
-
-  // *NOTE*: the message has been parsed/framed successfully
-  //         --> pass the data (chain) downstream
-  result = inherited::put_next (message_block_p, NULL);
+  int result = queue_.enqueue_tail (message_inout, NULL);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", aborting\n"),
+                ACE_TEXT ("%s: failed to ACE_Message_Queue_T::enqueue_tail(): \"%m\", aborting\n"),
                 inherited::mod_->name ()));
-    message_block_p->release ();
+    message_inout->release (); message_inout = NULL;
     goto error;
-  } // end IF
-
-  // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
-  //                   that the complete document data has arrived
-  if (likely (session_data_container_p))
-    session_data_container_p->increase ();
-  if (unlikely (!inherited::putSessionMessage (STREAM_SESSION_MESSAGE_STEP,
-                                               session_data_container_p,
-                                               NULL,
-                                               false))) // expedited ?
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
-                inherited::mod_->name (),
-                STREAM_SESSION_MESSAGE_STEP));
-
-  if (headFragment_)
-  {
-    message_block_p = headFragment_;
-    goto parse;
   } // end IF
 
   return;
@@ -312,28 +195,59 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
+  bool high_priority_b = false;
+
   switch (message_inout->type ())
   {
     case STREAM_SESSION_MESSAGE_ABORT:
     {
-      if (headFragment_)
-      {
-        headFragment_->release (); headFragment_ = NULL;
-      } // end IF
-      chunks_.clear ();
+      unsigned int result = queue_.flush (false); // flush all data messages
+      if (unlikely (result == static_cast<unsigned int> (-1)))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to Stream_MessageQueue_T::flush(false): \"%m\", continuing\n"),
+                    inherited::mod_->name ()));
+      else if (result > 0)
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("%s: aborting: flushed %u inbound data messages\n"),
+                    inherited::mod_->name (),
+                    result));
+
+      high_priority_b = true;
+      goto end;
+    }
+    case STREAM_SESSION_MESSAGE_BEGIN:
+    {
+      // *NOTE*: this prevents a race condition in svc()
+      { ACE_GUARD (ACE_Thread_Mutex, aGuard, inherited::lock_);
+        inherited::threadCount_ = 1;
+        bool lock_activate_was_b = inherited::TASK_BASE_T::TASK_BASE_T::lockActivate_;
+        inherited::lockActivate_ = false;
+        if (unlikely (inherited::open (NULL) == -1))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("%s: failed to Common_Task_Base_T::open(), aborting\n"),
+                      inherited::mod_->name ()));
+          inherited::lockActivate_ = lock_activate_was_b;
+          inherited::threadCount_ = 0;
+          goto error;
+        } // end IF
+        inherited::lockActivate_ = lock_activate_was_b;
+        inherited::threadCount_ = 0;
+        ACE_ASSERT (!inherited::threadIds_.empty ());
+      } // end lock scope
+
+      break;
+
+error:
+      this->notify (STREAM_SESSION_MESSAGE_ABORT);
 
       break;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      //// *NOTE*: (in a 'passive' scenario,) a parser thread may be waiting for
-      ////         additional (entity) fragments to arrive
-      ////         --> tell it to return
-      //ACE_ASSERT (inherited::msg_queue_);
-      //result = inherited::msg_queue_->pulse ();
-      //if (result == -1)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("failed to ACE_Message_Queue_Base::pulse(): \"%m\", continuing\n")));
+end:
+      stop (true,             // wait ?
+            high_priority_b); // high priority ?
 
       if (headFragment_)
       {
@@ -446,7 +360,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     { ACE_ASSERT (message_block_p);
       if (bytes_to_skip <= message_block_p->length ())
         break;
-      bytes_to_skip -= static_cast<unsigned int> (message_block_p->length ());
+      bytes_to_skip -= message_block_p->length ();
       message_block_p->rd_ptr (message_block_p->length ());
       message_block_p = message_block_p->cont ();
     } while (true);
@@ -483,7 +397,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //         in the content length header; i.e. the next response may already
     //         have been (partially) received and appended to the fragment chain
     //         --> do this in the handleDataMessage() method
-    //ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
+    ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
   } // end IF
   else
   { // --> chunked transfer
@@ -542,6 +456,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
           message_block_p->length (bytes_to_skip);
           message_block_2->rd_ptr (bytes_to_skip);
         } // end IF
+        else
+        {
+          ACE_ASSERT (bytes_to_skip == message_block_p->length ());
+        } // end ELSE
         message_block_p = message_block_p->cont ();
         // skip over chunk delimiter
         while (!message_block_p->length ())
@@ -636,6 +554,295 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   return inherited::put (messageBlock_in,
                          timeValue_in);
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ParserDriverType>
+void
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
+                     ParserDriverType>::stop (bool waitForCompletion_in,
+                                              bool highPriority_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::stop"));
+
+  ACE_Message_Block* message_block_p = NULL;
+  int result;
+
+  // enqueue a control message
+  ACE_NEW_NORETURN (message_block_p,
+                    ACE_Message_Block (0,                                  // size
+                                       ACE_Message_Block::MB_STOP,         // type
+                                       NULL,                               // continuation
+                                       NULL,                               // data
+                                       NULL,                               // buffer allocator
+                                       NULL,                               // locking strategy
+                                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // priority
+                                       ACE_Time_Value::zero,               // execution time
+                                       ACE_Time_Value::max_time,           // deadline time
+                                       NULL,                               // data block allocator
+                                       NULL));                             // message allocator
+  if (unlikely (!message_block_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("%s: failed to allocate ACE_Message_Block: \"%m\", returning\n"),
+                inherited::mod_->name ()));
+    return;
+  } // end IF
+
+  result = (highPriority_in ? queue_.enqueue_head (message_block_p, NULL) :
+                              queue_.enqueue_tail (message_block_p, NULL));
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Message_Queue_T::%s(): \"%m\", continuing\n"),
+                inherited::mod_->name (),
+                (highPriority_in ? ACE_TEXT ("enqueue_head") : ACE_TEXT ("enqueue_tail"))));
+    message_block_p->release (); message_block_p = NULL;
+  } // end IF  
+  message_block_p = NULL;
+
+  if (waitForCompletion_in)
+  {
+    Common_ITask* itask_p = this;
+    itask_p->wait (true); // wait for message queue(s) ?
+  } // end IF
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ParserDriverType>
+int
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
+                     ParserDriverType>::svc (void)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::svc"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0A00) // _WIN32_WINNT_WIN10
+  Common_Error_Tools::setThreadName (inherited::threadName_,
+                                     NULL);
+#else
+  Common_Error_Tools::setThreadName (inherited::threadName_,
+                                     0);
+#endif // _WIN32_WINNT_WIN10
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: (%s): worker thread (id: %t, group: %d) starting\n"),
+              inherited::mod_->name (),
+              ACE_TEXT (inherited::threadName_.c_str ()),
+              inherited::grp_id_));
+
+  ACE_Message_Block* message_block_p = NULL;
+  int result;
+  int error = -1;
+
+  do
+  {
+    result = queue_.dequeue_head (message_block_p, NULL);
+    if (unlikely (result == -1))
+    {
+      error = ACE_OS::last_error ();
+      //if (error == ETIME)
+      //  goto continue_;
+
+      if (unlikely (error != ESHUTDOWN))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: worker thread %t failed to ACE_Message_Queue_T::dequeue_head(): \"%m\", aborting\n"),
+                    inherited::mod_->name ()));
+        break;
+      } // end IF
+      result = 0; // OK, queue has been deactivate()d
+      break;
+    } // end IF
+    ACE_ASSERT (message_block_p);
+
+    if (unlikely (message_block_p->msg_type () == ACE_Message_Block::MB_STOP))
+    {
+      message_block_p->release (); message_block_p = NULL;
+      break; // done
+    } // end IF
+
+    dispatch (message_block_p);
+    message_block_p = NULL;
+  } while (true);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: (%s): worker thread (id: %t, group: %d) leaving\n"),
+              inherited::mod_->name (),
+              ACE_TEXT (inherited::threadName_.c_str ()),
+              inherited::grp_id_));
+
+  return result;
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ParserDriverType>
+void
+HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                     TimePolicyType,
+                     ConfigurationType,
+                     ControlMessageType,
+                     DataMessageType,
+                     SessionMessageType,
+                     ParserDriverType>::dispatch (ACE_Message_Block* message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::dispatch"));
+
+  ACE_Message_Block *message_block_p = NULL, *message_block_2 = NULL;
+  int result = -1;
+  typename SessionMessageType::DATA_T* session_data_container_p =
+    inherited::sessionData_;
+  size_t content_length_i, total_length_i;
+
+  // append the "\0\0"-sequence, as required by flex
+  ACE_ASSERT ((message_in->capacity () - message_in->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  *(message_in->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
+  *(message_in->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
+  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
+
+  if (!headFragment_)
+    headFragment_ = static_cast<DataMessageType*> (message_in);
+  else
+  {
+    for (message_block_p = headFragment_;
+         message_block_p->cont ();
+         message_block_p = message_block_p->cont ());
+    message_block_p->cont (message_in);
+  } // end ELSE
+  message_block_p = headFragment_;
+  ACE_ASSERT (message_block_p);
+
+  // OK: parse the message (fragment)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: parsing message (id:%u (%u byte(s))...\n"),
+              inherited::mod_->name (),
+              static_cast<DataMessageType*> (message_block_p)->id (),
+              message_block_p->total_length ()));
+
+parse:
+  if (!this->parse (message_block_p))
+  { // *NOTE*: most probable reason: connection
+    //         has been closed --> session end
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
+                inherited::mod_->name (),
+                static_cast<DataMessageType*> (message_block_p)->id ()));
+    return;
+  } // end IF
+  // the message fragment has been parsed successfully
+
+  if (!this->hasFinished ())
+    return; // --> wait for more data to arrive
+
+  // *NOTE*: the complete document has been parsed successfully,
+  //         but the headFragment_ MAY have additional data appended to it
+  //         --> re-frame the document body, if necessary
+  content_length_i = getContentLength ();
+  total_length_i = headFragment_->total_length ();
+  if (!content_length_i || content_length_i == total_length_i)
+  {
+    message_block_p = headFragment_;
+    headFragment_ = NULL;
+    goto continue_;
+  } // end IF
+  ACE_ASSERT (total_length_i > content_length_i);
+
+  message_block_p = Stream_Tools::get (content_length_i,
+                                       headFragment_,
+                                       message_block_2);
+  ACE_ASSERT (message_block_p);
+  headFragment_ = static_cast<DataMessageType*> (message_block_2);
+
+  if (headFragment_)
+  { // *TODO*: remove this ASAP
+    bool bytes_repaired_b = false;
+    // repair broken data; flex may (!) have clobbered the first few bytes
+    if ((headFragment_->length () >= 1) && (*headFragment_->rd_ptr () != 'H'))
+    { bytes_repaired_b = true;
+      *headFragment_->rd_ptr () = 'H';
+    } // end IF
+    if ((headFragment_->length () >= 2) && ((*headFragment_->rd_ptr () + 1) != 'T'))
+    { bytes_repaired_b = true;
+      *(headFragment_->rd_ptr () + 1) = 'T';
+    } // end IF
+    if ((headFragment_->length () >= 3) && ((*headFragment_->rd_ptr () + 2) != 'T'))
+    { bytes_repaired_b = true;
+      *(headFragment_->rd_ptr () + 2) = 'T';
+    } // end IF
+    if ((headFragment_->length () >= 4) && ((*headFragment_->rd_ptr () + 3) != 'P'))
+    { bytes_repaired_b = true;
+      *(headFragment_->rd_ptr () + 3) = 'P';
+    } // end IF
+    if (unlikely (bytes_repaired_b))
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("%s: repaired HTTP header...\n"),
+                  inherited::mod_->name ()));
+  } // end IF
+
+continue_:
+  ACE_ASSERT (message_block_p);
+  chunks_.clear ();
+
+  // *NOTE*: the message has been parsed/framed successfully
+  //         --> pass the data (chain) downstream
+  result = inherited::put_next (message_block_p, NULL);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", aborting\n"),
+                inherited::mod_->name ()));
+    message_block_p->release ();
+    goto error;
+  } // end IF
+
+  // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
+  //                   that the complete document data has arrived
+  if (likely (session_data_container_p))
+    session_data_container_p->increase ();
+  if (unlikely (!inherited::putSessionMessage (STREAM_SESSION_MESSAGE_STEP,
+                                               session_data_container_p,
+                                               NULL,
+                                               false))) // expedited ?
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
+                inherited::mod_->name (),
+                STREAM_SESSION_MESSAGE_STEP));
+
+  if (headFragment_)
+  {
+    message_block_p = headFragment_;
+    goto parse;
+  } // end IF
+
+  return;
+
+error:
+  inherited::notify (STREAM_SESSION_MESSAGE_ABORT);
 }
 
 template <ACE_SYNCH_DECL,

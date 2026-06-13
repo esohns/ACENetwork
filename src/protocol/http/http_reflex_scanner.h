@@ -20,6 +20,7 @@
 #undef REFLEX_OPTION_bison_locations
 #undef REFLEX_OPTION_debug
 #undef REFLEX_OPTION_extra_type
+#undef REFLEX_OPTION_fast
 #undef REFLEX_OPTION_flex
 #undef REFLEX_OPTION_full
 #undef REFLEX_OPTION_header_file
@@ -51,6 +52,7 @@
 #define REFLEX_OPTION_bison_locations     true
 #define REFLEX_OPTION_debug               true
 #define REFLEX_OPTION_extra_type          HTTP_Reflex_IParser*
+#define REFLEX_OPTION_fast                true
 #define REFLEX_OPTION_flex                true
 #define REFLEX_OPTION_full                true
 #define REFLEX_OPTION_header_file         "http_reflex_scanner.h"
@@ -168,6 +170,7 @@ class HTTP_Reflex_Scanner_FlexLexer : public FlexLexer {
     LexerError("HTTP_Reflex_Scanner_FlexLexer::yylex invoked but %option bison-bridge and/or bison-locations is used");
     yyterminate();
   }
+  inline virtual int wrap () { return yywrap (); }
   // the flex bison-locations lexer function defined by SECTION 2
   virtual int HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLTYPE& yylloc);
   void perf_report()
@@ -178,54 +181,54 @@ class HTTP_Reflex_Scanner_FlexLexer : public FlexLexer {
     std::cerr << "  INITIAL rules matched:\n"
       "    rule at line 338 matched " << perf_report_INITIAL_rule[0] << " times, matching " << perf_report_INITIAL_size[0] << " bytes total in " << perf_report_INITIAL_time[0] << " ms\n"
       "    rule at line 342 matched " << perf_report_INITIAL_rule[1] << " times, matching " << perf_report_INITIAL_size[1] << " bytes total in " << perf_report_INITIAL_time[1] << " ms\n"
-      "    rule at line 690 matched " << perf_report_INITIAL_rule[2] << " times, matching " << perf_report_INITIAL_size[2] << " bytes total in " << perf_report_INITIAL_time[2] << " ms\n";
+      "    rule at line 705 matched " << perf_report_INITIAL_rule[2] << " times, matching " << perf_report_INITIAL_size[2] << " bytes total in " << perf_report_INITIAL_time[2] << " ms\n";
     std::cerr << "  request rules matched:\n"
       "    rule at line 348 matched " << perf_report_request_rule[0] << " times, matching " << perf_report_request_size[0] << " bytes total in " << perf_report_request_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_request_rule[1] << " times, matching " << perf_report_request_size[1] << " bytes total in " << perf_report_request_time[1] << " ms\n";
+      "    rule at line 705 matched " << perf_report_request_rule[1] << " times, matching " << perf_report_request_size[1] << " bytes total in " << perf_report_request_time[1] << " ms\n";
     std::cerr << "  uri rules matched:\n"
       "    rule at line 359 matched " << perf_report_uri_rule[0] << " times, matching " << perf_report_uri_size[0] << " bytes total in " << perf_report_uri_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_uri_rule[1] << " times, matching " << perf_report_uri_size[1] << " bytes total in " << perf_report_uri_time[1] << " ms\n";
+      "    rule at line 705 matched " << perf_report_uri_rule[1] << " times, matching " << perf_report_uri_size[1] << " bytes total in " << perf_report_uri_time[1] << " ms\n";
     std::cerr << "  version rules matched:\n"
       "    rule at line 370 matched " << perf_report_version_rule[0] << " times, matching " << perf_report_version_size[0] << " bytes total in " << perf_report_version_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_version_rule[1] << " times, matching " << perf_report_version_size[1] << " bytes total in " << perf_report_version_time[1] << " ms\n";
+      "    rule at line 705 matched " << perf_report_version_rule[1] << " times, matching " << perf_report_version_size[1] << " bytes total in " << perf_report_version_time[1] << " ms\n";
     std::cerr << "  request_headers rules matched:\n"
       "    rule at line 381 matched " << perf_report_request_headers_rule[0] << " times, matching " << perf_report_request_headers_size[0] << " bytes total in " << perf_report_request_headers_time[0] << " ms\n"
       "    rule at line 389 matched " << perf_report_request_headers_rule[1] << " times, matching " << perf_report_request_headers_size[1] << " bytes total in " << perf_report_request_headers_time[1] << " ms\n"
       "    rule at line 397 matched " << perf_report_request_headers_rule[2] << " times, matching " << perf_report_request_headers_size[2] << " bytes total in " << perf_report_request_headers_time[2] << " ms\n"
       "    rule at line 405 matched " << perf_report_request_headers_rule[3] << " times, matching " << perf_report_request_headers_size[3] << " bytes total in " << perf_report_request_headers_time[3] << " ms\n"
-      "    rule at line 690 matched " << perf_report_request_headers_rule[4] << " times, matching " << perf_report_request_headers_size[4] << " bytes total in " << perf_report_request_headers_time[4] << " ms\n";
+      "    rule at line 705 matched " << perf_report_request_headers_rule[4] << " times, matching " << perf_report_request_headers_size[4] << " bytes total in " << perf_report_request_headers_time[4] << " ms\n";
     std::cerr << "  response rules matched:\n"
       "    rule at line 448 matched " << perf_report_response_rule[0] << " times, matching " << perf_report_response_size[0] << " bytes total in " << perf_report_response_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_response_rule[1] << " times, matching " << perf_report_response_size[1] << " bytes total in " << perf_report_response_time[1] << " ms\n";
+      "    rule at line 705 matched " << perf_report_response_rule[1] << " times, matching " << perf_report_response_size[1] << " bytes total in " << perf_report_response_time[1] << " ms\n";
     std::cerr << "  status rules matched:\n"
       "    rule at line 459 matched " << perf_report_status_rule[0] << " times, matching " << perf_report_status_size[0] << " bytes total in " << perf_report_status_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_status_rule[1] << " times, matching " << perf_report_status_size[1] << " bytes total in " << perf_report_status_time[1] << " ms\n";
+      "    rule at line 705 matched " << perf_report_status_rule[1] << " times, matching " << perf_report_status_size[1] << " bytes total in " << perf_report_status_time[1] << " ms\n";
     std::cerr << "  reason rules matched:\n"
       "    rule at line 470 matched " << perf_report_reason_rule[0] << " times, matching " << perf_report_reason_size[0] << " bytes total in " << perf_report_reason_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_reason_rule[1] << " times, matching " << perf_report_reason_size[1] << " bytes total in " << perf_report_reason_time[1] << " ms\n";
+      "    rule at line 705 matched " << perf_report_reason_rule[1] << " times, matching " << perf_report_reason_size[1] << " bytes total in " << perf_report_reason_time[1] << " ms\n";
     std::cerr << "  response_headers rules matched:\n"
       "    rule at line 481 matched " << perf_report_response_headers_rule[0] << " times, matching " << perf_report_response_headers_size[0] << " bytes total in " << perf_report_response_headers_time[0] << " ms\n"
       "    rule at line 489 matched " << perf_report_response_headers_rule[1] << " times, matching " << perf_report_response_headers_size[1] << " bytes total in " << perf_report_response_headers_time[1] << " ms\n"
       "    rule at line 497 matched " << perf_report_response_headers_rule[2] << " times, matching " << perf_report_response_headers_size[2] << " bytes total in " << perf_report_response_headers_time[2] << " ms\n"
       "    rule at line 505 matched " << perf_report_response_headers_rule[3] << " times, matching " << perf_report_response_headers_size[3] << " bytes total in " << perf_report_response_headers_time[3] << " ms\n"
-      "    rule at line 690 matched " << perf_report_response_headers_rule[4] << " times, matching " << perf_report_response_headers_size[4] << " bytes total in " << perf_report_response_headers_time[4] << " ms\n";
+      "    rule at line 705 matched " << perf_report_response_headers_rule[4] << " times, matching " << perf_report_response_headers_size[4] << " bytes total in " << perf_report_response_headers_time[4] << " ms\n";
     std::cerr << "  body rules matched:\n"
       "    rule at line 546 matched " << perf_report_body_rule[0] << " times, matching " << perf_report_body_size[0] << " bytes total in " << perf_report_body_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_body_rule[1] << " times, matching " << perf_report_body_size[1] << " bytes total in " << perf_report_body_time[1] << " ms\n";
+      "    rule at line 705 matched " << perf_report_body_rule[1] << " times, matching " << perf_report_body_size[1] << " bytes total in " << perf_report_body_time[1] << " ms\n";
     std::cerr << "  chunked_body rules matched:\n"
-      "    rule at line 590 matched " << perf_report_chunked_body_rule[0] << " times, matching " << perf_report_chunked_body_size[0] << " bytes total in " << perf_report_chunked_body_time[0] << " ms\n"
-      "    rule at line 623 matched " << perf_report_chunked_body_rule[1] << " times, matching " << perf_report_chunked_body_size[1] << " bytes total in " << perf_report_chunked_body_time[1] << " ms\n"
-      "    rule at line 631 matched " << perf_report_chunked_body_rule[2] << " times, matching " << perf_report_chunked_body_size[2] << " bytes total in " << perf_report_chunked_body_time[2] << " ms\n"
-      "    rule at line 690 matched " << perf_report_chunked_body_rule[3] << " times, matching " << perf_report_chunked_body_size[3] << " bytes total in " << perf_report_chunked_body_time[3] << " ms\n";
+      "    rule at line 589 matched " << perf_report_chunked_body_rule[0] << " times, matching " << perf_report_chunked_body_size[0] << " bytes total in " << perf_report_chunked_body_time[0] << " ms\n"
+      "    rule at line 622 matched " << perf_report_chunked_body_rule[1] << " times, matching " << perf_report_chunked_body_size[1] << " bytes total in " << perf_report_chunked_body_time[1] << " ms\n"
+      "    rule at line 630 matched " << perf_report_chunked_body_rule[2] << " times, matching " << perf_report_chunked_body_size[2] << " bytes total in " << perf_report_chunked_body_time[2] << " ms\n"
+      "    rule at line 705 matched " << perf_report_chunked_body_rule[3] << " times, matching " << perf_report_chunked_body_size[3] << " bytes total in " << perf_report_chunked_body_time[3] << " ms\n";
     std::cerr << "  chunk rules matched:\n"
-      "    rule at line 645 matched " << perf_report_chunk_rule[0] << " times, matching " << perf_report_chunk_size[0] << " bytes total in " << perf_report_chunk_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_chunk_rule[1] << " times, matching " << perf_report_chunk_size[1] << " bytes total in " << perf_report_chunk_time[1] << " ms\n";
+      "    rule at line 644 matched " << perf_report_chunk_rule[0] << " times, matching " << perf_report_chunk_size[0] << " bytes total in " << perf_report_chunk_time[0] << " ms\n"
+      "    rule at line 705 matched " << perf_report_chunk_rule[1] << " times, matching " << perf_report_chunk_size[1] << " bytes total in " << perf_report_chunk_time[1] << " ms\n";
     std::cerr << "  data_ rules matched:\n"
-      "    rule at line 578 matched " << perf_report_data__rule[0] << " times, matching " << perf_report_data__size[0] << " bytes total in " << perf_report_data__time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_data__rule[1] << " times, matching " << perf_report_data__size[1] << " bytes total in " << perf_report_data__time[1] << " ms\n";
+      "    rule at line 577 matched " << perf_report_data__rule[0] << " times, matching " << perf_report_data__size[0] << " bytes total in " << perf_report_data__time[0] << " ms\n"
+      "    rule at line 705 matched " << perf_report_data__rule[1] << " times, matching " << perf_report_data__size[1] << " bytes total in " << perf_report_data__time[1] << " ms\n";
     std::cerr << "  data_2 rules matched:\n"
-      "    rule at line 669 matched " << perf_report_data_2_rule[0] << " times, matching " << perf_report_data_2_size[0] << " bytes total in " << perf_report_data_2_time[0] << " ms\n"
-      "    rule at line 690 matched " << perf_report_data_2_rule[1] << " times, matching " << perf_report_data_2_size[1] << " bytes total in " << perf_report_data_2_time[1] << " ms\n";
+      "    rule at line 684 matched " << perf_report_data_2_rule[0] << " times, matching " << perf_report_data_2_size[0] << " bytes total in " << perf_report_data_2_time[0] << " ms\n"
+      "    rule at line 705 matched " << perf_report_data_2_rule[1] << " times, matching " << perf_report_data_2_size[1] << " bytes total in " << perf_report_data_2_time[1] << " ms\n";
     std::cerr << "  WARNING: execution time measurements are relative:\n  - includes caller's execution time between matches when HTTP_Reflex_Scanner_lex() returns\n  - perf-report instrumentation adds overhead that increases execution times\n" << std::endl;
     set_perf_report();
   }

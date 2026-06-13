@@ -87,6 +87,7 @@
 #include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
 
+#include "stream_allocatoralignedheap.h"
 #include "stream_allocatorheap.h"
 
 #include "stream_dec_defines.h"
@@ -758,8 +759,14 @@ do_work (const std::string& configurationFile_in,
   allocator_configuration_2.defaultBufferSize =
     TEST_I_WEBTV_DEFAULT_BUFFER_SIZE;
 
+#if defined (REFLEX_USE)
+  Stream_AllocatorAlignedHeap_T<ACE_MT_SYNCH,
+                                struct Common_AllocatorConfiguration,
+                                4096ULL> heap_allocator;
+#else
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
+#endif // REFLEX_USE
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -893,7 +900,7 @@ do_work (const std::string& configurationFile_in,
                                                    stream_configuration);
 
   modulehandler_configuration_marshal = modulehandler_configuration;
-  struct HTTP_ParserConfiguration parserConfiguration_2;
+  struct HTTP_ParserConfiguration parserConfiguration_2 = parser_configuration;
   modulehandler_configuration_marshal.parserConfiguration =
     &parserConfiguration_2;
   configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
@@ -901,7 +908,7 @@ do_work (const std::string& configurationFile_in,
                                                                                &modulehandler_configuration_marshal)));
 
   modulehandler_configuration_2a = modulehandler_configuration;
-  struct HTTP_ParserConfiguration parserConfiguration_2a;
+  struct HTTP_ParserConfiguration parserConfiguration_2a = parser_configuration;
   modulehandler_configuration_2a.parserConfiguration = &parserConfiguration_2a;
   modulehandler_configuration_2a.subscriber = &message_handler_2;
   // ******************** (sub-)stream configuration data *********************
@@ -912,14 +919,15 @@ do_work (const std::string& configurationFile_in,
                                                       modulehandler_configuration_2a,
                                                       stream_configuration_2a);
   modulehandler_configuration_marshal_2a = modulehandler_configuration_2a;
-  struct HTTP_ParserConfiguration parserConfiguration_marshal_2a;
+  struct HTTP_ParserConfiguration parserConfiguration_marshal_2a =
+    parser_configuration;
   modulehandler_configuration_marshal_2a.parserConfiguration =
     &parserConfiguration_marshal_2a;
   configuration_in.streamConfiguration_2a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_marshal_2a)));
   modulehandler_configuration_2b = modulehandler_configuration;
-  struct HTTP_ParserConfiguration parserConfiguration_2b;
+  struct HTTP_ParserConfiguration parserConfiguration_2b = parser_configuration;
   modulehandler_configuration_2b.parserConfiguration = &parserConfiguration_2b;
   modulehandler_configuration_2b.subscriber = &message_handler_2;
   // ******************** (sub-)stream configuration data *********************
@@ -930,7 +938,8 @@ do_work (const std::string& configurationFile_in,
                                                       modulehandler_configuration_2b,
                                                       stream_configuration_2b);
   modulehandler_configuration_marshal_2b = modulehandler_configuration_2b;
-  struct HTTP_ParserConfiguration parserConfiguration_marshal_2b;
+  struct HTTP_ParserConfiguration parserConfiguration_marshal_2b =
+    parser_configuration;
   modulehandler_configuration_marshal_2b.parserConfiguration =
     &parserConfiguration_marshal_2b;
   configuration_in.streamConfiguration_2b.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Marshal"),

@@ -62,8 +62,9 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::handle_input"));
 
-  int result = -1;
-  ssize_t bytes_received = -1;
+  int result;
+  int error;
+  ssize_t bytes_received;
   ACE_Message_Block* message_block_p = NULL;
 
   // sanity check
@@ -81,7 +82,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                 inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
-  message_block_p->size (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize);
+  //message_block_p->size (inherited::CONNECTION_BASE_T::configuration_->allocatorConfiguration->defaultBufferSize);
 
   // read some data from the socket
 //retry:
@@ -97,7 +98,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
       // - connection reset by peer
       // - connection abort()ed locally
       // [- data buffer is empty (SSL)]
-      int error = ACE_OS::last_error ();
+      error = ACE_OS::last_error ();
       if (error == EWOULDBLOCK)      // 11: SSL_read() failed (buffer is empty)
       { // clean up
         message_block_p->release ();
@@ -167,7 +168,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
   result = inherited::stream_.put (message_block_p, NULL);
   if (unlikely (result == -1))
   {
-    int error = ACE_OS::last_error ();
+    error = ACE_OS::last_error ();
     if (error != ESHUTDOWN) // 10058: queue has been deactivate()d
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u/%s: failed to ACE_Stream::put(): \"%m\", aborting\n"),
