@@ -102,17 +102,12 @@ class HTTP_ParserDriver_T
   inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool lex (yyscan_t state_in) { ACE_ASSERT (false); return false; /*HTTP_Scanner_lex (NULL, NULL, this, state_in);*/ };
 
+  struct yy_buffer_state*          bufferState_;
   bool                             isFirst_;
-
-  //// parser
-  //yy::HTTP_Parser                  parser_;
-
-  // scanner
+  bool                             isInitialized_;
+  ACE_Message_Queue_Base*          messageQueue_;
   yyscan_t                         scannerState_;
   //std::string                      scannerTables_;
-  struct yy_buffer_state*          bufferState_;
-
-  bool                             isInitialized_;
 };
 
 // include template definition

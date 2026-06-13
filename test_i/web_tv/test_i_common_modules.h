@@ -78,7 +78,7 @@
 
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
-#if defined (REFLEX_SUPPORT)
+#if defined (REFLEX_USE)
 #include "http_reflex_parser_driver.h"
 #else
 #include "http_parser_driver.h"
@@ -116,7 +116,7 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Stream_ControlMessage_t,
                                Test_I_Message,
                                Test_I_SessionMessage> Test_I_HTTPStreamer;
-#if defined (REFLEX_SUPPORT)
+#if defined (REFLEX_USE)
 typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
                                   Common_TimePolicy_t,
                                   Test_I_SessionMessage> HTTP_ParserDriver_t;
@@ -162,7 +162,7 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Stream_ControlMessage_t,
                                Test_I_Message,
                                Test_I_SessionMessage_3> Test_I_HTTPStreamer_3;
-#if defined (REFLEX_SUPPORT)
+#if defined (REFLEX_USE)
 typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
                                   Common_TimePolicy_t,
                                   Test_I_SessionMessage_3> HTTP_ParserDriver_3;
@@ -170,7 +170,7 @@ typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
 typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,
                             Test_I_SessionMessage_3> HTTP_ParserDriver_3;
-#endif // REFLEX_SUPPORT
+#endif // REFLEX_USE
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,

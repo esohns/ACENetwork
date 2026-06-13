@@ -49,11 +49,12 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
  , itask_ (itask_in)
  , offset_ (0)
  , record_ ()
+ , bufferState_ (NULL)
  , isFirst_ (true)
+ , isInitialized_ (false)
+ , messageQueue_ (NULL)
  , scannerState_ (NULL)
  //, scannerTables_ ()
- , bufferState_ (NULL)
- , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::HTTP_ParserDriver_T"));
 
@@ -215,11 +216,13 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
     //} // end IF
 
     isInitialized_ = false;
+    messageQueue_ = NULL;
   } // end IF
 
   configuration_ =
     &const_cast<struct HTTP_ParserConfiguration&> (configuration_in);
-  ACE_ASSERT (configuration_->messageQueue);
+  messageQueue_ = configuration_->messageQueue;
+  ACE_ASSERT (messageQueue_);
 
 #if defined (_DEBUG)
   HTTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
@@ -499,13 +502,13 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->block);
-  ACE_ASSERT (configuration_->messageQueue);
+  ACE_ASSERT (messageQueue_);
 
   // 1. wait for data
   do
   {
-    result_i = configuration_->messageQueue->dequeue_head (message_block_p,
-                                                           NULL);
+    result_i = messageQueue_->dequeue_head (message_block_p,
+                                            NULL);
     if (unlikely (result_i == -1))
     { int error = ACE_OS::last_error ();
       if (unlikely (error != ESHUTDOWN))
@@ -556,8 +559,8 @@ HTTP_ParserDriver_T<ACE_SYNCH_USE,
     } // end IF
     else
     {
-      result_i = configuration_->messageQueue->enqueue_tail (message_block_p,
-                                                             NULL);
+      result_i = messageQueue_->enqueue_tail (message_block_p,
+                                              NULL);
       if (unlikely (result_i == -1))
       {
         ACE_DEBUG ((LM_ERROR,

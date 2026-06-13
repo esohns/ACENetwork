@@ -1,5 +1,5 @@
-include (flex)
-include (reflex)
+include (PreScannerParserImplementation)
+include (SetScannerParserImplementation)
 
 include (ffmpeg)
 include (ImageMagick)
@@ -37,6 +37,7 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 
 if (REFLEX_SUPPORT)
+ add_definitions (-DWITH_REALLOC=0)
  include_directories (${REFLEX_INCLUDE_DIRS})
 endif (REFLEX_SUPPORT)
 if (FFMPEG_SUPPORT)

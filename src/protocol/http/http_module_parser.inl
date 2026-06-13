@@ -124,8 +124,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to HTTP_ParserDriver_T::initialize(), aborting\n"),
                 inherited::mod_->name ()));
+    const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      NULL;
     return false;
   } // end IF
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+    NULL;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -221,15 +225,28 @@ parse:
 
   if (headFragment_)
   { // *TODO*: remove this ASAP
+    bool bytes_repaired_b = false;
     // repair broken data; flex may (!) have clobbered the first few bytes
-    if (likely (headFragment_->length () >= 1))
+    if ((headFragment_->length () >= 1) && (*headFragment_->rd_ptr () != 'H'))
+    { bytes_repaired_b = true;
       *headFragment_->rd_ptr () = 'H';
-    if (likely (headFragment_->length () >= 2))
+    } // end IF
+    if ((headFragment_->length () >= 2) && ((*headFragment_->rd_ptr () + 1) != 'T'))
+    { bytes_repaired_b = true;
       *(headFragment_->rd_ptr () + 1) = 'T';
-    if (likely (headFragment_->length () >= 3))
+    } // end IF
+    if ((headFragment_->length () >= 3) && ((*headFragment_->rd_ptr () + 2) != 'T'))
+    { bytes_repaired_b = true;
       *(headFragment_->rd_ptr () + 2) = 'T';
-    if (likely (headFragment_->length () >= 4))
+    } // end IF
+    if ((headFragment_->length () >= 4) && ((*headFragment_->rd_ptr () + 3) != 'P'))
+    { bytes_repaired_b = true;
       *(headFragment_->rd_ptr () + 3) = 'P';
+    } // end IF
+    if (unlikely (bytes_repaired_b))
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("%s: repaired HTTP header...\n"),
+                  inherited::mod_->name ()));
   } // end IF
 
 continue_:

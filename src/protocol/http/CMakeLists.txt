@@ -26,6 +26,8 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 
 if (REFLEX_SUPPORT)
+ target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             -DWITH_REALLOC=0)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${REFLEX_INCLUDE_DIRS}>)
 endif (REFLEX_SUPPORT)

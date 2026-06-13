@@ -102,13 +102,11 @@ class HTTP_ReflexParserDriver_T
   inline virtual void destroy (yyscan_t, void*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool lex (yyscan_t state_in) { ACE_ASSERT (false); return false; /*HTTP_Scanner_lex (NULL, NULL, this, state_in);*/ };
 
-  bool                             isFirst_;
-
-  // scanner
-  yyscan_t                         scannerState_;
   YY_BUFFER_STATE                  bufferState_;
-
+  bool                             isFirst_;
   bool                             isInitialized_;
+  ACE_Message_Queue_Base*          messageQueue_;
+  yyscan_t                         scannerState_;
 };
 
 // include template definition

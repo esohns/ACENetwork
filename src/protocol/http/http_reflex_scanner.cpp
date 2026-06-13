@@ -1127,7 +1127,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              else
                              {
                                iterator =
-                                   record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
+                                 record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
                                if (iterator != record_r.headers.end ())
                                {
                                  std::string value_string =
