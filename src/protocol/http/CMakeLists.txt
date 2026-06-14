@@ -26,10 +26,10 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 
 if (REFLEX_SUPPORT)
-# target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-#                             -DWITH_REALLOC=0)
-# target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-#                             -DWITH_FAST_GET=0)
+ target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             -DWITH_REALLOC=0)
+ target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             -DWITH_FAST_GET=0)
 # target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
 #                             -DWITH_SPAN=0)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC

@@ -750,11 +750,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (message_block_p);
 
   // OK: parse the message (fragment)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: parsing message (id:%u (%u byte(s))...\n"),
-              inherited::mod_->name (),
-              static_cast<DataMessageType*> (message_block_p)->id (),
-              message_block_p->total_length ()));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("%s: parsing message (id:%u (%u byte(s))...\n"),
+  //            inherited::mod_->name (),
+  //            static_cast<DataMessageType*> (message_block_p)->id (),
+  //            message_block_p->total_length ()));
 
 parse:
   if (!this->parse (message_block_p))

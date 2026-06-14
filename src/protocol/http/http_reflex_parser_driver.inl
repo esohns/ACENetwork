@@ -294,21 +294,21 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     isFirst_ = false;
     // HTTP_Reflex_Scanner_set_column (1, scannerState_);
     // HTTP_Reflex_Scanner_set_lineno (1, scannerState_);
-  } // end IF
 
-  extern void reflex_code_HTTP_Reflex_Scanner_INITIAL (reflex::Matcher&);
-  static reflex::Pattern PATTERN_INITIAL (reflex_code_HTTP_Reflex_Scanner_INITIAL);
-  ACE_NEW_NORETURN (matcher_,
-                    FlexLexer::AbstractBaseLexer::Matcher (PATTERN_INITIAL,
-                                                           reflex::Input (),
-                                                           static_cast<yyscanner_t*> (scannerState_),
-                                                           NULL));
-  ACE_ASSERT (matcher_);
-  static_cast<yyscanner_t*> (scannerState_)->buffer (fragment_->rd_ptr (),
-                                                     fragment_->length () + 1);
-  static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
-  //matcher_->buffer (fragment_->length ());
-  matcher_->set_reserve (fragment_->size ());
+    extern void reflex_code_HTTP_Reflex_Scanner_INITIAL (reflex::Matcher&);
+    static reflex::Pattern PATTERN_INITIAL (reflex_code_HTTP_Reflex_Scanner_INITIAL);
+    ACE_NEW_NORETURN (matcher_,
+                      FlexLexer::AbstractBaseLexer::Matcher (PATTERN_INITIAL,
+                                                             reflex::Input (),
+                                                             static_cast<yyscanner_t*> (scannerState_),
+                                                             NULL));
+    ACE_ASSERT (matcher_);
+    static_cast<yyscanner_t*> (scannerState_)->buffer (fragment_->rd_ptr (),
+                                                       fragment_->length () + 1);
+    static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
+    //matcher_->buffer (fragment_->length ());
+    matcher_->set_reserve (fragment_->size () * 10);
+  } // end IF
 
   // parse data fragment
   try {
@@ -562,7 +562,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     matcher_->buffer (fragment_->rd_ptr (),
                       fragment_->length () + 1);
     //matcher_->buffer (fragment_->length ());
-    matcher_->set_reserve (fragment_->size ());
+    matcher_->set_reserve (fragment_->size () * 10);
   } // end IF
   else
     bufferState_ = yy_scan_bytes (fragment_->rd_ptr (),

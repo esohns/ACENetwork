@@ -555,10 +555,10 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              converter >> content_length_or_chunk_size;
                              yyextra->contentLengthOrChunkSize (content_length_or_chunk_size);
                              ACE_UINT64 missing_bytes = content_length_or_chunk_size;
-                             ACE_DEBUG ((LM_DEBUG,
-                                         ACE_TEXT ("found body @%u of %Q byte(s)\n"),
-                                         yyextra->offset (),
-                                         content_length_or_chunk_size));
+                             //ACE_DEBUG ((LM_DEBUG,
+                             //            ACE_TEXT ("found body @%u of %Q byte(s)\n"),
+                             //            yyextra->offset (),
+                             //            content_length_or_chunk_size));
                              --missing_bytes;
                              yyextra->bodyOrChunkBytesSkipped (1);
                              for (ACE_UINT64 i = 0;
@@ -648,11 +648,10 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                yyextra->contentLengthOrChunkSize ();
                              if (content_length_or_chunk_size)
                              {
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found entity chunk @%u: %Q byte(s)\n"),
-                                           yyextra->offset (),
-                                           content_length_or_chunk_size));
-
+                               //ACE_DEBUG ((LM_DEBUG,
+                               //            ACE_TEXT ("found entity chunk @%u: %Q byte(s)\n"),
+                               //            yyextra->offset (),
+                               //            content_length_or_chunk_size));
                                for (ACE_UINT64 i = 0;
                                     i < content_length_or_chunk_size;
                                     ++i)
@@ -670,10 +669,9 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              } // end IF
                              else
                              {
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found last entity chunk @%u: 0 byte(s)\n"),
-                                           yyextra->offset ()));
-
+                               //ACE_DEBUG ((LM_DEBUG,
+                               //            ACE_TEXT ("found last entity chunk @%u: 0 byte(s)\n"),
+                               //            yyextra->offset ()));
                                try {
                                  yyextra->finished ();
                                } catch (...) {

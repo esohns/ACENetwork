@@ -759,14 +759,14 @@ do_work (const std::string& configurationFile_in,
   allocator_configuration_2.defaultBufferSize =
     TEST_I_WEBTV_DEFAULT_BUFFER_SIZE;
 
-#if defined (REFLEX_USE)
+#if defined (REFLEX_USE) && (WITH_REALLOC == 1)
   Stream_AllocatorAlignedHeap_T<ACE_MT_SYNCH,
                                 struct Common_AllocatorConfiguration,
                                 4096ULL> heap_allocator;
 #else
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
-#endif // REFLEX_USE
+#endif // REFLEX_USE && (WITH_REALLOC == 1)
   if (!heap_allocator.initialize (allocator_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -874,7 +874,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
-      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   modulehandler_configuration.messageAllocator = &message_allocator;
@@ -1043,7 +1043,8 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.concurrency =
     STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_4b.computeThroughput = true;
-  modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
+  modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration_4b.messageAllocator = &message_allocator;
   //delay_configuration.catchUp = true; // *TODO*: why does this introduce stuttering ?
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
   delay_configuration.isMultimediaTask = true;
