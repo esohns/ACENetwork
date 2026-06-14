@@ -73,8 +73,11 @@ class HTTP_ParserDriver_T
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer ();
   inline virtual struct HTTP_Record& current () { return record_; }
-//  inline virtual void finished () { finished_ = true; };
+  inline virtual void finished () { finished_ = true; };
   inline virtual bool hasFinished () const { return finished_; }
+
+  inline virtual bool headerOnly () { ACE_ASSERT (configuration_); return configuration_->headerOnly; } // returns: parse HTTP header only ?
+  inline virtual void handleRealloc (ACE_Message_Block*) {}
 
   virtual void dump_state () const;
 

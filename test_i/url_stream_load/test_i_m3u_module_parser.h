@@ -79,6 +79,7 @@ class Test_I_M3U_Module_Parser
   ACE_UNIMPLEMENTED_FUNC (Test_I_M3U_Module_Parser& operator= (const Test_I_M3U_Module_Parser&))
 
   // implement (part of) Common_Parser_M3U_IParser
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   virtual bool hasFinished () const;
   virtual void record (struct M3U_Playlist*&); // data record
 

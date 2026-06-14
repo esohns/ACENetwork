@@ -80,9 +80,12 @@ Test_I_SessionMessage::duplicate (void) const
 
   // if there is no allocator, use the standard new and delete calls.
   if (inherited::message_block_allocator_ == NULL)
+  {
     ACE_NEW_RETURN (message_p,
                     Test_I_SessionMessage (*this),
                     NULL);
+    goto continue_;
+  } // end IF
 
   // *WARNING*: the allocator returns a Test_I_SessionMessageBase<ConfigurationType>
   //            when passing 0 as argument to malloc()...
@@ -91,16 +94,16 @@ Test_I_SessionMessage::duplicate (void) const
                          Test_I_SessionMessage (*this),
                          NULL);
 
+continue_:
   // increment the reference counts of all the continuation messages
-  if (inherited::cont_)
+  if (unlikely (inherited::cont_))
   {
     message_p->cont_ = inherited::cont_->duplicate ();
 
     // when things go wrong, release all resources and return
-    if (message_p->cont_ == 0)
+    if (unlikely (message_p->cont_ == NULL))
     {
-      message_p->release ();
-      message_p = NULL;
+      message_p->release (); message_p = NULL;
     } // end IF
   } // end IF
 
@@ -256,9 +259,12 @@ Test_I_SessionMessage_3::duplicate (void) const
 
   // if there is no allocator, use the standard new and delete calls.
   if (inherited::message_block_allocator_ == NULL)
-    ACE_NEW_RETURN (message_p,
-                    Test_I_SessionMessage_3 (*this),
-                    NULL);
+  {
+    ACE_NEW_NORETURN (message_p,
+                      Test_I_SessionMessage_3 (*this),
+                      NULL);
+    goto continue_;
+  } // end IF
 
   // *WARNING*: the allocator returns a Test_I_SessionMessageBase<ConfigurationType>
   //            when passing 0 as argument to malloc()...
@@ -267,16 +273,16 @@ Test_I_SessionMessage_3::duplicate (void) const
                          Test_I_SessionMessage_3 (*this),
                          NULL);
 
+continue_:
   // increment the reference counts of all the continuation messages
-  if (inherited::cont_)
+  if (unlikely (inherited::cont_))
   {
     message_p->cont_ = inherited::cont_->duplicate ();
 
     // when things go wrong, release all resources and return
-    if (message_p->cont_ == 0)
+    if (unlikely (message_p->cont_ == NULL))
     {
-      message_p->release ();
-      message_p = NULL;
+      message_p->release (); message_p = NULL;
     } // end IF
   } // end IF
 

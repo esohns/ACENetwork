@@ -48,12 +48,12 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
  , finished_ (false)
  , fragment_ (NULL)
  , itask_ (itask_in)
+ , matcher_ (NULL)
  , offset_ (0)
  , record_ ()
  , bufferState_ (NULL)
  , isFirst_ (true)
  , isInitialized_ (false)
- , matcher_ (NULL)
  , messageQueue_ (NULL)
  , scannerState_ (NULL)
 {
@@ -139,18 +139,6 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
 
   configuration_ =
     &const_cast<struct HTTP_ParserConfiguration&> (configuration_in);
-
-  //extern const reflex::Pattern::Opcode reflex_code_HTTP_Reflex_Scanner_INITIAL[];
-  extern void reflex_code_HTTP_Reflex_Scanner_INITIAL (reflex::Matcher&);
-  static reflex::Pattern PATTERN_INITIAL (reflex_code_HTTP_Reflex_Scanner_INITIAL);
-  ACE_NEW_NORETURN (matcher_,
-                    FlexLexer::AbstractBaseLexer::Matcher (PATTERN_INITIAL,
-                                                           reflex::Input (),
-                                                           static_cast<yyscanner_t*> (scannerState_),
-                                                           NULL));
-  ACE_ASSERT (matcher_);
-  static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
-
   messageQueue_ = configuration_->messageQueue;
   ACE_ASSERT (messageQueue_);
 
@@ -306,28 +294,21 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     isFirst_ = false;
     // HTTP_Reflex_Scanner_set_column (1, scannerState_);
     // HTTP_Reflex_Scanner_set_lineno (1, scannerState_);
-
-    reflex::Input input (fragment_->rd_ptr (),
-                         fragment_->length ());
-    matcher_ = static_cast<yyscanner_t*> (scannerState_)->new_matcher (input,
-                                                                       NULL);
-    ACE_ASSERT (matcher_);
-    static_cast<yyscanner_t*> (scannerState_)->pop_matcher ();
-    static_cast<yyscanner_t*> (scannerState_)->buffer (fragment_->rd_ptr (),
-                                                       fragment_->length () + 1);
-    static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
-    matcher_->buffer (fragment_->length ());
-    matcher_->set_end (false);
-    matcher_->set_reserve (fragment_->size ());
   } // end IF
 
-  //if (!begin (NULL, 0))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to HTTP_ReflexParserDriver_T::begin(), aborting\n")));
-  //  goto error;
-  //} // end IF
-  //do_scan_end = true;
+  extern void reflex_code_HTTP_Reflex_Scanner_INITIAL (reflex::Matcher&);
+  static reflex::Pattern PATTERN_INITIAL (reflex_code_HTTP_Reflex_Scanner_INITIAL);
+  ACE_NEW_NORETURN (matcher_,
+                    FlexLexer::AbstractBaseLexer::Matcher (PATTERN_INITIAL,
+                                                           reflex::Input (),
+                                                           static_cast<yyscanner_t*> (scannerState_),
+                                                           NULL));
+  ACE_ASSERT (matcher_);
+  static_cast<yyscanner_t*> (scannerState_)->buffer (fragment_->rd_ptr (),
+                                                     fragment_->length () + 1);
+  static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
+  //matcher_->buffer (fragment_->length ());
+  matcher_->set_reserve (fragment_->size ());
 
   // parse data fragment
   try {
@@ -383,6 +364,10 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (fragment_);
+  ACE_ASSERT (matcher_);
+
+  // need to adjust buffer ?
+  handleRealloc (fragment_);
 
   if (!fragment_->cont ())
   {
@@ -576,8 +561,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     ACE_ASSERT (matcher_);
     matcher_->buffer (fragment_->rd_ptr (),
                       fragment_->length () + 1);
-    matcher_->buffer (fragment_->length ());
-    matcher_->set_end (false);
+    //matcher_->buffer (fragment_->length ());
     matcher_->set_reserve (fragment_->size ());
   } // end IF
   else
@@ -614,4 +598,32 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   //else
     //yy_delete_buffer (YY_CURRENT_BUFFER);
     //yy_delete_buffer (static_cast<yyscanner_t*> (scannerState_)->ptr_matcher (), scannerState_);
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
+void
+HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
+                          TimePolicyType,
+                          SessionMessageType>::handleRealloc (ACE_Message_Block* fragment_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ReflexParserDriver_T::handleRealloc"));
+
+  // sanity check(s)
+  ACE_ASSERT (fragment_in);
+  ACE_ASSERT (matcher_);
+
+  // adjust buffer ?
+  struct FlexLexer::AbstractBaseLexer::Matcher::Context context_s =
+    matcher_->after ();
+  if (fragment_in->base () != context_s.buf)
+  {
+    ACE_Data_Block* data_block_p = fragment_in->data_block ();
+    data_block_p->set_flags (ACE_Message_Block::DONT_DELETE); // do NOT free the previous memory buffer
+    data_block_p->base (const_cast<char*> (context_s.buf),
+                        fragment_in->capacity (),
+                        0); // <-- own the reallocated memory buffer
+    data_block_p->size (fragment_in->size ());
+  } // end IF
 }

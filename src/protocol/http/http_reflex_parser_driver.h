@@ -73,8 +73,12 @@ class HTTP_ReflexParserDriver_T
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer ();
   inline virtual struct HTTP_Record& current () { return record_; }
-//  inline virtual void finished () { finished_ = true; };
+  inline virtual void finished () { finished_ = true; };
   inline virtual bool hasFinished () const { return finished_; }
+
+  inline virtual bool headerOnly () { ACE_ASSERT (configuration_); return configuration_->headerOnly; } // returns: parse HTTP header only ?
+  // *NOTE*: this only fixes the passed in fragment !
+  virtual void handleRealloc (ACE_Message_Block*); // (tail-) fragment
 
   virtual void dump_state () const;
 
@@ -83,6 +87,7 @@ class HTTP_ReflexParserDriver_T
   bool                                   finished_; // processed the whole entity ?
   ACE_Message_Block*                     fragment_;
   Stream_ITask*                          itask_;
+  FlexLexer::AbstractBaseLexer::Matcher* matcher_;
   size_t                                 offset_; // parsed entity bytes
   struct HTTP_Record                     record_;
 
@@ -106,7 +111,6 @@ class HTTP_ReflexParserDriver_T
   //reflex::Input                          input_;
   bool                                   isFirst_;
   bool                                   isInitialized_;
-  FlexLexer::AbstractBaseLexer::Matcher* matcher_;
   ACE_Message_Queue_Base*                messageQueue_;
   yyscan_t                               scannerState_;
 };

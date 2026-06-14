@@ -312,6 +312,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   DATA_T* data_p = NULL;
   ACE_Message_Block* message_block_p = headFragment_;
   size_t bytes_to_skip = 0;
+  size_t total_length, available_data;
 
   ACE_NEW_NORETURN (data_p,
                     DATA_T ());
@@ -347,10 +348,19 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     message_p->initialize (data_container_2,
                            message_p->sessionId (),
                            NULL);
+    if (message_p->cont () == NULL)
+      message_block_p = message_p;
     message_p = static_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
+  // adjust buffer ?
+  // *NOTE*: message_block_p points at the tail fragment (see above)
+  // *NOTE*: only need to do this for the tail fragment; other fragments are
+  //         handled in switchBuffer()
+  handleRealloc (message_block_p);
+
   // frame the content
+  message_block_p = headFragment_;
   data_p = &const_cast<DATA_T&> (data_container_p->getR ());
   if (chunks_.empty ())
   {
@@ -358,13 +368,13 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     bytes_to_skip = inherited2::offset ();
     do
     { ACE_ASSERT (message_block_p);
-      if (bytes_to_skip <= message_block_p->length ())
+      available_data = message_block_p->length ();
+      if (bytes_to_skip <= available_data)
         break;
-      bytes_to_skip -= message_block_p->length ();
-      message_block_p->rd_ptr (message_block_p->length ());
+      bytes_to_skip -= available_data;
+      message_block_p->rd_ptr (available_data);
       message_block_p = message_block_p->cont ();
     } while (true);
-    ACE_ASSERT (message_block_p->length () >= bytes_to_skip);
     message_block_p->rd_ptr (bytes_to_skip);
     //if (!message_block_p->length ())
     //  message_block_p = message_block_p->cont ();
@@ -397,7 +407,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //         in the content length header; i.e. the next response may already
     //         have been (partially) received and appended to the fragment chain
     //         --> do this in the handleDataMessage() method
-    ACE_ASSERT (headFragment_->total_length () == bytes_to_skip);
+    total_length = headFragment_->total_length ();
+    ACE_ASSERT (total_length >= bytes_to_skip);
   } // end IF
   else
   { // --> chunked transfer
@@ -408,10 +419,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     bytes_to_skip = (*iterator_2).first; // skip HTTP header + first chunk line
     do
     { ACE_ASSERT (message_block_p);
-      if (bytes_to_skip <= message_block_p->length ())
+      available_data = message_block_p->length ();
+      if (bytes_to_skip <= available_data)
         break;
-      bytes_to_skip -= static_cast<unsigned int> (message_block_p->length ());
-      message_block_p->rd_ptr (message_block_p->length ());
+      bytes_to_skip -= available_data;
+      message_block_p->rd_ptr (available_data);
       message_block_p = message_block_p->cont ();
     } while (true);
     message_block_p->rd_ptr (bytes_to_skip);
@@ -429,11 +441,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
         bytes_to_skip = inherited2::offset () - (*iterator_2).first;
         do
         { ACE_ASSERT (message_block_p);
-          if (bytes_to_skip <= message_block_p->length ())
+          available_data = message_block_p->length ();
+          if (bytes_to_skip <= available_data)
             break;
-          bytes_to_skip -=
-            static_cast<unsigned int> (message_block_p->length ());
-          message_block_p->rd_ptr (message_block_p->length ());
+          bytes_to_skip -= available_data;
+          message_block_p->rd_ptr (available_data);
           message_block_p = message_block_p->cont ();
         } while (true);
         message_block_p->rd_ptr (bytes_to_skip);
@@ -442,13 +454,13 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       {
         do
         { ACE_ASSERT (message_block_p);
-          if (bytes_to_skip <= message_block_p->length ())
+          available_data = message_block_p->length ();
+          if (bytes_to_skip <= available_data)
             break;
-          bytes_to_skip -=
-            static_cast<unsigned int> (message_block_p->length ());
+          bytes_to_skip -= available_data;
           message_block_p = message_block_p->cont ();
         } while (true);
-        if (bytes_to_skip < message_block_p->length ())
+        if (bytes_to_skip < available_data)
         {
           message_block_2 = message_block_p->duplicate ();
           message_block_2->cont (message_block_p->cont ());
@@ -458,7 +470,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
         } // end IF
         else
         {
-          ACE_ASSERT (bytes_to_skip == message_block_p->length ());
+          ACE_ASSERT (bytes_to_skip == available_data);
         } // end ELSE
         message_block_p = message_block_p->cont ();
         // skip over chunk delimiter
@@ -478,11 +490,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                         ((*iterator_2).first + (*iterator_2).second + 2);
         do
         { ACE_ASSERT (message_block_p);
-          if (bytes_to_skip <= static_cast<unsigned int> (message_block_p->length ()))
+          available_data = message_block_p->length ();
+          if (bytes_to_skip <= available_data)
             break;
-          bytes_to_skip -=
-            static_cast<unsigned int> (message_block_p->length ());
-          message_block_p->rd_ptr (message_block_p->length ());
+          bytes_to_skip -= available_data;
+          message_block_p->rd_ptr (available_data);
           message_block_p = message_block_p->cont ();
         } while (true);
         message_block_p->rd_ptr (bytes_to_skip);
@@ -493,10 +505,10 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //         in the content length header; i.e. the next response may already
     //         have been (partially) received and appended to the fragment chain
     //         --> do this in the handleDataMessage() method
-    //ACE_ASSERT (headFragment_->total_length () == total_data);
+    total_length = headFragment_->total_length ();
+    ACE_ASSERT (total_length >= total_data);
   } // end ELSE
 
-  inherited2::finished_ = true;
 error:
   ;
 }
@@ -778,31 +790,31 @@ parse:
   ACE_ASSERT (message_block_p);
   headFragment_ = static_cast<DataMessageType*> (message_block_2);
 
-  if (headFragment_)
-  { // *TODO*: remove this ASAP
-    bool bytes_repaired_b = false;
-    // repair broken data; flex may (!) have clobbered the first few bytes
-    if ((headFragment_->length () >= 1) && (*headFragment_->rd_ptr () != 'H'))
-    { bytes_repaired_b = true;
-      *headFragment_->rd_ptr () = 'H';
-    } // end IF
-    if ((headFragment_->length () >= 2) && ((*headFragment_->rd_ptr () + 1) != 'T'))
-    { bytes_repaired_b = true;
-      *(headFragment_->rd_ptr () + 1) = 'T';
-    } // end IF
-    if ((headFragment_->length () >= 3) && ((*headFragment_->rd_ptr () + 2) != 'T'))
-    { bytes_repaired_b = true;
-      *(headFragment_->rd_ptr () + 2) = 'T';
-    } // end IF
-    if ((headFragment_->length () >= 4) && ((*headFragment_->rd_ptr () + 3) != 'P'))
-    { bytes_repaired_b = true;
-      *(headFragment_->rd_ptr () + 3) = 'P';
-    } // end IF
-    if (unlikely (bytes_repaired_b))
-      ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("%s: repaired HTTP header...\n"),
-                  inherited::mod_->name ()));
-  } // end IF
+  //if (headFragment_)
+  //{ // *TODO*: remove this ASAP
+  //  bool bytes_repaired_b = false;
+  //  // repair broken data; flex may (!) have clobbered the first few bytes
+  //  if ((headFragment_->length () >= 1) && (*headFragment_->rd_ptr () != 'H'))
+  //  { bytes_repaired_b = true;
+  //    *headFragment_->rd_ptr () = 'H';
+  //  } // end IF
+  //  if ((headFragment_->length () >= 2) && ((*headFragment_->rd_ptr () + 1) != 'T'))
+  //  { bytes_repaired_b = true;
+  //    *(headFragment_->rd_ptr () + 1) = 'T';
+  //  } // end IF
+  //  if ((headFragment_->length () >= 3) && ((*headFragment_->rd_ptr () + 2) != 'T'))
+  //  { bytes_repaired_b = true;
+  //    *(headFragment_->rd_ptr () + 2) = 'T';
+  //  } // end IF
+  //  if ((headFragment_->length () >= 4) && ((*headFragment_->rd_ptr () + 3) != 'P'))
+  //  { bytes_repaired_b = true;
+  //    *(headFragment_->rd_ptr () + 3) = 'P';
+  //  } // end IF
+  //  if (unlikely (bytes_repaired_b))
+  //    ACE_DEBUG ((LM_WARNING,
+  //                ACE_TEXT ("%s: repaired HTTP header...\n"),
+  //                inherited::mod_->name ()));
+  //} // end IF
 
 continue_:
   ACE_ASSERT (message_block_p);

@@ -81,6 +81,7 @@ class BitTorrent_Bencoding_ParserDriver
   virtual void error (const yy::location&, // location
                       const std::string&); // message
   inline virtual struct Bencoding_Element& current () { ACE_ASSERT (bencoding_); return *bencoding_; }
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   virtual void record (struct Bencoding_Element*&); // data record
   virtual void pushInteger (ACE_INT64);

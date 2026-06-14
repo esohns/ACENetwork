@@ -110,9 +110,8 @@ class HTTP_Module_Parser_T
   // override (part of) Common_IScannerBase
   inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
 
-  // implement (part of) HTTP_IParser
+  // implement (part of) HTTP_(Reflex)_IParser
   virtual void record (struct HTTP_Record*&); // data record
-  inline virtual bool headerOnly () { ACE_ASSERT (inherited2::configuration_); return inherited2::configuration_->headerOnly; } // returns: parse HTTP header only ?
   inline virtual ACE_UINT32 currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); } // returns: current chunk size
   inline virtual ACE_UINT64 contentLengthOrChunkSize () { return contentLengthOrChunkSize_; }
   inline virtual ACE_UINT64 bodyOrChunkBytesToSkip () { return bodyOrChunkBytesToSkip_; }

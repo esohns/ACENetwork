@@ -87,6 +87,8 @@ class HTTP_Reflex_IParser
   using IPARSER_T::error;
 
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
+  virtual void handleRealloc (ACE_Message_Block*) = 0; // (tail-) fragment
+
   virtual ACE_UINT32 currentChunkSize () = 0; // returns: current chunk size
   virtual ACE_UINT64 contentLengthOrChunkSize () = 0;
   virtual ACE_UINT64 bodyOrChunkBytesToSkip () = 0;

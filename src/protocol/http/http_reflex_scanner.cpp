@@ -25,6 +25,7 @@
 #undef REFLEX_OPTION_lexer
 #undef REFLEX_OPTION_never_interactive
 #undef REFLEX_OPTION_nodefault
+#undef REFLEX_OPTION_noindent
 #undef REFLEX_OPTION_noline
 #undef REFLEX_OPTION_nomain
 #undef REFLEX_OPTION_nostack
@@ -57,6 +58,7 @@
 #define REFLEX_OPTION_lexer               HTTP_Reflex_Scanner_FlexLexer
 #define REFLEX_OPTION_never_interactive   true
 #define REFLEX_OPTION_nodefault           true
+#define REFLEX_OPTION_noindent            true
 #define REFLEX_OPTION_noline              true
 #define REFLEX_OPTION_nomain              true
 #define REFLEX_OPTION_nostack             true
@@ -492,7 +494,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -525,11 +527,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             yycolumn -= yyleng;*/
                              yyless (0); }
             YY_BREAK
-          case 3: // rule reflex_scanner.l:705: {OCTET} :
+          case 3: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_INITIAL_rule[2];
             perf_report_INITIAL_size[2] += size();
             perf_report_time_pointer = &perf_report_INITIAL_time[2];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -557,7 +559,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -584,11 +586,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::METHOD; } */
                              return http_tokentype::METHOD; }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_request_rule[1];
             perf_report_request_size[1] += size();
             perf_report_time_pointer = &perf_report_request_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -616,7 +618,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -643,11 +645,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::URI; } */
                              return http_tokentype::URI; }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_uri_rule[1];
             perf_report_uri_size[1] += size();
             perf_report_time_pointer = &perf_report_uri_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -675,7 +677,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -702,11 +704,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::_VERSION; } */
                              return http_tokentype::_VERSION; }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_version_rule[1];
             perf_report_version_size[1] += size();
             perf_report_time_pointer = &perf_report_version_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -734,7 +736,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -838,11 +840,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::DELIMITER; } */
                              return http_tokentype::DELIMITER; }
             YY_BREAK
-          case 5: // rule reflex_scanner.l:705: {OCTET} :
+          case 5: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_request_headers_rule[4];
             perf_report_request_headers_size[4] += size();
             perf_report_time_pointer = &perf_report_request_headers_time[4];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -870,7 +872,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -897,11 +899,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::_VERSION; } */
                              return http_tokentype::_VERSION; }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_response_rule[1];
             perf_report_response_size[1] += size();
             perf_report_time_pointer = &perf_report_response_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -929,7 +931,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -956,11 +958,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::STATUS; } */
                              return http_tokentype::STATUS; }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_status_rule[1];
             perf_report_status_size[1] += size();
             perf_report_time_pointer = &perf_report_status_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -988,7 +990,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -1015,11 +1017,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::REASON; } */
                              return http_tokentype::REASON; }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_reason_rule[1];
             perf_report_reason_size[1] += size();
             perf_report_time_pointer = &perf_report_reason_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -1047,7 +1049,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -1149,11 +1151,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              return http_tokentype::DELIMITER;
                            }
             YY_BREAK
-          case 5: // rule reflex_scanner.l:705: {OCTET} :
+          case 5: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_response_headers_rule[4];
             perf_report_response_headers_size[4] += size();
             perf_report_time_pointer = &perf_report_response_headers_time[4];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -1181,7 +1183,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -1211,7 +1213,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              yyextra->contentLengthOrChunkSize (content_length_or_chunk_size);
                              ACE_UINT64 missing_bytes = content_length_or_chunk_size;
                              ACE_DEBUG ((LM_DEBUG,
-                                         ACE_TEXT ("found body @%d of %d byte(s)\n"),
+                                         ACE_TEXT ("found body @%u of %Q byte(s)\n"),
                                          yyextra->offset (),
                                          content_length_or_chunk_size));
                              --missing_bytes;
@@ -1221,6 +1223,14 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                                   ++i)
                                yyinput (yyscanner);
                              yyextra->bodyOrChunkBytesSkipped (missing_bytes);
+
+                             try {
+                               yyextra->finished ();
+                             } catch (...) {
+                               ACE_DEBUG ((LM_ERROR,
+                                           ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                             }
+
                              BEGIN (INITIAL);
                              yylval.ival = content_length_or_chunk_size;
 //                               return yy::HTTP_Parser::token::BODY;
@@ -1228,11 +1238,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              /*BEGIN (data_);*/
                            }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_body_rule[1];
             perf_report_body_size[1] += size();
             perf_report_time_pointer = &perf_report_body_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -1260,7 +1270,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -1271,11 +1281,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
               yyterminate();
             }
             YY_BREAK
-          case 1: // rule reflex_scanner.l:589: {CHUNK_LINE}{CRLF} :
+          case 1: // rule reflex_scanner.l:597: {CHUNK_LINE}{CRLF} :
             ++perf_report_chunked_body_rule[0];
             perf_report_chunked_body_size[0] += size();
             perf_report_time_pointer = &perf_report_chunked_body_time[0];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:589 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:597 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { if (yyextra->currentChunkSize ()) // *IMPORTANT NOTE*: 0 the first time around
                                yyextra->offset (yyextra->currentChunkSize () + 2);
@@ -1311,11 +1321,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              yyless (0);
                            }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:622: {ENTITY_HEADER}{CRLF} :
+          case 2: // rule reflex_scanner.l:630: {ENTITY_HEADER}{CRLF} :
             ++perf_report_chunked_body_rule[1];
             perf_report_chunked_body_size[1] += size();
             perf_report_time_pointer = &perf_report_chunked_body_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:622 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:630 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { yyextra->offset (yyleng);
                              /* *TODO*: error handling */
@@ -1326,30 +1336,24 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
 /*                             return yy::HTTP_Parser::token::HEADER; } */
                              return http_tokentype::HEADER; }
             YY_BREAK
-          case 3: // rule reflex_scanner.l:630: {CRLF} :
+          case 3: // rule reflex_scanner.l:638: {CRLF} :
             ++perf_report_chunked_body_rule[2];
             perf_report_chunked_body_size[2] += size();
             perf_report_time_pointer = &perf_report_chunked_body_time[2];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:630 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:638 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { yyextra->offset (yyleng);
-                             try {
-//                               yyextra->finished ();
-                             } catch (...) {
-                               ACE_DEBUG ((LM_ERROR,
-                                           ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
-                             }
                              BEGIN (INITIAL);
                              yylval.ival = 2;
 /*                             return yy::HTTP_Parser::token::DELIMITER; } */
                              return http_tokentype::DELIMITER;
                            }
             YY_BREAK
-          case 4: // rule reflex_scanner.l:705: {OCTET} :
+          case 4: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_chunked_body_rule[3];
             perf_report_chunked_body_size[3] += size();
             perf_report_time_pointer = &perf_report_chunked_body_time[3];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -1377,7 +1381,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -1388,11 +1392,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
               yyterminate();
             }
             YY_BREAK
-          case 1: // rule reflex_scanner.l:644: {CHUNK_LINE}{CRLF} :
+          case 1: // rule reflex_scanner.l:652: {CHUNK_LINE}{CRLF} :
             ++perf_report_chunk_rule[0];
             perf_report_chunk_size[0] += size();
             perf_report_time_pointer = &perf_report_chunk_time[0];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:644 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:652 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { yyextra->offset (yyleng);
                              ACE_UINT64 content_length_or_chunk_size =
@@ -1424,6 +1428,14 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found last entity chunk @%u: 0 byte(s)\n"),
                                            yyextra->offset ()));
+
+                               try {
+                                 yyextra->finished ();
+                               } catch (...) {
+                                 ACE_DEBUG ((LM_ERROR,
+                                             ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                               }
+
                                // *NOTE*: do not consume the terminating CRLF
                                //         here; this happens in <chunked_body>
                                yylval.ival = 0;
@@ -1433,11 +1445,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              } // end ELSE
                            }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_chunk_rule[1];
             perf_report_chunk_size[1] += size();
             perf_report_time_pointer = &perf_report_chunk_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -1465,7 +1477,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -1476,11 +1488,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
               yyterminate();
             }
             YY_BREAK
-          case 1: // rule reflex_scanner.l:577: {OCTET}{1} :
+          case 1: // rule reflex_scanner.l:585: {OCTET}{1} :
             ++perf_report_data__rule[0];
             perf_report_data__size[0] += size();
             perf_report_time_pointer = &perf_report_data__time[0];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:577 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:585 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 {
                              yyextra->bodyOrChunkBytesSkipped (1);
@@ -1493,11 +1505,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              } // end IF
                            }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_data__rule[1];
             perf_report_data__size[1] += size();
             perf_report_time_pointer = &perf_report_data__time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -1525,7 +1537,7 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
           case 0:
             if (matcher().at_end())
             {
-              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:704 start(" << start() << ")\n";
+              if (debug()) std::cerr << "--EOF rule reflex_scanner.l:720 start(" << start() << ")\n";
 { yyterminate(); } // *NOTE*: yywrap returned non-zero
               perf_report();
             }
@@ -1536,11 +1548,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
               yyterminate();
             }
             YY_BREAK
-          case 1: // rule reflex_scanner.l:684: {OCTET}{1} :
+          case 1: // rule reflex_scanner.l:700: {OCTET}{1} :
             ++perf_report_data_2_rule[0];
             perf_report_data_2_size[0] += size();
             perf_report_time_pointer = &perf_report_data_2_time[0];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:684 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:700 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 {
                              yyextra->bodyOrChunkBytesSkipped (1);
@@ -1562,11 +1574,11 @@ int HTTP_Reflex_Scanner_FlexLexer::HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLT
                              } // end IF
                            }
             YY_BREAK
-          case 2: // rule reflex_scanner.l:705: {OCTET} :
+          case 2: // rule reflex_scanner.l:721: {OCTET} :
             ++perf_report_data_2_rule[1];
             perf_report_data_2_size[1] += size();
             perf_report_time_pointer = &perf_report_data_2_time[1];
-            if (debug()) std::cerr << "--rule reflex_scanner.l:705 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
+            if (debug()) std::cerr << "--rule reflex_scanner.l:721 start(" << start() << ") " << matcher().lineno() << "," << matcher().columno() << ":\"" << matcher().text() << "\"\n";
             YY_USER_ACTION
 { /* *TODO*: use (?s:.) ? */
                              if (!yyextra->isBlocking ())
@@ -1621,11 +1633,8 @@ yywrap (yyscan_t scanner)
   ACE_ASSERT (yyextra);
   if (!yyextra->isBlocking ())
     return 1; // not enough data, cannot proceed
-//  if (yyextra->hasFinished ())
-//  {
-//    BEGIN (INITIAL);
-//    return 1; // done
-//  } // end IF
+  if (yyextra->hasFinished ())
+    return 1; // done
 
   if (!yyextra->switchBuffer ())
   {

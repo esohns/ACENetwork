@@ -566,6 +566,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                   ++i)
                                yyinput (yyscanner);
                              yyextra->bodyOrChunkBytesSkipped (missing_bytes);
+
+                             try {
+                               yyextra->finished ();
+                             } catch (...) {
+                               ACE_DEBUG ((LM_ERROR,
+                                           ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                             }
+
                              BEGIN (INITIAL);
                              yylval.ival = content_length_or_chunk_size;
 //                               return yy::HTTP_Parser::token::BODY;
@@ -628,12 +636,6 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 /*                             return yy::HTTP_Parser::token::HEADER; } */
                              return http_tokentype::HEADER; }
 {CRLF}                     { yyextra->offset (yyleng);
-                             try {
-//                               yyextra->finished ();
-                             } catch (...) {
-                               ACE_DEBUG ((LM_ERROR,
-                                           ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
-                             }
                              BEGIN (INITIAL);
                              yylval.ival = 2;
 /*                             return yy::HTTP_Parser::token::DELIMITER; } */
@@ -671,6 +673,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found last entity chunk @%u: 0 byte(s)\n"),
                                            yyextra->offset ()));
+
+                               try {
+                                 yyextra->finished ();
+                               } catch (...) {
+                                 ACE_DEBUG ((LM_ERROR,
+                                             ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                               }
+
                                // *NOTE*: do not consume the terminating CRLF
                                //         here; this happens in <chunked_body>
                                yylval.ival = 0;
@@ -741,11 +751,8 @@ yywrap (yyscan_t scanner)
   ACE_ASSERT (yyextra);
   if (!yyextra->isBlocking ())
     return 1; // not enough data, cannot proceed
-//  if (yyextra->hasFinished ())
-//  {
-//    BEGIN (INITIAL);
-//    return 1; // done
-//  } // end IF
+  if (yyextra->hasFinished ())
+    return 1; // done
 
   if (!yyextra->switchBuffer ())
   {
