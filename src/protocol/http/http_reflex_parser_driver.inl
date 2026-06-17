@@ -307,7 +307,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
                                                        fragment_->length () + 1);
     static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
     //matcher_->buffer (fragment_->length ());
-    matcher_->set_reserve (fragment_->size () * 10);
+    matcher_->set_reserve (fragment_->size ());
   } // end IF
 
   // parse data fragment
@@ -562,7 +562,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     matcher_->buffer (fragment_->rd_ptr (),
                       fragment_->length () + 1);
     //matcher_->buffer (fragment_->length ());
-    matcher_->set_reserve (fragment_->size () * 10);
+    matcher_->set_reserve (fragment_->size ());
   } // end IF
   else
     bufferState_ = yy_scan_bytes (fragment_->rd_ptr (),

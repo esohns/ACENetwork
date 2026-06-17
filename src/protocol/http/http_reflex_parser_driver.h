@@ -28,6 +28,7 @@
 #include "common_parser_common.h"
 #include "common_parser_defines.h"
 
+#undef border
 #undef yyextra
 #include "http_reflex_scanner.h"
 #include "http_reflex_iparser.h"

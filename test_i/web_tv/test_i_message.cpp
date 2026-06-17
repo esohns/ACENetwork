@@ -192,8 +192,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
     // *NOTE*: the argument to calloc() doesn't matter (as long as it is not 0),
     //         the returned memory is always sizeof(ARDrone_LiveVideoMessage)
     ACE_NEW_MALLOC_NORETURN (result_p,
-                             static_cast<Test_I_Message*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_Message),
-                                                                                                        '\0')),
+                             static_cast<Test_I_Message*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_Message))),
                              Test_I_Message (inherited::sessionId_,
                                              data_block_p,
                                              inherited::message_block_allocator_,
@@ -208,7 +207,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
   if (unlikely (!result_p))
   {
     Stream_IAllocator* allocator_p =
-        dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
+      dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
     if (allocator_p->block ())
       ACE_DEBUG ((LM_CRITICAL,
@@ -305,11 +304,9 @@ Test_I_Message::duplicate (void) const
                       Test_I_Message (*this));
   else // otherwise, use the existing message_block_allocator
   {
-    // *NOTE*: the argument to malloc doesn't matter, as this will be
-    //         a shallow copy which just references the same data block
+    // *NOTE*: this will be a shallow copy which just references the same data block
     ACE_NEW_MALLOC_NORETURN (message_p,
-                             static_cast<Test_I_Message*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_Message),
-                                                                                                        '\0')),
+                             static_cast<Test_I_Message*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_Message))),
                              Test_I_Message (*this));
   } // end ELSE
   if (unlikely (!message_p))
@@ -327,7 +324,7 @@ Test_I_Message::duplicate (void) const
   if (inherited::cont_)
   {
     message_p->cont_ = inherited::cont_->duplicate ();
-    if (!message_p->cont_)
+    if (unlikely (!message_p->cont_))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Test_I_Message::duplicate(): \"%m\", aborting\n")));

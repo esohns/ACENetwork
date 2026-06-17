@@ -87,10 +87,9 @@ Test_I_SessionMessage::duplicate (void) const
     goto continue_;
   } // end IF
 
-  // *WARNING*: the allocator returns a Test_I_SessionMessageBase<ConfigurationType>
-  //            when passing 0 as argument to malloc()...
+  // *NOTE*: the allocator returns a memory of size sizeof (Test_I_SessionMessage)
   ACE_NEW_MALLOC_RETURN (message_p,
-                         static_cast<Test_I_SessionMessage*> (inherited::message_block_allocator_->malloc (0)),
+                         static_cast<Test_I_SessionMessage*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_SessionMessage))),
                          Test_I_SessionMessage (*this),
                          NULL);
 
@@ -260,16 +259,15 @@ Test_I_SessionMessage_3::duplicate (void) const
   // if there is no allocator, use the standard new and delete calls.
   if (inherited::message_block_allocator_ == NULL)
   {
-    ACE_NEW_NORETURN (message_p,
-                      Test_I_SessionMessage_3 (*this),
-                      NULL);
+    ACE_NEW_RETURN (message_p,
+                    Test_I_SessionMessage_3 (*this),
+                    NULL);
     goto continue_;
   } // end IF
 
-  // *WARNING*: the allocator returns a Test_I_SessionMessageBase<ConfigurationType>
-  //            when passing 0 as argument to malloc()...
+  // *NOTE*: the allocator returns memory of size sizeof(Test_I_SessionMessage_3)
   ACE_NEW_MALLOC_RETURN (message_p,
-                         static_cast<Test_I_SessionMessage_3*> (inherited::message_block_allocator_->malloc (0)),
+                         static_cast<Test_I_SessionMessage_3*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_SessionMessage_3))),
                          Test_I_SessionMessage_3 (*this),
                          NULL);
 

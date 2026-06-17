@@ -591,6 +591,13 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              iparser_p->bodyOrChunkBytesSkipped (1);
                              if (unlikely (!iparser_p->bodyOrChunkBytesToSkip ()))
                              {
+                               try {
+                                 iparser_p->finished ();
+                               } catch (...) {
+                                 ACE_DEBUG ((LM_ERROR,
+                                           ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                               }
+
                                BEGIN (INITIAL);
                                yylval->ival = iparser_p->contentLengthOrChunkSize ();
 //                               return yy::HTTP_Parser::token::BODY;
@@ -668,9 +675,16 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 /*                               ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("found last entity chunk @%d: 0 byte(s)\n"),
                                            iparser_p->offset ())); */
+                               try {
+                                 iparser_p->finished ();
+                               } catch (...) {
+                                 ACE_DEBUG ((LM_ERROR,
+                                             ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                               }
+
                                // *NOTE*: do not consume the terminating CRLF
                                //         here; this happens in <chunked_body>
-                               yylval->ival = iparser_p->contentLengthOrChunkSize ();
+                               yylval->ival = 0;
                                BEGIN (chunked_body);
 /*                             return yy::HTTP_Parser::token::CHUNK; */
                                return yytokentype::CHUNK;
@@ -730,11 +744,8 @@ HTTP_Scanner_wrap (yyscan_t yyscanner)
   ACE_ASSERT (iparser_p);
   if (!iparser_p->isBlocking ())
     return 1; // not enough data, cannot proceed
-//  if (iparser_p->hasFinished ())
-//  {
-//    BEGIN (INITIAL);
-//    return 1; // done
-//  } // end IF
+  if (iparser_p->hasFinished ())
+    return 1; // done
 
   if (!iparser_p->switchBuffer ())
   {

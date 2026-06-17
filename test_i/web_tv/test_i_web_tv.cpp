@@ -531,10 +531,10 @@ do_parse_configuration_file (const std::string& fileName_in,
     // open section
     ACE_Configuration_Section_Key section_key;
     result =
-        configuration_heap.open_section (root_section_key,
-                                         section_name.c_str (),
-                                         0, // MUST exist !
-                                         section_key);
+      configuration_heap.open_section (root_section_key,
+                                       section_name.c_str (),
+                                       0, // MUST exist !
+                                       section_key);
     ACE_ASSERT (result == 0);
 
     int index_2 = 0;
@@ -551,9 +551,9 @@ do_parse_configuration_file (const std::string& fileName_in,
         case ACE_Configuration::INTEGER:
         {
           result =
-              configuration_heap.get_integer_value (section_key,
-                                                    ACE_TEXT (item_name.c_str ()),
-                                                    item_value_2);
+            configuration_heap.get_integer_value (section_key,
+                                                  ACE_TEXT (item_name.c_str ()),
+                                                  item_value_2);
           if (unlikely (result == -1))
           {
             ACE_ERROR ((LM_ERROR,
