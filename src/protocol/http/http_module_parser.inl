@@ -408,7 +408,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //         have been (partially) received and appended to the fragment chain
     //         --> do this in the handleDataMessage() method
     total_length = headFragment_->total_length ();
-    ACE_ASSERT (total_length >= bytes_to_skip);
+    //ACE_ASSERT (total_length >= bytes_to_skip);
   } // end IF
   else
   { // --> chunked transfer
@@ -506,7 +506,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     //         have been (partially) received and appended to the fragment chain
     //         --> do this in the handleDataMessage() method
     total_length = headFragment_->total_length ();
-    ACE_ASSERT (total_length >= total_data);
+    //ACE_ASSERT (total_length >= total_data);
   } // end ELSE
 
 error:

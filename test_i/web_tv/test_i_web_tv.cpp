@@ -1043,7 +1043,9 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.concurrency =
     STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_4b.computeThroughput = true;
-  modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  // *WARNING*: this requires cloning; condensing leads to memory corruption ! *TODO*: why ?
+  // modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration_4b.defragmentMode = STREAM_DEFRAGMENT_CLONE;
   modulehandler_configuration_4b.messageAllocator = &message_allocator;
   //delay_configuration.catchUp = true; // *TODO*: why does this introduce stuttering ?
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
