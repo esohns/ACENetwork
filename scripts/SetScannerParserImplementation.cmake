@@ -1,5 +1,5 @@
 # *NOTE*: the first entry is the default option
-#set (SCANNER_IMPLEMENTATION "" CACHE STRING "Current Scanner Implementation")
+set (SCANNER_IMPLEMENTATION "" CACHE STRING "Current Scanner Implementation")
 if (FLEX_SUPPORT)
  set (SUPPORTED_SCANNER_IMPLEMENTATIONS "${SUPPORTED_SCANNER_IMPLEMENTATIONS};flex")
 endif (FLEX_SUPPORT)
