@@ -152,8 +152,8 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
 
   ACE_UNUSED_ARG (flags_in);
 
-  int result = -1;
-  size_t current_size = 0;
+  int result;
+  size_t current_size;
 
   // sanity check(s)
   ACE_ASSERT (inherited::data_block_);
@@ -162,25 +162,19 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
   Test_I_Message* result_p = NULL;
 
   current_size = inherited::data_block_->size ();
-  // *NOTE*: ACE_Data_Block::clone() does not retain the value of 'cur_size_'
-  //         --> reset it
-  // *TODO*: resolve ACE bugzilla issue #4219
-  ACE_Data_Block* data_block_p = inherited::data_block_->clone (0);
+  //ACE_Data_Block* data_block_p = inherited::data_block_->clone (0);
+  ACE_Data_Block* data_block_p = NULL;
+  ACE_ALLOCATOR_NORETURN (data_block_p,
+                          static_cast<ACE_Data_Block*> (inherited::data_block_->data_block_allocator ()->malloc (current_size)));
   if (unlikely (!data_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Data_Block::clone(0): \"%m\", aborting\n")));
     return NULL;
   } // end IF
-  result = data_block_p->size (current_size);
-  if (unlikely (result == -1))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Data_Block::size(%u): \"%m\", aborting\n"),
-                current_size));
-    data_block_p->release (); data_block_p = NULL;
-    return NULL;
-  } // end IF
+  ACE_OS::memcpy (data_block_p->base (),
+                  inherited::data_block_->base (),
+                  current_size);
 
   // allocate a new message that contains unique copies of the message
   // block fields, and "deep" copie(s) of the data block(s)
@@ -266,24 +260,6 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
   } // end IF
 
   // *NOTE*: if 'this' is initialized, so is the "clone"
-
-//  // *NOTE*: the new fragment chain is already 'crunch'ed, i.e. aligned to base_
-//  // *TODO*: consider defragment()ing the chain before padding
-//
-//  // step2: 'pad' the fragment(s)
-//  unsigned int padding_bytes =
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    AV_INPUT_BUFFER_PADDING_SIZE;
-//#else
-//    FF_INPUT_BUFFER_PADDING_SIZE;
-//#endif
-//  for (ACE_Message_Block* message_block_p = result_p;
-//       message_block_p;
-//       message_block_p = message_block_p->cont ())
-//  { ACE_ASSERT ((message_block_p->capacity () - message_block_p->size ()) >= padding_bytes);
-//    ACE_OS::memset (message_block_p->wr_ptr (), 0, padding_bytes);
-//  } // end FOR
-
   return result_p;
 }
 

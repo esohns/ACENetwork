@@ -367,7 +367,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   ACE_ASSERT (matcher_);
 
   // need to adjust buffer ?
-  handleRealloc (fragment_);
+  //handleRealloc (fragment_);
 
   if (!fragment_->cont ())
   {

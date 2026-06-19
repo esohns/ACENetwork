@@ -357,7 +357,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   // *NOTE*: message_block_p points at the tail fragment (see above)
   // *NOTE*: only need to do this for the tail fragment; other fragments are
   //         handled in switchBuffer()
-  this->handleRealloc (message_block_p);
+  //this->handleRealloc (message_block_p);
 
   // frame the content
   message_block_p = headFragment_;
