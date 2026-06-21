@@ -42,9 +42,9 @@
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include <cstdio>
 #include <iostream>
 #include <limits>
-#include <regex>
 #include <string>
 
 #include "ace/Configuration.h"
@@ -310,7 +310,7 @@ do_process_arguments (int argc_in,
 
   int option = 0;
   std::stringstream converter;
-  while ((option = argument_parser ()) != EOF)
+  while ((option = argument_parser ()) != -1)
   {
     switch (option)
     {

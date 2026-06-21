@@ -80,6 +80,10 @@
 #include "http_module_streamer.h"
 #if defined (REFLEX_USE)
 #include "http_reflex_parser_driver.h"
+#elif defined (ANTLR_USE)
+#undef emit
+#undef METHOD
+#include "http_antlr_parser_driver.h"
 #else
 #include "http_parser_driver.h"
 #endif // REFLEX_USE
@@ -120,6 +124,10 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
 typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
                                   Common_TimePolicy_t,
                                   Test_I_SessionMessage> HTTP_ParserDriver_t;
+#elif defined (ANTLR_USE)
+typedef HTTP_ANTLRParserDriver_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 Test_I_SessionMessage> HTTP_ParserDriver_t;
 #else
 typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,
@@ -166,6 +174,10 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
 typedef HTTP_ReflexParserDriver_T<ACE_MT_SYNCH,
                                   Common_TimePolicy_t,
                                   Test_I_SessionMessage_3> HTTP_ParserDriver_3;
+#elif defined (ANTLR_USE)
+typedef HTTP_ANTLRParserDriver_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 Test_I_SessionMessage_3> HTTP_ParserDriver_3;
 #else
 typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,

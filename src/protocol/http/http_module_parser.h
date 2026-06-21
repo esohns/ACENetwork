@@ -110,7 +110,7 @@ class HTTP_Module_Parser_T
   // override (part of) Common_IScannerBase
   inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
 
-  // implement (part of) HTTP_(Reflex)_IParser
+  // implement (part of) HTTP_(Reflex|ANTLR)_IParser
   virtual void record (struct HTTP_Record*&); // data record
   inline virtual ACE_UINT32 currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); } // returns: current chunk size
   inline virtual ACE_UINT64 contentLengthOrChunkSize () { return contentLengthOrChunkSize_; }
@@ -124,12 +124,9 @@ class HTTP_Module_Parser_T
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-  //                            offset      size
-  typedef std::vector<std::pair<ACE_UINT64, ACE_UINT32> > CHUNKS_T;
-  typedef CHUNKS_T::const_iterator CHUNKS_ITERATOR_T;
 
   ACE_UINT64                          bodyOrChunkBytesToSkip_;
-  CHUNKS_T                            chunks_;
+  HTTP_Chunks_t                       chunks_;
   ACE_UINT64                          contentLengthOrChunkSize_;
   typename inherited::MESSAGE_QUEUE_T queue_; // parser-
 };
@@ -252,10 +249,7 @@ class HTTP_Module_ParserH_T
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
-  //                            offset      size
-  typedef std::vector<std::pair<ACE_UINT64, ACE_UINT32> > CHUNKS_T;
-  typedef CHUNKS_T::const_iterator CHUNKS_ITERATOR_T;
-  CHUNKS_T         chunks_;
+  HTTP_Chunks_t    chunks_;
   ACE_UINT64       contentLengthOrChunkSize_;
   ACE_UINT64       bodyOrChunkBytesToSkip_;
 };

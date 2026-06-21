@@ -105,46 +105,6 @@ Test_I_Message::Test_I_Message (Stream_SessionId_t sessionId_in,
 
 }
 
-//Test_I_Message::Test_I_Message (ACE_Allocator* messageAllocator_in)
-// : inherited (messageAllocator_in) // message block allocator
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Test_I_Message::Test_I_Message"));
-//
-//}
-
-//DHCP_MessageType_t
-//Test_I_Message::command () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Test_I_Message::command"));
-//
-//  // sanity check(s)
-//  if (!inherited::initialized_)
-//    return DHCP_Codes::DHCP_MESSAGE_INVALID;
-////  ACE_ASSERT (inherited::data_);
-//
-//  DHCP_OptionsIterator_t iterator =
-////      inherited::data_.DHCPRecord->options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
-//      inherited::data_.options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
-//  ACE_ASSERT (iterator != inherited::data_.options.end ());
-////  ACE_ASSERT (iterator != inherited::data_.DHCPRecord->options.end ());
-////  Test_I_MessageData& data_r =
-////      const_cast<Test_I_MessageData&> (inherited::data_->get ());
-////  ACE_ASSERT (data_r.DHCPRecord);
-////  DHCP_OptionsIterator_t iterator =
-////    data_r.DHCPRecord->options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
-////  ACE_ASSERT (iterator != data_r.DHCPRecord->options.end ());
-//
-//  return DHCP_Tools::MessageType2Type ((*iterator).second);
-//}
-
-//std::string
-//Test_I_Message::Command2String (DHCP_MessageType_t type_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Test_I_Message::Command2String"));
-//
-//  return DHCP_Tools::MessageType2String (type_in);
-//}
-
 ACE_Message_Block*
 Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
 {
@@ -152,7 +112,6 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
 
   ACE_UNUSED_ARG (flags_in);
 
-  int result;
   size_t current_size;
 
   // sanity check(s)
@@ -184,7 +143,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
   if (inherited::message_block_allocator_)
   {
     // *NOTE*: the argument to calloc() doesn't matter (as long as it is not 0),
-    //         the returned memory is always sizeof(ARDrone_LiveVideoMessage)
+    //         the returned memory is always sizeof(Test_I_Message)
     ACE_NEW_MALLOC_NORETURN (result_p,
                              static_cast<Test_I_Message*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_Message))),
                              Test_I_Message (inherited::sessionId_,
@@ -235,8 +194,6 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
                           inherited::sessionId_,
                           NULL);
   } // end IF
-
-  result_p->setMediaType (mediaType_);
 
   // clone any continuations
   if (inherited::cont_)
@@ -313,6 +270,5 @@ Test_I_Message::duplicate (void) const
   } // end IF
 
   // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
-
   return message_p;
 }

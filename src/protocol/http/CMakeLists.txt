@@ -1,5 +1,6 @@
 include (flex)
 include (reflex)
+include (antlr)
 
 add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
 
@@ -26,15 +27,19 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 
 if (REFLEX_SUPPORT)
- target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             -DWITH_REALLOC=0)
- target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             -DWITH_FAST_GET=0)
+# target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+#                             -DWITH_REALLOC=0)
+# target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+#                             -DWITH_FAST_GET=1)
 # target_compile_definitions (${PROJECT_NAME}_Protocol_HTTP PUBLIC
 #                             -DWITH_SPAN=0)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${REFLEX_INCLUDE_DIRS}>)
 endif (REFLEX_SUPPORT)
+if (ANTLR_SUPPORT)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${ANTLR_INCLUDE_DIRS}>)
+endif (ANTLR_SUPPORT)
 if (UNIX)
 # target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
 
@@ -146,11 +151,29 @@ if (REFLEX_SUPPORT)
       http_reflex_scanner.cpp
       http_reflex_scanner.h)
 endif (REFLEX_SUPPORT)
+if (ANTLR_SUPPORT)
+ set (source_files
+      ${source_files}
+      http_antlr_iparser.h
+      http_antlr_parser.cpp
+      http_antlr_parser.h
+      http_antlr_parserBaseListener.cpp
+      http_antlr_parserBaseListener.h
+      http_antlr_parserListener.cpp
+      http_antlr_parserListener.h
+      http_antlr_parser_driver.cpp
+      http_antlr_parser_driver.h
+      http_antlr_parser_driver.inl
+      http_antlr_scanner.cpp
+      http_antlr_scanner.h)
+endif (ANTLR_SUPPORT)
 set (script_files
 #     scripts/bisector.l
      scripts/scanner.l
      scripts/reflex_scanner.l
-     scripts/parser.y)
+     scripts/parser.y
+     scripts/antlr_http_scanner.g4
+     scripts/antlr_http_parser.g4)
 set (table_files)
 #     etc/http_scanner.tab)
 
@@ -208,6 +231,9 @@ endif (WIN32 AND MSVC)
 if (REFLEX_SUPPORT)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${REFLEX_LIB})
 endif (REFLEX_SUPPORT)
+if (ANTLR_SUPPORT)
+ target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${ANTLR_LIB})
+endif (ANTLR_SUPPORT)
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
@@ -258,6 +284,17 @@ if (REFLEX_SUPPORT)
           http_reflex_scanner.h
           DESTINATION include)
 endif (REFLEX_SUPPORT)
+if (ANTLR_SUPPORT)
+ install (FILES
+          http_antlr_iparser.h
+          http_antlr_parser.h
+          http_antlr_parserBaseListener.h
+          http_antlr_parserListener.h
+          http_antlr_parser_driver.h
+          http_antlr_parser_driver.inl
+          http_antlr_scanner.h
+          DESTINATION include)
+endif (ANTLR_SUPPORT)
 install (TARGETS ${PROJECT_NAME}_Protocol_HTTP
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib

@@ -1,0 +1,252 @@
+
+#include <regex>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "common_string_tools.h"
+
+#include "http_common.h"
+#include "http_defines.h"
+#include "http_tools.h"
+
+#include "http_antlr_scanner.h"
+
+
+// Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_parser.g4 by ANTLR 4.13.2
+
+#pragma once
+
+
+#include "antlr4-runtime.h"
+
+
+
+
+class  http_antlr_parser : public antlr4::Parser {
+public:
+  enum {
+    METHOD = 1, URI = 2, VERSION = 3, CODE = 4, REASON = 5, FIELD_KEY = 6, 
+    COLON = 7, FIELD_VALUE = 8, CRLF_HEAD = 9, CRLF = 10, CHUNK = 11, SP_RESP = 12, 
+    SP_CODE = 13, CRLF_REASON = 14, BODY = 15, CHUNK_DATA = 16
+  };
+
+  enum {
+    RuleMain = 0, RuleMessage = 1, RuleHead = 2, RuleHead_request_rest = 3, 
+    RuleHead_response_rest = 4, RuleHeaders = 5, RuleHeader = 6, RuleBody = 7, 
+    RuleChunked_body = 8, RuleChunks = 9
+  };
+
+  explicit http_antlr_parser(antlr4::TokenStream *input);
+
+  http_antlr_parser(antlr4::TokenStream *input, const antlr4::atn::ParserATNSimulatorOptions &options);
+
+  ~http_antlr_parser() override;
+
+  std::string getGrammarFileName() const override;
+
+  const antlr4::atn::ATN& getATN() const override;
+
+  const std::vector<std::string>& getRuleNames() const override;
+
+  const antlr4::dfa::Vocabulary& getVocabulary() const override;
+
+  antlr4::atn::SerializedATNView getSerializedATN() const override;
+
+
+   public:
+    std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks_;
+    size_t                                          content_length_;
+    struct HTTP_Record                              record_;
+
+    // Helper function to extract token text
+    inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
+
+
+  class MainContext;
+  class MessageContext;
+  class HeadContext;
+  class Head_request_restContext;
+  class Head_response_restContext;
+  class HeadersContext;
+  class HeaderContext;
+  class BodyContext;
+  class Chunked_bodyContext;
+  class ChunksContext; 
+
+  class  MainContext : public antlr4::ParserRuleContext {
+  public:
+    MainContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    MessageContext *message();
+    antlr4::tree::TerminalNode *EOF();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  MainContext* main();
+
+  class  MessageContext : public antlr4::ParserRuleContext {
+  public:
+    MessageContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    HeadContext *head();
+    antlr4::tree::TerminalNode *CRLF();
+    BodyContext *body();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  MessageContext* message();
+
+  class  HeadContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *m = nullptr;
+    antlr4::Token *v = nullptr;
+    HeadContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    Head_request_restContext *head_request_rest();
+    antlr4::tree::TerminalNode *METHOD();
+    Head_response_restContext *head_response_rest();
+    antlr4::tree::TerminalNode *VERSION();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  HeadContext* head();
+
+  class  Head_request_restContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *u = nullptr;
+    antlr4::Token *v = nullptr;
+    Head_request_restContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *CRLF();
+    HeadersContext *headers();
+    antlr4::tree::TerminalNode *URI();
+    antlr4::tree::TerminalNode *VERSION();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  Head_request_restContext* head_request_rest();
+
+  class  Head_response_restContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *c = nullptr;
+    antlr4::Token *r = nullptr;
+    Head_response_restContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *CRLF();
+    HeadersContext *headers();
+    antlr4::tree::TerminalNode *CODE();
+    antlr4::tree::TerminalNode *REASON();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  Head_response_restContext* head_response_rest();
+
+  class  HeadersContext : public antlr4::ParserRuleContext {
+  public:
+    HeadersContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    HeadersContext *headers();
+    HeaderContext *header();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  HeadersContext* headers();
+  HeadersContext* headers(int precedence);
+  class  HeaderContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *k = nullptr;
+    antlr4::Token *v = nullptr;
+    HeaderContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *COLON();
+    antlr4::tree::TerminalNode *CRLF();
+    antlr4::tree::TerminalNode *FIELD_KEY();
+    antlr4::tree::TerminalNode *FIELD_VALUE();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  HeaderContext* header();
+
+  class  BodyContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *b = nullptr;
+    antlr4::Token *c = nullptr;
+    BodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *BODY();
+    Chunked_bodyContext *chunked_body();
+    antlr4::tree::TerminalNode *CHUNK();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  BodyContext* body();
+
+  class  Chunked_bodyContext : public antlr4::ParserRuleContext {
+  public:
+    Chunked_bodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ChunksContext *chunks();
+    HeadersContext *headers();
+    antlr4::tree::TerminalNode *CRLF();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  Chunked_bodyContext* chunked_body();
+
+  class  ChunksContext : public antlr4::ParserRuleContext {
+  public:
+    antlr4::Token *c = nullptr;
+    ChunksContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ChunksContext *chunks();
+    antlr4::tree::TerminalNode *CHUNK();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  ChunksContext* chunks();
+  ChunksContext* chunks(int precedence);
+
+  bool sempred(antlr4::RuleContext *_localctx, size_t ruleIndex, size_t predicateIndex) override;
+
+  bool headersSempred(HeadersContext *_localctx, size_t predicateIndex);
+  bool chunksSempred(ChunksContext *_localctx, size_t predicateIndex);
+
+  // By default the static state used to implement the parser is lazily initialized during the first
+  // call to the constructor. You can call this function if you wish to initialize the static state
+  // ahead of time.
+  static void initialize();
+
+private:
+};
+

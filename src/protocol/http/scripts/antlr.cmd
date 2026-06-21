@@ -5,12 +5,11 @@ pushd . >NUL 2>&1
 goto Begin
 
 :Begin
-set LOCATION=%PRJ_ROOT%\\Common\\src\\parser\\etc\\antlr-4.8-complete.jar
-java -jar %LOCATION% -Dlanguage=Cpp -listener -visitor -o generated/ -package antlrcpptest HTTPScanner.g4 HTTPParser.g4
-::java -jar %LOCATION% -Dlanguage=Cpp -listener -visitor -o generated/ -package antlrcpptest -XdbgST TLexer.g4 TParser.g4
-::java -jar %LOCATION% -Dlanguage=Java -listener -visitor -o generated/ -package antlrcpptest TLexer.g4 TParser.g4
+set LOCATION=%LIB_ROOT%\\antlr\\tools\\antlr-4.13.2-complete.jar
+::java -jar %LOCATION% -Dlanguage=Cpp -listener -visitor -o generated/ -package antlrcpptest antlr_http_scanner.g4 antlr_http_parser.g4
+java -jar %LOCATION% -Dlanguage=Cpp -o generated/ antlr_http_scanner.g4 antlr_http_parser.g4
 if %ERRORLEVEL% NEQ 0 (
-  echo failed to generate parser file^(s^)^, exiting
+  echo failed to generate scanner/parser file^(s^)^, exiting
   set RC=%ERRORLEVEL%
   goto Failed
 )

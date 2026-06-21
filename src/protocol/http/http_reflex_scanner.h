@@ -166,7 +166,7 @@ class HTTP_Reflex_Scanner_FlexLexer : public FlexLexer {
     yylloc.first_line = static_cast<unsigned int>(matcher().lineno());
     yylloc.first_column = static_cast<unsigned int>(matcher().columno());
     yylloc.last_line = static_cast<unsigned int>(matcher().lineno_end());
-    yylloc.last_column = static_cast<unsigned int>(matcher().columno_end());
+    //yylloc.last_column = static_cast<unsigned int>(matcher().columno_end());
   }
   virtual int yylex(void)
   {
@@ -175,6 +175,12 @@ class HTTP_Reflex_Scanner_FlexLexer : public FlexLexer {
   }
   /* EDIT */
   inline virtual int wrap () { return yywrap (); }
+  virtual void LexerError (const char *s) ///< error message
+  {
+    std::cerr << s << std::endl;
+    //exit(YY_EXIT_FAILURE);
+  }
+
   // the flex bison-locations lexer function defined by SECTION 2
   virtual int HTTP_Reflex_Scanner_lex(YYSTYPE& yylval, YYLTYPE& yylloc);
   void perf_report()

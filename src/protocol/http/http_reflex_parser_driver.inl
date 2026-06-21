@@ -306,8 +306,8 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     static_cast<yyscanner_t*> (scannerState_)->buffer (fragment_->rd_ptr (),
                                                        fragment_->length () + 1);
     static_cast<yyscanner_t*> (scannerState_)->matcher (matcher_);
-    //matcher_->buffer (fragment_->length ());
-    matcher_->set_reserve (fragment_->size ());
+    // matcher_->buffer (fragment_->length ());
+    // matcher_->set_reserve (fragment_->size ());
   } // end IF
 
   // parse data fragment
@@ -561,8 +561,8 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
     ACE_ASSERT (matcher_);
     matcher_->buffer (fragment_->rd_ptr (),
                       fragment_->length () + 1);
-    //matcher_->buffer (fragment_->length ());
-    matcher_->set_reserve (fragment_->size ());
+    // matcher_->buffer (fragment_->length ());
+    // matcher_->set_reserve (fragment_->size ());
   } // end IF
   else
     bufferState_ = yy_scan_bytes (fragment_->rd_ptr (),
@@ -615,7 +615,7 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   ACE_ASSERT (matcher_);
 
   // adjust buffer ?
-  struct FlexLexer::AbstractBaseLexer::Matcher::Context context_s =
+  /*struct FlexLexer::AbstractBaseLexer::Matcher::Context context_s =
     matcher_->after ();
   if (fragment_in->base () != context_s.buf)
   {
@@ -625,5 +625,5 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
                         fragment_in->capacity (),
                         0); // <-- own the reallocated memory buffer
     data_block_p->size (fragment_in->size ());
-  } // end IF
+  } // end IF*/
 }

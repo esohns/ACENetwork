@@ -79,7 +79,7 @@
 
 // parser
 #define HTTP_PRT_LEXER_DFA_TABLES_FILENAME        "http_scanner.tab"
-#define HTTP_PRT_REGEX_CHUNK_LINE                 "^([[:xdigit:]]+)(?:(;.+)*)(?:\\r\\n)$"
+#define HTTP_PRT_REGEX_CHUNK_LINE                 "^([[:xdigit:]]+)(?:(;.*)*)(?:\\r\\n)$"
 
 //////////////////////////////////////////
 // HTTPS

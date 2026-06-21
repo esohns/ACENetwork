@@ -21,8 +21,8 @@
 #ifndef HTTP_COMMON_H
 #define HTTP_COMMON_H
 
-#include <map>
 #include <string>
+#include <map>
 
 #include "ace/OS.h"
 
@@ -141,5 +141,9 @@ struct HTTP_ParserConfiguration
 
   bool headerOnly; // parse only message headers ?
 };
+
+//                            offset      size
+typedef std::vector<std::pair<ACE_UINT64, ACE_UINT32> > HTTP_Chunks_t;
+typedef HTTP_Chunks_t::const_iterator HTTP_ChunksConstIterator_t;
 
 #endif

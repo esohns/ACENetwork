@@ -413,8 +413,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   else
   { // --> chunked transfer
     ACE_Message_Block* message_block_2 = NULL;
-    CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
-    CHUNKS_ITERATOR_T iterator_3;
+    HTTP_ChunksConstIterator_t iterator_2 = chunks_.begin ();
+    HTTP_ChunksConstIterator_t iterator_3;
     size_t total_data = 0;
     bytes_to_skip = (*iterator_2).first; // skip HTTP header + first chunk line
     do
@@ -911,7 +911,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
   else
   { // --> chunked transfer
-    for (CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
+    for (HTTP_ChunksConstIterator_t iterator_2 = chunks_.begin ();
          iterator_2 != chunks_.end ();
          ++iterator_2)
       result += (*iterator_2).second;
@@ -1470,8 +1470,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   else
   { ACE_ASSERT (!chunks_.empty ());
     ACE_Message_Block* message_block_2 = NULL;
-    CHUNKS_ITERATOR_T iterator_2 = chunks_.begin ();
-    CHUNKS_ITERATOR_T iterator_3;
+    HTTP_ChunksConstIterator_t iterator_2 = chunks_.begin ();
+    HTTP_ChunksConstIterator_t iterator_3;
     unsigned int total_data = 0;
     bytes_to_skip = (*iterator_2).first; // skip HTTP header + first chunk line
     do
