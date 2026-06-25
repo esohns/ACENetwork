@@ -32,8 +32,7 @@ options {
 }
 
 // Actual grammar start.
-main:               message EOF;
-message:            head CRLF body;
+document:           head CRLF body EOF;
 head:               METHOD {
                       record_.method = HTTP_Tools::MethodToType ($METHOD->getText ());
                     } head_request_rest

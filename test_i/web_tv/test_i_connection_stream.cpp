@@ -20,6 +20,8 @@
 #include "stdafx.h"
 
 #include "test_i_connection_stream.h"
+#undef main
+#undef ERROR
 
 #include "ace/Log_Msg.h"
 

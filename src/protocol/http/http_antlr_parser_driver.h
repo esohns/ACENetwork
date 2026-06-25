@@ -32,8 +32,8 @@
 
 #include "http_common.h"
 
-#include "http_antlr_scanner.h"
 #include "http_antlr_iparser.h"
+#include "http_antlr_scanner.h"
 #include "http_antlr_parser.h"
 #include "http_antlr_parserBaseListener.h"
 

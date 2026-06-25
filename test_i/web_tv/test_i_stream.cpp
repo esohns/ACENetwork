@@ -20,6 +20,8 @@
 #include "stdafx.h"
 
 #include "test_i_stream.h"
+#undef main
+#undef ERROR
 
 #include "stream_dec_defines.h"
 

@@ -304,6 +304,9 @@ elseif (WIN32)
  if (FAAD_SUPPORT)
   file (TO_CMAKE_PATH "${faad_LIB_DIR}" FAAD_PATH)
  endif (FAAD_SUPPORT)
+ if (ANTLR_SUPPORT)
+  file (TO_CMAKE_PATH "${ANTLR_LIB_DIR}" ANTLR_PATH)
+ endif (ANTLR_SUPPORT)
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
  file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
@@ -311,6 +314,7 @@ elseif (WIN32)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${ANTLR_PATH}
                            ${SSL_PATH}
                            ${FAAD_PATH}
                            ${VCPKG_LIB_PATH}

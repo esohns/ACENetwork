@@ -19,4 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#undef main
+#undef ERROR
+
 #include "http_antlr_parser_driver.h"

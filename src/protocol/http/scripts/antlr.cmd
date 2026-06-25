@@ -5,7 +5,7 @@ pushd . >NUL 2>&1
 goto Begin
 
 :Begin
-set LOCATION=%LIB_ROOT%\\antlr\\tools\\antlr-4.13.2-complete.jar
+set LOCATION=%LIB_ROOT%\\antlr\\tool\\antlr-4.13.2-complete.jar
 ::java -jar %LOCATION% -Dlanguage=Cpp -listener -visitor -o generated/ -package antlrcpptest antlr_http_scanner.g4 antlr_http_parser.g4
 java -jar %LOCATION% -Dlanguage=Cpp -o generated/ antlr_http_scanner.g4 antlr_http_parser.g4
 if %ERRORLEVEL% NEQ 0 (

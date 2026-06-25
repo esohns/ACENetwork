@@ -130,6 +130,9 @@
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
 
+#undef ACE_OS_MAIN_H
+#include "ace/OS_main.h"
+
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream");
 const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream_3");
 const char stream_name_string_4a[] = ACE_TEXT_ALWAYS_CHAR ("WebTVAudioInputStream");
@@ -1397,8 +1400,18 @@ ACE_TMAIN (int argc_in,
   NETWORK_TRACE (ACE_TEXT ("::main"));
 
   // std::setlocale (LC_ALL, ACE_TEXT_ALWAYS_CHAR (""));
-
   int result = -1;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE::init ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
+
   ACE_Profile_Timer process_profile;
   std::string configuration_file;
   bool debug_parser;

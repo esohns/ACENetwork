@@ -36,7 +36,7 @@
 #include "http_common.h"
 #include "http_defines.h"
 
-#include "http_antlr_parser.h"
+//#include "http_antlr_parser.h"
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,

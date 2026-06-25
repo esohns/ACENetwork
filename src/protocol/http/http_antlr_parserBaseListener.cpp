@@ -11,6 +11,8 @@
 #include "http_tools.h"
 
 #include "http_antlr_iparser.h"
+#undef main
+#undef ERROR
 #include "http_antlr_scanner.h"
 
 
