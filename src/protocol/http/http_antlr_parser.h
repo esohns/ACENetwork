@@ -29,7 +29,7 @@ public:
   enum {
     METHOD = 1, URI = 2, VERSION = 3, CODE = 4, REASON = 5, FIELD_KEY = 6, 
     COLON = 7, FIELD_VALUE = 8, CRLF_HEAD = 9, CRLF = 10, CHUNK = 11, SP_RESP = 12, 
-    SP_CODE = 13, BODY = 14, CHUNK_DATA = 15
+    SP_CODE = 13, BODY = 14, CHUNK_DATA = 15, CRLF_CHUNKED_DATA = 16
   };
 
   enum {
@@ -87,7 +87,6 @@ public:
     HeadContext *head();
     antlr4::tree::TerminalNode *CRLF();
     BodyContext *body();
-    antlr4::tree::TerminalNode *EOF();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

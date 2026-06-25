@@ -381,7 +381,7 @@ BODY                           : OCTET {
 
 mode CHUNKED_BODY;
 CHUNK_LAST                     : CHUNK_LINE_LAST CRLF {
-                                   offset += getText ().size () + 2;
+                                   offset += getText ().size ();
                                    setText (ACE_TEXT_ALWAYS_CHAR ("0"));
                                    parser->chunk_2 (offset, 0);
                                  } -> type(CHUNK), mode(CHUNKED_BODY_END);
@@ -422,8 +422,8 @@ CHUNK                          : CHUNK_LINE CRLF {
                                    converter << chunk_size;
                                    setText (converter.str ());
                                    parser->chunk_2 (offset, static_cast<ACE_UINT32> (chunk_size));
-                                   if (missing_body_or_chunk_bytes)
-                                     pushMode(CHUNKED_DATA);
+                                   ACE_ASSERT (missing_body_or_chunk_bytes);
+                                   pushMode(CHUNKED_DATA);
                                  }
                                  } -> type(CHUNK);
 
@@ -438,5 +438,10 @@ CHUNK_DATA                     : OCTET {
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    --missing_body_or_chunk_bytes;
                                    if (unlikely (!missing_body_or_chunk_bytes))
-                                     popMode ();
+                                     setMode(CHUNKED_DATA_END);
                                  } -> skip;
+
+mode CHUNKED_DATA_END;
+CRLF_CHUNKED_DATA              : CRLF {
+                                   offset += 2;
+                                 } -> skip, popMode;
