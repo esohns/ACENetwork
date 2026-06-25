@@ -17,6 +17,7 @@ options {
 #include "http_defines.h"
 #include "http_tools.h"
 
+#include "http_antlr_iparser.h"
 #include "http_antlr_scanner.h"
 }
 
@@ -24,20 +25,20 @@ options {
  public:
   std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks_;
   size_t                                          content_length_;
+  HTTP_ANTLR_IParser*                             parser_;
   struct HTTP_Record                              record_;
 
-  // Helper function to extract token text
-  inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
+  // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 }
 
 // Actual grammar start.
 main:               message EOF;
 message:            head CRLF body;
-head:               m=METHOD {
-                      record_.method = HTTP_Tools::MethodToType ($m.text);
+head:               METHOD {
+                      record_.method = HTTP_Tools::MethodToType ($METHOD->getText ());
                     } head_request_rest
-                    | v=VERSION {
-                    { std::string input_string = $v.text;
+                    | VERSION {
+                    { std::string input_string = $VERSION->getText ();
                       std::smatch match_results;
                       std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^");
                       regex_string += ACE_TEXT_ALWAYS_CHAR ("(?:HTTP\\/)");
@@ -63,10 +64,10 @@ head:               m=METHOD {
                         HTTP_Tools::VersionToType (match_results[1].str ());
                     }
                     } head_response_rest;
-head_request_rest:  u=URI v=VERSION CRLF {
-                    { record_.URI = $u.text;
+head_request_rest:  URI VERSION CRLF {
+                    { record_.URI = $URI->getText ();
 
-                      std::string input_string = $v.text;
+                      std::string input_string = $VERSION->getText ();
                       std::smatch match_results;
                       std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^");
                       regex_string += ACE_TEXT_ALWAYS_CHAR ("(?:HTTP\\/)");
@@ -92,55 +93,55 @@ head_request_rest:  u=URI v=VERSION CRLF {
                         HTTP_Tools::VersionToType (match_results[1].str ());
                     }
                     } headers;
-head_response_rest: c=CODE r=REASON CRLF {
+head_response_rest: CODE {
                     { std::istringstream converter;
-                      converter.str ($c.text);
+                      converter.str ($CODE->getText ());
                       int code_i;
                       converter >> code_i;
                       record_.status =
                         static_cast<HTTP_Codes::StatusType> (code_i);
-
-                      record_.reason = $r.text;
                     }
-                    } headers;
-headers:            <assoc = right> headers header
+                    } REASON {
+                      record_.reason = $REASON->getText ();
+                    } CRLF headers;
+headers:            headers header
                     |;
-header:             k=FIELD_KEY COLON v=FIELD_VALUE CRLF {
-                      record_.headers[$k.text] = $v.text;
+header:             FIELD_KEY COLON FIELD_VALUE CRLF {
+                      record_.headers[$FIELD_KEY->getText ()] = $FIELD_VALUE->getText ();
                     };
-body:               b=BODY {
+body:               BODY {
                     {
                       std::istringstream converter;
-                      converter.str ($b.text);
+                      converter.str ($BODY->getText ());
                       converter >> content_length_;
                     }
                     }
-                    | c=CHUNK {
+                    | CHUNK {
                     {
                       http_antlr_scanner* scanner_p =
                         static_cast<http_antlr_scanner*> (getTokenStream ()->getTokenSource ());
                       ACE_ASSERT (scanner_p);
                       std::istringstream converter;
-                      converter.str ($c.text);
+                      converter.str ($CHUNK->getText ());
                       int chunk_size_i;
                       converter >> chunk_size_i;
                       content_length_ += chunk_size_i;
                       chunks_.clear ();
-                      chunks_.push_back (std::make_pair (scanner_p->offset, chunk_size_i));
+                      chunks_.push_back (std::make_pair (scanner_p->chunk_offset, chunk_size_i));
                     }
                     } chunked_body;
 chunked_body:       chunks headers CRLF;
-chunks:             <assoc = right> chunks c=CHUNK {
+chunks:             chunks CHUNK {
                     {
                       http_antlr_scanner* scanner_p =
                         static_cast<http_antlr_scanner*> (getTokenStream ()->getTokenSource ());
                       ACE_ASSERT (scanner_p);
                       std::istringstream converter;
-                      converter.str ($c.text);
+                      converter.str ($CHUNK->getText ());
                       int chunk_size_i;
                       converter >> chunk_size_i;
                       content_length_ += chunk_size_i;
-                      chunks_.push_back (std::make_pair (scanner_p->offset, chunk_size_i));
+                      chunks_.push_back (std::make_pair (scanner_p->chunk_offset, chunk_size_i));
                     }
                     }
                     |;

@@ -769,7 +769,17 @@ parse:
   // the message fragment has been parsed successfully
 
   if (!this->hasFinished ())
-    return; // --> wait for more data to arrive
+  {
+    if (!this->switchBuffer (false)) // do not begin()(, will be done in parse())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to HTTP_IParser::switchBuffer(), returning\n"),
+                  inherited::mod_->name ()));
+      return; // --> wait for more data to arrive
+    } // end IF
+    message_block_p = inherited2::fragment_;
+    goto parse;
+  } // end IF
 
   // *NOTE*: the complete document has been parsed successfully,
   //         but the headFragment_ MAY have additional data appended to it

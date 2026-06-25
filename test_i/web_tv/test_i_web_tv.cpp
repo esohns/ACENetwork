@@ -1396,6 +1396,8 @@ ACE_TMAIN (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::main"));
 
+  // std::setlocale (LC_ALL, ACE_TEXT_ALWAYS_CHAR (""));
+
   int result = -1;
   ACE_Profile_Timer process_profile;
   std::string configuration_file;

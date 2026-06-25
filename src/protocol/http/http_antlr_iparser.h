@@ -21,17 +21,26 @@
 #ifndef HTTP_ANTLR_IPARSER_T_H
 #define HTTP_ANTLR_IPARSER_T_H
 
-#include <string>
-
 #include "ace/Basic_Types.h"
+
+// forward declarations
+class ACE_Message_Block;
+struct HTTP_Record;
 
 class HTTP_ANTLR_IParser
 {
  public:
+  virtual bool hasFinished () const = 0;
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
 
   virtual void record (struct HTTP_Record*&) = 0; // data record
   virtual void chunk (ACE_UINT32) = 0; // chunk size
+
+  virtual ACE_Message_Block* head () = 0; // return value: head buffer handle
+  virtual bool switchBuffer (bool = true) = 0; // begin() current fragment ?
+
+  // virtual void chunkOffset (size_t) = 0;
+  // virtual size_t chunkOffset () = 0;
 };
 
 #endif

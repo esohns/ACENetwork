@@ -101,6 +101,7 @@ class SMTP_ParserDriver_T
 #endif // _DEBUG
   inline virtual bool isBlocking () const { return true; }
   inline virtual unsigned int offset () const { return offset_; }
+  inline virtual ACE_Message_Block* head () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
 
   inline virtual bool begin (const char*, unsigned int) { return scan_begin (); }
   inline virtual void end () { scan_end (); }

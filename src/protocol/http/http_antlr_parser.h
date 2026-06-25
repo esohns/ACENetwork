@@ -10,8 +10,11 @@
 #include "http_defines.h"
 #include "http_tools.h"
 
-#include "http_antlr_scanner.h"
+#include "http_antlr_iparser.h"
 
+#undef main
+#undef ERROR
+#include "http_antlr_scanner.h"
 
 // Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_parser.g4 by ANTLR 4.13.2
 
@@ -28,7 +31,7 @@ public:
   enum {
     METHOD = 1, URI = 2, VERSION = 3, CODE = 4, REASON = 5, FIELD_KEY = 6, 
     COLON = 7, FIELD_VALUE = 8, CRLF_HEAD = 9, CRLF = 10, CHUNK = 11, SP_RESP = 12, 
-    SP_CODE = 13, CRLF_REASON = 14, BODY = 15, CHUNK_DATA = 16
+    SP_CODE = 13, BODY = 14, CHUNK_DATA = 15
   };
 
   enum {
@@ -57,10 +60,10 @@ public:
    public:
     std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks_;
     size_t                                          content_length_;
+    HTTP_ANTLR_IParser*                             parser_;
     struct HTTP_Record                              record_;
 
-    // Helper function to extract token text
-    inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
+    // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 
 
   class MainContext;
@@ -105,14 +108,14 @@ public:
 
   class  HeadContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *m = nullptr;
-    antlr4::Token *v = nullptr;
+    antlr4::Token *methodToken = nullptr;
+    antlr4::Token *versionToken = nullptr;
     HeadContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    Head_request_restContext *head_request_rest();
     antlr4::tree::TerminalNode *METHOD();
-    Head_response_restContext *head_response_rest();
+    Head_request_restContext *head_request_rest();
     antlr4::tree::TerminalNode *VERSION();
+    Head_response_restContext *head_response_rest();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -123,14 +126,14 @@ public:
 
   class  Head_request_restContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *u = nullptr;
-    antlr4::Token *v = nullptr;
+    antlr4::Token *uriToken = nullptr;
+    antlr4::Token *versionToken = nullptr;
     Head_request_restContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *CRLF();
-    HeadersContext *headers();
     antlr4::tree::TerminalNode *URI();
     antlr4::tree::TerminalNode *VERSION();
+    antlr4::tree::TerminalNode *CRLF();
+    HeadersContext *headers();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -141,14 +144,14 @@ public:
 
   class  Head_response_restContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *c = nullptr;
-    antlr4::Token *r = nullptr;
+    antlr4::Token *codeToken = nullptr;
+    antlr4::Token *reasonToken = nullptr;
     Head_response_restContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *CRLF();
-    HeadersContext *headers();
     antlr4::tree::TerminalNode *CODE();
     antlr4::tree::TerminalNode *REASON();
+    antlr4::tree::TerminalNode *CRLF();
+    HeadersContext *headers();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -173,14 +176,14 @@ public:
   HeadersContext* headers(int precedence);
   class  HeaderContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *k = nullptr;
-    antlr4::Token *v = nullptr;
+    antlr4::Token *field_keyToken = nullptr;
+    antlr4::Token *field_valueToken = nullptr;
     HeaderContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *COLON();
-    antlr4::tree::TerminalNode *CRLF();
     antlr4::tree::TerminalNode *FIELD_KEY();
+    antlr4::tree::TerminalNode *COLON();
     antlr4::tree::TerminalNode *FIELD_VALUE();
+    antlr4::tree::TerminalNode *CRLF();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -191,13 +194,13 @@ public:
 
   class  BodyContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *b = nullptr;
-    antlr4::Token *c = nullptr;
+    antlr4::Token *bodyToken = nullptr;
+    antlr4::Token *chunkToken = nullptr;
     BodyContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *BODY();
-    Chunked_bodyContext *chunked_body();
     antlr4::tree::TerminalNode *CHUNK();
+    Chunked_bodyContext *chunked_body();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -223,7 +226,7 @@ public:
 
   class  ChunksContext : public antlr4::ParserRuleContext {
   public:
-    antlr4::Token *c = nullptr;
+    antlr4::Token *chunkToken = nullptr;
     ChunksContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     ChunksContext *chunks();

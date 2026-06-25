@@ -24,12 +24,13 @@ public:
   enum {
     METHOD = 1, URI = 2, VERSION = 3, CODE = 4, REASON = 5, FIELD_KEY = 6, 
     COLON = 7, FIELD_VALUE = 8, CRLF_HEAD = 9, CRLF = 10, CHUNK = 11, SP_RESP = 12, 
-    SP_CODE = 13, CRLF_REASON = 14, BODY = 15, CHUNK_DATA = 16
+    SP_CODE = 13, BODY = 14, CHUNK_DATA = 15
   };
 
   enum {
     RESPONSE_SP = 1, STATUS_CODE = 2, REASON_STRING = 3, HEADERS = 4, HEAD = 5, 
-    HEAD_VALUE = 6, REGULAR_BODY = 7, CHUNKED_BODY = 8, CHUNKED_DATA = 9
+    HEAD_VALUE = 6, HEAD_END = 7, REGULAR_BODY = 8, CHUNKED_BODY = 9, CHUNKED_BODY_END = 10, 
+    CHUNKED_DATA = 11
   };
 
   explicit http_antlr_scanner(antlr4::CharStream *input);
@@ -38,6 +39,7 @@ public:
 
 
    public:
+    size_t             chunk_offset;
     size_t             content_length;
     std::string        key;
     size_t             missing_body_or_chunk_bytes;
@@ -46,10 +48,10 @@ public:
 
     void reset_2 ()
     {
-     // initialization code here
-     content_length = 0;
-     missing_body_or_chunk_bytes = 0;
-     offset = 0;
+      chunk_offset = 0;
+      content_length = 0;
+      missing_body_or_chunk_bytes = 0;
+      offset = 0;
     }
 
 
@@ -89,6 +91,7 @@ private:
   void VALUE_HEADAction(antlr4::RuleContext *context, size_t actionIndex);
   void CRLF_HEADAction(antlr4::RuleContext *context, size_t actionIndex);
   void BODYAction(antlr4::RuleContext *context, size_t actionIndex);
+  void CHUNK_LASTAction(antlr4::RuleContext *context, size_t actionIndex);
   void CHUNKAction(antlr4::RuleContext *context, size_t actionIndex);
   void CRLF_CHUNKED_BODYAction(antlr4::RuleContext *context, size_t actionIndex);
   void CHUNK_DATAAction(antlr4::RuleContext *context, size_t actionIndex);

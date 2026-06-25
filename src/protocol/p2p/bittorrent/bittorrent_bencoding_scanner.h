@@ -64,6 +64,8 @@ class BitTorrent_Bencoding_Scanner
 #endif // _DEBUG
   inline virtual bool isBlocking () const { ACE_ASSERT (parser_); return parser_->isBlocking (); }
   inline virtual unsigned int offset () const { ACE_ASSERT (parser_); return parser_->offset (); }
+  inline virtual ACE_Message_Block* head () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+
   inline virtual bool begin (const char* buffer_in, unsigned int bufferSize_in) { ACE_ASSERT (parser_); return parser_->begin (buffer_in, bufferSize_in); }
   inline virtual void end () { ACE_ASSERT (parser_); parser_->end (); }
   // *IMPORTANT NOTE*: when the parser detects a frame end, it inserts a new

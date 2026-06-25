@@ -15,6 +15,7 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 
 @members {
  public:
+  size_t             chunk_offset;
   size_t             content_length;
   std::string        key;
   size_t             missing_body_or_chunk_bytes;
@@ -23,10 +24,10 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 
   void reset_2 ()
   {
-   // initialization code here
-   content_length = 0;
-   missing_body_or_chunk_bytes = 0;
-   offset = 0;
+    chunk_offset = 0;
+    content_length = 0;
+    missing_body_or_chunk_bytes = 0;
+    offset = 0;
   }
 }
 
@@ -255,7 +256,7 @@ fragment ENTITY_HEADER         : (ALLOW_HEADER|CONTENTENCODING_HEADER|CONTENTLEN
 /*BODY                           : (OCTET)+;*/
 
 /* Chunks (*NOTE*: HTTP/1.1) */
-fragment CHUNKSIZE             : (HEX)+;
+fragment CHUNKSIZE             : HEX+;
 fragment CHUNK_EXTENSION       : TOKEN ('=' TOKEN|QUOTED_STRING)?;
 fragment CHUNK_EXTENSIONS      : (';' CHUNK_EXTENSION)*;
 fragment CHUNK_LINE            : CHUNKSIZE CHUNK_EXTENSIONS;
@@ -268,29 +269,29 @@ fragment CHUNK_TRAILER         : (ENTITY_HEADER CRLF)*;
 /*                                                                            */
 
 VERSION                        : 'HTTP' '/' DIGIT '.' DIGIT {
-                                   offset += getText ().size ();
+                                   offset += 8;
                                  } -> type(VERSION), mode(RESPONSE_SP);
 
 mode RESPONSE_SP;
 SP_RESP                        : SP {
-                                   offset += getText ().size ();
+                                   ++offset;
                                  } -> skip, mode(STATUS_CODE);
 
 mode STATUS_CODE;
 CODE                           : DIGIT DIGIT DIGIT {
-                                   offset += getText ().size ();
+                                   offset += 3;
                                  } -> type(CODE);
 SP_CODE                        : SP {
-                                   offset += getText ().size ();
+                                   ++offset;
                                  } -> skip, mode(REASON_STRING);
 
 mode REASON_STRING;  /* *( HTAB / SP / VCHAR / obs-text ) */
 REASON                         : (HT|SP|VCHAR|OBS_TEXT)+ {
                                    offset += getText ().size ();
-                                 }-> type(REASON);
+                                 } -> type(REASON);
 CRLF_REASON                    : CRLF {
-                                   offset += getText ().size ();
-                                 } -> skip, mode(HEADERS);
+                                   offset += 2;
+                                 } -> type(CRLF), mode(HEADERS);
 
 mode HEADERS;
 KEY_HEAD                       : FIELD_NAME {
@@ -298,7 +299,7 @@ KEY_HEAD                       : FIELD_NAME {
                                    offset += key.size ();
                                  } -> type(FIELD_KEY), pushMode(HEAD);
 CRLF_HEADERS                   : CRLF {
-                                 { offset += getText ().size ();
+                                 { offset += 2;
                                    HTTP_HeadersConstIterator_t iterator =
                                      record.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
                                    if (iterator != record.headers.end ())
@@ -341,7 +342,7 @@ CRLF_HEADERS                   : CRLF {
                                  } -> type(CRLF);
 
 mode HEAD;
-COLON_SP                       : ':' (SP)+ {
+COLON_SP                       : ':' SP+ {
                                    offset += getText ().size ();
                                  } -> type(COLON), mode(HEAD_VALUE);
 
@@ -352,9 +353,11 @@ VALUE_HEAD                     : FIELD_VALUE {
                                    offset += value.size ();
                                    record.headers.insert (std::make_pair (key, value));
                                  }
-                                 } -> type(FIELD_VALUE);
+                                 } -> type(FIELD_VALUE), mode(HEAD_END);
+
+mode HEAD_END;
 CRLF_HEAD                      : CRLF {
-                                   offset += getText ().size ();
+                                   offset += 2;
                                  }-> type(CRLF), popMode;
 
 mode REGULAR_BODY;
@@ -367,14 +370,22 @@ BODY                           : OCTET {
                                      converter << content_length;
                                      setText (converter.str ());
                                      setType (BODY);
+                                     break;
                                    } // end IF
-                                 } -> skip;
+                                   skip ();
+                                 };
 
 mode CHUNKED_BODY;
+CHUNK_LAST                     : CHUNK_LINE_LAST CRLF {
+                                   offset += 3;
+                                   chunk_offset = offset;
+                                   setText (ACE_TEXT_ALWAYS_CHAR ("0"));
+                                 } -> type(CHUNK), mode(CHUNKED_BODY_END);
 CHUNK                          : CHUNK_LINE CRLF {
                                  { // *TODO*: let the scanner parse this (it does it anyway)
                                    std::string input_string = getText ();
                                    offset += input_string.size ();
+                                   chunk_offset = offset;
                                    std::smatch match_results;
                                    std::string regex_string = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE);
                                    std::regex regex (regex_string.c_str ());
@@ -411,11 +422,15 @@ CHUNK                          : CHUNK_LINE CRLF {
                                      pushMode(CHUNKED_DATA);
                                  }
                                  } -> type(CHUNK);
+
+mode CHUNKED_BODY_END;
 CRLF_CHUNKED_BODY              : CRLF {
+                                   offset += 2;
                                  } -> type(CRLF), mode(DEFAULT_MODE);
 
 mode CHUNKED_DATA;
 CHUNK_DATA                     : OCTET {
+                                   ++offset;
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    --missing_body_or_chunk_bytes;
                                    if (unlikely (!missing_body_or_chunk_bytes))

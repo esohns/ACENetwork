@@ -10,6 +10,7 @@
 #include "http_defines.h"
 #include "http_tools.h"
 
+#include "http_antlr_iparser.h"
 #include "http_antlr_scanner.h"
 
 

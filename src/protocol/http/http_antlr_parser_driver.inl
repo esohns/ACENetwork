@@ -48,12 +48,19 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
  , configuration_ (NULL)
  , finished_ (false)
  , fragment_ (NULL)
- , inputBuffer_ ()
- , inputStream_ ()
+#if (USE_UNBUFFERED)
+ , inputBuffer_ (this)
+ , inputStream_ (&inputBuffer_)
  , input_ (inputStream_)
- , itask_ (itask_in)
+ , tokenFactory_ (true)
  , lexer_ (&input_)
  , tokens_ (&lexer_)
+#else
+ , inputStream_ ()
+ , lexer_ (&inputStream_)
+ , tokens_ (&lexer_)
+#endif // USE_UNBUFFERED
+ , itask_ (itask_in)
  , offset_ (0)
  , parser_ (&tokens_)
  , record_ ()
@@ -66,12 +73,14 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (itask_);
 
-  inputStream_.rdbuf (&inputBuffer_);
-
   lexer_.removeErrorListeners ();
   lexer_.addErrorListener (this);
-  lexer_.setTokenFactory (new antlr4::CommonTokenFactory (true));
+#if (USE_UNBUFFERED)
+  //lexer_.setTokenFactory(antlr4::CommonTokenFactory::DEFAULT.get ());
+  lexer_.setTokenFactory (&tokenFactory_);
+#endif // USE_UNBUFFERED
 
+  parser_.parser_ = this;
   parser_.setBuildParseTree (false);
   parser_.removeErrorListeners ();
   parser_.addErrorListener (this);
@@ -89,24 +98,37 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 
 }
 
-template <ACE_SYNCH_DECL, typename TimePolicyType, typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE, TimePolicyType, SessionMessageType>::
-  exitChunks (http_antlr_parser::ChunksContext* context_in)
+HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
+                         TimePolicyType,
+                         SessionMessageType>::exitChunks (http_antlr_parser::ChunksContext* context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::exitChunks"));
 
   ACE_UNUSED_ARG (context_in);
 }
 
-template <ACE_SYNCH_DECL, typename TimePolicyType, typename SessionMessageType>
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
 void
-HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE, TimePolicyType,
-  SessionMessageType>::exitBody (http_antlr_parser::BodyContext* context_in)
+HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
+                         TimePolicyType,
+                         SessionMessageType>::exitBody (http_antlr_parser::BodyContext* context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::exitBody"));
 
   ACE_UNUSED_ARG (context_in);
+
+  // sanity check: finished ?
+  ACE_Message_Block* head_fragment_p = this->head ();
+  ACE_ASSERT (head_fragment_p);
+  size_t total_length_i = head_fragment_p->total_length ();
+  if (total_length_i < lexer_.content_length)
+    return;
 
   // process any chunks
   size_t offset_i = lexer_.offset;
@@ -124,6 +146,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE, TimePolicyType,
   struct HTTP_Record* record_p = &record_;
   record (record_p);
 
+  // *TODO*: set to finished only iff total_length >= content_length !
   finished_ = true;
 }
 
@@ -145,12 +168,15 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     std::vector<std::string> rules = parser_.getRuleInvocationStack (context_in);
     std::reverse (rules.begin (), rules.end ());
     std::string rulesStr = antlrcpp::arrayToString (rules);
-    std::string info_string = rulesStr +
-                              ACE_TEXT_ALWAYS_CHAR ("{start=") +
-                              (context_in->start ? std::to_string (context_in->start->getTokenIndex ()) : ACE_TEXT_ALWAYS_CHAR ("0x0")) +
-                              ACE_TEXT_ALWAYS_CHAR (", stop=") +
-                              (context_in->stop ? std::to_string (context_in->stop->getTokenIndex ()) : ACE_TEXT_ALWAYS_CHAR ("0x0")) +
-                              '}';
+    std::string info_string = rulesStr;
+#if (USE_UNBUFFERED)
+#else
+    info_string += ACE_TEXT_ALWAYS_CHAR (" {start=") +
+                   (context_in->start ? std::to_string (context_in->start->getTokenIndex ()) : ACE_TEXT_ALWAYS_CHAR ("0x0")) +
+                   ACE_TEXT_ALWAYS_CHAR (", stop=") +
+                   (context_in->stop ? std::to_string (context_in->stop->getTokenIndex ()) : ACE_TEXT_ALWAYS_CHAR ("0x0")) +
+                   '}';
+#endif // USE_UNBUFFERED
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("entering rule: \"%s\"...\n"),
                 ACE_TEXT (info_string.c_str ())));
@@ -309,6 +335,9 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   messageQueue_ = configuration_->messageQueue;
   ACE_ASSERT (messageQueue_);
 
+  if (configuration_->debugParser)
+    parser_.setTrace (true);
+
   isInitialized_ = true;
 
   return true;
@@ -333,14 +362,15 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   finished_ = false;
   // retain a handle to the 'current' fragment
   fragment_ = data_in;
-  offset_ = 0;
-  record_.reset ();
-  lexer_.reset_2 ();
 
   // initialize scanner ?
   if (isFirst_)
   {
     isFirst_ = false;
+
+    offset_ = 0;
+    record_.reset ();
+    lexer_.reset_2 ();
   } // end IF
 
   begin (fragment_->rd_ptr (),
@@ -348,25 +378,41 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 
   if (unlikely (configuration_->debugParser))
   {
-    // tokens_.fill ();
-    // antlr4::Token* token_p = NULL;
-    // for (size_t i = 0;
-    //      i < tokens_.size ();
-    //      ++i)
-    // {
-    //   token_p = tokens_.get (i);
-    //   ACE_ASSERT (token_p);
-    //   ACE_DEBUG ((LM_DEBUG,
-    //               ACE_TEXT ("#%B: @%B/%B:\t%d -->\t\"%s\"\n"),
-    //               i + 1,
-    //               token_p->getLine (), token_p->getCharPositionInLine (),
-    //               token_p->getType (), ACE_TEXT (token_p->getText ().c_str ())));
-    // } // end FOR
+#if (USE_UNBUFFERED)
+#else
+    tokens_.fill ();
+    antlr4::Token* token_p = NULL;
+    for (size_t i = 0;
+         i < tokens_.size ();
+         ++i)
+    {
+      token_p = tokens_.get (i);
+      ACE_ASSERT (token_p);
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("#%B: @%B/%B:\t%d -->\t\"%s\"\n"),
+                  i + 1,
+                  token_p->getLine (), token_p->getCharPositionInLine (),
+                  token_p->getType (), ACE_TEXT (token_p->getText ().c_str ())));
+    } // end FOR
+#endif // USE_UNBUFFERED
   } // end IF
+#if (USE_UNBUFFERED)
+  tokens_.fill (1);
+#endif // USE_UNBUFFERED
 
   // parse data fragment
   try {
     parser_.main ();
+  } catch (const antlr4::RuntimeException& e) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught ANTLR exception in http_antlr_parser::main(): \"%s\", continuing\n"),
+                ACE_TEXT (e.what ())));
+    result = 1;
+  } catch (const std::runtime_error& e) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in http_antlr_parser::main(): \"%s\", continuing\n"),
+                ACE_TEXT (e.what ())));
+    result = 1;
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in http_antlr_parser::main(), continuing\n")));
@@ -405,11 +451,9 @@ template <ACE_SYNCH_DECL,
 bool
 HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
                          TimePolicyType,
-                         SessionMessageType>::switchBuffer (bool unlink_in)
+                         SessionMessageType>::switchBuffer (bool begin_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::switchBuffer"));
-
-  ACE_UNUSED_ARG (unlink_in);
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
@@ -440,13 +484,14 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   // clean state
   end ();
 
-  if (!begin (fragment_->rd_ptr (),
-              fragment_->length ()))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_ANTLRParserDriver_T::begin(), aborting\n")));
-    return false;
-  } // end IF
+  if (likely (begin_in))
+    if (!begin (fragment_->rd_ptr (),
+                fragment_->length ()))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HTTP_ANTLRParserDriver_T::begin(), aborting\n")));
+      return false;
+    } // end IF
 
   return true;
 }
@@ -591,10 +636,16 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   ACE_ASSERT (configuration_);
   ACE_ASSERT (fragment_);
 
-  inputBuffer_.pubsetbuf (fragment_->rd_ptr (),
-                          fragment_->length ());
-  // inputStream_.load (fragment_->rd_ptr (),
-  //                    fragment_->length ());
+#if (USE_UNBUFFERED)
+  // inputBuffer_.pubsetbuf (fragment_->rd_ptr (),
+  //                         fragment_->length ());
+  inputBuffer_.append_chunk (fragment_->rd_ptr (),
+                             fragment_->length ());
+  inputStream_.clear ();
+#else
+  inputStream_.load (fragment_->rd_ptr (),
+                     fragment_->length ());
+#endif
   // lexer_.setInputStream (&input_);
   // tokens_.setTokenSource (&lexer_);
   // parser_.setInputStream (&tokens_);

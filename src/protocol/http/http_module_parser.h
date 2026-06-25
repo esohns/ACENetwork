@@ -108,6 +108,7 @@ class HTTP_Module_Parser_T
   size_t getContentLength ();
 
   // override (part of) Common_IScannerBase
+  inline virtual ACE_Message_Block* head () { return headFragment_; }
   inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
 
   // implement (part of) HTTP_(Reflex|ANTLR)_IParser
@@ -231,6 +232,7 @@ class HTTP_Module_ParserH_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
 
   // override (part of) Common_IScannerBase
+  inline virtual ACE_Message_Block* head () { return headFragment_; }
   inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
 
   // implement (part of) HTTP_IParser

@@ -21,6 +21,9 @@
 #ifndef TEST_I_MODULE_HTTPGET_H
 #define TEST_I_MODULE_HTTPGET_H
 
+#include <cstdio>
+#define EOF (-1)
+
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
