@@ -35,6 +35,7 @@ class HTTP_ANTLR_IParser
 
   virtual void record (struct HTTP_Record*&) = 0; // data record
   virtual void chunk (ACE_UINT32) = 0; // chunk size
+  virtual void chunk_2 (ACE_UINT64, ACE_UINT32) = 0; // chunk offset, chunk size
 
   virtual ACE_Message_Block* head () = 0; // return value: head buffer handle
   virtual bool switchBuffer (bool = true) = 0; // begin() current fragment ?

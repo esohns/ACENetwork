@@ -750,16 +750,11 @@ http_antlr_parser::BodyContext* http_antlr_parser::body() {
         antlrcpp::downCast<BodyContext *>(_localctx)->chunkToken = match(http_antlr_parser::CHUNK);
 
                             {
-                              http_antlr_scanner* scanner_p =
-                                static_cast<http_antlr_scanner*> (getTokenStream ()->getTokenSource ());
-                              ACE_ASSERT (scanner_p);
                               std::istringstream converter;
                               converter.str (antlrcpp::downCast<BodyContext *>(_localctx)->chunkToken->getText ());
-                              int chunk_size_i;
+                              ACE_UINT32 chunk_size_i;
                               converter >> chunk_size_i;
                               content_length_ += chunk_size_i;
-                              chunks_.clear ();
-                              chunks_.push_back (std::make_pair (scanner_p->chunk_offset, chunk_size_i));
                             }
                             
         setState(62);
@@ -921,15 +916,11 @@ http_antlr_parser::ChunksContext* http_antlr_parser::chunks(int precedence) {
         antlrcpp::downCast<ChunksContext *>(_localctx)->chunkToken = match(http_antlr_parser::CHUNK);
 
                                       {
-                                        http_antlr_scanner* scanner_p =
-                                          static_cast<http_antlr_scanner*> (getTokenStream ()->getTokenSource ());
-                                        ACE_ASSERT (scanner_p);
                                         std::istringstream converter;
                                         converter.str (antlrcpp::downCast<ChunksContext *>(_localctx)->chunkToken->getText ());
-                                        int chunk_size_i;
+                                        ACE_UINT32 chunk_size_i;
                                         converter >> chunk_size_i;
                                         content_length_ += chunk_size_i;
-                                        chunks_.push_back (std::make_pair (scanner_p->chunk_offset, chunk_size_i));
                                       }
                                        
       }

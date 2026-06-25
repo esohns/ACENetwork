@@ -11,23 +11,27 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 
 #include "http_common.h"
 #include "http_defines.h"
+
+#include "http_antlr_iparser.h"
 }
 
 @members {
  public:
-  size_t             chunk_offset;
-  size_t             content_length;
-  std::string        key;
-  size_t             missing_body_or_chunk_bytes;
-  size_t             offset;
-  struct HTTP_Record record;
+  size_t              content_length;
+  std::string         key;
+  size_t              missing_body_or_chunk_bytes;
+  size_t              offset;
+  HTTP_ANTLR_IParser* parser;
+  struct HTTP_Record  record;
 
   void reset_2 ()
   {
-    chunk_offset = 0;
     content_length = 0;
+    key.clear ();
     missing_body_or_chunk_bytes = 0;
     offset = 0;
+    parser = NULL;
+    record.reset ();
   }
 }
 
@@ -377,15 +381,14 @@ BODY                           : OCTET {
 
 mode CHUNKED_BODY;
 CHUNK_LAST                     : CHUNK_LINE_LAST CRLF {
-                                   offset += 3;
-                                   chunk_offset = offset;
+                                   offset += getText ().size () + 2;
                                    setText (ACE_TEXT_ALWAYS_CHAR ("0"));
+                                   parser->chunk_2 (offset, 0);
                                  } -> type(CHUNK), mode(CHUNKED_BODY_END);
 CHUNK                          : CHUNK_LINE CRLF {
                                  { // *TODO*: let the scanner parse this (it does it anyway)
                                    std::string input_string = getText ();
                                    offset += input_string.size ();
-                                   chunk_offset = offset;
                                    std::smatch match_results;
                                    std::string regex_string = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE);
                                    std::regex regex (regex_string.c_str ());
@@ -418,6 +421,7 @@ CHUNK                          : CHUNK_LINE CRLF {
                                    converter.clear ();
                                    converter << chunk_size;
                                    setText (converter.str ());
+                                   parser->chunk_2 (offset, static_cast<ACE_UINT32> (chunk_size));
                                    if (missing_body_or_chunk_bytes)
                                      pushMode(CHUNKED_DATA);
                                  }

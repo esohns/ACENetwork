@@ -1402,6 +1402,7 @@ ACE_TMAIN (int argc_in,
   // std::setlocale (LC_ALL, ACE_TEXT_ALWAYS_CHAR (""));
   int result = -1;
 
+  // step0: initialize
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::init ();
   if (result == -1)
@@ -1475,26 +1476,15 @@ ACE_TMAIN (int argc_in,
   ACE_Profile_Timer::Rusage elapsed_rusage;
   std::string user_time_string, system_time_string;
   ACE_Time_Value user_time, system_time;
-
-  // step0: initialize
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  result = ACE::init ();
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-#endif // ACE_WIN32 || ACE_WIN64
   process_profile.start ();
 
   Common_Log_Tools::packageName = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Common_Tools::initialize (true,   // COM ?
                             false); // RNG ?
-#if defined (_DEBUG)
-  Common_Error_Tools::initialize (true); // debug heap ?
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//  Common_Error_Tools::initialize (true); // debug heap ?
+//#endif // _DEBUG
 #else
 #if defined (LIBPIPEWIRE_SUPPORT)
   pw_init (&argc_in, &argv_in);

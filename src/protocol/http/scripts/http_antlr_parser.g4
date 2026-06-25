@@ -23,10 +23,16 @@ options {
 
 @members {
  public:
-  std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks_;
-  size_t                                          content_length_;
-  HTTP_ANTLR_IParser*                             parser_;
-  struct HTTP_Record                              record_;
+  size_t              content_length_;
+  HTTP_ANTLR_IParser* parser_;
+  struct HTTP_Record  record_;
+
+  void reset_2 ()
+  {
+    content_length_ = 0;
+    parser_ = NULL;
+    record_.reset ();
+  }
 
   // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 }
@@ -117,30 +123,21 @@ body:               BODY {
                     }
                     | CHUNK {
                     {
-                      http_antlr_scanner* scanner_p =
-                        static_cast<http_antlr_scanner*> (getTokenStream ()->getTokenSource ());
-                      ACE_ASSERT (scanner_p);
                       std::istringstream converter;
                       converter.str ($CHUNK->getText ());
-                      int chunk_size_i;
+                      ACE_UINT32 chunk_size_i;
                       converter >> chunk_size_i;
                       content_length_ += chunk_size_i;
-                      chunks_.clear ();
-                      chunks_.push_back (std::make_pair (scanner_p->chunk_offset, chunk_size_i));
                     }
                     } chunked_body;
 chunked_body:       chunks headers CRLF;
 chunks:             chunks CHUNK {
                     {
-                      http_antlr_scanner* scanner_p =
-                        static_cast<http_antlr_scanner*> (getTokenStream ()->getTokenSource ());
-                      ACE_ASSERT (scanner_p);
                       std::istringstream converter;
                       converter.str ($CHUNK->getText ());
-                      int chunk_size_i;
+                      ACE_UINT32 chunk_size_i;
                       converter >> chunk_size_i;
                       content_length_ += chunk_size_i;
-                      chunks_.push_back (std::make_pair (scanner_p->chunk_offset, chunk_size_i));
                     }
                     }
                     |;

@@ -8,6 +8,8 @@
 #include "http_common.h"
 #include "http_defines.h"
 
+#include "http_antlr_iparser.h"
+
 
 // Generated from http_antlr_scanner.g4 by ANTLR 4.13.2
 
@@ -39,19 +41,21 @@ public:
 
 
    public:
-    size_t             chunk_offset;
-    size_t             content_length;
-    std::string        key;
-    size_t             missing_body_or_chunk_bytes;
-    size_t             offset;
-    struct HTTP_Record record;
+    size_t              content_length;
+    std::string         key;
+    size_t              missing_body_or_chunk_bytes;
+    size_t              offset;
+    HTTP_ANTLR_IParser* parser;
+    struct HTTP_Record  record;
 
     void reset_2 ()
     {
-      chunk_offset = 0;
       content_length = 0;
+      key.clear ();
       missing_body_or_chunk_bytes = 0;
       offset = 0;
+      parser = NULL;
+      record.reset ();
     }
 
 

@@ -8,6 +8,8 @@
 #include "http_common.h"
 #include "http_defines.h"
 
+#include "http_antlr_iparser.h"
+
 
 // Generated from http_antlr_scanner.g4 by ANTLR 4.13.2
 
@@ -886,9 +888,9 @@ void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionI
 void http_antlr_scanner::CHUNK_LASTAction(antlr4::RuleContext *context, size_t actionIndex) {
   switch (actionIndex) {
     case 12: 
-                                       offset += 3;
-                                       chunk_offset = offset;
+                                       offset += getText ().size () + 2;
                                        setText (ACE_TEXT_ALWAYS_CHAR ("0"));
+                                       parser->chunk_2 (offset, 0);
                                       break;
 
   default:
@@ -902,7 +904,6 @@ void http_antlr_scanner::CHUNKAction(antlr4::RuleContext *context, size_t action
                                      { // *TODO*: let the scanner parse this (it does it anyway)
                                        std::string input_string = getText ();
                                        offset += input_string.size ();
-                                       chunk_offset = offset;
                                        std::smatch match_results;
                                        std::string regex_string = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE);
                                        std::regex regex (regex_string.c_str ());
@@ -935,6 +936,7 @@ void http_antlr_scanner::CHUNKAction(antlr4::RuleContext *context, size_t action
                                        converter.clear ();
                                        converter << chunk_size;
                                        setText (converter.str ());
+                                       parser->chunk_2 (offset, static_cast<ACE_UINT32> (chunk_size));
                                        if (missing_body_or_chunk_bytes)
                                          pushMode(CHUNKED_DATA);
                                      }

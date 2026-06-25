@@ -61,9 +61,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
  , tokens_ (&lexer_)
 #endif // USE_UNBUFFERED
  , itask_ (itask_in)
- , offset_ (0)
  , parser_ (&tokens_)
- , record_ ()
  , isFirst_ (true)
  , isInitialized_ (false)
  , messageQueue_ (NULL)
@@ -73,6 +71,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (itask_);
 
+  lexer_.parser = this;
   lexer_.removeErrorListeners ();
   lexer_.addErrorListener (this);
 #if (USE_UNBUFFERED)
@@ -131,19 +130,17 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     return;
 
   // process any chunks
-  size_t offset_i = lexer_.offset;
-  for (HTTP_ChunksConstIterator_t iterator = parser_.chunks_.begin ();
-       iterator != parser_.chunks_.end ();
-       ++iterator)
-  {
-    offset_ = (*iterator).first;
-    chunk ((*iterator).second);
-  } // end FOR
-  offset_ = offset_i;
+  //size_t offset_i = lexer_.offset;
+  //for (HTTP_ChunksConstIterator_t iterator = parser_.chunks_.begin ();
+  //     iterator != parser_.chunks_.end ();
+  //     ++iterator)
+  //{
+  //  lexer_.offset = (*iterator).first;
+  //  chunk ((*iterator).second);
+  //} // end FOR
+  //lexer_.offset = offset_i;
 
-  record_ = parser_.record_;
-
-  struct HTTP_Record* record_p = &record_;
+  struct HTTP_Record* record_p = &parser_.record_;
   record (record_p);
 
   // *TODO*: set to finished only iff total_length >= content_length !
@@ -320,9 +317,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     configuration_ = NULL;
     finished_ = false;
     fragment_ = NULL;
-    offset_ = 0;
     parser_.reset ();
-    record_.reset ();
 
     isFirst_ = true;
 
@@ -368,9 +363,11 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   {
     isFirst_ = false;
 
-    offset_ = 0;
-    record_.reset ();
     lexer_.reset_2 ();
+    lexer_.parser = this;
+
+    parser_.reset_2 ();
+    parser_.parser_ = this;
   } // end IF
 
   begin (fragment_->rd_ptr (),
@@ -668,4 +665,22 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::end"));
 
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
+void
+HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
+                         TimePolicyType,
+                         SessionMessageType>::chunk_2 (ACE_UINT64 offset_in,
+                                                       ACE_UINT32 size_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::chunk_2"));
+
+  size_t temp_i = lexer_.offset;
+  lexer_.offset = offset_in;
+  chunk (size_in);
+
+  lexer_.offset = temp_i;
 }

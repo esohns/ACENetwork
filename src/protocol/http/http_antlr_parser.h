@@ -56,10 +56,16 @@ public:
 
 
    public:
-    std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks_;
-    size_t                                          content_length_;
-    HTTP_ANTLR_IParser*                             parser_;
-    struct HTTP_Record                              record_;
+    size_t              content_length_;
+    HTTP_ANTLR_IParser* parser_;
+    struct HTTP_Record  record_;
+
+    void reset_2 ()
+    {
+      content_length_ = 0;
+      parser_ = NULL;
+      record_.reset ();
+    }
 
     // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 

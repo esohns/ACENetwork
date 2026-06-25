@@ -111,7 +111,7 @@ class HTTP_Module_Parser_T
   inline virtual ACE_Message_Block* head () { return headFragment_; }
   inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
 
-  // implement (part of) HTTP_(Reflex|ANTLR)_IParser
+  // implement (part of) HTTP_(|Reflex|ANTLR)_IParser
   virtual void record (struct HTTP_Record*&); // data record
   inline virtual ACE_UINT32 currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); } // returns: current chunk size
   inline virtual ACE_UINT64 contentLengthOrChunkSize () { return contentLengthOrChunkSize_; }

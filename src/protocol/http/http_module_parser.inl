@@ -282,7 +282,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (record_inout);
-  ACE_ASSERT (record_inout == &(inherited2::record_));
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (headFragment_);

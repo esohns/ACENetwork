@@ -383,21 +383,19 @@ class HTTP_ANTLRParserDriver_T
   virtual bool initialize (const struct HTTP_ParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
   inline virtual bool isBlocking () const { ACE_ASSERT (configuration_); return configuration_->block; }
-  inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; } // offset (increment)
-  inline virtual unsigned int offset () const { return static_cast<unsigned int> (offset_); }
+  //inline virtual void offset (size_t offset_in) { lexer_.offset += offset_in; } // offset (increment)
+  inline virtual size_t offset () const { return static_cast<unsigned int> (lexer_.offset); }
   virtual bool begin (const char*, // buffer handle
                       size_t);     // buffer size
   virtual void end ();
-  // inline virtual const HTTP_ANTLR_IParser* const getP_2 () const { return this; }
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = true); // begin() current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer ();
-  // inline virtual struct HTTP_Record& current () { return record_; }
-  // inline virtual void finished () { finished_ = true; };
-  inline virtual bool hasFinished () const { return finished_; }
 
+  inline virtual bool hasFinished () const { return finished_; }
   inline virtual bool headerOnly () { ACE_ASSERT (configuration_); return configuration_->headerOnly; } // returns: parse HTTP header only ?
+  virtual void chunk_2 (ACE_UINT64, ACE_UINT32); // chunk offset, chunk size
 
   virtual void dump_state () const;
 
@@ -420,9 +418,7 @@ class HTTP_ANTLRParserDriver_T
   antlr4::BufferedTokenStream      tokens_;
 #endif // USE_UNBUFFERED
   Stream_ITask*                    itask_;
-  size_t                           offset_; // parsed entity bytes
   http_antlr_parser                parser_;
-  struct HTTP_Record               record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ANTLRParserDriver_T ())
