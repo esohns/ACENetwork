@@ -1492,9 +1492,9 @@ ACE_TMAIN (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Common_Tools::initialize (true,   // COM ?
                             false); // RNG ?
-//#if defined (_DEBUG)
-//  Common_Error_Tools::initialize (true); // debug heap ?
-//#endif // _DEBUG
+#if defined (_DEBUG)
+  Common_Error_Tools::initialize (true); // debug heap ?
+#endif // _DEBUG
 #else
 #if defined (LIBPIPEWIRE_SUPPORT)
   pw_init (&argc_in, &argv_in);

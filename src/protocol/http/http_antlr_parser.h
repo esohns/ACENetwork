@@ -11,10 +11,10 @@
 #include "http_tools.h"
 
 #include "http_antlr_iparser.h"
-
 #include "http_antlr_scanner.h"
 
-// Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_parser.g4 by ANTLR 4.13.2
+
+// Generated from http_antlr_parser.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -33,9 +33,9 @@ public:
   };
 
   enum {
-    RuleMain = 0, RuleMessage = 1, RuleHead = 2, RuleHead_request_rest = 3, 
-    RuleHead_response_rest = 4, RuleHeaders = 5, RuleHeader = 6, RuleBody = 7, 
-    RuleChunked_body = 8, RuleChunks = 9
+    RuleDocument = 0, RuleHead = 1, RuleHead_request_rest = 2, RuleHead_response_rest = 3, 
+    RuleHeaders = 4, RuleHeader = 5, RuleBody = 6, RuleChunked_body = 7, 
+    RuleChunks = 8
   };
 
   explicit http_antlr_parser(antlr4::TokenStream *input);
@@ -64,8 +64,7 @@ public:
     // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 
 
-  class MainContext;
-  class MessageContext;
+  class DocumentContext;
   class HeadContext;
   class Head_request_restContext;
   class Head_response_restContext;
@@ -75,11 +74,13 @@ public:
   class Chunked_bodyContext;
   class ChunksContext; 
 
-  class  MainContext : public antlr4::ParserRuleContext {
+  class  DocumentContext : public antlr4::ParserRuleContext {
   public:
-    MainContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    DocumentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    MessageContext *message();
+    HeadContext *head();
+    antlr4::tree::TerminalNode *CRLF();
+    BodyContext *body();
     antlr4::tree::TerminalNode *EOF();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -87,22 +88,7 @@ public:
    
   };
 
-  MainContext* main();
-
-  class  MessageContext : public antlr4::ParserRuleContext {
-  public:
-    MessageContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    HeadContext *head();
-    antlr4::tree::TerminalNode *CRLF();
-    BodyContext *body();
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-   
-  };
-
-  MessageContext* message();
+  DocumentContext* document();
 
   class  HeadContext : public antlr4::ParserRuleContext {
   public:

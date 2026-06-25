@@ -9,7 +9,7 @@
 #include "http_defines.h"
 
 
-// Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_scanner.g4 by ANTLR 4.13.2
+// Generated from http_antlr_scanner.g4 by ANTLR 4.13.2
 
 #pragma once
 

@@ -14,7 +14,7 @@
 #include "http_antlr_scanner.h"
 
 
-// Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_parser.g4 by ANTLR 4.13.2
+// Generated from http_antlr_parser.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -29,11 +29,8 @@
 class  http_antlr_parserListener : public antlr4::tree::ParseTreeListener {
 public:
 
-  virtual void enterMain(http_antlr_parser::MainContext *ctx) = 0;
-  virtual void exitMain(http_antlr_parser::MainContext *ctx) = 0;
-
-  virtual void enterMessage(http_antlr_parser::MessageContext *ctx) = 0;
-  virtual void exitMessage(http_antlr_parser::MessageContext *ctx) = 0;
+  virtual void enterDocument(http_antlr_parser::DocumentContext *ctx) = 0;
+  virtual void exitDocument(http_antlr_parser::DocumentContext *ctx) = 0;
 
   virtual void enterHead(http_antlr_parser::HeadContext *ctx) = 0;
   virtual void exitHead(http_antlr_parser::HeadContext *ctx) = 0;

@@ -2226,7 +2226,6 @@ do_printVersion (const std::string& programName_in)
             << std::endl;
 }
 
-//#undef main
 int
 ACE_TMAIN (int argc_in,
            ACE_TCHAR* argv_in[])

@@ -11,16 +11,16 @@
 #include "http_tools.h"
 
 #include "http_antlr_iparser.h"
-#undef main
-#undef ERROR
 #include "http_antlr_scanner.h"
 
-// Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_parser.g4 by ANTLR 4.13.2
+
+// Generated from http_antlr_parser.g4 by ANTLR 4.13.2
 
 
 #include "http_antlr_parserListener.h"
 
 #include "http_antlr_parser.h"
+
 
 using namespace antlrcpp;
 
@@ -67,8 +67,8 @@ void http_antlr_parserParserInitialize() {
 #endif
   auto staticData = std::make_unique<Http_antlr_parserStaticData>(
     std::vector<std::string>{
-      "main", "message", "head", "head_request_rest", "head_response_rest", 
-      "headers", "header", "body", "chunked_body", "chunks"
+      "document", "head", "head_request_rest", "head_response_rest", "headers", 
+      "header", "body", "chunked_body", "chunks"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "'\\u000D\\u000A'"
@@ -80,28 +80,27 @@ void http_antlr_parserParserInitialize() {
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,15,83,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
-  	7,7,2,8,7,8,2,9,7,9,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,
-  	2,3,2,34,8,2,1,3,1,3,1,3,1,3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,5,
-  	1,5,1,5,5,5,52,8,5,10,5,12,5,55,9,5,1,6,1,6,1,6,1,6,1,6,1,6,1,7,1,7,1,
-  	7,1,7,1,7,3,7,68,8,7,1,8,1,8,1,8,1,8,1,9,1,9,1,9,1,9,5,9,78,8,9,10,9,
-  	12,9,81,9,9,1,9,0,2,10,18,10,0,2,4,6,8,10,12,14,16,18,0,0,76,0,20,1,0,
-  	0,0,2,23,1,0,0,0,4,33,1,0,0,0,6,35,1,0,0,0,8,41,1,0,0,0,10,48,1,0,0,0,
-  	12,56,1,0,0,0,14,67,1,0,0,0,16,69,1,0,0,0,18,73,1,0,0,0,20,21,3,2,1,0,
-  	21,22,5,0,0,1,22,1,1,0,0,0,23,24,3,4,2,0,24,25,5,10,0,0,25,26,3,14,7,
-  	0,26,3,1,0,0,0,27,28,5,1,0,0,28,29,6,2,-1,0,29,34,3,6,3,0,30,31,5,3,0,
-  	0,31,32,6,2,-1,0,32,34,3,8,4,0,33,27,1,0,0,0,33,30,1,0,0,0,34,5,1,0,0,
-  	0,35,36,5,2,0,0,36,37,5,3,0,0,37,38,5,10,0,0,38,39,6,3,-1,0,39,40,3,10,
-  	5,0,40,7,1,0,0,0,41,42,5,4,0,0,42,43,6,4,-1,0,43,44,5,5,0,0,44,45,6,4,
-  	-1,0,45,46,5,10,0,0,46,47,3,10,5,0,47,9,1,0,0,0,48,53,6,5,-1,0,49,50,
-  	10,2,0,0,50,52,3,12,6,0,51,49,1,0,0,0,52,55,1,0,0,0,53,51,1,0,0,0,53,
-  	54,1,0,0,0,54,11,1,0,0,0,55,53,1,0,0,0,56,57,5,6,0,0,57,58,5,7,0,0,58,
-  	59,5,8,0,0,59,60,5,10,0,0,60,61,6,6,-1,0,61,13,1,0,0,0,62,63,5,14,0,0,
-  	63,68,6,7,-1,0,64,65,5,11,0,0,65,66,6,7,-1,0,66,68,3,16,8,0,67,62,1,0,
-  	0,0,67,64,1,0,0,0,68,15,1,0,0,0,69,70,3,18,9,0,70,71,3,10,5,0,71,72,5,
-  	10,0,0,72,17,1,0,0,0,73,79,6,9,-1,0,74,75,10,2,0,0,75,76,5,11,0,0,76,
-  	78,6,9,-1,0,77,74,1,0,0,0,78,81,1,0,0,0,79,77,1,0,0,0,79,80,1,0,0,0,80,
-  	19,1,0,0,0,81,79,1,0,0,0,4,33,53,67,79
+  	4,1,15,79,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,7,
+  	7,7,2,8,7,8,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,3,1,30,8,1,1,
+  	2,1,2,1,2,1,2,1,2,1,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,4,1,4,1,4,5,4,48,
+  	8,4,10,4,12,4,51,9,4,1,5,1,5,1,5,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,3,6,
+  	64,8,6,1,7,1,7,1,7,1,7,1,8,1,8,1,8,1,8,5,8,74,8,8,10,8,12,8,77,9,8,1,
+  	8,0,2,8,16,9,0,2,4,6,8,10,12,14,16,0,0,73,0,18,1,0,0,0,2,29,1,0,0,0,4,
+  	31,1,0,0,0,6,37,1,0,0,0,8,44,1,0,0,0,10,52,1,0,0,0,12,63,1,0,0,0,14,65,
+  	1,0,0,0,16,69,1,0,0,0,18,19,3,2,1,0,19,20,5,10,0,0,20,21,3,12,6,0,21,
+  	22,5,0,0,1,22,1,1,0,0,0,23,24,5,1,0,0,24,25,6,1,-1,0,25,30,3,4,2,0,26,
+  	27,5,3,0,0,27,28,6,1,-1,0,28,30,3,6,3,0,29,23,1,0,0,0,29,26,1,0,0,0,30,
+  	3,1,0,0,0,31,32,5,2,0,0,32,33,5,3,0,0,33,34,5,10,0,0,34,35,6,2,-1,0,35,
+  	36,3,8,4,0,36,5,1,0,0,0,37,38,5,4,0,0,38,39,6,3,-1,0,39,40,5,5,0,0,40,
+  	41,6,3,-1,0,41,42,5,10,0,0,42,43,3,8,4,0,43,7,1,0,0,0,44,49,6,4,-1,0,
+  	45,46,10,2,0,0,46,48,3,10,5,0,47,45,1,0,0,0,48,51,1,0,0,0,49,47,1,0,0,
+  	0,49,50,1,0,0,0,50,9,1,0,0,0,51,49,1,0,0,0,52,53,5,6,0,0,53,54,5,7,0,
+  	0,54,55,5,8,0,0,55,56,5,10,0,0,56,57,6,5,-1,0,57,11,1,0,0,0,58,59,5,14,
+  	0,0,59,64,6,6,-1,0,60,61,5,11,0,0,61,62,6,6,-1,0,62,64,3,14,7,0,63,58,
+  	1,0,0,0,63,60,1,0,0,0,64,13,1,0,0,0,65,66,3,16,8,0,66,67,3,8,4,0,67,68,
+  	5,10,0,0,68,15,1,0,0,0,69,75,6,8,-1,0,70,71,10,2,0,0,71,72,5,11,0,0,72,
+  	74,6,8,-1,0,73,70,1,0,0,0,74,77,1,0,0,0,75,73,1,0,0,0,75,76,1,0,0,0,76,
+  	17,1,0,0,0,77,75,1,0,0,0,4,29,49,63,75
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -150,40 +149,48 @@ antlr4::atn::SerializedATNView http_antlr_parser::getSerializedATN() const {
 }
 
 
-//----------------- MainContext ------------------------------------------------------------------
+//----------------- DocumentContext ------------------------------------------------------------------
 
-http_antlr_parser::MainContext::MainContext(ParserRuleContext *parent, size_t invokingState)
+http_antlr_parser::DocumentContext::DocumentContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-http_antlr_parser::MessageContext* http_antlr_parser::MainContext::message() {
-  return getRuleContext<http_antlr_parser::MessageContext>(0);
+http_antlr_parser::HeadContext* http_antlr_parser::DocumentContext::head() {
+  return getRuleContext<http_antlr_parser::HeadContext>(0);
 }
 
-tree::TerminalNode* http_antlr_parser::MainContext::EOF() {
+tree::TerminalNode* http_antlr_parser::DocumentContext::CRLF() {
+  return getToken(http_antlr_parser::CRLF, 0);
+}
+
+http_antlr_parser::BodyContext* http_antlr_parser::DocumentContext::body() {
+  return getRuleContext<http_antlr_parser::BodyContext>(0);
+}
+
+tree::TerminalNode* http_antlr_parser::DocumentContext::EOF() {
   return getToken(http_antlr_parser::EOF, 0);
 }
 
 
-size_t http_antlr_parser::MainContext::getRuleIndex() const {
-  return http_antlr_parser::RuleMain;
+size_t http_antlr_parser::DocumentContext::getRuleIndex() const {
+  return http_antlr_parser::RuleDocument;
 }
 
-void http_antlr_parser::MainContext::enterRule(tree::ParseTreeListener *listener) {
+void http_antlr_parser::DocumentContext::enterRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<http_antlr_parserListener *>(listener);
   if (parserListener != nullptr)
-    parserListener->enterMain(this);
+    parserListener->enterDocument(this);
 }
 
-void http_antlr_parser::MainContext::exitRule(tree::ParseTreeListener *listener) {
+void http_antlr_parser::DocumentContext::exitRule(tree::ParseTreeListener *listener) {
   auto parserListener = dynamic_cast<http_antlr_parserListener *>(listener);
   if (parserListener != nullptr)
-    parserListener->exitMain(this);
+    parserListener->exitDocument(this);
 }
 
-http_antlr_parser::MainContext* http_antlr_parser::main() {
-  MainContext *_localctx = _tracker.createInstance<MainContext>(_ctx, getState());
-  enterRule(_localctx, 0, http_antlr_parser::RuleMain);
+http_antlr_parser::DocumentContext* http_antlr_parser::document() {
+  DocumentContext *_localctx = _tracker.createInstance<DocumentContext>(_ctx, getState());
+  enterRule(_localctx, 0, http_antlr_parser::RuleDocument);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -194,75 +201,14 @@ http_antlr_parser::MainContext* http_antlr_parser::main() {
   });
   try {
     enterOuterAlt(_localctx, 1);
+    setState(18);
+    head();
+    setState(19);
+    match(http_antlr_parser::CRLF);
     setState(20);
-    message();
+    body();
     setState(21);
     match(http_antlr_parser::EOF);
-   
-  }
-  catch (RecognitionException &e) {
-    _errHandler->reportError(this, e);
-    _localctx->exception = std::current_exception();
-    _errHandler->recover(this, _localctx->exception);
-  }
-
-  return _localctx;
-}
-
-//----------------- MessageContext ------------------------------------------------------------------
-
-http_antlr_parser::MessageContext::MessageContext(ParserRuleContext *parent, size_t invokingState)
-  : ParserRuleContext(parent, invokingState) {
-}
-
-http_antlr_parser::HeadContext* http_antlr_parser::MessageContext::head() {
-  return getRuleContext<http_antlr_parser::HeadContext>(0);
-}
-
-tree::TerminalNode* http_antlr_parser::MessageContext::CRLF() {
-  return getToken(http_antlr_parser::CRLF, 0);
-}
-
-http_antlr_parser::BodyContext* http_antlr_parser::MessageContext::body() {
-  return getRuleContext<http_antlr_parser::BodyContext>(0);
-}
-
-
-size_t http_antlr_parser::MessageContext::getRuleIndex() const {
-  return http_antlr_parser::RuleMessage;
-}
-
-void http_antlr_parser::MessageContext::enterRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<http_antlr_parserListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->enterMessage(this);
-}
-
-void http_antlr_parser::MessageContext::exitRule(tree::ParseTreeListener *listener) {
-  auto parserListener = dynamic_cast<http_antlr_parserListener *>(listener);
-  if (parserListener != nullptr)
-    parserListener->exitMessage(this);
-}
-
-http_antlr_parser::MessageContext* http_antlr_parser::message() {
-  MessageContext *_localctx = _tracker.createInstance<MessageContext>(_ctx, getState());
-  enterRule(_localctx, 2, http_antlr_parser::RuleMessage);
-
-#if __cplusplus > 201703L
-  auto onExit = finally([=, this] {
-#else
-  auto onExit = finally([=] {
-#endif
-    exitRule();
-  });
-  try {
-    enterOuterAlt(_localctx, 1);
-    setState(23);
-    head();
-    setState(24);
-    match(http_antlr_parser::CRLF);
-    setState(25);
-    body();
    
   }
   catch (RecognitionException &e) {
@@ -315,7 +261,7 @@ void http_antlr_parser::HeadContext::exitRule(tree::ParseTreeListener *listener)
 
 http_antlr_parser::HeadContext* http_antlr_parser::head() {
   HeadContext *_localctx = _tracker.createInstance<HeadContext>(_ctx, getState());
-  enterRule(_localctx, 4, http_antlr_parser::RuleHead);
+  enterRule(_localctx, 2, http_antlr_parser::RuleHead);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -325,24 +271,24 @@ http_antlr_parser::HeadContext* http_antlr_parser::head() {
     exitRule();
   });
   try {
-    setState(33);
+    setState(29);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case http_antlr_parser::METHOD: {
         enterOuterAlt(_localctx, 1);
-        setState(27);
+        setState(23);
         antlrcpp::downCast<HeadContext *>(_localctx)->methodToken = match(http_antlr_parser::METHOD);
 
                               record_.method = HTTP_Tools::MethodToType (antlrcpp::downCast<HeadContext *>(_localctx)->methodToken->getText ());
                             
-        setState(29);
+        setState(25);
         head_request_rest();
         break;
       }
 
       case http_antlr_parser::VERSION: {
         enterOuterAlt(_localctx, 2);
-        setState(30);
+        setState(26);
         antlrcpp::downCast<HeadContext *>(_localctx)->versionToken = match(http_antlr_parser::VERSION);
 
                             { std::string input_string = antlrcpp::downCast<HeadContext *>(_localctx)->versionToken->getText ();
@@ -371,7 +317,7 @@ http_antlr_parser::HeadContext* http_antlr_parser::head() {
                                 HTTP_Tools::VersionToType (match_results[1].str ());
                             }
                             
-        setState(32);
+        setState(28);
         head_response_rest();
         break;
       }
@@ -431,7 +377,7 @@ void http_antlr_parser::Head_request_restContext::exitRule(tree::ParseTreeListen
 
 http_antlr_parser::Head_request_restContext* http_antlr_parser::head_request_rest() {
   Head_request_restContext *_localctx = _tracker.createInstance<Head_request_restContext>(_ctx, getState());
-  enterRule(_localctx, 6, http_antlr_parser::RuleHead_request_rest);
+  enterRule(_localctx, 4, http_antlr_parser::RuleHead_request_rest);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -442,11 +388,11 @@ http_antlr_parser::Head_request_restContext* http_antlr_parser::head_request_res
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(35);
+    setState(31);
     antlrcpp::downCast<Head_request_restContext *>(_localctx)->uriToken = match(http_antlr_parser::URI);
-    setState(36);
+    setState(32);
     antlrcpp::downCast<Head_request_restContext *>(_localctx)->versionToken = match(http_antlr_parser::VERSION);
-    setState(37);
+    setState(33);
     match(http_antlr_parser::CRLF);
 
                         { record_.URI = antlrcpp::downCast<Head_request_restContext *>(_localctx)->uriToken->getText ();
@@ -477,7 +423,7 @@ http_antlr_parser::Head_request_restContext* http_antlr_parser::head_request_res
                             HTTP_Tools::VersionToType (match_results[1].str ());
                         }
                         
-    setState(39);
+    setState(35);
     headers(0);
    
   }
@@ -531,7 +477,7 @@ void http_antlr_parser::Head_response_restContext::exitRule(tree::ParseTreeListe
 
 http_antlr_parser::Head_response_restContext* http_antlr_parser::head_response_rest() {
   Head_response_restContext *_localctx = _tracker.createInstance<Head_response_restContext>(_ctx, getState());
-  enterRule(_localctx, 8, http_antlr_parser::RuleHead_response_rest);
+  enterRule(_localctx, 6, http_antlr_parser::RuleHead_response_rest);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -542,7 +488,7 @@ http_antlr_parser::Head_response_restContext* http_antlr_parser::head_response_r
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(41);
+    setState(37);
     antlrcpp::downCast<Head_response_restContext *>(_localctx)->codeToken = match(http_antlr_parser::CODE);
 
                         { std::istringstream converter;
@@ -553,14 +499,14 @@ http_antlr_parser::Head_response_restContext* http_antlr_parser::head_response_r
                             static_cast<HTTP_Codes::StatusType> (code_i);
                         }
                         
-    setState(43);
+    setState(39);
     antlrcpp::downCast<Head_response_restContext *>(_localctx)->reasonToken = match(http_antlr_parser::REASON);
 
                           record_.reason = antlrcpp::downCast<Head_response_restContext *>(_localctx)->reasonToken->getText ();
                         
-    setState(45);
+    setState(41);
     match(http_antlr_parser::CRLF);
-    setState(46);
+    setState(42);
     headers(0);
    
   }
@@ -615,8 +561,8 @@ http_antlr_parser::HeadersContext* http_antlr_parser::headers(int precedence) {
   http_antlr_parser::HeadersContext *_localctx = _tracker.createInstance<HeadersContext>(_ctx, parentState);
   http_antlr_parser::HeadersContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 10;
-  enterRecursionRule(_localctx, 10, http_antlr_parser::RuleHeaders, precedence);
+  size_t startState = 8;
+  enterRecursionRule(_localctx, 8, http_antlr_parser::RuleHeaders, precedence);
 
     
 
@@ -631,7 +577,7 @@ http_antlr_parser::HeadersContext* http_antlr_parser::headers(int precedence) {
     size_t alt;
     enterOuterAlt(_localctx, 1);
     _ctx->stop = _input->LT(-1);
-    setState(53);
+    setState(49);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -641,13 +587,13 @@ http_antlr_parser::HeadersContext* http_antlr_parser::headers(int precedence) {
         previousContext = _localctx;
         _localctx = _tracker.createInstance<HeadersContext>(parentContext, parentState);
         pushNewRecursionContext(_localctx, startState, RuleHeaders);
-        setState(49);
+        setState(45);
 
         if (!(precpred(_ctx, 2))) throw FailedPredicateException(this, "precpred(_ctx, 2)");
-        setState(50);
+        setState(46);
         header(); 
       }
-      setState(55);
+      setState(51);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx);
     }
@@ -701,7 +647,7 @@ void http_antlr_parser::HeaderContext::exitRule(tree::ParseTreeListener *listene
 
 http_antlr_parser::HeaderContext* http_antlr_parser::header() {
   HeaderContext *_localctx = _tracker.createInstance<HeaderContext>(_ctx, getState());
-  enterRule(_localctx, 12, http_antlr_parser::RuleHeader);
+  enterRule(_localctx, 10, http_antlr_parser::RuleHeader);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -712,13 +658,13 @@ http_antlr_parser::HeaderContext* http_antlr_parser::header() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(56);
+    setState(52);
     antlrcpp::downCast<HeaderContext *>(_localctx)->field_keyToken = match(http_antlr_parser::FIELD_KEY);
-    setState(57);
+    setState(53);
     match(http_antlr_parser::COLON);
-    setState(58);
+    setState(54);
     antlrcpp::downCast<HeaderContext *>(_localctx)->field_valueToken = match(http_antlr_parser::FIELD_VALUE);
-    setState(59);
+    setState(55);
     match(http_antlr_parser::CRLF);
 
                           record_.headers[antlrcpp::downCast<HeaderContext *>(_localctx)->field_keyToken->getText ()] = antlrcpp::downCast<HeaderContext *>(_localctx)->field_valueToken->getText ();
@@ -771,7 +717,7 @@ void http_antlr_parser::BodyContext::exitRule(tree::ParseTreeListener *listener)
 
 http_antlr_parser::BodyContext* http_antlr_parser::body() {
   BodyContext *_localctx = _tracker.createInstance<BodyContext>(_ctx, getState());
-  enterRule(_localctx, 14, http_antlr_parser::RuleBody);
+  enterRule(_localctx, 12, http_antlr_parser::RuleBody);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -781,12 +727,12 @@ http_antlr_parser::BodyContext* http_antlr_parser::body() {
     exitRule();
   });
   try {
-    setState(67);
+    setState(63);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case http_antlr_parser::BODY: {
         enterOuterAlt(_localctx, 1);
-        setState(62);
+        setState(58);
         antlrcpp::downCast<BodyContext *>(_localctx)->bodyToken = match(http_antlr_parser::BODY);
 
                             {
@@ -800,7 +746,7 @@ http_antlr_parser::BodyContext* http_antlr_parser::body() {
 
       case http_antlr_parser::CHUNK: {
         enterOuterAlt(_localctx, 2);
-        setState(64);
+        setState(60);
         antlrcpp::downCast<BodyContext *>(_localctx)->chunkToken = match(http_antlr_parser::CHUNK);
 
                             {
@@ -816,7 +762,7 @@ http_antlr_parser::BodyContext* http_antlr_parser::body() {
                               chunks_.push_back (std::make_pair (scanner_p->chunk_offset, chunk_size_i));
                             }
                             
-        setState(66);
+        setState(62);
         chunked_body();
         break;
       }
@@ -872,7 +818,7 @@ void http_antlr_parser::Chunked_bodyContext::exitRule(tree::ParseTreeListener *l
 
 http_antlr_parser::Chunked_bodyContext* http_antlr_parser::chunked_body() {
   Chunked_bodyContext *_localctx = _tracker.createInstance<Chunked_bodyContext>(_ctx, getState());
-  enterRule(_localctx, 16, http_antlr_parser::RuleChunked_body);
+  enterRule(_localctx, 14, http_antlr_parser::RuleChunked_body);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -883,11 +829,11 @@ http_antlr_parser::Chunked_bodyContext* http_antlr_parser::chunked_body() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(69);
+    setState(65);
     chunks(0);
-    setState(70);
+    setState(66);
     headers(0);
-    setState(71);
+    setState(67);
     match(http_antlr_parser::CRLF);
    
   }
@@ -942,8 +888,8 @@ http_antlr_parser::ChunksContext* http_antlr_parser::chunks(int precedence) {
   http_antlr_parser::ChunksContext *_localctx = _tracker.createInstance<ChunksContext>(_ctx, parentState);
   http_antlr_parser::ChunksContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 18;
-  enterRecursionRule(_localctx, 18, http_antlr_parser::RuleChunks, precedence);
+  size_t startState = 16;
+  enterRecursionRule(_localctx, 16, http_antlr_parser::RuleChunks, precedence);
 
     
 
@@ -958,7 +904,7 @@ http_antlr_parser::ChunksContext* http_antlr_parser::chunks(int precedence) {
     size_t alt;
     enterOuterAlt(_localctx, 1);
     _ctx->stop = _input->LT(-1);
-    setState(79);
+    setState(75);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 3, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -968,10 +914,10 @@ http_antlr_parser::ChunksContext* http_antlr_parser::chunks(int precedence) {
         previousContext = _localctx;
         _localctx = _tracker.createInstance<ChunksContext>(parentContext, parentState);
         pushNewRecursionContext(_localctx, startState, RuleChunks);
-        setState(74);
+        setState(70);
 
         if (!(precpred(_ctx, 2))) throw FailedPredicateException(this, "precpred(_ctx, 2)");
-        setState(75);
+        setState(71);
         antlrcpp::downCast<ChunksContext *>(_localctx)->chunkToken = match(http_antlr_parser::CHUNK);
 
                                       {
@@ -987,7 +933,7 @@ http_antlr_parser::ChunksContext* http_antlr_parser::chunks(int precedence) {
                                       }
                                        
       }
-      setState(81);
+      setState(77);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 3, _ctx);
     }
@@ -1002,8 +948,8 @@ http_antlr_parser::ChunksContext* http_antlr_parser::chunks(int precedence) {
 
 bool http_antlr_parser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
-    case 5: return headersSempred(antlrcpp::downCast<HeadersContext *>(context), predicateIndex);
-    case 9: return chunksSempred(antlrcpp::downCast<ChunksContext *>(context), predicateIndex);
+    case 4: return headersSempred(antlrcpp::downCast<HeadersContext *>(context), predicateIndex);
+    case 8: return chunksSempred(antlrcpp::downCast<ChunksContext *>(context), predicateIndex);
 
   default:
     break;

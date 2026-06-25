@@ -396,26 +396,26 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     } // end FOR
 #endif // USE_UNBUFFERED
   } // end IF
-#if (USE_UNBUFFERED)
-  tokens_.fill (1);
-#endif // USE_UNBUFFERED
+//#if (USE_UNBUFFERED)
+//  tokens_.fill (1);
+//#endif // USE_UNBUFFERED
 
   // parse data fragment
   try {
-    parser_.main ();
+    parser_.document ();
   } catch (const antlr4::RuntimeException& e) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught ANTLR exception in http_antlr_parser::main(): \"%s\", continuing\n"),
+                ACE_TEXT ("caught ANTLR exception in http_antlr_parser::document(): \"%s\", continuing\n"),
                 ACE_TEXT (e.what ())));
     result = 1;
   } catch (const std::runtime_error& e) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in http_antlr_parser::main(): \"%s\", continuing\n"),
+                ACE_TEXT ("caught exception in http_antlr_parser::document(): \"%s\", continuing\n"),
                 ACE_TEXT (e.what ())));
     result = 1;
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in http_antlr_parser::main(), continuing\n")));
+                ACE_TEXT ("caught exception in http_antlr_parser::document(), continuing\n")));
     result = 1;
   }
   switch (result)

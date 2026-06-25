@@ -83,7 +83,6 @@
 #elif defined (ANTLR_USE)
 #undef emit
 #undef METHOD
-#undef main
 #include "http_antlr_parser_driver.h"
 #else
 #include "http_parser_driver.h"
