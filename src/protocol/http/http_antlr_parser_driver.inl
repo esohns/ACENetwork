@@ -80,6 +80,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 #endif // USE_UNBUFFERED
 
   parser_.parser_ = this;
+  parser_.getInterpreter<antlr4::atn::ParserATNSimulator> ()->setPredictionMode (antlr4::atn::PredictionMode::SLL);
   parser_.setBuildParseTree (false);
   HTTP_ANTLRErrorHandler* error_handler_p = NULL;
   ACE_NEW_NORETURN (error_handler_p,

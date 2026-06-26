@@ -344,9 +344,11 @@ class UnbufferedByteCharStream
 #endif // USE_UNBUFFERED
 
 class HTTP_ANTLRErrorHandler
- : public antlr4::DefaultErrorStrategy
+ //: public antlr4::DefaultErrorStrategy
+ : public antlr4::BailErrorStrategy
 {
-  typedef antlr4::DefaultErrorStrategy inherited;
+  //typedef antlr4::DefaultErrorStrategy inherited;
+  typedef antlr4::BailErrorStrategy inherited;
 
  public:
   HTTP_ANTLRErrorHandler ()
