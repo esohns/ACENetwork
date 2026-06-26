@@ -41,6 +41,7 @@ public:
 
 
    public:
+    bool                chunked;
     size_t              content_length;
     std::string         key;
     size_t              missing_body_or_chunk_bytes;
@@ -50,6 +51,7 @@ public:
 
     void reset_2 ()
     {
+      chunked = false;
       content_length = 0;
       key.clear ();
       missing_body_or_chunk_bytes = 0;

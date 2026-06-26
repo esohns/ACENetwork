@@ -37,8 +37,7 @@ options {
   // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 }
 
-// Actual grammar start.
-document:           head CRLF body;
+document:           head CRLF body EOF;
 head:               METHOD {
                       record_.method = HTTP_Tools::MethodToType ($METHOD->getText ());
                     } head_request_rest

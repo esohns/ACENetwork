@@ -763,6 +763,7 @@ parse:
                 ACE_TEXT ("%s: failed to HTTP_IParser::parse() (message id was: %u), returning\n"),
                 inherited::mod_->name (),
                 static_cast<DataMessageType*> (message_block_p)->id ()));
+    headFragment_->release (); headFragment_ = NULL;
     return;
   } // end IF
   // the message fragment has been parsed successfully
@@ -785,7 +786,7 @@ parse:
   //         --> re-frame the document body, if necessary
   content_length_i = getContentLength ();
   total_length_i = headFragment_->total_length ();
-  if (!content_length_i || content_length_i == total_length_i)
+  if (!content_length_i || content_length_i >= total_length_i)
   {
     message_block_p = headFragment_;
     headFragment_ = NULL;

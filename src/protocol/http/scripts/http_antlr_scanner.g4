@@ -17,6 +17,7 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 
 @members {
  public:
+  bool                chunked;
   size_t              content_length;
   std::string         key;
   size_t              missing_body_or_chunk_bytes;
@@ -26,6 +27,7 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 
   void reset_2 ()
   {
+    chunked = false;
     content_length = 0;
     key.clear ();
     missing_body_or_chunk_bytes = 0;
@@ -266,7 +268,8 @@ fragment CHUNK_EXTENSIONS      : (';' CHUNK_EXTENSION)*;
 fragment CHUNK_LINE            : CHUNKSIZE CHUNK_EXTENSIONS;
 /*fragment CHUNK_DATA            : (OCTET)+;*/
 /* CHUNK                  {CHUNK_LINE}{CRLF}{CHUNK_DATA}{CRLF} */
-fragment CHUNK_LINE_LAST       : '0' CHUNK_EXTENSIONS;
+fragment ZERO_ASCII            : '0';
+fragment CHUNK_LINE_LAST       : ZERO_ASCII+ CHUNK_EXTENSIONS;
 fragment CHUNK_TRAILER         : (ENTITY_HEADER CRLF)*;
 /*CHUNK                          : CHUNK_DATA;*/
 
@@ -324,6 +327,7 @@ CRLF_HEADERS                   : CRLF {
                                      Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
                                      if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                      {
+                                       chunked = true;
                                        content_length = 0;
                                        setMode (CHUNKED_BODY);
                                      } // end IF

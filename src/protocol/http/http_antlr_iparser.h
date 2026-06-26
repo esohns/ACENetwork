@@ -30,7 +30,7 @@ struct HTTP_Record;
 class HTTP_ANTLR_IParser
 {
  public:
-  virtual bool hasFinished () const = 0;
+  virtual bool hasFinished () = 0;
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
 
   virtual void record (struct HTTP_Record*&) = 0; // data record

@@ -87,6 +87,7 @@ public:
     HeadContext *head();
     antlr4::tree::TerminalNode *CRLF();
     BodyContext *body();
+    antlr4::tree::TerminalNode *EOF();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

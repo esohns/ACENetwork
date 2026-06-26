@@ -81,6 +81,11 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 
   parser_.parser_ = this;
   parser_.setBuildParseTree (false);
+  HTTP_ANTLRErrorHandler* error_handler_p = NULL;
+  ACE_NEW_NORETURN (error_handler_p,
+                    HTTP_ANTLRErrorHandler ());
+  ACE_ASSERT (error_handler_p);
+  parser_.setErrorHandler (Ref<antlr4::ANTLRErrorStrategy> (error_handler_p));
   parser_.removeErrorListeners ();
   parser_.addErrorListener (this);
   parser_.addParseListener (this);
@@ -126,24 +131,12 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   ACE_Message_Block* head_fragment_p = this->head ();
   ACE_ASSERT (head_fragment_p);
   size_t total_length_i = head_fragment_p->total_length ();
-  if (total_length_i < lexer_.content_length)
+  if (lexer_.content_length && total_length_i < lexer_.content_length)
     return;
-
-  // process any chunks
-  //size_t offset_i = lexer_.offset;
-  //for (HTTP_ChunksConstIterator_t iterator = parser_.chunks_.begin ();
-  //     iterator != parser_.chunks_.end ();
-  //     ++iterator)
-  //{
-  //  lexer_.offset = (*iterator).first;
-  //  chunk ((*iterator).second);
-  //} // end FOR
-  //lexer_.offset = offset_i;
 
   struct HTTP_Record* record_p = &parser_.record_;
   record (record_p);
 
-  // *TODO*: set to finished only iff total_length >= content_length !
   finished_ = true;
 }
 
@@ -358,15 +351,16 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   // retain a handle to the 'current' fragment
   fragment_ = data_in;
 
+  inputBuffer_.reset ();
+  input_.reset ();
+  lexer_.reset_2 ();
+  parser_.reset_2 ();
+
   // initialize scanner ?
   if (isFirst_)
   {
     isFirst_ = false;
-
-    lexer_.reset_2 ();
     lexer_.parser = this;
-
-    parser_.reset_2 ();
     parser_.parser_ = this;
   } // end IF
 
@@ -393,9 +387,9 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     } // end FOR
 #endif // USE_UNBUFFERED
   } // end IF
-//#if (USE_UNBUFFERED)
-//  tokens_.fill (1);
-//#endif // USE_UNBUFFERED
+#if (USE_UNBUFFERED)
+  tokens_.fill (1);
+#endif // USE_UNBUFFERED
 
   // parse data fragment
   try {
@@ -418,7 +412,15 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   switch (result)
   {
     case 0:
-      break; // done/need more data
+    {
+      isFirst_ = true;
+      // parser_.reset () calls seek(0) iff it has an inputstream, which doesn't
+      // work on unbuffered streams...
+      parser_.setInputStream (NULL);
+      parser_.reset ();
+      parser_.setInputStream (&tokens_);
+      break; // done
+    }
     case 1:
     default:
     { // *NOTE*: most probable reason: connection
@@ -642,10 +644,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 #else
   inputStream_.load (fragment_->rd_ptr (),
                      fragment_->length ());
-#endif
-  // lexer_.setInputStream (&input_);
-  // tokens_.setTokenSource (&lexer_);
-  // parser_.setInputStream (&tokens_);
+#endif // USE_UNBUFFERED
 
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("parsing fragment #%d --> %d byte(s)\n"),
@@ -665,6 +664,28 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::end"));
 
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename SessionMessageType>
+bool
+HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
+                         TimePolicyType,
+                         SessionMessageType>::hasFinished ()
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::hasFinished"));
+
+  // *TODO*: this "short-cut" is not entirely safe
+  ACE_Message_Block* head_fragment_p = this->head ();
+  ACE_ASSERT (head_fragment_p);
+  size_t total_length_i = head_fragment_p->total_length ();
+  if (!lexer_.chunked                        &&
+      lexer_.content_length                  &&
+      total_length_i >= lexer_.content_length)
+    return true;
+
+  return finished_;
 }
 
 template <ACE_SYNCH_DECL,

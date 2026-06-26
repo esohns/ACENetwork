@@ -65,10 +65,12 @@ class HTTP_ANTLR_Streambuf
   }
   inline virtual ~HTTP_ANTLR_Streambuf () {}
 
-  // bool is_empty () const
-  // {
-  //   return gptr() >= egptr ();
-  // }
+  void reset ()
+  {
+    buffer_.clear ();
+
+    setg (NULL, NULL, NULL);
+  }
 
   // void append_chunk (const char* data_in, size_t size_in)
   // { ACE_ASSERT (data_in && size_in);
@@ -198,6 +200,15 @@ class UnbufferedByteCharStream
    , _currentCharIndex (0)
   {}
 
+  void reset ()
+  {
+    _data.clear ();
+    _p = 0;
+    _numMarkers = 0;
+    _lastCharBufferStart = 0;
+    _currentCharIndex = 0;
+  }
+
   virtual void consume() override
   {
     if (LA(1) == antlr4::IntStream::EOF)
@@ -278,7 +289,8 @@ class UnbufferedByteCharStream
 
   virtual size_t size () override
   {
-    throw std::runtime_error("Size verification is unavailable on unbuffered streams.");
+    //throw std::runtime_error("Size verification is unavailable on unbuffered streams.");
+    return 0;
   }
 
   virtual std::string getSourceName() const override
@@ -330,6 +342,18 @@ class UnbufferedByteCharStream
   }
 };
 #endif // USE_UNBUFFERED
+
+class HTTP_ANTLRErrorHandler
+ : public antlr4::DefaultErrorStrategy
+{
+  typedef antlr4::DefaultErrorStrategy inherited;
+
+ public:
+  HTTP_ANTLRErrorHandler ()
+   : inherited ()
+  {}
+  inline virtual ~HTTP_ANTLRErrorHandler () {}
+};
 
 //////////////////////////////////////////
 
@@ -393,7 +417,7 @@ class HTTP_ANTLRParserDriver_T
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer ();
 
-  inline virtual bool hasFinished () const { return finished_; }
+  virtual bool hasFinished ();
   inline virtual bool headerOnly () { ACE_ASSERT (configuration_); return configuration_->headerOnly; } // returns: parse HTTP header only ?
   virtual void chunk_2 (ACE_UINT64, ACE_UINT32); // chunk offset, chunk size
 
