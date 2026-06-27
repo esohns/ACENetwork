@@ -2,6 +2,10 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
+
+#include "ace/Basic_Types.h"
 
 #include "common_string_tools.h"
 
@@ -94,7 +98,7 @@ void http_antlr_scannerLexerInitialize() {
       "ZERO_ASCII", "CHUNK_LINE_LAST", "CHUNK_TRAILER", "VERSION", "SP_RESP", 
       "CODE", "SP_CODE", "REASON", "CRLF_REASON", "KEY_HEAD", "CRLF_HEADERS", 
       "COLON_SP", "VALUE_HEAD", "CRLF_HEAD", "BODY", "CHUNK_LAST", "CHUNK", 
-      "CRLF_CHUNKED_BODY", "CHUNK_DATA", "CRLF_CHUNKED_DATA"
+      "CHUNK_DATA", "CRLF_CHUNKED_DATA", "CRLF_CHUNKED_BODY"
     },
     std::vector<std::string>{
       "DEFAULT_TOKEN_CHANNEL", "HIDDEN"
@@ -102,7 +106,7 @@ void http_antlr_scannerLexerInitialize() {
     std::vector<std::string>{
       "DEFAULT_MODE", "RESPONSE_SP", "STATUS_CODE", "REASON_STRING", "HEADERS", 
       "HEAD", "HEAD_VALUE", "HEAD_END", "REGULAR_BODY", "CHUNKED_BODY", 
-      "CHUNKED_BODY_END", "CHUNKED_DATA", "CHUNKED_DATA_END"
+      "CHUNKED_DATA", "CHUNKED_DATA_END", "CHUNKED_BODY_END"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "'\\u000D\\u000A'"
@@ -230,7 +234,7 @@ void http_antlr_scannerLexerInitialize() {
   	1,128,1,128,1,128,1,128,1,128,1,129,1,129,1,129,1,129,1,129,1,129,1,130,
   	1,130,1,130,1,130,1,130,1,130,1,131,1,131,1,131,1,132,1,132,1,132,1,132,
   	1,132,1,132,1,132,1,133,1,133,1,133,1,133,1,133,1,133,1,134,1,134,1,134,
-  	1,134,1,134,1,134,1,135,1,135,1,135,1,135,1,135,1,136,1,136,1,136,1,136,
+  	1,134,1,134,1,135,1,135,1,135,1,135,1,135,1,135,1,136,1,136,1,136,1,136,
   	1,136,1,136,0,0,137,13,0,15,0,17,0,19,0,21,0,23,0,25,0,27,0,29,0,31,0,
   	33,0,35,10,37,0,39,0,41,0,43,0,45,0,47,0,49,0,51,0,53,0,55,0,57,0,59,
   	0,61,0,63,0,65,0,67,0,69,0,71,0,73,0,75,0,77,0,79,0,81,0,83,0,85,0,87,
@@ -242,7 +246,7 @@ void http_antlr_scannerLexerInitialize() {
   	0,211,0,213,0,215,0,217,0,219,0,221,0,223,0,225,0,227,0,229,0,231,0,233,
   	0,235,0,237,0,239,0,241,0,243,0,245,0,247,0,249,0,251,0,253,3,255,12,
   	257,4,259,13,261,5,263,0,265,0,267,0,269,0,271,0,273,9,275,14,277,0,279,
-  	11,281,0,283,15,285,16,13,0,1,2,3,4,5,6,7,8,9,10,11,12,24,1,0,0,255,1,
+  	11,281,15,283,16,285,0,13,0,1,2,3,4,5,6,7,8,9,10,11,12,24,1,0,0,255,1,
   	0,0,127,1,0,65,90,1,0,97,122,2,0,65,90,97,122,1,0,48,57,2,0,0,31,127,
   	127,2,0,9,9,32,32,3,0,48,57,65,70,97,102,1,0,128,255,6,0,33,33,35,39,
   	42,46,94,95,124,124,126,126,1,0,32,126,10,0,9,9,32,32,34,34,40,41,44,
@@ -286,7 +290,7 @@ void http_antlr_scannerLexerInitialize() {
   	0,0,259,1388,1,0,0,0,261,1398,1,0,0,0,263,1406,1,0,0,0,265,1412,1,0,0,
   	0,267,1418,1,0,0,0,269,1423,1,0,0,0,271,1434,1,0,0,0,273,1440,1,0,0,0,
   	275,1446,1,0,0,0,277,1449,1,0,0,0,279,1456,1,0,0,0,281,1462,1,0,0,0,283,
-  	1468,1,0,0,0,285,1473,1,0,0,0,287,288,7,0,0,0,288,14,1,0,0,0,289,290,
+  	1467,1,0,0,0,285,1473,1,0,0,0,287,288,7,0,0,0,288,14,1,0,0,0,289,290,
   	7,1,0,0,290,16,1,0,0,0,291,292,7,2,0,0,292,18,1,0,0,0,293,294,7,3,0,0,
   	294,20,1,0,0,0,295,296,7,4,0,0,296,22,1,0,0,0,297,298,7,5,0,0,298,24,
   	1,0,0,0,299,300,7,6,0,0,300,26,1,0,0,0,301,302,5,13,0,0,302,28,1,0,0,
@@ -613,11 +617,11 @@ void http_antlr_scannerLexerInitialize() {
   	1452,6,132,28,0,1452,1453,1,0,0,0,1453,1454,6,132,29,0,1454,1455,6,132,
   	30,0,1455,278,1,0,0,0,1456,1457,3,245,116,0,1457,1458,3,35,11,0,1458,
   	1459,6,133,31,0,1459,1460,1,0,0,0,1460,1461,6,133,29,0,1461,280,1,0,0,
-  	0,1462,1463,3,35,11,0,1463,1464,6,134,32,0,1464,1465,1,0,0,0,1465,1466,
-  	6,134,13,0,1466,1467,6,134,33,0,1467,282,1,0,0,0,1468,1469,3,13,0,0,1469,
-  	1470,6,135,34,0,1470,1471,1,0,0,0,1471,1472,6,135,4,0,1472,284,1,0,0,
-  	0,1473,1474,3,35,11,0,1474,1475,6,136,35,0,1475,1476,1,0,0,0,1476,1477,
-  	6,136,4,0,1477,1478,6,136,26,0,1478,286,1,0,0,0,87,0,1,2,3,4,5,6,7,8,
+  	0,1462,1463,3,13,0,0,1463,1464,6,134,32,0,1464,1465,1,0,0,0,1465,1466,
+  	6,134,4,0,1466,282,1,0,0,0,1467,1468,3,35,11,0,1468,1469,6,135,33,0,1469,
+  	1470,1,0,0,0,1470,1471,6,135,4,0,1471,1472,6,135,26,0,1472,284,1,0,0,
+  	0,1473,1474,3,35,11,0,1474,1475,6,136,34,0,1475,1476,1,0,0,0,1476,1477,
+  	6,136,13,0,1477,1478,6,136,35,0,1478,286,1,0,0,0,87,0,1,2,3,4,5,6,7,8,
   	9,10,11,12,324,326,331,340,344,346,353,355,362,375,378,382,386,390,392,
   	400,408,413,415,423,428,430,436,446,451,456,462,464,469,471,476,483,489,
   	494,507,532,570,652,695,878,899,909,922,932,938,943,945,949,954,973,977,
@@ -625,8 +629,8 @@ void http_antlr_scannerLexerInitialize() {
   	1321,1326,1332,1338,1349,1358,1398,1400,1427,36,1,120,0,7,3,0,2,1,0,1,
   	121,1,6,0,0,2,2,0,1,122,2,7,4,0,1,123,3,2,3,0,1,124,4,7,5,0,1,125,5,7,
   	10,0,2,4,0,1,126,6,7,6,0,5,5,0,1,127,7,1,128,8,7,7,0,2,6,0,1,129,9,7,
-  	8,0,2,7,0,1,130,10,4,0,0,1,131,11,1,132,12,7,11,0,2,10,0,1,133,13,1,134,
-  	14,2,0,0,1,135,15,1,136,16
+  	8,0,2,7,0,1,130,10,4,0,0,1,131,11,1,132,12,7,11,0,2,12,0,1,133,13,1,134,
+  	14,1,135,15,1,136,16,2,0,0
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -697,9 +701,9 @@ void http_antlr_scanner::action(RuleContext *context, size_t ruleIndex, size_t a
     case 131: BODYAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
     case 132: CHUNK_LASTAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
     case 133: CHUNKAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
-    case 134: CRLF_CHUNKED_BODYAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
-    case 135: CHUNK_DATAAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
-    case 136: CRLF_CHUNKED_DATAAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
+    case 134: CHUNK_DATAAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
+    case 135: CRLF_CHUNKED_DATAAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
+    case 136: CRLF_CHUNKED_BODYAction(antlrcpp::downCast<antlr4::RuleContext *>(context), actionIndex); break;
 
   default:
     break;
@@ -788,9 +792,11 @@ void http_antlr_scanner::CRLF_HEADERSAction(antlr4::RuleContext *context, size_t
   switch (actionIndex) {
     case 7: 
                                      { offset += 2;
+                                       const struct HTTP_Record& record_r = parser->current ();
                                        HTTP_HeadersConstIterator_t iterator =
-                                         record.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-                                       if (iterator != record.headers.end ())
+                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                                       scanned_content_length = 0;
+                                       if (iterator != record_r.headers.end ())
                                        {
                                          std::istringstream converter;
                                          converter.str ((*iterator).second);
@@ -801,14 +807,14 @@ void http_antlr_scanner::CRLF_HEADERSAction(antlr4::RuleContext *context, size_t
                                          break;
                                        } // end IF
                                        iterator =
-                                         record.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
-                                       if (iterator != record.headers.end ())
+                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
+                                       if (iterator != record_r.headers.end ())
                                        {
                                          std::string value_string =
-                                         Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
+                                           Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
                                          if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                          {
-                                           chunked = true;
+                                           chunks.clear ();
                                            content_length = 0;
                                            setMode (CHUNKED_BODY);
                                          } // end IF
@@ -852,7 +858,6 @@ void http_antlr_scanner::VALUE_HEADAction(antlr4::RuleContext *context, size_t a
                                      {
                                        std::string value = getText ();
                                        offset += value.size ();
-                                       record.headers.insert (std::make_pair (key, value));
                                      }
                                       break;
 
@@ -876,6 +881,8 @@ void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionI
   switch (actionIndex) {
     case 11: 
                                        ACE_ASSERT (missing_body_or_chunk_bytes);
+                                       ++scanned_content_length;
+                                       ACE_ASSERT (missing_body_or_chunk_bytes);
                                        --missing_body_or_chunk_bytes;
                                        if (unlikely (!missing_body_or_chunk_bytes))
                                        {
@@ -898,7 +905,9 @@ void http_antlr_scanner::CHUNK_LASTAction(antlr4::RuleContext *context, size_t a
     case 12: 
                                        offset += getText ().size ();
                                        setText (ACE_TEXT_ALWAYS_CHAR ("0"));
+                                       chunks.push_back (std::make_pair (offset, 0));
                                        parser->chunk_2 (offset, 0);
+                                       content_length = scanned_content_length;
                                       break;
 
   default:
@@ -937,13 +946,13 @@ void http_antlr_scanner::CHUNKAction(antlr4::RuleContext *context, size_t action
                                        converter.str (match_results[1].str ());
                                        size_t chunk_size;
                                        converter >> chunk_size;
-                                       content_length += chunk_size;
                                        missing_body_or_chunk_bytes = chunk_size;
                                        converter.setf (std::ios::dec,
                                                        std::ios::basefield);
                                        converter.clear ();
                                        converter << chunk_size;
                                        setText (converter.str ());
+                                       chunks.push_back (std::make_pair (offset, static_cast<ACE_UINT32> (chunk_size)));
                                        parser->chunk_2 (offset, static_cast<ACE_UINT32> (chunk_size));
                                        ACE_ASSERT (missing_body_or_chunk_bytes);
                                        pushMode(CHUNKED_DATA);
@@ -955,21 +964,11 @@ void http_antlr_scanner::CHUNKAction(antlr4::RuleContext *context, size_t action
   }
 }
 
-void http_antlr_scanner::CRLF_CHUNKED_BODYAction(antlr4::RuleContext *context, size_t actionIndex) {
-  switch (actionIndex) {
-    case 14: 
-                                       offset += 2;
-                                      break;
-
-  default:
-    break;
-  }
-}
-
 void http_antlr_scanner::CHUNK_DATAAction(antlr4::RuleContext *context, size_t actionIndex) {
   switch (actionIndex) {
-    case 15: 
+    case 14: 
                                        ++offset;
+                                       ++scanned_content_length;
                                        ACE_ASSERT (missing_body_or_chunk_bytes);
                                        --missing_body_or_chunk_bytes;
                                        if (unlikely (!missing_body_or_chunk_bytes))
@@ -982,6 +981,17 @@ void http_antlr_scanner::CHUNK_DATAAction(antlr4::RuleContext *context, size_t a
 }
 
 void http_antlr_scanner::CRLF_CHUNKED_DATAAction(antlr4::RuleContext *context, size_t actionIndex) {
+  switch (actionIndex) {
+    case 15: 
+                                       offset += 2;
+                                      break;
+
+  default:
+    break;
+  }
+}
+
+void http_antlr_scanner::CRLF_CHUNKED_BODYAction(antlr4::RuleContext *context, size_t actionIndex) {
   switch (actionIndex) {
     case 16: 
                                        offset += 2;

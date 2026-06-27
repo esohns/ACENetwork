@@ -33,7 +33,10 @@ class HTTP_ANTLR_IParser
   virtual bool hasFinished () = 0;
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
 
-  virtual void record (struct HTTP_Record*&) = 0; // data record
+  virtual const struct HTTP_Record& current () = 0; // current record
+
+  // *NOTE*: the implementation needs to frame the 'body' based on this data
+  virtual void record (struct HTTP_Record*&) = 0; // record
   virtual void chunk (ACE_UINT32) = 0; // chunk size
   virtual void chunk_2 (ACE_UINT64, ACE_UINT32) = 0; // chunk offset, chunk size
 

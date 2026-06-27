@@ -272,3 +272,21 @@ Test_I_Message::duplicate (void) const
   // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
   return message_p;
 }
+
+void
+Test_I_Message::dump_state () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Message::dump_state"));
+
+  // dump data
+  if (data_)
+  {
+    try { // *TODO*: remove type inference
+      data_->dump_state ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
+    }
+  } // end IF
+  //inherited::dump_state ();
+}

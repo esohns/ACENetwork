@@ -23,13 +23,11 @@ options {
 
 @members {
  public:
-  size_t              content_length_;
   HTTP_ANTLR_IParser* parser_;
   struct HTTP_Record  record_;
 
   void reset_2 ()
   {
-    content_length_ = 0;
     parser_ = NULL;
     record_.reset ();
   }
@@ -37,7 +35,8 @@ options {
   // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 }
 
-document:           head CRLF body EOF;
+initial:            document EOF;
+document:           head CRLF body;
 head:               METHOD {
                       record_.method = HTTP_Tools::MethodToType ($METHOD->getText ());
                     } head_request_rest
@@ -117,7 +116,7 @@ body:               BODY {
                     {
                       std::istringstream converter;
                       converter.str ($BODY->getText ());
-                      converter >> content_length_;
+                      //converter >> content_length_;
                     }
                     }
                     | CHUNK {
@@ -126,7 +125,7 @@ body:               BODY {
                       converter.str ($CHUNK->getText ());
                       ACE_UINT32 chunk_size_i;
                       converter >> chunk_size_i;
-                      content_length_ += chunk_size_i;
+                      //content_length_ += chunk_size_i;
                     }
                     } chunked_body;
 chunked_body:       chunks headers CRLF;
@@ -136,7 +135,7 @@ chunks:             chunks CHUNK {
                       converter.str ($CHUNK->getText ());
                       ACE_UINT32 chunk_size_i;
                       converter >> chunk_size_i;
-                      content_length_ += chunk_size_i;
+                      //content_length_ += chunk_size_i;
                     }
                     }
                     |;

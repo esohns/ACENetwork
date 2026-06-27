@@ -29,6 +29,9 @@
 class  http_antlr_parserListener : public antlr4::tree::ParseTreeListener {
 public:
 
+  virtual void enterInitial(http_antlr_parser::InitialContext *ctx) = 0;
+  virtual void exitInitial(http_antlr_parser::InitialContext *ctx) = 0;
+
   virtual void enterDocument(http_antlr_parser::DocumentContext *ctx) = 0;
   virtual void exitDocument(http_antlr_parser::DocumentContext *ctx) = 0;
 

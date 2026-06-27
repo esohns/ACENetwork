@@ -151,11 +151,6 @@ class HTTP_ANTLR_Streambuf
     setg (base, current_read_ptr, end);
   }
 
-  // void signal_eof ()
-  // {
-  //   is_eof_ = true;
-  // }
-
  protected:
   virtual int_type underflow ()
   {
@@ -202,6 +197,7 @@ class UnbufferedByteCharStream
 
   void reset ()
   {
+    _input.clear ();
     _data.clear ();
     _p = 0;
     _numMarkers = 0;
@@ -209,7 +205,7 @@ class UnbufferedByteCharStream
     _currentCharIndex = 0;
   }
 
-  virtual void consume() override
+  virtual void consume () override
   {
     if (LA(1) == antlr4::IntStream::EOF)
     {
@@ -332,10 +328,21 @@ class UnbufferedByteCharStream
     ssize_t absoluteNeededPos = static_cast<ssize_t> (_p) + need;
     ssize_t toRead = absoluteNeededPos - static_cast<ssize_t> (_data.size ());
 
+    // get pointer to underlying streambuf once
+    //std::streambuf* sb = _input.rdbuf ();
+    //ACE_ASSERT (sb);
+
     for (ssize_t i = 0; i < toRead; ++i)
     {
+      // Non-blocking check: only read when bytes are immediately available.
+      // This avoids invoking underflow()/switchBuffer() indirectly via get()
+      // which could block waiting for more ACE message-queue data
+      //std::streamsize avail = sb->in_avail ();
+      //if (avail <= 0)
+      //  break;
+
       int byte = _input.get ();
-      if (byte == EOF)
+      if (unlikely (byte == EOF))
         break;
       _data.push_back (static_cast<char32_t> (byte));
     }
@@ -343,19 +350,20 @@ class UnbufferedByteCharStream
 };
 #endif // USE_UNBUFFERED
 
-class HTTP_ANTLRErrorHandler
- //: public antlr4::DefaultErrorStrategy
- : public antlr4::BailErrorStrategy
+template <typename T>
+class HTTP_ANTLRErrorHandler_T
+ : public T
 {
-  //typedef antlr4::DefaultErrorStrategy inherited;
-  typedef antlr4::BailErrorStrategy inherited;
+  typedef T inherited;
 
  public:
-  HTTP_ANTLRErrorHandler ()
+  HTTP_ANTLRErrorHandler_T ()
    : inherited ()
   {}
-  inline virtual ~HTTP_ANTLRErrorHandler () {}
+  inline virtual ~HTTP_ANTLRErrorHandler_T () {}
 };
+//typedef HTTP_ANTLRErrorHandler_T<antlr4::DefaultErrorStrategy> HTTP_ANTLRErrorHandler_t;
+typedef HTTP_ANTLRErrorHandler_T<antlr4::BailErrorStrategy> HTTP_ANTLRErrorHandler_t;
 
 //////////////////////////////////////////
 
@@ -409,7 +417,6 @@ class HTTP_ANTLRParserDriver_T
   virtual bool initialize (const struct HTTP_ParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; }
   inline virtual bool isBlocking () const { ACE_ASSERT (configuration_); return configuration_->block; }
-  //inline virtual void offset (size_t offset_in) { lexer_.offset += offset_in; } // offset (increment)
   inline virtual size_t offset () const { return static_cast<unsigned int> (lexer_.offset); }
   virtual bool begin (const char*, // buffer handle
                       size_t);     // buffer size
@@ -421,6 +428,7 @@ class HTTP_ANTLRParserDriver_T
 
   virtual bool hasFinished ();
   inline virtual bool headerOnly () { ACE_ASSERT (configuration_); return configuration_->headerOnly; } // returns: parse HTTP header only ?
+  inline virtual const struct HTTP_Record& current () { return parser_.record_; }
   virtual void chunk_2 (ACE_UINT64, ACE_UINT32); // chunk offset, chunk size
 
   virtual void dump_state () const;

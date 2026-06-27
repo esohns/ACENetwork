@@ -2,6 +2,10 @@
 #include <regex>
 #include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
+
+#include "ace/Basic_Types.h"
 
 #include "common_string_tools.h"
 
@@ -31,8 +35,8 @@ public:
 
   enum {
     RESPONSE_SP = 1, STATUS_CODE = 2, REASON_STRING = 3, HEADERS = 4, HEAD = 5, 
-    HEAD_VALUE = 6, HEAD_END = 7, REGULAR_BODY = 8, CHUNKED_BODY = 9, CHUNKED_BODY_END = 10, 
-    CHUNKED_DATA = 11, CHUNKED_DATA_END = 12
+    HEAD_VALUE = 6, HEAD_END = 7, REGULAR_BODY = 8, CHUNKED_BODY = 9, CHUNKED_DATA = 10, 
+    CHUNKED_DATA_END = 11, CHUNKED_BODY_END = 12
   };
 
   explicit http_antlr_scanner(antlr4::CharStream *input);
@@ -41,23 +45,28 @@ public:
 
 
    public:
-    bool                chunked;
-    size_t              content_length;
-    std::string         key;
-    size_t              missing_body_or_chunk_bytes;
-    size_t              offset;
-    HTTP_ANTLR_IParser* parser;
-    struct HTTP_Record  record;
+    std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks;
+    size_t                                          scanned_content_length;
+    size_t                                          content_length;
+    std::string                                     key;
+    size_t                                          missing_body_or_chunk_bytes;
+    size_t                                          offset;
+    HTTP_ANTLR_IParser*                             parser;
 
     void reset_2 ()
     {
-      chunked = false;
+      chunks.clear ();
+      scanned_content_length = 0;
       content_length = 0;
       key.clear ();
       missing_body_or_chunk_bytes = 0;
       offset = 0;
       parser = NULL;
-      record.reset ();
+    }
+
+    void reset_3 ()
+    {
+      hitEOF = false;
     }
 
 
@@ -99,9 +108,9 @@ private:
   void BODYAction(antlr4::RuleContext *context, size_t actionIndex);
   void CHUNK_LASTAction(antlr4::RuleContext *context, size_t actionIndex);
   void CHUNKAction(antlr4::RuleContext *context, size_t actionIndex);
-  void CRLF_CHUNKED_BODYAction(antlr4::RuleContext *context, size_t actionIndex);
   void CHUNK_DATAAction(antlr4::RuleContext *context, size_t actionIndex);
   void CRLF_CHUNKED_DATAAction(antlr4::RuleContext *context, size_t actionIndex);
+  void CRLF_CHUNKED_BODYAction(antlr4::RuleContext *context, size_t actionIndex);
 
   // Individual semantic predicate functions triggered by sempred() above.
 

@@ -104,6 +104,9 @@ class Test_I_Message
   inline virtual enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
   inline virtual void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
 
+  // override Common_IDumpState
+  virtual void dump_state () const;
+
  protected:
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")

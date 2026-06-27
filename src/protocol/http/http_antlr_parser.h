@@ -33,9 +33,9 @@ public:
   };
 
   enum {
-    RuleDocument = 0, RuleHead = 1, RuleHead_request_rest = 2, RuleHead_response_rest = 3, 
-    RuleHeaders = 4, RuleHeader = 5, RuleBody = 6, RuleChunked_body = 7, 
-    RuleChunks = 8
+    RuleInitial = 0, RuleDocument = 1, RuleHead = 2, RuleHead_request_rest = 3, 
+    RuleHead_response_rest = 4, RuleHeaders = 5, RuleHeader = 6, RuleBody = 7, 
+    RuleChunked_body = 8, RuleChunks = 9
   };
 
   explicit http_antlr_parser(antlr4::TokenStream *input);
@@ -56,13 +56,11 @@ public:
 
 
    public:
-    size_t              content_length_;
     HTTP_ANTLR_IParser* parser_;
     struct HTTP_Record  record_;
 
     void reset_2 ()
     {
-      content_length_ = 0;
       parser_ = NULL;
       record_.reset ();
     }
@@ -70,6 +68,7 @@ public:
     // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 
 
+  class InitialContext;
   class DocumentContext;
   class HeadContext;
   class Head_request_restContext;
@@ -80,6 +79,20 @@ public:
   class Chunked_bodyContext;
   class ChunksContext; 
 
+  class  InitialContext : public antlr4::ParserRuleContext {
+  public:
+    InitialContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    DocumentContext *document();
+    antlr4::tree::TerminalNode *EOF();
+
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+   
+  };
+
+  InitialContext* initial();
+
   class  DocumentContext : public antlr4::ParserRuleContext {
   public:
     DocumentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
@@ -87,7 +100,6 @@ public:
     HeadContext *head();
     antlr4::tree::TerminalNode *CRLF();
     BodyContext *body();
-    antlr4::tree::TerminalNode *EOF();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

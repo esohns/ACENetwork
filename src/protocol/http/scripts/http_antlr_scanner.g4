@@ -6,6 +6,10 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 #include <regex>
 #include <sstream>
 #include <string>
+#include <utility>
+#include <vector>
+
+#include "ace/Basic_Types.h"
 
 #include "common_string_tools.h"
 
@@ -17,23 +21,28 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 
 @members {
  public:
-  bool                chunked;
-  size_t              content_length;
-  std::string         key;
-  size_t              missing_body_or_chunk_bytes;
-  size_t              offset;
-  HTTP_ANTLR_IParser* parser;
-  struct HTTP_Record  record;
+  std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks;
+  size_t                                          scanned_content_length;
+  size_t                                          content_length;
+  std::string                                     key;
+  size_t                                          missing_body_or_chunk_bytes;
+  size_t                                          offset;
+  HTTP_ANTLR_IParser*                             parser;
 
   void reset_2 ()
   {
-    chunked = false;
+    chunks.clear ();
+    scanned_content_length = 0;
     content_length = 0;
     key.clear ();
     missing_body_or_chunk_bytes = 0;
     offset = 0;
     parser = NULL;
-    record.reset ();
+  }
+
+  void reset_3 ()
+  {
+    hitEOF = false;
   }
 }
 
@@ -307,9 +316,11 @@ KEY_HEAD                       : FIELD_NAME {
                                  } -> type(FIELD_KEY), pushMode(HEAD);
 CRLF_HEADERS                   : CRLF {
                                  { offset += 2;
+                                   const struct HTTP_Record& record_r = parser->current ();
                                    HTTP_HeadersConstIterator_t iterator =
-                                     record.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-                                   if (iterator != record.headers.end ())
+                                     record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                                   scanned_content_length = 0;
+                                   if (iterator != record_r.headers.end ())
                                    {
                                      std::istringstream converter;
                                      converter.str ((*iterator).second);
@@ -320,14 +331,14 @@ CRLF_HEADERS                   : CRLF {
                                      break;
                                    } // end IF
                                    iterator =
-                                     record.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
-                                   if (iterator != record.headers.end ())
+                                     record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
+                                   if (iterator != record_r.headers.end ())
                                    {
                                      std::string value_string =
-                                     Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
+                                       Common_String_Tools::tolower (Common_String_Tools::strip ((*iterator).second));
                                      if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                      {
-                                       chunked = true;
+                                       chunks.clear ();
                                        content_length = 0;
                                        setMode (CHUNKED_BODY);
                                      } // end IF
@@ -359,7 +370,6 @@ VALUE_HEAD                     : FIELD_VALUE {
                                  {
                                    std::string value = getText ();
                                    offset += value.size ();
-                                   record.headers.insert (std::make_pair (key, value));
                                  }
                                  } -> type(FIELD_VALUE), mode(HEAD_END);
 
@@ -370,6 +380,8 @@ CRLF_HEAD                      : CRLF {
 
 mode REGULAR_BODY;
 BODY                           : OCTET {
+                                   ACE_ASSERT (missing_body_or_chunk_bytes);
+                                   ++scanned_content_length;
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    --missing_body_or_chunk_bytes;
                                    if (unlikely (!missing_body_or_chunk_bytes))
@@ -387,7 +399,9 @@ mode CHUNKED_BODY;
 CHUNK_LAST                     : CHUNK_LINE_LAST CRLF {
                                    offset += getText ().size ();
                                    setText (ACE_TEXT_ALWAYS_CHAR ("0"));
+                                   chunks.push_back (std::make_pair (offset, 0));
                                    parser->chunk_2 (offset, 0);
+                                   content_length = scanned_content_length;
                                  } -> type(CHUNK), mode(CHUNKED_BODY_END);
 CHUNK                          : CHUNK_LINE CRLF {
                                  { // *TODO*: let the scanner parse this (it does it anyway)
@@ -418,27 +432,23 @@ CHUNK                          : CHUNK_LINE CRLF {
                                    converter.str (match_results[1].str ());
                                    size_t chunk_size;
                                    converter >> chunk_size;
-                                   content_length += chunk_size;
                                    missing_body_or_chunk_bytes = chunk_size;
                                    converter.setf (std::ios::dec,
                                                    std::ios::basefield);
                                    converter.clear ();
                                    converter << chunk_size;
                                    setText (converter.str ());
+                                   chunks.push_back (std::make_pair (offset, static_cast<ACE_UINT32> (chunk_size)));
                                    parser->chunk_2 (offset, static_cast<ACE_UINT32> (chunk_size));
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    pushMode(CHUNKED_DATA);
                                  }
                                  } -> type(CHUNK);
 
-mode CHUNKED_BODY_END;
-CRLF_CHUNKED_BODY              : CRLF {
-                                   offset += 2;
-                                 } -> type(CRLF), mode(DEFAULT_MODE);
-
 mode CHUNKED_DATA;
 CHUNK_DATA                     : OCTET {
                                    ++offset;
+                                   ++scanned_content_length;
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    --missing_body_or_chunk_bytes;
                                    if (unlikely (!missing_body_or_chunk_bytes))
@@ -449,3 +459,8 @@ mode CHUNKED_DATA_END;
 CRLF_CHUNKED_DATA              : CRLF {
                                    offset += 2;
                                  } -> skip, popMode;
+
+mode CHUNKED_BODY_END;
+CRLF_CHUNKED_BODY              : CRLF {
+                                   offset += 2;
+                                 } -> type(CRLF), mode(DEFAULT_MODE);

@@ -31,6 +31,9 @@
 class  http_antlr_parserBaseListener : public http_antlr_parserListener {
 public:
 
+  virtual void enterInitial(http_antlr_parser::InitialContext * /*ctx*/) override { }
+  virtual void exitInitial(http_antlr_parser::InitialContext * /*ctx*/) override { }
+
   virtual void enterDocument(http_antlr_parser::DocumentContext * /*ctx*/) override { }
   virtual void exitDocument(http_antlr_parser::DocumentContext * /*ctx*/) override { }
 

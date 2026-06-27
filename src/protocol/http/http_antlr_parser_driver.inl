@@ -80,11 +80,11 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 #endif // USE_UNBUFFERED
 
   parser_.parser_ = this;
-  parser_.getInterpreter<antlr4::atn::ParserATNSimulator> ()->setPredictionMode (antlr4::atn::PredictionMode::SLL);
+  //parser_.getInterpreter<antlr4::atn::ParserATNSimulator> ()->setPredictionMode (antlr4::atn::PredictionMode::SLL);
   parser_.setBuildParseTree (false);
-  HTTP_ANTLRErrorHandler* error_handler_p = NULL;
+  HTTP_ANTLRErrorHandler_t* error_handler_p = NULL;
   ACE_NEW_NORETURN (error_handler_p,
-                    HTTP_ANTLRErrorHandler ());
+                    HTTP_ANTLRErrorHandler_t ());
   ACE_ASSERT (error_handler_p);
   parser_.setErrorHandler (Ref<antlr4::ANTLRErrorStrategy> (error_handler_p));
   parser_.removeErrorListeners ();
@@ -118,10 +118,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (context_in);
 
   // sanity check: finished ?
-  ACE_Message_Block* head_fragment_p = this->head ();
-  ACE_ASSERT (head_fragment_p);
-  size_t total_length_i = head_fragment_p->total_length ();
-  if (lexer_.content_length && total_length_i < lexer_.content_length)
+  if (!this->hasFinished ())
     return;
 
   struct HTTP_Record* record_p = &parser_.record_;
@@ -343,19 +340,23 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 
   inputBuffer_.reset ();
   input_.reset ();
-  lexer_.reset_2 ();
-  parser_.reset_2 ();
 
   // initialize scanner ?
   if (isFirst_)
   {
     isFirst_ = false;
+    lexer_.reset ();
+    lexer_.reset_2 ();
     lexer_.parser = this;
+    parser_.reset_2 ();
     parser_.parser_ = this;
   } // end IF
 
   begin (fragment_->rd_ptr (),
          fragment_->length ());
+//#if (USE_UNBUFFERED)
+//  tokens_.fill (1);
+//#endif // USE_UNBUFFERED
 
   if (unlikely (configuration_->debugParser))
   {
@@ -377,38 +378,40 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     } // end FOR
 #endif // USE_UNBUFFERED
   } // end IF
-#if (USE_UNBUFFERED)
-  tokens_.fill (1);
-#endif // USE_UNBUFFERED
 
   // parse data fragment
   try {
-    parser_.document ();
+    parser_.initial ();
   } catch (const antlr4::RuntimeException& e) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught ANTLR exception in http_antlr_parser::document(): \"%s\", continuing\n"),
+                ACE_TEXT ("caught ANTLR exception in http_antlr_parser::initial(): \"%s\", continuing\n"),
                 ACE_TEXT (e.what ())));
     result = 1;
   } catch (const std::runtime_error& e) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in http_antlr_parser::document(): \"%s\", continuing\n"),
+                ACE_TEXT ("caught exception in http_antlr_parser::initial(): \"%s\", continuing\n"),
                 ACE_TEXT (e.what ())));
     result = 1;
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in http_antlr_parser::document(), continuing\n")));
+                ACE_TEXT ("caught exception in http_antlr_parser::initial(), continuing\n")));
     result = 1;
   }
   switch (result)
   {
     case 0:
     {
-      isFirst_ = true;
+      if (this->hasFinished ())
+        isFirst_ = true;
       // parser_.reset () calls seek(0) iff it has an inputstream, which doesn't
       // work on unbuffered streams...
       parser_.setInputStream (NULL);
       parser_.reset ();
       parser_.setInputStream (&tokens_);
+      if (configuration_->debugParser)
+        parser_.setTrace (true);
+      lexer_.reset_3 ();
+      tokens_.reset ();
       break; // done
     }
     case 1:
@@ -418,6 +421,15 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("failed to parse HTTP PDU (result was: %d), aborting\n"),
                   result));
+      //// parser_.reset () calls seek(0) iff it has an inputstream, which doesn't
+      //// work on unbuffered streams...
+      //parser_.setInputStream (NULL);
+      //parser_.reset ();
+      //parser_.setInputStream (&tokens_);
+      //if (configuration_->debugParser)
+      //  parser_.setTrace (true);
+      lexer_.reset_3 ();
+      tokens_.reset ();
       goto error;
     }
   } // end SWITCH
@@ -658,9 +670,12 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   ACE_Message_Block* head_fragment_p = this->head ();
   ACE_ASSERT (head_fragment_p);
   size_t total_length_i = head_fragment_p->total_length ();
-  if (!lexer_.chunked                        &&
-      lexer_.content_length                  &&
-      total_length_i >= lexer_.content_length)
+  if ((lexer_.chunks.empty ()                  &&
+       lexer_.content_length                   &&
+       (lexer_.scanned_content_length >= lexer_.content_length - 1) &&
+       (total_length_i >= lexer_.content_length)) || // in fill(1) ?
+      (!lexer_.chunks.empty () &&
+       !lexer_.chunks.back ().second))
     return true;
 
   return finished_;
