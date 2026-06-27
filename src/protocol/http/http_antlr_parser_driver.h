@@ -371,11 +371,11 @@ class HTTP_ANTLRParserDriver_T
 
  public:
   HTTP_ANTLRParserDriver_T (Stream_ITask*); // (parent-) stream task
-  virtual ~HTTP_ANTLRParserDriver_T ();
+  inline virtual ~HTTP_ANTLRParserDriver_T () {}
 
   // override (part of) http_antlr_parserBaseListener
   virtual void exitBody (http_antlr_parser::BodyContext*);
-  virtual void exitChunks (http_antlr_parser::ChunksContext*);
+  //virtual void exitChunks (http_antlr_parser::ChunksContext*);
   virtual void enterEveryRule (antlr4::ParserRuleContext*);
 
   // implement antlr4::ANTLRErrorListener
@@ -413,7 +413,7 @@ class HTTP_ANTLRParserDriver_T
   inline virtual size_t offset () const { return static_cast<unsigned int> (lexer_.offset); }
   virtual bool begin (const char*, // buffer handle
                       size_t);     // buffer size
-  virtual void end ();
+  inline virtual void end () {}
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = true); // begin() current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;

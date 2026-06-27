@@ -39,9 +39,6 @@ class HTTP_ANTLR_IParser
 
   virtual ACE_Message_Block* head () = 0; // return value: head buffer handle
   virtual bool switchBuffer (bool = true) = 0; // begin() current fragment ?
-
-  // virtual void chunkOffset (size_t) = 0;
-  // virtual size_t chunkOffset () = 0;
 };
 
 #endif

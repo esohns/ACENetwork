@@ -92,29 +92,18 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   parser_.addParseListener (this);
 }
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename SessionMessageType>
-HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
-                         TimePolicyType,
-                         SessionMessageType>::~HTTP_ANTLRParserDriver_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::~HTTP_ANTLRParserDriver_T"));
-
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename SessionMessageType>
-void
-HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
-                         TimePolicyType,
-                         SessionMessageType>::exitChunks (http_antlr_parser::ChunksContext* context_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::exitChunks"));
-
-  ACE_UNUSED_ARG (context_in);
-}
+//template <ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//          typename SessionMessageType>
+//void
+//HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
+//                         TimePolicyType,
+//                         SessionMessageType>::exitChunks (http_antlr_parser::ChunksContext* context_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::exitChunks"));
+//
+//  ACE_UNUSED_ARG (context_in);
+//}
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -653,18 +642,6 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 //              fragment_->length ()));
 
   return true;
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename SessionMessageType>
-void
-HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
-                         TimePolicyType,
-                         SessionMessageType>::end ()
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::end"));
-
 }
 
 template <ACE_SYNCH_DECL,
