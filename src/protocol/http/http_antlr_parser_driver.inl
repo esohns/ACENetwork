@@ -354,9 +354,6 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 
   begin (fragment_->rd_ptr (),
          fragment_->length ());
-//#if (USE_UNBUFFERED)
-//  tokens_.fill (1);
-//#endif // USE_UNBUFFERED
 
   if (unlikely (configuration_->debugParser))
   {
@@ -434,13 +431,9 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     }
   } // end SWITCH
 
-  // finalize buffer/scanner
-  end ();
-
   return true;
 
 error:
-  end ();
   fragment_ = NULL;
 
   return false;
@@ -480,11 +473,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   } // end IF
   fragment_ = fragment_->cont ();
 
-  // switch to the next fragment
-
-  // clean state
-  end ();
-
+  // switch to the next fragment ?
   if (likely (begin_in))
     if (!begin (fragment_->rd_ptr (),
                 fragment_->length ()))
@@ -638,8 +627,6 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   ACE_ASSERT (fragment_);
 
 #if (USE_UNBUFFERED)
-  // inputBuffer_.pubsetbuf (fragment_->rd_ptr (),
-  //                         fragment_->length ());
   inputBuffer_.append_chunk (fragment_->rd_ptr (),
                              fragment_->length ());
   inputStream_.clear ();

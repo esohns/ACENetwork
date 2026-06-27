@@ -880,7 +880,6 @@ void http_antlr_scanner::CRLF_HEADAction(antlr4::RuleContext *context, size_t ac
 void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionIndex) {
   switch (actionIndex) {
     case 11: 
-                                       ACE_ASSERT (missing_body_or_chunk_bytes);
                                        ++scanned_content_length;
                                        ACE_ASSERT (missing_body_or_chunk_bytes);
                                        --missing_body_or_chunk_bytes;

@@ -380,7 +380,6 @@ CRLF_HEAD                      : CRLF {
 
 mode REGULAR_BODY;
 BODY                           : OCTET {
-                                   ACE_ASSERT (missing_body_or_chunk_bytes);
                                    ++scanned_content_length;
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    --missing_body_or_chunk_bytes;
