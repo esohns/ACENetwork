@@ -3,7 +3,6 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "ace/Basic_Types.h"
 

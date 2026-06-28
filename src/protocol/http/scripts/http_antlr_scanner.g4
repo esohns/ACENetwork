@@ -7,7 +7,6 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 #include <sstream>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "ace/Basic_Types.h"
 
@@ -21,13 +20,13 @@ tokens { METHOD, URI, VERSION, CODE, REASON, FIELD_KEY, COLON, FIELD_VALUE, CRLF
 
 @members {
  public:
-  std::vector<std::pair<ACE_UINT64, ACE_UINT32> > chunks;
-  size_t                                          scanned_content_length;
-  size_t                                          content_length;
-  std::string                                     key;
-  size_t                                          missing_body_or_chunk_bytes;
-  size_t                                          offset;
-  HTTP_ANTLR_IParser*                             parser;
+  HTTP_Chunks_t       chunks;
+  size_t              scanned_content_length;
+  size_t              content_length;
+  std::string         key;
+  size_t              missing_body_or_chunk_bytes;
+  size_t              offset;
+  HTTP_ANTLR_IParser* parser;
 
   void reset_2 ()
   {

@@ -30,18 +30,27 @@ struct HTTP_Record;
 class HTTP_ANTLR_IParser
 {
  public:
+  virtual bool initialize (const struct HTTP_ParserConfiguration&) = 0;
+  virtual ACE_Message_Block* buffer () = 0;
+  virtual bool isBlocking () const = 0;
+  virtual size_t offset () const = 0;
+  virtual bool begin (const char*, // buffer handle
+                      size_t) = 0; // buffer size
+  //virtual void end () = 0;
+  virtual bool parse (ACE_Message_Block*) = 0; // data buffer handle
+  virtual bool switchBuffer (bool = true) = 0; // begin() current fragment ?
+  // *NOTE*: (waits for and) appends the next data chunk to fragment_;
+  virtual void waitBuffer () = 0;
+   
   virtual bool hasFinished () = 0;
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
-
   virtual const struct HTTP_Record& current () = 0; // current record
+  virtual void chunk_2 (ACE_UINT64, ACE_UINT32) = 0; // chunk offset, chunk size
 
   // *NOTE*: the implementation needs to frame the 'body' based on this data
   virtual void record (struct HTTP_Record*&) = 0; // record
-  virtual void chunk (ACE_UINT32) = 0; // chunk size
-  virtual void chunk_2 (ACE_UINT64, ACE_UINT32) = 0; // chunk offset, chunk size
-
+  virtual void chunk (ACE_UINT32) = 0;            // chunk size
   virtual ACE_Message_Block* head () = 0; // return value: head buffer handle
-  virtual bool switchBuffer (bool = true) = 0; // begin() current fragment ?
 };
 
 #endif

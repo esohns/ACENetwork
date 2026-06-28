@@ -21,9 +21,10 @@
 #ifndef HTTP_ANTLR_PARSER_DRIVER_T_H
 #define HTTP_ANTLR_PARSER_DRIVER_T_H
 
-#include <string>
-
 #include "antlr4-runtime.h"
+
+#include <streambuf>
+#include <vector>
 
 #include "ace/Global_Macros.h"
 
@@ -56,9 +57,6 @@ class HTTP_ANTLR_Streambuf
   HTTP_ANTLR_Streambuf (HTTP_ANTLR_IParser* parser_in)
    : inherited ()
    , buffer_ ()
-   // , leftover_bytes_ ()
-   // , is_eof_ (false)
-   // , state_ ()
    , parser_ (parser_in)
   {
     setg (NULL, NULL, NULL);
@@ -72,64 +70,6 @@ class HTTP_ANTLR_Streambuf
     setg (NULL, NULL, NULL);
   }
 
-  // void append_chunk (const char* data_in, size_t size_in)
-  // { ACE_ASSERT (data_in && size_in);
-  //   if (!leftover_bytes_.empty ())
-  //   {
-  //     leftover_bytes_.insert (leftover_bytes_.end (), data_in, data_in + size_in);
-  //     data_in = leftover_bytes_.data ();
-  //     size_in = leftover_bytes_.size ();
-  //   } // end IF
-
-  //   std::vector<wchar_t> wide_chunk;
-  //   const char* ptr = data_in;
-  //   const char* end_ptr = data_in + size_in;
-
-  //   while (ptr < end_ptr)
-  //   {
-  //     wchar_t wc;
-  //     size_t max_bytes_to_read = static_cast<size_t> (end_ptr - ptr);
-
-  //     size_t result = std::mbrtowc (&wc, ptr, max_bytes_to_read, &state_);
-  //     if (result == static_cast<size_t> (-2))
-  //       break;
-  //     if (result == static_cast<size_t> (-1))
-  //     {
-  //       ptr++;
-  //       std::mbrtowc (NULL, NULL, 0, &state_);
-  //       continue;
-  //     } // end IF
-  //     if (result == 0)
-  //     {
-  //       wide_chunk.push_back (L'\0');
-  //       ptr += 1;
-  //       continue;
-  //     } // end IF
-  //     wide_chunk.push_back (wc);
-  //     ptr += result;
-  //   } // end WHILE
-  //   if (ptr < end_ptr)
-  //     leftover_bytes_.assign (ptr, end_ptr);
-  //   else
-  //     leftover_bytes_.clear ();
-  //   if (wide_chunk.empty ())
-  //     return;
-
-  //   size_t current_read_offset = gptr () - eback ();
-  //   if (current_read_offset > 0)
-  //   {
-  //     buffer_.erase (buffer_.begin (), buffer_.begin () + current_read_offset);
-  //     current_read_offset = 0;
-  //   } // end IF
-  //   buffer_.insert (buffer_.end (), wide_chunk.begin (), wide_chunk.end ());
-
-  //   // 3. Re-anchor standard stream pointers to the contiguous memory layout
-  //   wchar_t* base = buffer_.data ();
-  //   wchar_t* current_read_ptr = base + current_read_offset;
-  //   wchar_t* end = base + buffer_.size ();
-
-  //   setg (base, current_read_ptr, end);
-  // }
   void append_chunk (const char* data_in, size_t size_in)
   { ACE_ASSERT (data_in && size_in);
     const char* ptr = data_in;
@@ -143,7 +83,6 @@ class HTTP_ANTLR_Streambuf
     } // end IF
     buffer_.insert (buffer_.end (), ptr, end_ptr);
 
-    // 3. Re-anchor standard stream pointers to the contiguous memory layout
     char* base = buffer_.data ();
     char* current_read_ptr = base + current_read_offset;
     char* end = base + buffer_.size ();
@@ -166,11 +105,7 @@ retry:
   }
 
  private:
-  // std::vector<wchar_t> buffer_;
   std::vector<char>   buffer_;
-  // std::vector<char>   leftover_bytes_;
-  // bool              is_eof_;
-  // std::mbstate_t    state_;
   HTTP_ANTLR_IParser* parser_;
 };
 
@@ -205,12 +140,10 @@ class UnbufferedByteCharStream
     _currentCharIndex = 0;
   }
 
-  virtual void consume () override
+  virtual void consume ()
   {
-    if (LA(1) == antlr4::IntStream::EOF)
-    {
-      throw std::runtime_error("Cannot consume EOF");
-    } // end IF
+    if (LA (1) == antlr4::IntStream::EOF)
+      throw std::runtime_error (ACE_TEXT_ALWAYS_CHAR ("Cannot consume EOF"));
     _p++;
     _currentCharIndex++;
     if (_p == _data.size () && _numMarkers == 0)
@@ -222,7 +155,7 @@ class UnbufferedByteCharStream
     } // end IF
   }
 
-  virtual size_t LA (ssize_t i) override
+  virtual size_t LA (ssize_t i)
   {
     if (i == 0)
       return 0; // Undefined by ANTLR specification
@@ -231,11 +164,9 @@ class UnbufferedByteCharStream
       // Backward lookahead calculations
       ssize_t index = static_cast<ssize_t> (_p) + i;
       if (index < 0)
-      {
-        throw std::runtime_error("Backward lookahead went out of buffered window");
-      }
+        throw std::runtime_error (ACE_TEXT_ALWAYS_CHAR ("Backward lookahead went out of buffered window"));
       return _data[static_cast<size_t> (index)];
-    }
+    } // end IF
 
     size_t index = _p + static_cast<size_t>(i) - 1;
     fill (i); // Lazily request streaming buffers to expand up to lookahead length
@@ -244,29 +175,29 @@ class UnbufferedByteCharStream
     return _data[index];
   }
 
-  virtual ssize_t mark () override
+  virtual ssize_t mark ()
   {
     _numMarkers++;
     return _currentCharIndex;
   }
 
-  virtual void release (ssize_t marker) override
+  virtual void release (ssize_t marker)
   {
     if (_numMarkers > 0)
       _numMarkers--;
   }
 
-  virtual size_t index () override
+  virtual size_t index ()
   {
     return _currentCharIndex;
   }
 
-  virtual void seek (size_t index) override
+  virtual void seek (size_t index)
   {
     if (index == _currentCharIndex)
       return;
     if (index < _lastCharBufferStart)
-      throw std::runtime_error ("Cannot seek backward outside the sliding memory window.");
+      throw std::runtime_error (ACE_TEXT_ALWAYS_CHAR ("Cannot seek backward outside the sliding memory window."));
 
     size_t targetBufferPos = index - _lastCharBufferStart;
     if (targetBufferPos < _data.size ())
@@ -283,43 +214,42 @@ class UnbufferedByteCharStream
     } // end ELSE
   }
 
-  virtual size_t size () override
+  virtual size_t size ()
   {
-    //throw std::runtime_error("Size verification is unavailable on unbuffered streams.");
+    throw std::runtime_error (ACE_TEXT_ALWAYS_CHAR ("Size verification is unavailable on unbuffered streams."));
     return 0;
   }
 
-  virtual std::string getSourceName() const override
+  virtual std::string getSourceName () const
   {
-    return "UnbufferedByteCharStream";
+    return ACE_TEXT_ALWAYS_CHAR ("UnbufferedByteCharStream");
   }
 
-  virtual std::string getText (const antlr4::misc::Interval& interval) override
+  virtual std::string getText (const antlr4::misc::Interval& interval)
   {
     if (interval.a < static_cast<ssize_t> (_lastCharBufferStart))
     {
-      return "<DISCARDED_SLIDING_WINDOW>";
+      return ACE_TEXT_ALWAYS_CHAR ("<DISCARDED_SLIDING_WINDOW>");
     } // end IF
 
     size_t start = static_cast<size_t> (interval.a) - _lastCharBufferStart;
     size_t stop = static_cast<size_t> (interval.b) - _lastCharBufferStart;
 
     if (start >= _data.size ())
-      return "";
+      return ACE_TEXT_ALWAYS_CHAR ("");
     stop = std::min (stop, _data.size () - 1);
 
     std::string result;
     for (size_t i = start; i <= stop; ++i)
-    {
-      // Narrow down internal UTF-32 points back to standard characters safely
       result += static_cast<char> (_data[i]);
-    } // end IF
     return result;
   }
 
-  virtual std::string toString () const override
+  virtual std::string toString () const
   {
-    return "UnbufferedByteCharStream(index=" + std::to_string(_currentCharIndex) + ")";
+    return ACE_TEXT_ALWAYS_CHAR ("UnbufferedByteCharStream(index=") +
+           std::to_string (_currentCharIndex) +
+           ACE_TEXT_ALWAYS_CHAR (")");
   }
 
  protected:
@@ -345,7 +275,7 @@ class UnbufferedByteCharStream
       if (unlikely (byte == EOF))
         break;
       _data.push_back (static_cast<char32_t> (byte));
-    }
+    } // end FOR
   }
 };
 #endif // USE_UNBUFFERED
@@ -383,7 +313,6 @@ class HTTP_ANTLRParserDriver_T
 
   // override (part of) http_antlr_parserBaseListener
   virtual void exitBody (http_antlr_parser::BodyContext*);
-  //virtual void exitChunks (http_antlr_parser::ChunksContext*);
   virtual void enterEveryRule (antlr4::ParserRuleContext*);
 
   // implement antlr4::ANTLRErrorListener
@@ -420,7 +349,7 @@ class HTTP_ANTLRParserDriver_T
   inline virtual size_t offset () const { return static_cast<unsigned int> (lexer_.offset); }
   virtual bool begin (const char*, // buffer handle
                       size_t);     // buffer size
-  inline virtual void end () {}
+  //inline virtual void end () {}
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = true); // begin() current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
@@ -431,17 +360,13 @@ class HTTP_ANTLRParserDriver_T
   inline virtual const struct HTTP_Record& current () { return parser_.record_; }
   virtual void chunk_2 (ACE_UINT64, ACE_UINT32); // chunk offset, chunk size
 
-  virtual void dump_state () const;
-
  protected:
   struct HTTP_ParserConfiguration* configuration_;
   bool                             finished_; // processed the whole entity ?
   ACE_Message_Block*               fragment_;
 #if (USE_UNBUFFERED)
   HTTP_ANTLR_Streambuf             inputBuffer_;
-  // std::wistream                    inputStream_;
   std::istream                     inputStream_;
-  // antlr4::UnbufferedCharStream     input_;
   UnbufferedByteCharStream         input_;
   antlr4::CommonTokenFactory       tokenFactory_;
   http_antlr_scanner               lexer_;
@@ -458,10 +383,6 @@ class HTTP_ANTLRParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_ANTLRParserDriver_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_ANTLRParserDriver_T (const HTTP_ANTLRParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_ANTLRParserDriver_T& operator= (const HTTP_ANTLRParserDriver_T&))
-
-  inline virtual const HTTP_ParserConfiguration& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
-  inline virtual const Common_FlexScannerState& getR_2 () const { static Common_FlexScannerState dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) }
-  inline virtual void setP (HTTP_ANTLR_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   bool                             isFirst_;
   bool                             isInitialized_;

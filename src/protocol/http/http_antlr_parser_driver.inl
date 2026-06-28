@@ -92,19 +92,6 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   parser_.addParseListener (this);
 }
 
-//template <ACE_SYNCH_DECL,
-//          typename TimePolicyType,
-//          typename SessionMessageType>
-//void
-//HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
-//                         TimePolicyType,
-//                         SessionMessageType>::exitChunks (http_antlr_parser::ChunksContext* context_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::exitChunks"));
-//
-//  ACE_UNUSED_ARG (context_in);
-//}
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename SessionMessageType>
@@ -297,7 +284,14 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     configuration_ = NULL;
     finished_ = false;
     fragment_ = NULL;
+
+    // parser_.reset () calls seek(0) iff it has an inputstream, which doesn't
+    // work on unbuffered streams...
+    parser_.setInputStream (NULL);
     parser_.reset ();
+    parser_.setInputStream (&tokens_);
+    lexer_.reset_3 ();
+    tokens_.reset ();
 
     isFirst_ = true;
 
@@ -595,22 +589,6 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename SessionMessageType>
-void
-HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
-                         TimePolicyType,
-                         SessionMessageType>::dump_state () const
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::dump_state"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename SessionMessageType>
 bool
 HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
                          TimePolicyType,
@@ -682,6 +660,5 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   size_t temp_i = lexer_.offset;
   lexer_.offset = offset_in;
   chunk (size_in);
-
   lexer_.offset = temp_i;
 }
