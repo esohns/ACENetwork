@@ -130,9 +130,6 @@
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
 
-#undef ACE_OS_MAIN_H
-#include "ace/OS_main.h"
-
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream");
 const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("WebTVStream_3");
 const char stream_name_string_4a[] = ACE_TEXT_ALWAYS_CHAR ("WebTVAudioInputStream");

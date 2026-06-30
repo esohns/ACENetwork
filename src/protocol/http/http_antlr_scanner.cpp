@@ -801,8 +801,7 @@ void http_antlr_scanner::CRLF_HEADERSAction(antlr4::RuleContext *context, size_t
                                          converter.str ((*iterator).second);
                                          converter >> content_length;
                                          missing_body_or_chunk_bytes = content_length;
-                                         if (content_length)
-                                           setMode (REGULAR_BODY);
+                                         setMode (content_length ? REGULAR_BODY : DEFAULT_MODE);
                                          break;
                                        } // end IF
                                        iterator =
@@ -888,6 +887,7 @@ void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionI
                                          converter << content_length;
                                          setText (converter.str ());
                                          setType (BODY);
+                                         setMode (DEFAULT_MODE);
                                          break;
                                        } // end IF
                                        skip ();

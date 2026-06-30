@@ -325,8 +325,7 @@ CRLF_HEADERS                   : CRLF {
                                      converter.str ((*iterator).second);
                                      converter >> content_length;
                                      missing_body_or_chunk_bytes = content_length;
-                                     if (content_length)
-                                       setMode (REGULAR_BODY);
+                                     setMode (content_length ? REGULAR_BODY : DEFAULT_MODE);
                                      break;
                                    } // end IF
                                    iterator =
@@ -388,6 +387,7 @@ BODY                           : OCTET {
                                      converter << content_length;
                                      setText (converter.str ());
                                      setType (BODY);
+                                     setMode (DEFAULT_MODE);
                                      break;
                                    } // end IF
                                    skip ();

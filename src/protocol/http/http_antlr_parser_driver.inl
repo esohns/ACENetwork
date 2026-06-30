@@ -162,10 +162,29 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::syntaxError"));
 
-  ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("%B/%B: \"%s\"...\n"),
-              line_in, column_in,
-              ACE_TEXT (message_in.c_str ())));
+  try {
+    if (exception_in)
+      std::rethrow_exception (exception_in);
+
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%B/%B: \"%s\"...\n"),
+                line_in, column_in,
+                ACE_TEXT (message_in.c_str ())));
+  } catch (const antlr4::RuntimeException& e) {
+    const char* what_p = e.what ();
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%B/%B: \"%s\" / \"%s\"...\n"),
+                line_in, column_in,
+                ACE_TEXT (message_in.c_str ()),
+                (what_p ? ACE_TEXT (what_p) : ACE_TEXT (""))));
+  } catch (const std::exception& e) {
+    const char* what_p = e.what ();
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%B/%B: \"%s\" / \"%s\"...\n"),
+                line_in, column_in,
+                ACE_TEXT (message_in.c_str ()),
+                (what_p ? ACE_TEXT (what_p) : ACE_TEXT (""))));
+  }
 
   Common_IDumpState* idump_state_p =
     dynamic_cast<Common_IDumpState*> (fragment_);
