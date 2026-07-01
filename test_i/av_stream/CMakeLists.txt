@@ -360,8 +360,10 @@ elseif (WIN32)
  file (TO_CMAKE_PATH "${SSL_LIB_DIR}" SSL_PATH)
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
  file (TO_CMAKE_PATH "${VCPKG_BIN_DIR}" VCPKG_PATH)
+ file (TO_CMAKE_PATH "${VCPKG_RELEASE_BIN_DIR}" VCPKG_PATH_2)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_PATH)
  set (RUNTIME_LIBRARY_DIRS ${VCPKG_PATH}
+                           ${VCPKG_PATH_2}
                            ${FFMPEG_PATH}
                            ${IMAGEMAGICK_PATH}
                            ${GTK_PATH}

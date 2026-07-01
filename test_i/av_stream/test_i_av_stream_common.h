@@ -80,6 +80,8 @@ extern "C"
 
 #include "stream_net_common.h"
 
+#include "stream_vis_iresize.h"
+
 #include "net_defines.h"
 
 #include "test_i_common.h"
@@ -247,11 +249,8 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
 #endif // ACE_WIN32 || ACE_WIN64
    , display ()
    , fullScreen (false)
-//#if defined (GTK_USE)
-//   , pixelBuffer (NULL)
-//   , pixelBufferLock (NULL)
-//#endif // GTK_USE
    , parserConfiguration (NULL)
+   , resize (NULL)
    , window ()
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -273,11 +272,8 @@ struct Test_I_AVStream_ModuleHandlerConfiguration
 #endif // ACE_WIN32 || ACE_WIN64
   struct Common_UI_DisplayDevice                       display;
   bool                                                 fullScreen;
-//#if defined (GTK_USE)
-//  GdkPixbuf*                                           pixelBuffer;
-//  ACE_SYNCH_MUTEX*                                     pixelBufferLock;
-//#endif // GTK_USE
   struct Common_FlexBisonParserConfiguration*          parserConfiguration;                  // parser module(s)
+  Stream_Visualization_IResize*                        resize;
   struct Common_UI_Window                              window;
 };
 

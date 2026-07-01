@@ -70,8 +70,6 @@
 #include "stream_lib_v4l_common.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include "stream_vis_iresize.h"
-
 #include "test_i_common.h"
 #include "test_i_configuration.h"
 
@@ -465,7 +463,6 @@ struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration
    , connectionManager (NULL)
    , mediaSource (NULL)
    , outputFormat (NULL)
-   , resize (NULL)
    , sampleGrabberNodeId (0)
    , session (NULL)
    //, sourceFormat (NULL)
@@ -494,7 +491,6 @@ struct Test_I_AVStream_Client_MediaFoundation_ModuleHandlerConfiguration
   IMFMediaSource*                                           mediaSource;
 #endif // _WIN32_WINNT_WIN8
   IMFMediaType*                                             outputFormat; // display module
-  Stream_Visualization_IResize*                             resize;
   TOPOID                                                    sampleGrabberNodeId;
   IMFMediaSession*                                          session;
   //IMFMediaType*                                             sourceFormat;
