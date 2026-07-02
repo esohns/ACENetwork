@@ -23,11 +23,12 @@
                  //         (see: stream_lib_common.h)
 #include "Unknwn.h"
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 #undef NANOSECONDS
 #include "streams.h"
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
 #include "ace/Log_Msg.h"
-//#include "ace/Synch.h"
 
 #include "common_time_common.h"
 #include "common_tools.h"
@@ -48,7 +49,6 @@
 
 #include "test_i_av_stream_server_common.h"
 #include "test_i_av_stream_server_message.h"
-//#include "test_i_av_stream_server_session_message.h"
 
 // Setup data
 const struct REGPINTYPES sudMediaTypes[] =
@@ -149,7 +149,7 @@ const struct _AMOVIESETUP_FILTER sudFilterRegAM2 =
 
 // -----------------------------------------------------------------------------
 
-// *TODO*: these type definitions are useless; this filter is monolythic
+// *TODO*: these type definitions are useless; this filter is monolithic
 typedef Stream_MediaFramework_DirectShow_Source_Filter_T<Test_I_AVStream_Server_DirectShow_Message,
                                                          struct Test_I_AVStream_Server_DirectShow_FilterConfiguration,
                                                          struct Stream_MediaFramework_DirectShow_FilterPinConfiguration> Test_I_AVStream_DirectShow_Source_Filter_t;
@@ -159,6 +159,7 @@ typedef Stream_MediaFramework_DirectShow_Asynch_Source_Filter_T<Test_I_AVStream_
 
 void WINAPI InitRoutine (BOOL, const CLSID*);
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 CFactoryTemplate g_Templates[] = {
   { STREAM_LIB_DIRECTSHOW_FILTER_NAME_SOURCE_L                 // Name
   , &CLSID_ACEStream_MediaFramework_Source_Filter              // CLSID
@@ -173,6 +174,7 @@ CFactoryTemplate g_Templates[] = {
   , &sudFilterRegAM2 }                                                // Pointer to filter information
 };
 int g_cTemplates = sizeof (g_Templates) / sizeof (g_Templates[0]);
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
 // -----------------------------------------------------------------------------
 
@@ -191,7 +193,7 @@ int g_cTemplates = sizeof (g_Templates) / sizeof (g_Templates[0]);
 void __CRTDECL
 operator delete (void* pointer_p, const ACE_nothrow_t& noThrow_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::delete"));
+  NETWORK_TRACE (ACE_TEXT ("::delete"));
 
   ACE_UNUSED_ARG (noThrow_in);
 
@@ -200,7 +202,7 @@ operator delete (void* pointer_p, const ACE_nothrow_t& noThrow_in)
 void __CRTDECL
 operator delete (void* pointer_p)
 {
-  STREAM_TRACE (ACE_TEXT ("::delete"));
+  NETWORK_TRACE (ACE_TEXT ("::delete"));
 
   ::free (pointer_p);
 }
@@ -216,7 +218,7 @@ void WINAPI
 InitRoutine (BOOL isLoading_in,
              const CLSID* CLSID_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::InitRoutine"));
+  NETWORK_TRACE (ACE_TEXT ("::InitRoutine"));
 
   ACE_UNUSED_ARG (CLSID_in);
 
@@ -293,7 +295,7 @@ InitRoutine (BOOL isLoading_in,
 STDAPI
 DllRegisterServer ()
 {
-  STREAM_TRACE (ACE_TEXT ("::DllRegisterServer"));
+  NETWORK_TRACE (ACE_TEXT ("::DllRegisterServer"));
 
   HRESULT result = E_FAIL;
 
@@ -436,15 +438,14 @@ clean:
 
 //////////////////////////////////////////
 
-extern "C"
-BOOL WINAPI
-DllEntryPoint (HINSTANCE, ULONG, LPVOID);
+extern "C" BOOL WINAPI DllEntryPoint (HINSTANCE, ULONG, LPVOID);
+
 BOOL WINAPI
 DllMain (HANDLE hModule,
          DWORD  dwReason,
          LPVOID lpReserved)
 {
-  STREAM_TRACE (ACE_TEXT ("::DllMain"));
+  NETWORK_TRACE (ACE_TEXT ("::DllMain"));
 
   return DllEntryPoint (static_cast<HINSTANCE> (hModule), dwReason, lpReserved);
 }
