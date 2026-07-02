@@ -23,8 +23,10 @@
                  //         (see: stream_lib_common.h)
 #include "Unknwn.h"
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 #undef NANOSECONDS
 #include "streams.h"
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
 #include "strsafe.h"
 
@@ -85,7 +87,6 @@ RegDeleteKeyValueW (__in      HKEY     hKey,
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 
 #include "ace/Log_Msg.h"
-//#include "ace/Synch.h"
 
 #include "class_factory.h"
 #include "registry.h"       // Helpers to register COM objects.
@@ -358,13 +359,13 @@ RegisterByteStreamHandler (REFCLSID CLSID_in,
     return result;
   } // end IF
   result =
-      CreateRegistryKey (HKEY_LOCAL_MACHINE,
+    CreateRegistryKey (HKEY_LOCAL_MACHINE,
 #if defined (UNICODE)
-                         ACE_TEXT_ALWAYS_WCHAR (STREAM_LIB_MEDIAFOUNDATION_BYTESTREAMHANDLER_ROOTKEY),
+                       ACE_TEXT_ALWAYS_WCHAR (STREAM_LIB_MEDIAFOUNDATION_BYTESTREAMHANDLER_ROOTKEY),
 #else
-                         ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_MEDIAFOUNDATION_BYTESTREAMHANDLER_ROOTKEY),
+                       ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_MEDIAFOUNDATION_BYTESTREAMHANDLER_ROOTKEY),
 #endif // UNICODE
-                         &key_p);
+                       &key_p);
   if (unlikely (FAILED (result)))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -414,6 +415,7 @@ clean:
 
   return result;
 }
+
 HRESULT
 UnregisterByteStreamHandler (REFCLSID CLSID_in,
                              const TCHAR* fileExtension_in)

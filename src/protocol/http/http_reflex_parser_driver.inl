@@ -555,12 +555,12 @@ HTTP_ReflexParserDriver_T<ACE_SYNCH_USE,
   // create/initialize a new buffer state
   if (configuration_->useYYScanBuffer)
   {
-    //bufferState_ = yy_scan_buffer (fragment_->rd_ptr (),
-    //                               fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
-    //                               scannerState_);
-    ACE_ASSERT (matcher_);
-    matcher_->buffer (fragment_->rd_ptr (),
-                      fragment_->length () + 1);
+    bufferState_ = yy_scan_buffer (fragment_->rd_ptr (),
+                                   fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                                   scannerState_);
+    //ACE_ASSERT (matcher_);
+    //matcher_->buffer (fragment_->rd_ptr (),
+    //                  fragment_->length () + 1);
     // matcher_->buffer (fragment_->length ());
     // matcher_->set_reserve (fragment_->size ());
   } // end IF
