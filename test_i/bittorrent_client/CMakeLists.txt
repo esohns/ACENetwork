@@ -1,24 +1,8 @@
 include (flex)
 include (reflex)
 
-#set (FLEX_LIB_FILE libfl.so)
-#if (UNIX)
-# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-#               HINTS /usr/lib64 /usr/lib
-#               PATH_SUFFIXES x86_64-linux-gnu
-#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
-#elseif (WIN32)
-# unset (FLEX_LIB_FILE)
-# set (FLEX_LIB_FILE libfl.lib)
-# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
-#endif ()
-#if (NOT FLEX_LIBRARY)
-## message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
-#endif (NOT FLEX_LIBRARY)
-
-#include (FindPkgConfig)
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../scripts")
+include (SSLConfig)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -160,16 +144,6 @@ endif (UNIX)
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
-if (UNIX)
-# target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
-# target_link_libraries (${EXECUTABLE} PUBLIC X11)
-elseif (WIN32)
-# set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
-# target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
-
-# target_link_libraries (${EXECUTABLE} PUBLIC mf.lib)
-# target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
-endif ()
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonEvent)
@@ -285,10 +259,6 @@ endif (UNIX)
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${ACE_LIBRARY})
-
-if (UNIX)
-# target_link_libraries (${EXECUTABLE_GUI} PUBLIC X11)
-endif (UNIX)
 
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC Common)
 target_link_libraries (${EXECUTABLE_GUI} PUBLIC CommonEvent)

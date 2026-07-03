@@ -1,3 +1,6 @@
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../scripts")
+include (SSLConfig)
+
 if (UNIX)
 # include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
@@ -7,7 +10,7 @@ endif (UNIX)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -17,7 +20,7 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif (NOT EXISTS ${Common_DIR})
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -31,7 +34,6 @@ if (CURSES_SUPPORT)
  include_directories (${CURSES_INCLUDE_DIRS})
 endif (CURSES_SUPPORT)
 if (UNIX)
-# include_directories (${PKG_CAP_INCLUDE_DIRS})
  # *WORKAROUND*
  if (CURSES_USE)
   add_definitions (-DNCURSES_INTERNALS)
@@ -167,7 +169,7 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
- target_link_libraries (${EXECUTABLE} PUBLIC X11)
+# target_link_libraries (${EXECUTABLE} PUBLIC X11)
 elseif (WIN32)
  target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 endif ()
@@ -282,7 +284,7 @@ add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
- target_link_libraries (${EXECUTABLE_GUI} PUBLIC X11)
+# target_link_libraries (${EXECUTABLE_GUI} PUBLIC X11)
 elseif (WIN32)
  target_link_options (${EXECUTABLE_GUI} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 endif ()
