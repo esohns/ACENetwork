@@ -130,6 +130,7 @@ const struct REGFILTERPINS sudOutputPinAM =
   sudMediaTypes                                   // pointer to media types
 };
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 const struct _AMOVIESETUP_FILTER sudFilterRegAM =
 {
   &CLSID_ACEStream_MediaFramework_Source_Filter, // filter CLSID
@@ -146,6 +147,7 @@ const struct _AMOVIESETUP_FILTER sudFilterRegAM2 =
   1,                                                    // number of pin types
   &sudOutputPinAM                                       // pointer to pin information
 };
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
 // -----------------------------------------------------------------------------
 
@@ -299,6 +301,7 @@ DllRegisterServer ()
 
   HRESULT result = E_FAIL;
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
   result = AMovieDllRegisterServer2 (TRUE);
   if (FAILED (result))
   {
@@ -307,6 +310,7 @@ DllRegisterServer ()
                 ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return result;
   } // end IF
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
   // *TODO*: is this necessary at all ?
   IFilterMapper2* ifilter_mapper_p = NULL;
@@ -374,14 +378,16 @@ DllUnregisterServer ()
 
   HRESULT result = E_FAIL;
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
   result = AMovieDllRegisterServer2 (FALSE);
   if (FAILED (result))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to AMovieDllRegisterServer2(false): \"%s\", aborting\n"),
+                ACE_TEXT ("failed to AMovieDllRegisterServer2(FALSE): \"%s\", aborting\n"),
                 ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return result;
   } // end IF
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
   // *TODO*: is this necessary at all ?
   IFilterMapper2* ifilter_mapper_p = NULL;
