@@ -1,13 +1,15 @@
 include (flex)
 include (reflex)
+include (antlr)
+
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../../../scripts")
+include (SSLConfig)
 
 add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
 
-set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
-
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -15,9 +17,9 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
-endif ()
+endif (NOT EXISTS ${Common_DIR})
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -25,7 +27,7 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
-endif ()
+endif (NOT EXISTS ${ACEStream_DIR})
 
 if (REFLEX_SUPPORT)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
@@ -185,13 +187,6 @@ target_sources (${PROJECT_NAME}_Protocol_BitTorrent
 target_precompile_headers (${PROJECT_NAME}_Protocol_BitTorrent
                            PUBLIC stdafx.h)
 
-#set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
-#set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS -Dbittorrent_BUILD_DLL)
-
-#if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "CLang")
-# add_compile_options (-fPIC)
-#endif ()
-
 if (WIN32)
 # *NOTE*: generate .def file and export all symbols on Windows
 # set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -212,22 +207,20 @@ set_property (TARGET ${PROJECT_NAME}_Protocol_BitTorrent PROPERTY FOLDER "protoc
 add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent Common)
 add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
 
-set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES DEFINE_SYMBOL BITTORRENT_BUILD_DLL)
-set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
-if (WIN32 AND MSVC)
- set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
-endif (WIN32 AND MSVC)
+#if (WIN32 AND MSVC)
+# set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
+#endif (WIN32 AND MSVC)
 
-if (UNIX)
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${PKG_OPENSSL_LIBRARIES})
-elseif (WIN32)
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC $ENV{LIB_ROOT}/openssl/libcrypto.lib)
+if (SSL_SUPPORT)
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${SSL_LIBRARIES})
+endif (SSL_SUPPORT)
 
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${ACE_LIBRARY})
-endif ()
+target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${ACE_LIBRARY})
+
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC CommonParser)
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC CommonParser_Bencoding)
+
 target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ACEStream)
 
 # add PCH
