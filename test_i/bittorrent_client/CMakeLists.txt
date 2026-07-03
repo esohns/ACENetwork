@@ -143,6 +143,9 @@ endif (UNIX)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${SSL_LIBRARIES})
+endif (SSL_SUPPORT)
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)

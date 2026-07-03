@@ -2556,7 +2556,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   ACE_ASSERT (number_of_threads_i);
   struct BitTorrent_SessionInitiationThreadData* thread_data_p = NULL;
   ACE_NEW_NORETURN (thread_data_p,
-                    struct BitTorrent_SessionInitiationThreadData (number_of_threads_i));
+                    struct BitTorrent_SessionInitiationThreadData (static_cast<unsigned int> (number_of_threads_i)));
   ACE_ASSERT (thread_data_p);
   thread_data_p->addresses = peer_addresses_a;
   thread_data_p->lock = &(inherited::lock_);

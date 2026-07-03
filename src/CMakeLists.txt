@@ -282,9 +282,6 @@ add_dependencies (${PROJECT_NAME} Common)
 
 add_dependencies (${PROJECT_NAME} ACEStream)
 
-#set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
-#set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
-
 if (SSL_SUPPORT)
  target_link_libraries (${PROJECT_NAME} ${SSL_LIBRARIES})
 
