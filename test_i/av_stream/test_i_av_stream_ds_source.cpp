@@ -43,7 +43,7 @@
 #include "stream_lib_guids.h"
 #include "stream_lib_tools.h"
 
-//#include "class_factory.h"
+#include "class_factory.h"
 
 #include "test_i_defines.h"
 
@@ -242,55 +242,59 @@ InitRoutine (BOOL isLoading_in,
   Stream_MediaFramework_Tools::initialize (STREAM_MEDIAFRAMEWORK_DIRECTSHOW);
 }
 
-//STDAPI
-//DllCanUnloadNow ()
-//{
-//  STREAM_TRACE (ACE_TEXT ("::DllCanUnloadNow"));
-//
-//  if (CClassFactory::IsLocked () ||
-//      CBaseObject::ObjectsActive ())
-//    return S_FALSE;
-//
-//  return S_OK;
-//}
+STDAPI
+DllCanUnloadNow ()
+{
+  NETWORK_TRACE (ACE_TEXT ("::DllCanUnloadNow"));
 
-//STDAPI
-//DllGetClassObject (REFCLSID rClsID_in,
-//                   REFIID riid_in,
-//                   LPVOID* factory_out)
-//{
-//  STREAM_TRACE (ACE_TEXT ("::DllGetClassObject"));
-//
-//  // sanity check(s)
-//  if (!InlineIsEqualGUID (rClsID_in, CLSID_ACEStream_MediaFramework_Source_Filter) &&
-//      !InlineIsEqualGUID (rClsID_in, CLSID_ACEStream_MediaFramework_Asynch_Source_Filter))
-//    return CLASS_E_CLASSNOTAVAILABLE;
-//  if (!InlineIsEqualGUID (riid_in, IID_IUnknown) &&
-//      !InlineIsEqualGUID (riid_in, IID_IClassFactory))
-//    return E_NOINTERFACE;
-//  if (!factory_out)
-//    return E_POINTER;
-//
-//  // initialize return value(s)
-//  *factory_out = NULL;
-//
-//  const CFactoryTemplate* factory_template_p = NULL;
-//  for (int i = 0; i < g_cTemplates; ++i)
-//  {
-//    factory_template_p = &g_Templates[i];
-//    if (factory_template_p->IsClassID (rClsID_in))
-//      break;
-//  } // end FOR
-//  if (!factory_template_p)
-//    return CLASS_E_CLASSNOTAVAILABLE;
-//
-//  ACE_NEW_NORETURN (*factory_out,
-//                    CClassFactory (factory_template_p));
-//  if (!*factory_out)
-//    return E_OUTOFMEMORY;
-//
-//  return NOERROR;
-//}
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
+  if (CClassFactory::IsLocked () ||
+      CBaseObject::ObjectsActive ())
+    return S_FALSE;
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
+
+  return S_OK;
+}
+
+STDAPI
+DllGetClassObject (REFCLSID rClsID_in,
+                   REFIID riid_in,
+                   LPVOID* factory_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("::DllGetClassObject"));
+
+  // sanity check(s)
+  if (!InlineIsEqualGUID (rClsID_in, CLSID_ACEStream_MediaFramework_Source_Filter) &&
+      !InlineIsEqualGUID (rClsID_in, CLSID_ACEStream_MediaFramework_Asynch_Source_Filter))
+    return CLASS_E_CLASSNOTAVAILABLE;
+  if (!InlineIsEqualGUID (riid_in, IID_IUnknown) &&
+      !InlineIsEqualGUID (riid_in, IID_IClassFactory))
+    return E_NOINTERFACE;
+  if (!factory_out)
+    return E_POINTER;
+
+  // initialize return value(s)
+  *factory_out = NULL;
+
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
+  const CFactoryTemplate* factory_template_p = NULL;
+  for (int i = 0; i < g_cTemplates; ++i)
+  {
+    factory_template_p = &g_Templates[i];
+    if (factory_template_p->IsClassID (rClsID_in))
+      break;
+  } // end FOR
+  if (!factory_template_p)
+    return CLASS_E_CLASSNOTAVAILABLE;
+
+  ACE_NEW_NORETURN (*factory_out,
+                    CClassFactory (factory_template_p));
+  if (!*factory_out)
+    return E_OUTOFMEMORY;
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
+
+  return NOERROR;
+}
 
 //////////////////////////////////////////
 

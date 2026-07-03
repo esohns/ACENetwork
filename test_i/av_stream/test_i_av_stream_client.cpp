@@ -559,6 +559,7 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
   IMediaFilter* media_filter_p = NULL;
   struct _AMMediaType* media_type_p = NULL;
   struct tWAVEFORMATEX waveformatex_s;
+  Common_Image_Resolution_t resolution_s;
 
   // sanity check(s)
   ACE_ASSERT (!IGraphBuilder_out);
@@ -675,7 +676,7 @@ do_initialize_directshow (const struct Stream_Device_Identifier& deviceIdentifie
     goto error;
   } // end ELSE
 
-  Common_Image_Resolution_t resolution_s = {640, 480}; // default resolution
+  resolution_s = {640, 480}; // default resolution
   Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
                                                          outputVideoFormat_inout);
 

@@ -412,8 +412,10 @@ if (WIN32)
 
  add_dependencies (${LIBRARY_DS} ACEStream)
 
- set (CMAKE_MODULE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
+# set (CMAKE_MODULE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
  set_target_properties (${LIBRARY_DS} PROPERTIES LINK_FLAGS /SAFESEH:NO)
+
+ target_link_options (${LIBRARY_DS} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 
  target_link_libraries (${LIBRARY_DS} PUBLIC strmiids.lib)
  target_link_libraries (${LIBRARY_DS} PUBLIC winmm.lib)
