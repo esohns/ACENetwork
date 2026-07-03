@@ -21,6 +21,8 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define INITGUID // *NOTE*: this exports DEFINE_GUIDs (see stream_misc_common.h)
+#include "amvideo.h"
+#include "ks.h"
 // *NOTE*: uuids.h doesn't have double include protection
 #if defined (UUIDS_H)
 #else
@@ -524,7 +526,7 @@ do_initialize_directshow (struct _AMMediaType& sourceAudioMediaType_inout,
      STREAM_DEV_CAM_DEFAULT_CAPTURE_SIZE_HEIGHT * 4 * 30 * 8);
   //video_info_header_p->dwBitErrorRate = 0;
   video_info_header_p->AvgTimePerFrame =
-    MILLISECONDS_TO_100NS_UNITS (1000 / 30); // --> 30 fps
+    static_cast<REFERENCE_TIME> (1 / 30.0f * 100000000000000.0f) / NANOSECONDS;
 
   // *TODO*: make this configurable (and part of a protocol)
   video_info_header_p->bmiHeader.biSize = sizeof (struct tagBITMAPINFOHEADER);
@@ -534,7 +536,7 @@ do_initialize_directshow (struct _AMMediaType& sourceAudioMediaType_inout,
   video_info_header_p->bmiHeader.biBitCount = 32;
   video_info_header_p->bmiHeader.biCompression = BI_RGB;
   video_info_header_p->bmiHeader.biSizeImage =
-    GetBitmapSize (&video_info_header_p->bmiHeader);
+    DIBSIZE (video_info_header_p->bmiHeader);
   //video_info_header_p->bmiHeader.biXPelsPerMeter;
   //video_info_header_p->bmiHeader.biYPelsPerMeter;
   //video_info_header_p->bmiHeader.biClrUsed;
@@ -584,14 +586,11 @@ do_initialize_directshow (struct _AMMediaType& sourceAudioMediaType_inout,
   waveformatex_s.nAvgBytesPerSec =
     (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
   //waveformatex_s.cbSize = 0;
-  result = CreateAudioMediaType (&waveformatex_s,
-                                 &sourceAudioMediaType_inout,
-                                 TRUE);
-  if (FAILED (result))
+  if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
+                                                                 sourceAudioMediaType_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to CreateAudioMediaType(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
+                ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), aborting\n")));
     goto error;
   } // end IF
 

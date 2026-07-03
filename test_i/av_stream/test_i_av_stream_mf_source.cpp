@@ -141,7 +141,7 @@ DllMain (HANDLE module_in,
          DWORD  reason_in,
          LPVOID lpReserved_in)
 {
-  //STREAM_TRACE (ACE_TEXT ("::DllMain"));
+  NETWORK_TRACE (ACE_TEXT ("::DllMain"));
 
   ACE_UNUSED_ARG (lpReserved_in);
 
@@ -165,7 +165,7 @@ DllMain (HANDLE module_in,
 STDAPI
 DllCanUnloadNow ()
 {
-  //STREAM_TRACE (ACE_TEXT ("::DllCanUnloadNow"));
+  NETWORK_TRACE (ACE_TEXT ("::DllCanUnloadNow"));
 
   return (!ClassFactory::IsLocked () ? S_OK : S_FALSE);
 }
@@ -173,7 +173,7 @@ DllCanUnloadNow ()
 STDAPI
 DllRegisterServer ()
 {
-  //STREAM_TRACE (ACE_TEXT ("::DllRegisterServer"));
+  NETWORK_TRACE (ACE_TEXT ("::DllRegisterServer"));
 
   HRESULT result = S_OK;
 
@@ -214,10 +214,11 @@ DllRegisterServer ()
 
   return result;
 }
+
 STDAPI
 DllUnregisterServer ()
 {
-  //STREAM_TRACE (ACE_TEXT ("::DllUnregisterServer"));
+  NETWORK_TRACE (ACE_TEXT ("::DllUnregisterServer"));
 
   // unregister the CLSIDs
   HRESULT result = UnregisterObject (CLSID_ACEStream_MediaFramework_MF_MediaSource);
@@ -241,7 +242,7 @@ DllGetClassObject (REFCLSID CLSID_in,
                    REFIID IID_in,
                    void** handle_out)
 {
-  //STREAM_TRACE (ACE_TEXT ("::DllGetClassObject"));
+  NETWORK_TRACE (ACE_TEXT ("::DllGetClassObject"));
 
   HRESULT result = CLASS_E_CLASSNOTAVAILABLE;
 
@@ -291,7 +292,7 @@ CreateRegistryKey (HKEY parentKey_in,
                    LPCTSTR key_in,
                    HKEY* key_out)
 {
-  //STREAM_TRACE (ACE_TEXT ("::CreateRegistryKey"));
+  NETWORK_TRACE (ACE_TEXT ("::CreateRegistryKey"));
 
   HRESULT result = E_FAIL;
 
@@ -337,7 +338,7 @@ RegisterByteStreamHandler (REFCLSID CLSID_in,
                            const TCHAR* fileExtension_in,
                            const TCHAR* description_in)
 {
-  //STREAM_TRACE (ACE_TEXT ("::RegisterByteStreamHandler"));
+  NETWORK_TRACE (ACE_TEXT ("::RegisterByteStreamHandler"));
 
   // Open HKCU/<byte stream handlers>/<file extension>
   // Create {clsid} = <description> key
@@ -420,7 +421,7 @@ HRESULT
 UnregisterByteStreamHandler (REFCLSID CLSID_in,
                              const TCHAR* fileExtension_in)
 {
-  //STREAM_TRACE (ACE_TEXT ("::UnregisterByteStreamHandler"));
+  NETWORK_TRACE (ACE_TEXT ("::UnregisterByteStreamHandler"));
 
   HRESULT result = S_OK;
   TCHAR buffer_a[MAX_PATH];
