@@ -448,7 +448,9 @@ clean:
 
 //////////////////////////////////////////
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
 extern "C" BOOL WINAPI DllEntryPoint (HINSTANCE, ULONG, LPVOID);
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 
 BOOL WINAPI
 DllMain (HANDLE hModule,
@@ -457,5 +459,9 @@ DllMain (HANDLE hModule,
 {
   NETWORK_TRACE (ACE_TEXT ("::DllMain"));
 
+#if defined (DIRECTSHOW_BASECLASSES_SUPPORT)
   return DllEntryPoint (static_cast<HINSTANCE> (hModule), dwReason, lpReserved);
+#else
+  return TRUE;
+#endif // DIRECTSHOW_BASECLASSES_SUPPORT
 }
