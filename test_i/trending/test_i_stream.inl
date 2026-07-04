@@ -49,19 +49,25 @@ Test_I_Trending_Stream_T<ConnectorType>::load (Stream_ILayout* layout_in,
                   false);
   ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
+
   module_p = NULL;
   //ACE_NEW_RETURN (module_p,
   //                Test_I_StatisticReport_Module (this,
   //                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
   //                false);
-  //modules_out.push_back (module_p);
+  //ACE_ASSERT (module_p);
+  //layout_in->append (module_p, NULL, 0);
+
   //module_p = NULL;
+#if defined (ZLIB_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_ZIPDecompressor_Module (this,
                                                  ACE_TEXT_ALWAYS_CHAR ("ZIPDecompressor")),
                   false);
   ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
+#endif // ZLIB_SUPPORT
+
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   SOURCE_MODULE_T (this,
@@ -69,6 +75,7 @@ Test_I_Trending_Stream_T<ConnectorType>::load (Stream_ILayout* layout_in,
                   false);
   ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
+
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_Stream_HTTPGet_Module (this,
@@ -76,6 +83,7 @@ Test_I_Trending_Stream_T<ConnectorType>::load (Stream_ILayout* layout_in,
                   false);
   ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
+
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_Stream_HTMLParser_Module (this,

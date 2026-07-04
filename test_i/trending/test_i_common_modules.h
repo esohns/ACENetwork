@@ -30,11 +30,13 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
+#if defined (ZLIB_SUPPORT)
 #include "stream_dec_zip_decoder.h"
+#endif // ZLIB_SUPPORT
 
 #include "stream_misc_parser.h"
 
-#include "stream_module_htmlparser.h"
+//#include "stream_module_htmlparser.h"
 
 #include "stream_net_output.h"
 
@@ -141,6 +143,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_Trending_SessionData,                // 
                           Test_I_Statistic_WriterTask_t,                    // writer type
                           Test_I_StatisticReport);                          // name
 
+#if defined (ZLIB_SUPPORT)
 typedef Stream_Decoder_ZIPDecoder_T<ACE_MT_SYNCH,
                                     Common_TimePolicy_t,
                                     struct Test_I_Trending_ModuleHandlerConfiguration,
@@ -154,5 +157,6 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_Trending_SessionData,               
                               libacestream_default_dec_zip_decoder_module_name_string,
                               Stream_INotify_t,                                 // stream notification interface type
                               Test_I_ZIPDecompressor);                          // writer type
+#endif // ZLIB_SUPPORT
 
 #endif
