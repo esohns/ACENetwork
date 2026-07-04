@@ -1335,7 +1335,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
         message_block_2->length (missing_bytes);
         break;
       } // end IF
-      missing_bytes -= message_block_2->length ();
+      missing_bytes -= static_cast<unsigned int> (message_block_2->length ());
       if (message_block_2->cont ())
       {
         message_block_2 = message_block_2->cont ();
@@ -2490,7 +2490,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
              ++iterator_3)
           if (*(*iterator_3).first == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_PORT_HEADER))
           { ACE_ASSERT ((*iterator_3).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
-            port_number_i = (*iterator_3).second->integer;
+            port_number_i = static_cast<u_short> ((*iterator_3).second->integer);
             break;
           } // end IF
         ACE_ASSERT (port_number_i);
@@ -2976,7 +2976,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
             inherited::state_.peerState.find (peer_address_i);
           ACE_ASSERT (iterator != inherited::state_.peerState.end ());
           number_of_connections_to_this_peer_i =
-            (*iterator).second.connections.size ();
+            static_cast<unsigned int> ((*iterator).second.connections.size ());
         } // end lock scope
         if (inherited::configuration_->allowMultipleConnectionsPerPeer && 
             (number_of_connections_to_this_peer_i < BITTORRENT_DEFAULT_MAX_CONNECTIONS_PER_PEER))
@@ -3100,14 +3100,13 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
           send_have_b = true;
           if (!BitTorrent_Tools::savePiece (ACE_TEXT_ALWAYS_CHAR (ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
                                                                                  ACE_DIRECTORY_SEPARATOR_CHAR)),
-                                            inherited::state_.pieces.size (),
+                                            static_cast<unsigned int> (inherited::state_.pieces.size ()),
                                             record_in.piece.index,
                                             *iterator))
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to BitTorrent_Tools::savePiece(%s,%u), continuing\n"),
-                        ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                                       ACE_DIRECTORY_SEPARATOR_CHAR),
+                        ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
                         record_in.piece.index));
             ACE_ASSERT (false); // *TODO*
             break;
