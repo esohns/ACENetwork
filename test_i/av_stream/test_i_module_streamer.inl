@@ -108,7 +108,7 @@ Test_I_AVStream_Streamer_T<ACE_SYNCH_USE,
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to ACE_Message_Block::copy(%u): \"%m\", aborting\n"),
+                ACE_TEXT ("%s: failed to ACE_Message_Block::copy(%B): \"%m\", aborting\n"),
                 inherited::mod_->name (),
                 sizeof (struct acestream_av_stream_header)));
     passMessageDownstream_out = false;

@@ -27,7 +27,7 @@
 %option nounput
 %option extra-type="AVStream_ParserDriver*"
 
-CHAR           [\x00-\xFF]
+OCTET           [\x00-\xFF]
 
 %s             header
 %s             length
@@ -42,24 +42,24 @@ CHAR           [\x00-\xFF]
 %}
 
 <INITIAL>{
-{CHAR}{1}                  { BEGIN(header);
+{OCTET}{1}                 { BEGIN(header);
                              yyless(0);
                            }
 } // end <INITIAL>
 <header>{
-{CHAR}{1}                  { //yylloc->step();
+{OCTET}{1}                 { //yylloc->step();
                              BEGIN(length);
                              yylval->ival = static_cast<ACE_UINT32> (yytext[0]);
                              return TYPE; }
 } // end <header>
 <length>{
-{CHAR}{4}                  { //yylloc->step();
+{OCTET}{4}                 { //yylloc->step();
                              BEGIN(body);
                              yylval->ival = *reinterpret_cast<ACE_UINT32*> (yytext);
                              return LENGTH; }
 } // end <length>
 <body>{
-{CHAR}{1}                  { //yylloc->step();
+{OCTET}{1}                 { //yylloc->step();
                              char c = 0;
                              for (unsigned int i = 0;
                                   i < (driver->missing_ - 1);
@@ -73,15 +73,15 @@ CHAR           [\x00-\xFF]
                              BEGIN(header);
                              return BODY; }
 } // end <body>
-<<EOF>>                    { yyterminate(); }
-<*>{CHAR}                  { /* *TODO*: use (?s:.) ? */
+<<EOF>>                    { yyterminate (); }
+<*>{OCTET}                 { /* *TODO*: use (?s:.) ? */
                              //yylloc->step();
 
                              // debug info
                              std::string error_message = ACE_TEXT("invalid character: \"");
                              error_message += yytext[0];
                              error_message += ACE_TEXT("\", aborting");
-                             driver->error(*yylloc, error_message);
+                             driver->error (*yylloc, error_message);
 
                              yyterminate(); }
 %%
@@ -100,7 +100,7 @@ AVStream_Scanner_wrap (yyscan_t yyscanner)
   AVStream_ParserDriver* driver = AVStream_Scanner_get_extra (yyscanner);
   ACE_ASSERT (driver);
 
-  if (!driver->switchBuffer())
+  if (!driver->switchBuffer ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to AVStream_ParserDriver::switchBuffer(), aborting\n")));

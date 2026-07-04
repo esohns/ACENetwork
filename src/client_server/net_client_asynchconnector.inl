@@ -377,7 +377,7 @@ Net_Client_AsynchConnector_T<HandlerType,
       return 0; // *TODO*: race condition; result could be a false positive
 
     if (relativeTimeout_in != ACE_Time_Value::zero)
-      absolute_timeout = ACE_OS::gettimeofday () + relativeTimeout_in;
+      absolute_timeout = COMMON_TIME_NOW + relativeTimeout_in;
     result = condition_.wait (timeout_p);
     if (unlikely (result == -1))
     {
@@ -491,8 +491,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, -1);
     iterator = handles_.find (result_in.connect_handle ());
     if (iterator != handles_.end ()) // *TODO*: when does this fail ?
-      (*iterator).second =
-        ((result_in.success () == 0) ? static_cast<int> (result_in.error ()) : 0);
+      (*iterator).second = ((result_in.success () == 0) ? static_cast<int> (result_in.error ()) : 0);
   } // end lock scope
   // signal completion
   result = condition_.broadcast ();

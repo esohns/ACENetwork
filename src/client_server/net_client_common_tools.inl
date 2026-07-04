@@ -103,7 +103,7 @@ retry:
   else
   {
     timeout.sec (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S);
-    deadline = ACE_OS::gettimeofday () + timeout;
+    deadline = COMMON_TIME_NOW + timeout;
 
     // step1: wait for the connection to establish
     typename ConnectorType::IASYNCH_CONNECTOR_T* iasynch_connector_p =
@@ -119,16 +119,14 @@ retry:
                     ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\", retrying\n"),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                     ACE_OS::strerror (result_2)));
-        iasynch_connector_p->abort ();
         goto retry;
       } // end IF
       ACE_DEBUG (((result_2 == ETIME ? LM_WARNING: LM_ERROR),
-                  ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\", continuing\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                   ACE_OS::strerror (result_2)));
-      iasynch_connector_p->abort ();
-      iconnection_manager_p->unlock (false);
-      return ACE_INVALID_HANDLE;
+      //iconnection_manager_p->unlock (false);
+      //return ACE_INVALID_HANDLE;
     } // end IF
 
     // step2: wait for the connection to register with the manager
@@ -139,13 +137,13 @@ retry:
                                                  isPeerAddress_in);
       if (likely (connection_p))
         break;
-    } while (ACE_OS::gettimeofday () < deadline);
+    } while (COMMON_TIME_NOW < deadline);
     if (unlikely (!connection_p))
       goto continue_;
   } // end ELSE
 
   timeout.sec (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT_S);
-  deadline = ACE_OS::gettimeofday () + timeout;
+  deadline = COMMON_TIME_NOW + timeout;
 
   // step3: wait for the connection to finish initializing
   // *TODO*: avoid these tight loops
@@ -154,7 +152,7 @@ retry:
     status = connection_p->status ();
     if (status > NET_CONNECTION_STATUS_INITIALIZING)
       break;
-  } while (ACE_OS::gettimeofday () < deadline);
+  } while (COMMON_TIME_NOW < deadline);
   if (unlikely (status != NET_CONNECTION_STATUS_OK))
   {
     if (retries_in--)

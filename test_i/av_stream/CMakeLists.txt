@@ -19,7 +19,7 @@ endif ()
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
@@ -30,7 +30,6 @@ if (NOT EXISTS ${ACEStream_DIR})
 else ()
  message (STATUS "found package \"ACEStream\": \"${ACEStream_DIR}\"")
 endif ()
-#add_definitions (-DACESTREAM_HAS_DLL)
 
 if (FFMPEG_SUPPORT)
  include_directories (${ffmpeg_INCLUDE_DIRS})
@@ -208,7 +207,6 @@ elseif (WXWIDGETS_USE)
  set (ui_definition_file_2 etc/test_i_server.xrc)
 endif ()
 
-#cmake_policy (SET CMP0065 OLD) # do not add flags to export symbols from executables without the ENABLE_EXPORTS target property
 add_executable (${EXECUTABLE_CLIENT}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE_CLIENT}_EXE_SRCS}
@@ -216,13 +214,10 @@ add_executable (${EXECUTABLE_CLIENT}
                 ${ui_definition_file})
 set_property (TARGET ${EXECUTABLE_CLIENT} PROPERTY FOLDER "test_i")
 if (WIN32)
- cmake_policy (SET CMP0012 NEW)
  if (NOT BUILD_TEST_I)
   set_target_properties (${EXECUTABLE_CLIENT} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
  endif (NOT BUILD_TEST_I)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set_target_properties (${EXECUTABLE_CLIENT} PROPERTIES COMPILE_FLAGS "/wd4503")
- endif (CMAKE_BUILD_TYPE STREQUAL Debug)
+# set_target_properties (${EXECUTABLE_CLIENT} PROPERTIES COMPILE_FLAGS "/wd4503")
 endif (WIN32)
 
 #add_dependencies (${EXECUTABLE_CLIENT} ACE)
@@ -253,22 +248,22 @@ if (WIN32)
 endif (WIN32)
 
 #target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+
 if (FFMPEG_SUPPORT)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${ffmpeg_LIBRARIES})
 endif (FFMPEG_SUPPORT)
 if (UNIX)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${PKG_V4L2_LIBRARIES})
 elseif (WIN32)
-# target_link_options (${EXECUTABLE_CLIENT} PUBLIC /NODEFAULTLIB:\"libcmt.lib\")
-# set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
-
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC evr.lib)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC mfplat.lib)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC mfuuid.lib)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC strmiids.lib)
  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC winmm.lib)
 
- target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${DS_BASECLASSES_LIBRARIES})
+ if (DIRECTSHOW_BASECLASSES_SUPPORT)
+  target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${DS_BASECLASSES_LIBRARIES})
+ endif (DIRECTSHOW_BASECLASSES_SUPPORT)
 endif ()
 target_link_libraries (${EXECUTABLE_CLIENT} PUBLIC ${ACE_LIBRARY})
 
@@ -405,21 +400,25 @@ if (WIN32)
               etc/${LIBRARY_DS}.def)
  set_property (TARGET ${LIBRARY_DS} PROPERTY FOLDER "test_i")
 
- target_include_directories (${LIBRARY_DS} PUBLIC ${DS_BASECLASSES_INCLUDE_DIRS})
+ if (DIRECTSHOW_BASECLASSES_SUPPORT)
+  target_include_directories (${LIBRARY_DS} PUBLIC ${DS_BASECLASSES_INCLUDE_DIRS})
+ endif (DIRECTSHOW_BASECLASSES_SUPPORT)
 
  add_dependencies (${LIBRARY_DS} Common)
  add_dependencies (${LIBRARY_DS} CommonLog)
 
  add_dependencies (${LIBRARY_DS} ACEStream)
 
-# set (CMAKE_MODULE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
  set_target_properties (${LIBRARY_DS} PROPERTIES LINK_FLAGS /SAFESEH:NO)
 
  target_link_options (${LIBRARY_DS} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 
  target_link_libraries (${LIBRARY_DS} PUBLIC strmiids.lib)
  target_link_libraries (${LIBRARY_DS} PUBLIC winmm.lib)
- target_link_libraries (${LIBRARY_DS} PUBLIC ${DS_BASECLASSES_LIBRARIES})
+
+ if (DIRECTSHOW_BASECLASSES_SUPPORT)
+  target_link_libraries (${LIBRARY_DS} PUBLIC ${DS_BASECLASSES_LIBRARIES})
+ endif (DIRECTSHOW_BASECLASSES_SUPPORT)
 
  if (WXWIDGETS_SUPPORT)
   target_link_libraries (${LIBRARY_DS} PUBLIC ${wxWidgets_LIBRARIES})
@@ -437,7 +436,6 @@ if (WIN32)
 
 # target_link_libraries (${LIBRARY_DS} PUBLIC ${PROJECT_NAME}_Test_I)
 
- set_target_properties (${LIBRARY_DS} PROPERTIES DEFINE_SYMBOL STREAM_HAS_DLL)
  set_target_properties (${LIBRARY_DS} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 # add PCH
@@ -478,11 +476,17 @@ if (WIN32)
               etc/${LIBRARY_MF}.def)
  set_property (TARGET ${LIBRARY_MF} PROPERTY FOLDER "test_i")
 
- target_include_directories (${LIBRARY_MF} PUBLIC ${DS_BASECLASSES_INCLUDE_DIRS})
+ if (DIRECTSHOW_BASECLASSES_SUPPORT)
+  target_include_directories (${LIBRARY_MF} PUBLIC ${DS_BASECLASSES_INCLUDE_DIRS})
+ endif (DIRECTSHOW_BASECLASSES_SUPPORT)
 
  add_dependencies (${LIBRARY_MF} Common)
 
  add_dependencies (${LIBRARY_MF} ACEStream)
+
+ if (DIRECTSHOW_BASECLASSES_SUPPORT)
+  target_link_libraries (${LIBRARY_MF} PUBLIC ${DS_BASECLASSES_LIBRARIES})
+ endif (DIRECTSHOW_BASECLASSES_SUPPORT)
 
  if (WXWIDGETS_SUPPORT)
   target_link_libraries (${LIBRARY_MF} PUBLIC ${wxWidgets_LIBRARIES})
@@ -500,7 +504,6 @@ if (WIN32)
 
 # target_link_libraries (${LIBRARY_MF} PUBLIC ${PROJECT_NAME}_Test_I)
 
- set_target_properties (${LIBRARY_MF} PROPERTIES DEFINE_SYMBOL STREAM_HAS_DLL)
  set_target_properties (${LIBRARY_MF} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 # add PCH
@@ -588,17 +591,16 @@ add_executable (${EXECUTABLE_SERVER}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE_SERVER}_EXE_SRCS}
                 etc/resources.rc
+                scripts/parser.y
+                scripts/scanner.l
                 ${ui_definition_file_2})
 set_property (TARGET ${EXECUTABLE_SERVER} PROPERTY FOLDER "test_i")
 if (WIN32)
- cmake_policy (SET CMP0012 NEW)
  if (NOT BUILD_TEST_I)
   set_target_properties (${EXECUTABLE_SERVER} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
- endif ()
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set_target_properties (${EXECUTABLE_SERVER} PROPERTIES COMPILE_FLAGS "/wd4503")
- endif ()
-endif ()
+ endif (NOT BUILD_TEST_I)
+# set_target_properties (${EXECUTABLE_SERVER} PROPERTIES COMPILE_FLAGS "/wd4503")
+endif (WIN32)
 
 #add_dependencies (${EXECUTABLE_SERVER} ACE)
 add_dependencies (${EXECUTABLE_SERVER} Common)
@@ -621,14 +623,15 @@ if (FFMPEG_SUPPORT)
 endif (FFMPEG_SUPPORT)
 if (UNIX)
  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${PKG_V4L2_LIBRARIES})
-
 # target_link_libraries (${EXECUTABLE_SERVER} PUBLIC X11)
 elseif (WIN32)
  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC evr.lib)
  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC strmiids.lib)
  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC winmm.lib)
 
- target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${DS_BASECLASSES_LIBRARIES})
+ if (DIRECTSHOW_BASECLASSES_SUPPORT)
+  target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${DS_BASECLASSES_LIBRARIES})
+ endif (DIRECTSHOW_BASECLASSES_SUPPORT)
 endif ()
 target_link_libraries (${EXECUTABLE_SERVER} PUBLIC ${ACE_LIBRARY})
 

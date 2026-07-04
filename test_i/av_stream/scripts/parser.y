@@ -126,27 +126,24 @@ void yyprint (FILE*, yytokentype, YYSTYPE);*/
 %start        message;
 message:      header msg_body                                 { $$ = $1 + $2; };
               | %empty                                        { $$ = 0; };
-header:       "type"                                          { driver->header_.type = $1;
-                                                              }
+header:       "type"                                          { driver->header_.type = $1; }
               "length"                                        { $$ = $1 + $3;
                                                                 driver->header_.length = $3;
                                                                 driver->missing_ = $3;
                                                               };
-msg_body:     "data"                                          { driver->missing_ -= $1;
-                                                              }
+msg_body:     "data"                                          { driver->missing_ -= $1; }
               ext_msg_body                                    { $$ = $1 + $3; };
               | "body"                                        { $$ = $1;
                                                                 driver->missing_ -= $1;
-                                                                ACE_ASSERT (!driver->missing_);
+                                                                ACE_ASSERT (driver->missing_ == 0);
                                                                 driver->message_cb ();
                                                                 YYACCEPT;
                                                               };
-ext_msg_body: "data"                                          { driver->missing_ -= $1;
-                                                              }
+ext_msg_body: "data"                                          { driver->missing_ -= $1; }
               ext_msg_body                                    { $$ = $1 + $3; };
               | "body"                                        { $$ = $1;
                                                                 driver->missing_ -= $1;
-                                                                ACE_ASSERT (!driver->missing_);
+                                                                ACE_ASSERT (driver->missing_ == 0);
                                                                 driver->message_cb ();
                                                                 YYACCEPT;
                                                               };
