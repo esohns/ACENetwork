@@ -1432,13 +1432,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 
     Net_ConnectionConfigurationsIterator_t iterator_3;
-//    PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-//      connection_manager_p;
-//    ACE_ASSERT (iconnection_manager_p);
-    PCPClient_UnicastConnector_t connector;
-    PCPClient_UnicastAsynchConnector_t asynch_connector;
-    PCPClient_McastConnector_t connector_mcast;
-    PCPClient_McastAsynchConnector_t asynch_connector_mcast;
     PCPClient_IConnection_t* iconnection_p = NULL;
 
     // listen on unicast port
@@ -1447,7 +1440,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<PCPClient_UnicastConnector_t> (connector,
+        Net_Client_Common_Tools::connect<PCPClient_UnicastConnector_t> (data_p->connector,
                                                                         *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                         data_p->configuration->userData,
                                                                         NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1455,7 +1448,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                         false);
     else
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<PCPClient_UnicastAsynchConnector_t> (asynch_connector,
+        Net_Client_Common_Tools::connect<PCPClient_UnicastAsynchConnector_t> (data_p->asynch_connector,
                                                                               *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                               data_p->configuration->userData,
                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1495,7 +1488,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<PCPClient_McastConnector_t> (connector_mcast,
+        Net_Client_Common_Tools::connect<PCPClient_McastConnector_t> (data_p->connector_mcast,
                                                                       *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                       data_p->configuration->userData,
                                                                       NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1503,7 +1496,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                       false);
     else
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<PCPClient_McastAsynchConnector_t> (asynch_connector_mcast,
+        Net_Client_Common_Tools::connect<PCPClient_McastAsynchConnector_t> (data_p->asynch_connector_mcast,
                                                                             *static_cast<PCPClient_ConnectionConfiguration*> ((*iterator_3).second),
                                                                             data_p->configuration->userData,
                                                                             NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,

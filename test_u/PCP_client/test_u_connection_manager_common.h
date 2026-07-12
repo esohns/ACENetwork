@@ -31,8 +31,21 @@
 #include "pcp_common.h"
 #include "pcp_session.h"
 
-#include "test_u_connection_common.h"
+//#include "test_u_connection_common.h"
 #include "test_u_message.h"
+
+struct PCPClient_ModuleHandlerConfiguration;
+typedef Stream_Configuration_T<struct PCP_StreamConfiguration,
+                               struct PCPClient_ModuleHandlerConfiguration> PCPClient_StreamConfiguration_t;
+class PCPClient_ConnectionConfiguration
+ : public Net_StreamConnectionConfiguration_T<PCPClient_StreamConfiguration_t,
+                                              NET_TRANSPORTLAYER_UDP>
+{
+ public:
+  PCPClient_ConnectionConfiguration ()
+   : Net_StreamConnectionConfiguration_T ()
+  {}
+};
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  PCPClient_ConnectionConfiguration,

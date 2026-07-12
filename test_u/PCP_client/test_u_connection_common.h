@@ -54,23 +54,20 @@
 #include "pcp_common.h"
 #include "pcp_configuration.h"
 
-// forward declarations
-class Test_U_ConnectionStream;
-class Test_U_OutboundConnectionStream;
-class PCPClient_ConnectionConfiguration;
+#include "test_u_connection_stream.h"
 
-struct PCPClient_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<struct PCP_StreamConfiguration,
-                               struct PCPClient_ModuleHandlerConfiguration> PCPClient_StreamConfiguration_t;
-class PCPClient_ConnectionConfiguration
- : public Net_StreamConnectionConfiguration_T<PCPClient_StreamConfiguration_t,
-                                              NET_TRANSPORTLAYER_UDP>
-{
- public:
-  PCPClient_ConnectionConfiguration ()
-   : Net_StreamConnectionConfiguration_T ()
-  {}
-};
+//struct PCPClient_ModuleHandlerConfiguration;
+//typedef Stream_Configuration_T<struct PCP_StreamConfiguration,
+//                               struct PCPClient_ModuleHandlerConfiguration> PCPClient_StreamConfiguration_t;
+//class PCPClient_ConnectionConfiguration
+// : public Net_StreamConnectionConfiguration_T<PCPClient_StreamConfiguration_t,
+//                                              NET_TRANSPORTLAYER_UDP>
+//{
+// public:
+//  PCPClient_ConnectionConfiguration ()
+//   : Net_StreamConnectionConfiguration_T ()
+//  {}
+//};
 
 //////////////////////////////////////////
 

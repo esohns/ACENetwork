@@ -138,20 +138,6 @@ struct PCPClient_ModuleHandlerConfiguration
 //  //struct Net_UserData* userData;
 //};
 
-struct PCPClient_StreamState
- : Test_U_StreamState
-{
-  PCPClient_StreamState ()
-   : Test_U_StreamState ()
-   , sessionData (NULL)
-   , userData (NULL)
-  {}
-
-  struct PCPClient_SessionData* sessionData;
-
-  struct Stream_UserData*        userData;
-};
-
 struct PCPClient_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
@@ -240,15 +226,28 @@ struct PCPClient_UI_CBData
    , progressData ()
    , session (NULL)
    , subscribers ()
+  ////////////////////////////////////////
+   , connector ()
+   , asynch_connector ()
+   , connector_mcast ()
+   , asynch_connector_mcast ()
   {}
 
-  struct PCPClient_Configuration*  configuration;
-  ACE_INET_Addr                    externalAddress;
-  ACE_INET_Addr                    gatewayAddress;
-  ACE_INET_Addr                    interfaceAddress;
-  struct PCPClient_UI_ProgressData progressData;
-  PCP_ISession_t*                  session;
-  PCPClient_Subscribers_t          subscribers;
+  struct PCPClient_Configuration*    configuration;
+  ACE_INET_Addr                      externalAddress;
+  ACE_INET_Addr                      gatewayAddress;
+  ACE_INET_Addr                      interfaceAddress;
+  struct PCPClient_UI_ProgressData   progressData;
+  PCP_ISession_t*                    session;
+  PCPClient_Subscribers_t            subscribers;
+
+  ////////////////////////////////////////
+
+  // *NOTE*: ensure the connectors do not fall off the stack early
+  PCPClient_UnicastConnector_t       connector;
+  PCPClient_UnicastAsynchConnector_t asynch_connector;
+  PCPClient_McastConnector_t         connector_mcast;
+  PCPClient_McastAsynchConnector_t   asynch_connector_mcast;
 };
 
 struct PCPClient_ThreadData

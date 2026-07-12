@@ -36,11 +36,25 @@
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
 
-#include "test_u_pcp_client_common.h"
+//#include "test_u_pcp_client_common.h"
 #include "test_u_message.h"
 
 // forward declarations
 class Test_U_SessionMessage;
+
+struct PCPClient_StreamState
+ : Test_U_StreamState
+{
+  PCPClient_StreamState ()
+   : Test_U_StreamState ()
+   //, sessionData (NULL)
+   , userData (NULL)
+  {}
+
+  //struct PCPClient_SessionData* sessionData;
+
+  struct Stream_UserData*        userData;
+};
 
 typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  enum Stream_SessionMessageType,

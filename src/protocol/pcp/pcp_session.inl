@@ -77,8 +77,13 @@ PCP_Session_T<StateType,
 {
   NETWORK_TRACE (ACE_TEXT ("PCP_Session_T::initialize"));
 
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+
   configuration_ = &const_cast<ConnectionConfigurationType&> (configuration_in);
   connection_ = connection_in;
+
+  connection_->increase ();
 }
 
 template <typename StateType,

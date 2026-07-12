@@ -90,8 +90,7 @@ do_printUsage (const std::string& programName_in)
   // enable verbatim boolean output
   std::cout.setf (std::ios::boolalpha);
 
-  std::string path =
-    Common_File_Tools::getWorkingDirectory ();
+  //std::string path = Common_File_Tools::getWorkingDirectory ();
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -108,7 +107,7 @@ do_printUsage (const std::string& programName_in)
             << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
-  std::string output_file = path;
+  std::string output_file = Common_File_Tools::getTempDirectory ();
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [STRING] : (output) file name [")
@@ -167,20 +166,19 @@ do_processArguments (int argc_in,
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   int result = -1;
-  std::string path =
-    Common_File_Tools::getWorkingDirectory ();
+  //std::string path = Common_File_Tools::getWorkingDirectory ();
 
   // initialize results
   bufferSize_out = TEST_U_DEFAULT_BUFFER_SIZE;
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
-  outputFileName_out = path;
+  outputFileName_out = Common_File_Tools::getTempDirectory ();
   outputFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   outputFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   hostName_out.clear ();
   logToFile_out = false;
   port_out = HTTP_DEFAULT_SERVER_PORT;
   useReactor_out =
-          (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   traceInformation_out = false;
   useSSL_out = false;
@@ -1000,12 +998,14 @@ ACE_TMAIN (int argc_in,
   // step1a set defaults
   unsigned int buffer_size = TEST_U_DEFAULT_BUFFER_SIZE;
   bool debug_parser = COMMON_PARSER_DEFAULT_YACC_TRACE;
-  std::string output_file = ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
+  std::string output_file = Common_File_Tools::getTempDirectory ();
+  output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  output_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
   std::string host_name;
   bool log_to_file = false;
   unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   bool use_reactor =
-            (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
