@@ -995,29 +995,8 @@ IRC_Session_T<ConnectionType,
   {
     case NET_ROLE_CLIENT:
     {
-      typename inherited::ICONNECTOR_T* iconnector_p = NULL;
-
-      // work around ACE code here
-      if ((inherited::dispatch () == COMMON_EVENT_DISPATCH_REACTOR) &&
-          (inherited::transportLayer () == NET_TRANSPORTLAYER_TCP))
-      {
-        //ACE_CONNECTOR_T* connector_p =
-        //  static_cast<ACE_CONNECTOR_T*> (arg_in);
-        //ACE_ASSERT (connector_p);
-        //iconnector_p = dynamic_cast<ICONNECTOR_T*> (connector_p);
-        iconnector_p =
-            static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
-        //if (!iconnector_p)
-        //{
-        //  ACE_DEBUG ((LM_ERROR,
-        //              ACE_TEXT ("failed to dynamic_cast<Net_IConnector_T*> (argument was: %@), aborting\n"),
-        //              connector_p));
-        //  return -1;
-        //} // end IF
-      } // end IF
-      else
-        iconnector_p =
-            static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
+      typename inherited::ICONNECTOR_T* iconnector_p =
+        static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
       connection_configuration_p =
         &const_cast<ConnectionConfigurationType&> (iconnector_p->getR ());
@@ -1026,7 +1005,7 @@ IRC_Session_T<ConnectionType,
     case NET_ROLE_SERVER:
     {
       typename inherited::ILISTENER_T* ilistener_p =
-          static_cast<typename inherited::ILISTENER_T*> (arg_in);
+        static_cast<typename inherited::ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
       connection_configuration_p =
         &const_cast<ConnectionConfigurationType&> (ilistener_p->getR ());
@@ -1043,21 +1022,10 @@ IRC_Session_T<ConnectionType,
   ACE_ASSERT (connection_configuration_p);
 
   ModuleHandlerConfigurationIteratorType iterator;
-  if (!inherited::isManaged_)
-  { // *TODO*: remove type inference
-    ACE_ASSERT (connection_configuration_p->streamConfiguration);
-    iterator =
-      connection_configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->end ());
-  } // end IF
-  else
-  { // *TODO*: remove type inference
-    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
-    iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
-  } // end ELSE
+  ACE_ASSERT (connection_configuration_p->streamConfiguration);
+  iterator =
+    connection_configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->end ());
   (*iterator).second.second->subscriber = this;
 
   // step1: initialize/start stream, tweak socket, register reading data with

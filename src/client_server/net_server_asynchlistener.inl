@@ -790,7 +790,7 @@ Net_Server_AsynchListener_T<HandlerType,
 
   // *TODO*: remove type inference
   ACE_NEW_NORETURN (connection_p,
-                    HandlerType (true)); // managed ?
+                    HandlerType ());
   if (unlikely (!connection_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

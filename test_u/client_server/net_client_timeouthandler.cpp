@@ -54,12 +54,12 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
  , maximumNumberOfConnections_ (maximumNumberOfConnections_in)
  , mode_ (mode_in)
  , protocolConfiguration_ (&const_cast<struct Test_U_ProtocolConfiguration&> (protocolConfiguration_in))
- , AsynchTCPConnector_ (true)
- , TCPConnector_ (true)
- , AsynchUDPConnector_ (true)
- , UDPConnector_ (true)
+ , AsynchTCPConnector_ ()
+ , TCPConnector_ ()
+ , AsynchUDPConnector_ ()
+ , UDPConnector_ ()
 #if defined (SSL_SUPPORT)
- , SSLConnector_ (true)
+ , SSLConnector_ ()
 #endif // SSL_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::Client_TimeoutHandler"));

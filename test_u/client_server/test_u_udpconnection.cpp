@@ -28,8 +28,8 @@
 
 #include "test_u_sessionmessage.h"
 
-Test_U_UDPConnection::Test_U_UDPConnection (bool managed_in)
- : inherited (managed_in)
+Test_U_UDPConnection::Test_U_UDPConnection ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPConnection::Test_U_UDPConnection"));
 
@@ -48,8 +48,8 @@ Test_U_UDPConnection::Test_U_UDPConnection (bool managed_in)
 
 //////////////////////////////////////////
 
-Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection (bool managed_in)
- : inherited (managed_in)
+Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchUDPConnection::Test_U_AsynchUDPConnection"));
 

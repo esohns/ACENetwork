@@ -69,8 +69,8 @@ FTP_Control_T<ControlAsynchConnectorType,
   ACE_ASSERT (connectionConfiguration_);
 
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-  ControlConnectorType connector (true);
-  ControlAsynchConnectorType asynch_connector (true);
+  ControlConnectorType connector;
+  ControlAsynchConnectorType asynch_connector;
   UserDataType user_data;
   if (dispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
     handle_h =
@@ -132,8 +132,8 @@ FTP_Control_T<ControlAsynchConnectorType,
   ACE_ASSERT (connectionConfiguration_2);
 
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-  DataConnectorType connector (true);
-  DataAsynchConnectorType asynch_connector (true);
+  DataConnectorType connector;
+  DataAsynchConnectorType asynch_connector;
   UserDataType user_data;
   if (dispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
     handle_h =

@@ -1767,7 +1767,7 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   TrackerConnectionConfigurationType* configuration_p = NULL;
   TrackerUserDataType* user_data_p = NULL;
   typename TrackerStreamType::CONFIGURATION_T::ITERATOR_T iterator;
-  TrackerConnectorType connector (true);
+  TrackerConnectorType connector;
   TrackerUserDataType user_data_s;
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
 

@@ -229,11 +229,11 @@ idle_load_segment_cb (gpointer userData_in)
   static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
     static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
 
-  Test_I_TCPConnector_2_t connector (true);
+  Test_I_TCPConnector_2_t connector;
 #if defined (SSL_SUPPORT)
-  Test_I_SSLConnector_2_t ssl_connector (true);
+  Test_I_SSLConnector_2_t ssl_connector;
 #endif // SSL_SUPPORT
-  Test_I_AsynchTCPConnector_2_t asynch_connector (true);
+  Test_I_AsynchTCPConnector_2_t asynch_connector;
   Test_I_IConnector_2_t* iconnector_p = NULL;
   Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
@@ -1173,11 +1173,11 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
-    Test_I_TCPConnector_t connector (true);
+    Test_I_TCPConnector_t connector;
 #if defined (SSL_SUPPORT)
-    Test_I_SSLConnector_t ssl_connector (true);
+    Test_I_SSLConnector_t ssl_connector;
 #endif // SSL_SUPPORT
-    Test_I_AsynchTCPConnector_t asynch_connector (true);
+    Test_I_AsynchTCPConnector_t asynch_connector;
 //    Test_I_IConnector_t* iconnector_p = NULL;
     Test_I_IStreamConnection_t* istream_connection_p = NULL;
     HTTP_Form_t HTTP_form;

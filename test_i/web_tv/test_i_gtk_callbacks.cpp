@@ -1244,11 +1244,11 @@ idle_start_session_cb (gpointer userData_in)
   (*stream_iterator_3b).second.second->parserConfiguration->messageQueue = NULL;
   (*stream_iterator_marshal_3b).second.second->parserConfiguration->messageQueue = NULL;
 
-  Test_I_TCPConnector_3_t connector (true);
+  Test_I_TCPConnector_3_t connector;
 #if defined (SSL_SUPPORT)
-  Test_I_SSLConnector_3_t ssl_connector (true);
+  Test_I_SSLConnector_3_t ssl_connector;
 #endif // SSL_SUPPORT
-  Test_I_AsynchTCPConnector_3_t asynch_connector (true);
+  Test_I_AsynchTCPConnector_3_t asynch_connector;
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string, URI_string_2, URL_string, URL_string_2;
   bool use_SSL = false;
@@ -2109,11 +2109,11 @@ togglebutton_play_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (stream_iterator_4b_2 != data_p->configuration->streamConfiguration_4b.end ());
     ACE_ASSERT ((*stream_iterator_4b_2).second.second->delayConfiguration);
 
-    Test_I_TCPConnector_t connector (true);
+    Test_I_TCPConnector_t connector;
 #if defined (SSL_SUPPORT)
-    Test_I_SSLConnector_t ssl_connector (true);
+    Test_I_SSLConnector_t ssl_connector;
 #endif // SSL_SUPPORT
-    Test_I_AsynchTCPConnector_t asynch_connector (true);
+    Test_I_AsynchTCPConnector_t asynch_connector;
 //    GtkSpinner* spinner_p = NULL;
     GtkProgressBar* progress_bar_p = NULL;
     GtkTreeIter iterator_7;
@@ -2614,11 +2614,11 @@ button_load_clicked_cb (GtkWidget* widget_in,
   std::string hostname_string, URI_string, URL_string;
   bool use_SSL = false;
 
-  Test_I_TCPConnector_t connector (true);
+  Test_I_TCPConnector_t connector;
 #if defined (SSL_SUPPORT)
-  Test_I_SSLConnector_t ssl_connector (true);
+  Test_I_SSLConnector_t ssl_connector;
 #endif // SSL_SUPPORT
-  Test_I_AsynchTCPConnector_t asynch_connector (true);
+  Test_I_AsynchTCPConnector_t asynch_connector;
   struct Net_UserData user_data_s;
 
   GtkProgressBar* progress_bar_p = NULL;

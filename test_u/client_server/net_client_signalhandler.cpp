@@ -40,12 +40,12 @@
 
 Client_SignalHandler::Client_SignalHandler ()
  : inherited (this) // event handler handle
- , AsynchTCPConnector_ (true)
- , TCPConnector_ (true)
- , AsynchUDPConnector_ (true)
- , UDPConnector_ (true)
+ , AsynchTCPConnector_ ()
+ , TCPConnector_ ()
+ , AsynchUDPConnector_ ()
+ , UDPConnector_ ()
 #if defined (SSL_SUPPORT)
- , SSLConnector_ (true)
+ , SSLConnector_ ()
 #endif // SSL_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::Client_SignalHandler"));

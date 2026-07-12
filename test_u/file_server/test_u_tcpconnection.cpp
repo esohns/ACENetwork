@@ -28,8 +28,8 @@
 
 #include "test_u_sessionmessage.h"
 
-Test_U_TCPConnection::Test_U_TCPConnection (bool managed_in)
- : inherited (managed_in)
+Test_U_TCPConnection::Test_U_TCPConnection ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
 
@@ -37,8 +37,8 @@ Test_U_TCPConnection::Test_U_TCPConnection (bool managed_in)
 
 //////////////////////////////////////////
 
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (bool managed_in)
- : inherited (managed_in)
+Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
 

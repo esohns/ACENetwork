@@ -63,9 +63,7 @@ class Test_U_TCPConnection
   friend class ACE_Connector<Test_U_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Test_U_TCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  Test_U_TCPConnection (bool); // managed ?
+  Test_U_TCPConnection ();
   inline virtual ~Test_U_TCPConnection () {}
 
   // implement (part of) Net_ITransportLayer_T
@@ -97,9 +95,7 @@ class Test_U_AsynchTCPConnection
  friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
 
  public:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Test_U_AsynchTCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  Test_U_AsynchTCPConnection (bool); // managed ?
+  Test_U_AsynchTCPConnection ();
   inline virtual ~Test_U_AsynchTCPConnection () {}
 
   // implement (part of) Net_ITransportLayer_T

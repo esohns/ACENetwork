@@ -151,12 +151,10 @@ class Net_StreamConnectionBase_T
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
 
  protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_StreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  Net_StreamConnectionBase_T (bool); // managed ?
+  Net_StreamConnectionBase_T ();
 
   // override (part of) Net_ISocketHandler
-  virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  virtual ACE_Message_Block* allocateMessage (size_t); // requested size
 
   // *IMPORTANT NOTE*: stub to facilitate connection handler encapsulation
   virtual void open (ACE_HANDLE, ACE_Message_Block&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return); }
@@ -284,12 +282,10 @@ class Net_AsynchStreamConnectionBase_T
  protected:
   typedef HandlerType HANDLER_T;
 
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_AsynchStreamConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  Net_AsynchStreamConnectionBase_T (bool); // managed ?
+  Net_AsynchStreamConnectionBase_T ();
 
   // override (part of) Net_ISocketHandler
-  virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  virtual ACE_Message_Block* allocateMessage (size_t); // requested size
   virtual bool initiate_read ();
 
   // *IMPORTANT NOTE*: supports synchronicity-agnostic connections

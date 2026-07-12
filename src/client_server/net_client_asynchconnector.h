@@ -85,7 +85,7 @@ class Net_Client_AsynchConnector_T
                                  ConfigurationType> ICONNECTOR_T;
   typedef ICONNECTOR_T IASYNCH_CONNECTOR_T;
 
-  Net_Client_AsynchConnector_T (bool = true); // managed ?
+  Net_Client_AsynchConnector_T ();
   virtual ~Net_Client_AsynchConnector_T ();
 
   // implement Net_IAsynchConnector_T
@@ -118,11 +118,9 @@ class Net_Client_AsynchConnector_T
   typedef HANDLE_TO_ERROR_MAP_T::iterator HANDLE_TO_ERROR_MAP_ITERATOR_T;
 
   HANDLE_TO_ERROR_MAP_T handles_;
-  bool                  managed_;
   AddressType           SAP_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
@@ -231,7 +229,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                                      UserDataType>,
                         ACE_SYNCH_MUTEX> SINGLETON_T;
 
-  Net_Client_AsynchConnector_T (bool = true); // managed ?
+  Net_Client_AsynchConnector_T ();
   inline virtual ~Net_Client_AsynchConnector_T () {}
 
   // implement Net_IAsynchConnector_T
@@ -275,7 +273,6 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
   ConfigurationType*  configuration_; // connection-
   ACE_HANDLE          handle_;
-  bool                managed_;
   ACE_INET_Addr       SAP_;
 
  private:
@@ -283,7 +280,6 @@ class Net_Client_AsynchConnector_T<HandlerType,
   typedef Net_ITransportLayer_T<Net_UDPSocketConfiguration_t> ITRANSPORTLAYER_T;
   typedef ACE_Singleton<CONNECTION_MANAGER_T, ACE_SYNCH_MUTEX> CONNECTION_MANAGER_SINGLETON_T;
 
-  //ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 
@@ -351,7 +347,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                  ConfigurationType> ICONNECTOR_T;
   typedef ICONNECTOR_T IASYNCH_CONNECTOR_T;
 
-  Net_Client_AsynchConnector_T (bool = true); // managed ?
+  Net_Client_AsynchConnector_T ();
   inline virtual ~Net_Client_AsynchConnector_T () {}
 
   // implement Net_IAsynchConnector_T
@@ -372,14 +368,12 @@ class Net_Client_AsynchConnector_T<HandlerType,
   virtual HandlerType* make_handler (void);
 
   ConfigurationType*  configuration_; // connection-
-  bool                managed_;
   Net_Netlink_Addr    SAP_;
 
  private:
   // convenient types
   typedef Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t> ITRANSPORTLAYER_T;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T (const Net_Client_AsynchConnector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_AsynchConnector_T& operator= (const Net_Client_AsynchConnector_T&))
 

@@ -54,9 +54,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           UserDataType>::Net_StreamConnectionBase_T (bool managed_in)
+                           UserDataType>::Net_StreamConnectionBase_T ()
  : inherited ()
- , inherited2 (managed_in)
+ , inherited2 ()
  , allocator_ (NULL)
  , sendLock_ ()
  , stream_ ()
@@ -169,10 +169,10 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
         case NET_ROLE_CLIENT:
         {
           iconnector_p =
-              static_cast<typename inherited2::ICONNECTOR_T*> (arg_in);
+            static_cast<typename inherited2::ICONNECTOR_T*> (arg_in);
           ACE_ASSERT (iconnector_p);
           configuration_p =
-              &const_cast<ConfigurationType&> (iconnector_p->getR ());
+            &const_cast<ConfigurationType&> (iconnector_p->getR ());
           break;
         }
         case NET_ROLE_SERVER:
@@ -180,7 +180,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
           ilistener_p = static_cast<typename inherited2::ILISTENER_T*> (arg_in);
           ACE_ASSERT (ilistener_p);
           configuration_p =
-              &const_cast<ConfigurationType&> (ilistener_p->getR ());
+            &const_cast<ConfigurationType&> (ilistener_p->getR ());
 
           inherited2::listener_ = ilistener_p;
           break;
@@ -250,17 +250,14 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   } // end lock scope
 
   // step2: register with the connection manager ?
-  if (likely (inherited2::isManaged_))
+  if (unlikely (!inherited2::register_ ()))
   {
-    if (unlikely (!inherited2::register_ ()))
-    {
-      // *NOTE*: (most probably) maximum number of connections has been reached
-      //ACE_DEBUG ((LM_ERROR,
-      //            ACE_TEXT ("failed to Net_ConnectionBase_T::register_(), aborting\n")));
-      goto error;
-    } // end IF
-    handle_manager = true;
+    // *NOTE*: (most probably) maximum number of connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::register_(), aborting\n")));
+    goto error;
   } // end IF
+  handle_manager = true;
 
   // step3: initialize/start stream
   ACE_ASSERT (inherited2::configuration_);
@@ -1122,7 +1119,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           UserDataType>::allocateMessage (unsigned int requestedSize_in)
+                           UserDataType>::allocateMessage (size_t requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::allocateMessage"));
 
@@ -1203,9 +1200,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 UserDataType>::Net_AsynchStreamConnectionBase_T (bool managed_in)
+                                 UserDataType>::Net_AsynchStreamConnectionBase_T ()
  : inherited ()
- , inherited2 (managed_in)
+ , inherited2 ()
  , allocator_ (NULL)
  , stream_ ()
  , notify_ (true)
@@ -1241,7 +1238,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
   ConfigurationType* configuration_p = NULL;
-  HandlerConfigurationType* socket_handler_configuration_p = NULL;
+  //HandlerConfigurationType* socket_handler_configuration_p = NULL;
   typename inherited2::ICONNECTOR_T* iconnector_p = NULL;
   typename inherited2::ILISTENER_T* ilistener_p = NULL;
   switch (this->transportLayer ())
@@ -1254,7 +1251,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         case NET_ROLE_CLIENT:
         {
           iconnector_p =
-              static_cast<typename inherited2::ICONNECTOR_T*> (const_cast<void*> (act_in));
+            static_cast<typename inherited2::ICONNECTOR_T*> (const_cast<void*> (act_in));
           ACE_ASSERT (iconnector_p);
           configuration_p =
             &const_cast<ConfigurationType&> (iconnector_p->getR ());
@@ -1263,7 +1260,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
         case NET_ROLE_SERVER:
         {
           ilistener_p =
-              static_cast<typename inherited2::ILISTENER_T*> (const_cast<void*> (act_in));
+            static_cast<typename inherited2::ILISTENER_T*> (const_cast<void*> (act_in));
           ACE_ASSERT (ilistener_p);
           configuration_p =
             &const_cast<ConfigurationType&> (ilistener_p->getR ());
@@ -1286,7 +1283,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     case NET_TRANSPORTLAYER_UDP:
     {
       iconnector_p =
-          static_cast<typename inherited2::ICONNECTOR_T*> (const_cast<void*> (act_in));
+        static_cast<typename inherited2::ICONNECTOR_T*> (const_cast<void*> (act_in));
       ACE_ASSERT (iconnector_p);
       configuration_p =
         &const_cast<ConfigurationType&> (iconnector_p->getR ());
@@ -1310,23 +1307,22 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     }
   } // end SWITCH
   ACE_ASSERT (configuration_p);
-  socket_handler_configuration_p = &configuration_p->socketConfiguration;
 
-  if (unlikely (!HANDLER_T::initialize (*socket_handler_configuration_p)))
+  if (unlikely (!inherited2::initialize (*configuration_p)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n"),
+                id ()));
+    return;
+  } // end IF
+
+  if (unlikely (!HANDLER_T::initialize (configuration_p->socketConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_SocketHandlerBase_T::initialize(): \"%m\", returning\n"),
                 id ()));
     return;
   } // end IF
-//  if (!inherited2::isManaged_) // *TODO*: remove this 'feature' completely
-    if (unlikely (!inherited2::initialize (*configuration_p)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n"),
-                  id ()));
-      return;
-    } // end IF
 }
 
 template <typename HandlerType,
@@ -1411,17 +1407,14 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
               local_SAP, peer_SAP);
 
   // step2: register with the connection manager ?
-  if (likely (inherited2::isManaged_))
+  if (unlikely (!inherited2::register_ ()))
   {
-    if (unlikely (!inherited2::register_ ()))
-    {
-      // *NOTE*: (most probably) maximum number of connections has been reached
-      //ACE_DEBUG ((LM_ERROR,
-      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-      goto error;
-    } // end IF
-    handle_manager = true;
+    // *NOTE*: (most probably) maximum number of connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto error;
   } // end IF
+  handle_manager = true;
 
   // step3: initialize/start stream
   ACE_ASSERT (inherited2::configuration_);
@@ -2053,7 +2046,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 UserDataType>::allocateMessage (unsigned int requestedSize_in)
+                                 UserDataType>::allocateMessage (size_t requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::allocateMessage"));
 

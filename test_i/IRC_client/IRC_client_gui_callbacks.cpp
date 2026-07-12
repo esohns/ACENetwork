@@ -207,8 +207,8 @@ connection_setup_function (void* arg_in)
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  IRC_Client_Connector_t connector (true);
-  IRC_Client_AsynchConnector_t asynch_connector (true);
+  IRC_Client_Connector_t connector;
+  IRC_Client_AsynchConnector_t asynch_connector;
   IRC_Client_IConnector_t* connector_p = &connector;
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
     connector_p = &asynch_connector;

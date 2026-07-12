@@ -95,7 +95,7 @@ class Net_Client_Connector_T
   typedef Net_IAsynchConnector_T<AddressType,
                                  ConfigurationType> IASYNCH_CONNECTOR_T;
 
-  Net_Client_Connector_T (bool = true); // managed ?
+  Net_Client_Connector_T ();
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_IConnector_T
@@ -128,12 +128,10 @@ class Net_Client_Connector_T
                                  UserDataType> OWN_TYPE_T;
   typedef Net_ITransportLayer_T<HandlerConfigurationType> ITRANSPORTLAYER_T;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
   ConfigurationType* configuration_; // connection-
-  bool               managed_;
 };
 
 //////////////////////////////////////////
@@ -220,7 +218,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                                UserDataType>,
                         ACE_SYNCH_MUTEX> SINGLETON_T;
 
-  Net_Client_Connector_T (bool = true); // managed ?
+  Net_Client_Connector_T ();
   inline virtual ~Net_Client_Connector_T () {}
 
   // implement Net_IConnector_T
@@ -283,7 +281,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                  UserDataType> OWN_TYPE_T;
   typedef ACE_Singleton<CONNECTION_MANAGER_T, ACE_SYNCH_MUTEX> CONNECTION_MANAGER_SINGLETON_T;
 
-  //ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
@@ -292,7 +289,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
 
   ConfigurationType* configuration_; // connection-
   ACE_HANDLE         handle_;
-  bool               managed_;
 };
 
 #if defined (NETLINK_SUPPORT)
@@ -351,7 +347,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef Net_IAsynchConnector_T<Net_Netlink_Addr,
                                  ConfigurationType> IASYNCH_CONNECTOR_T;
 
-  Net_Client_Connector_T (bool = true); // managed ?
+  Net_Client_Connector_T ();
   inline virtual ~Net_Client_Connector_T () {}
 
   // implement Net_IConnector_T
@@ -376,7 +372,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef Net_ITransportLayer_T<Net_NetlinkSocketConfiguration_t> ITRANSPORTLAYER_T;
 
   ConfigurationType* configuration_; // connection-
-  bool               managed_;
 };
 #endif // NETLINK_SUPPORT
 

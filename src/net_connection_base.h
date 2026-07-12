@@ -89,23 +89,21 @@ class Net_ConnectionBase_T
   typedef Net_IConnector_T<AddressType, ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ConfigurationType> ILISTENER_T;
     
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_ConnectionBase_T () : inherited (1, true) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  Net_ConnectionBase_T (bool); // managed ?
+  Net_ConnectionBase_T ();
 
   // implement Common_IRegister
   virtual bool register_ ();
   virtual void deregister ();
 
   // helper methods
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  ACE_Message_Block* allocateMessage (size_t); // requested size
 
   ConfigurationType* configuration_;
   ICONNECTOR_T*      connector_; // the connector (if any (--> SERVER_ROLE))
   ILISTENER_T*       listener_; // the listener (if any (--> SERVER_ROLE))
   StateType          state_;
 
-  bool               isManaged_;
+  //bool               isManaged_;
   bool               isRegistered_;
 
  private:

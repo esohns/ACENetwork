@@ -1877,10 +1877,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
         {
           if (useReactor_in)
             ACE_NEW_NORETURN (directshow_iconnector_p,
-                              Test_I_AVStream_Server_DirectShow_UDPConnector_t (true));
+                              Test_I_AVStream_Server_DirectShow_UDPConnector_t ());
           else
             ACE_NEW_NORETURN (directshow_iconnector_p,
-                              Test_I_AVStream_Server_DirectShow_UDPAsynchConnector_t (true));
+                              Test_I_AVStream_Server_DirectShow_UDPAsynchConnector_t ());
           result_2 =
             directshow_iconnector_p->initialize (directshow_udp_connection_configuration);
           break;
@@ -1889,10 +1889,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
         {
           if (useReactor_in)
             ACE_NEW_NORETURN (mediafoundation_iconnector_p,
-                              Test_I_AVStream_Server_MediaFoundation_UDPConnector_t (true));
+                              Test_I_AVStream_Server_MediaFoundation_UDPConnector_t ());
           else
             ACE_NEW_NORETURN (mediafoundation_iconnector_p,
-                              Test_I_AVStream_Server_MediaFoundation_UDPAsynchConnector_t (true));
+                              Test_I_AVStream_Server_MediaFoundation_UDPAsynchConnector_t ());
           result_2 =
             mediafoundation_iconnector_p->initialize (mediafoundation_udp_connection_configuration);
           break;
@@ -1909,10 +1909,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
       if (useReactor_in)
         ACE_NEW_NORETURN (i_udp_connector_p,
-                          Test_I_AVStream_Server_UDPConnector_t (true));
+                          Test_I_AVStream_Server_UDPConnector_t ());
       else
         ACE_NEW_NORETURN (i_udp_connector_p,
-                          Test_I_AVStream_Server_UDPAsynchConnector_t (true));
+                          Test_I_AVStream_Server_UDPAsynchConnector_t ());
 
       result_2 = i_udp_connector_p->initialize (udp_connection_configuration);
 #endif // ACE_WIN32 || ACE_WIN64

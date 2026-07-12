@@ -880,8 +880,8 @@ do_work (bool requestBroadcastReplies_in,
   // *NOTE*: the DHCP server address may not be known at this stage, so
   //         connection to the unicast address is handled by the discovery
   //         module
-  DHCPClient_OutboundConnectorBcast_t connector (true);
-  DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector (true);
+  DHCPClient_OutboundConnectorBcast_t connector;
+  DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector;
   struct Net_UserData user_data_s;
   if (useReactor_in)
     handle =
@@ -922,8 +922,8 @@ do_work (bool requestBroadcastReplies_in,
   // step1cb: start listening ?
   if (UIDefinitionFileName_in.empty ())
   {
-    DHCPClient_InboundConnector_t connector_2 (true);
-    DHCPClient_InboundAsynchConnector_t asynch_connector_2 (true);
+    DHCPClient_InboundConnector_t connector_2;
+    DHCPClient_InboundAsynchConnector_t asynch_connector_2;
     if (useReactor_in)
       iconnector_p = &connector_2;
     else

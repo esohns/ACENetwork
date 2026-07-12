@@ -44,7 +44,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StatisticContainerType,
                        HandlerConfigurationType,
                        StreamType,
-                       UserDataType>::Net_Client_Connector_T (bool managed_in)
+                       UserDataType>::Net_Client_Connector_T ()
  : inherited (ACE_Reactor::instance (), // default reactor
               // *IMPORTANT NOTE*: ACE_NONBLOCK is only set if timeout != NULL
               //                   (see: SOCK_Connector.cpp:94), set via the
@@ -52,7 +52,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
  , configuration_ (NULL)
- , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
@@ -164,13 +163,13 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   //         Connector.cpp:409 and net_sock_connector.cpp:219 and/or
   //         SOCK_Connector.cpp:94)
   result =
-      inherited::connect (handler_p,      // service handler
-                          address_in,                      // remote SAP
-                          ACE_Synch_Options::defaults,     // synch options
-                          ACE_sap_any_cast (AddressType&), // local SAP
-                          1,                               // set SO_REUSEADDR ?
-                          O_RDWR,                          // flags
-                          0);                              // permissions
+    inherited::connect (handler_p,                       // service handler
+                        address_in,                      // remote SAP
+                        ACE_Synch_Options::defaults,     // synch options
+                        ACE_sap_any_cast (AddressType&), // local SAP
+                        1,                               // set SO_REUSEADDR ?
+                        O_RDWR,                          // flags
+                        0);                              // permissions
   if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();
@@ -242,8 +241,8 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
     handler_in->close (NORMAL_CLOSE_OPERATION);
     return -1;
   }
-  else
-    return 0;
+
+  return 0;
 }
 template <ACE_SYNCH_DECL,
           typename HandlerType,
@@ -274,7 +273,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (managed_));
+                    HandlerType ());
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -301,11 +300,10 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StatisticContainerType,
                        Net_UDPSocketConfiguration_t,
                        StreamType,
-                       UserDataType>::Net_Client_Connector_T (bool managed_in)
+                       UserDataType>::Net_Client_Connector_T ()
  : inherited2 ()
  , configuration_ (NULL)
  , handle_ (ACE_INVALID_HANDLE)
- , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
@@ -606,7 +604,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    CONNECTION_T (managed_));
+                    CONNECTION_T ());
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -728,9 +726,8 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        StatisticContainerType,
                        Net_NetlinkSocketConfiguration_t,
                        StreamType,
-                       UserDataType>::Net_Client_Connector_T (bool managed_in)
+                       UserDataType>::Net_Client_Connector_T ()
  : configuration_ (NULL)
- , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::Net_Client_Connector_T"));
 
@@ -811,7 +808,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (managed_));
+                    HandlerType ());
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

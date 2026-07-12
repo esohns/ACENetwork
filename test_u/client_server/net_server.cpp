@@ -966,8 +966,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-  Server_UDP_AsynchConnector_t udp_asynch_connector (true);
-  Server_UDP_Connector_t udp_connector (true);
+  Server_UDP_AsynchConnector_t udp_asynch_connector;
+  Server_UDP_Connector_t udp_connector;
   Test_U_ITCPListener_t* listener_p = NULL;
   switch (protocol_in)
   {

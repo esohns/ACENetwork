@@ -685,11 +685,11 @@ do_work (unsigned int bufferSize_in,
 #if defined (SSL_SUPPORT)
     if (useSSL_in)
       ACE_NEW_NORETURN (iconnector_p,
-                        Test_U_SSLConnector_t (true));
+                        Test_U_SSLConnector_t ());
     else
 #endif // SSL_SUPPORT
       ACE_NEW_NORETURN (iconnector_p,
-                        Test_U_TCPConnector_t (true));
+                        Test_U_TCPConnector_t ());
   } // end IF
   else
   {
@@ -698,7 +698,7 @@ do_work (unsigned int bufferSize_in,
     ACE_ASSERT (port_in != HTTPS_DEFAULT_SERVER_PORT);
 #endif // SSL_SUPPORT
     ACE_NEW_NORETURN (iconnector_p,
-                      Test_U_TCPAsynchConnector_t (true));
+                      Test_U_TCPAsynchConnector_t ());
   } // end ELSE
   if (!iconnector_p)
   {

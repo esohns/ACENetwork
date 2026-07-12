@@ -48,7 +48,7 @@ enum Net_Connection_Status;
 class Net_ISocketHandler
 {
  public:
-  virtual ACE_Message_Block* allocateMessage (unsigned int) = 0; // requested size
+  virtual ACE_Message_Block* allocateMessage (size_t) = 0; // requested size
   virtual bool initiate_read () = 0;
 };
 

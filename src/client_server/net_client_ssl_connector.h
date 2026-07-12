@@ -77,7 +77,7 @@ class Net_Client_SSL_Connector_T
   typedef Net_IConnector_T<ACE_INET_Addr,
                            ConfigurationType> ICONNECTOR_T;
 
-  Net_Client_SSL_Connector_T (bool = true); // managed ?
+  Net_Client_SSL_Connector_T ();
   inline virtual ~Net_Client_SSL_Connector_T () {}
 
   // implement Net_IConnector_T
@@ -97,7 +97,6 @@ class Net_Client_SSL_Connector_T
   virtual int make_svc_handler (HandlerType*&);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T (const Net_Client_SSL_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T& operator= (const Net_Client_SSL_Connector_T&))
 
@@ -112,7 +111,6 @@ class Net_Client_SSL_Connector_T
   typedef Net_ITransportLayer_T<Net_TCPSocketConfiguration_t> ITRANSPORTLAYER_T;
 
   ConfigurationType* configuration_; // connection-
-  bool               managed_;
 };
 
 // include template definition

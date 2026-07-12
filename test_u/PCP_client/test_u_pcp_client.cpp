@@ -862,8 +862,8 @@ do_work (//bool requestBroadcastReplies_in,
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In/Out"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    PCPClient_UnicastConnector_t connector_2 (true);
-    PCPClient_UnicastAsynchConnector_t asynch_connector_2 (true);
+    PCPClient_UnicastConnector_t connector_2;
+    PCPClient_UnicastAsynchConnector_t asynch_connector_2;
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<PCPClient_UnicastConnector_t> (connector_2,
@@ -908,8 +908,8 @@ do_work (//bool requestBroadcastReplies_in,
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    PCPClient_McastConnector_t connector_3 (true);
-    PCPClient_McastAsynchConnector_t asynch_connector_3 (true);
+    PCPClient_McastConnector_t connector_3;
+    PCPClient_McastAsynchConnector_t asynch_connector_3;
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<PCPClient_McastConnector_t> (connector_3,

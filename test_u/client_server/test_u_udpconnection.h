@@ -63,15 +63,13 @@ class Test_U_UDPConnection
   friend class ACE_Connector<Test_U_UDPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  Test_U_UDPConnection (bool); // managed ?
+  Test_U_UDPConnection ();
   inline virtual ~Test_U_UDPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { inherited::stream_.ping (); }
 
  private:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Test_U_UDPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   ACE_UNIMPLEMENTED_FUNC (Test_U_UDPConnection (const Test_U_UDPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_UDPConnection& operator= (const Test_U_UDPConnection&))
 };
@@ -97,15 +95,13 @@ class Test_U_AsynchUDPConnection
  friend class ACE_Asynch_Connector<Test_U_AsynchUDPConnection>;
 
  public:
-  Test_U_AsynchUDPConnection (bool); // managed ?
+  Test_U_AsynchUDPConnection ();
   inline virtual ~Test_U_AsynchUDPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { inherited::stream_.ping (); }
 
  private:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Test_U_AsynchUDPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchUDPConnection (const Test_U_AsynchUDPConnection&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchUDPConnection& operator= (const Test_U_AsynchUDPConnection&))
 };

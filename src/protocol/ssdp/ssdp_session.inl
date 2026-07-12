@@ -171,7 +171,7 @@ SSDP_Session_T<StateType,
     return;
   } // end IF
 
-  ConnectorType connector (true);
+  ConnectorType connector;
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   ConnectionManagerType* connection_manager_p = NULL;
   HTTP_IConnection_t* connection_p = NULL;
@@ -322,7 +322,7 @@ SSDP_Session_T<StateType,
     return;
   } // end IF
 
-  ConnectorType connector (true);
+  ConnectorType connector;
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   ConnectionManagerType* connection_manager_p = NULL;
   HTTP_IConnection_t* connection_p = NULL;
@@ -517,7 +517,7 @@ SSDP_Session_T<StateType,
     return;
   } // end IF
 
-  ConnectorType connector (true);
+  ConnectorType connector;
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   ConnectionManagerType* connection_manager_p = NULL;
   HTTP_IConnection_t* connection_p = NULL;

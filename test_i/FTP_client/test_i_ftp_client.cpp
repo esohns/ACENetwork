@@ -863,8 +863,8 @@ do_work (//bool requestBroadcastReplies_in,
   if (UIDefinitionFileName_in.empty ())
   {
     FTP_Client_IConnection_t* iconnection_p = NULL;
-    FTP_Client_Connector_t connector (true);
-    FTP_Client_AsynchConnector_t asynch_connector (true);
+    FTP_Client_Connector_t connector;
+    FTP_Client_AsynchConnector_t asynch_connector;
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<FTP_Client_Connector_t> (connector,

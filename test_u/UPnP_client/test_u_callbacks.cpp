@@ -1507,12 +1507,12 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //    UPnP_Client_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
 //      connection_manager_p;
 //    ACE_ASSERT (iconnection_manager_p);
-    UPnP_Client_OutboundConnector_t connector_out (true);
-    UPnP_Client_OutboundAsynchConnector_t asynch_connector_out (true);
-    UPnP_Client_InboundConnector_t connector (true);
-    UPnP_Client_InboundAsynchConnector_t asynch_connector (true);
-    UPnP_Client_InboundConnectorMcast_t connector_mcast (true);
-    UPnP_Client_InboundAsynchConnectorMcast_t asynch_connector_mcast (true);
+    UPnP_Client_OutboundConnector_t connector_out;
+    UPnP_Client_OutboundAsynchConnector_t asynch_connector_out;
+    UPnP_Client_InboundConnector_t connector;
+    UPnP_Client_InboundAsynchConnector_t asynch_connector;
+    UPnP_Client_InboundConnectorMcast_t connector_mcast;
+    UPnP_Client_InboundAsynchConnectorMcast_t asynch_connector_mcast;
     //UPnP_Client_IConnection_t* iconnection_p = NULL;
 
     // *IMPORTANT NOTE*: bind()ing is weird. On Windows systems, the FIRST bound

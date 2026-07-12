@@ -166,7 +166,7 @@ Net_SessionBase_T<AddressType,
   ACE_ASSERT (configuration_);
 
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
-  ConnectorType connector (true);
+  ConnectorType connector;
 
   typename ConnectorType::CONNECTION_MANAGER_T::INTERFACE_T* iconnection_manager_p =
     ConnectorType::CONNECTION_MANAGER_T::SINGLETON_T::instance ();

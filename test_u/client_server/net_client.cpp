@@ -629,10 +629,10 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //  typename Test_U_UDPConnectionManager_t::INTERFACE_T* iconnection_manager_2 =
 //    connection_manager_2;
 
-  Client_TCP_AsynchConnector_t asynch_tcp_connector (true);
-  Client_TCP_Connector_t tcp_connector (true);
+  Client_TCP_AsynchConnector_t asynch_tcp_connector;
+  Client_TCP_Connector_t tcp_connector;
 #if defined (SSL_SUPPORT)
-  Client_SSL_Connector_t ssl_connector (true);
+  Client_SSL_Connector_t ssl_connector;
 
   std::string module_name =
     ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
@@ -657,8 +657,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     return;
   } // end IF
 #endif // SSL_SUPPORT
-  Client_UDP_AsynchConnector_t asynch_udp_connector (true);
-  Client_UDP_Connector_t udp_connector (true);
+  Client_UDP_AsynchConnector_t asynch_udp_connector;
+  Client_UDP_Connector_t udp_connector;
   Test_U_ITCPConnector_t* connector_p = NULL;
   Test_U_IUDPConnector_t* connector_2 = NULL;
   switch (protocol_in)

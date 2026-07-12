@@ -36,35 +36,34 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     UserDataType>::Net_ConnectionBase_T (bool managed_in)
+                     UserDataType>::Net_ConnectionBase_T ()
  : inherited (1,    // initial count
               true) // delete on zero ?
  , configuration_ (NULL)
  , connector_ (NULL)
  , listener_ (NULL)
  , state_ ()
- , isManaged_ (managed_in)
  , isRegistered_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::Net_ConnectionBase_T"));
 
-  // initialize configuration/user data ?
-  if (likely (isManaged_))
-  {
-    typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
-        CONNECTION_MANAGER_T::SINGLETON_T::instance ();
-    ACE_ASSERT (manager_p);
-    try {
-      // get (default) configuration/user data from the connection manager
-      // *TODO*: remove type inference
-      manager_p->get (configuration_,
-                      state_.userData);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::get(), continuing\n")));
-    }
-    ACE_ASSERT (configuration_);
-  } // end IF
+  //// initialize configuration/user data ?
+  //if (likely (isManaged_))
+  //{
+  //  typename CONNECTION_MANAGER_T::INTERFACE_T* manager_p =
+  //      CONNECTION_MANAGER_T::SINGLETON_T::instance ();
+  //  ACE_ASSERT (manager_p);
+  //  try {
+  //    // get (default) configuration/user data from the connection manager
+  //    // *TODO*: remove type inference
+  //    manager_p->get (configuration_,
+  //                    state_.userData);
+  //  } catch (...) {
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("caught exception in Net_IConnectionManager_T::get(), continuing\n")));
+  //  }
+  //  ACE_ASSERT (configuration_);
+  //} // end IF
 }
 
 template <ACE_SYNCH_DECL,
@@ -251,7 +250,7 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
-                     UserDataType>::allocateMessage (unsigned int requestedSize_in)
+                     UserDataType>::allocateMessage (size_t requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::allocateMessage"));
 

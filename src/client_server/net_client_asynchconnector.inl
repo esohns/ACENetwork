@@ -42,11 +42,10 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StatisticContainerType,
                              HandlerConfigurationType,
                              StreamType,
-                             UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
+                             UserDataType>::Net_Client_AsynchConnector_T ()
  : inherited ()
  , configuration_ (NULL)
  , handles_ ()
- , managed_ (managed_in)
  , SAP_ ()
  , lock_ ()
  , condition_ (lock_)
@@ -252,7 +251,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0602) // _WIN32_WINNT_WIN8
   // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if ((protocol_family_i == PF_INET)                 &&
       remoteAddress_in.is_loopback ()                &&
@@ -658,7 +657,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_p,
-                    HandlerType (managed_));
+                    HandlerType ());
   if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -681,10 +680,9 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StatisticContainerType,
                              Net_UDPSocketConfiguration_t,
                              StreamType,
-                             UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
+                             UserDataType>::Net_Client_AsynchConnector_T ()
  : configuration_ (NULL)
  , handle_ (ACE_INVALID_HANDLE)
- , managed_ (managed_in)
  , SAP_ ()
  , lock_ ()
  , condition_ (lock_)
@@ -974,7 +972,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   // default behavior
   // *TODO*: remove type inference
   ACE_NEW_NORETURN (handler_p,
-                    CONNECTION_T (managed_));
+                    CONNECTION_T ());
   if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -998,9 +996,8 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StatisticContainerType,
                              Net_NetlinkSocketConfiguration_t,
                              StreamType,
-                             UserDataType>::Net_Client_AsynchConnector_T (bool managed_in)
+                             UserDataType>::Net_Client_AsynchConnector_T ()
  : configuration_ (NULL)
- , managed_ (managed_in)
  , SAP_ ()
  , lock_ ()
  , condition_ (lock_)
@@ -1138,7 +1135,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_p,
-                    HandlerType (managed_));
+                    HandlerType ());
   if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

@@ -41,7 +41,7 @@ Net_Client_SSL_Connector_T<HandlerType,
                            StateType,
                            StatisticContainerType,
                            StreamType,
-                           UserDataType>::Net_Client_SSL_Connector_T (bool managed_in)
+                           UserDataType>::Net_Client_SSL_Connector_T ()
  : inherited (ACE_Reactor::instance (), // default reactor
               // *IMPORTANT NOTE*: ACE_NONBLOCK is only set if timeout != NULL
               //                   (see: SOCK_Connector.cpp:94), set via the
@@ -49,7 +49,6 @@ Net_Client_SSL_Connector_T<HandlerType,
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
  , configuration_ (NULL)
- , managed_ (managed_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::Net_Client_SSL_Connector_T"));
 
@@ -85,13 +84,13 @@ Net_Client_SSL_Connector_T<HandlerType,
   //         Connector.cpp:409 and net_sock_connector.cpp:219 and/or
   //         SOCK_Connector.cpp:94)
   result =
-      inherited::connect (handler_p,      // service handler
-                          address_in,     // remote SAP
-                          synch_options,  // synch options
-                          local_address,  // local SAP
-                          reuse_addr_i,   // re-use address ?
-                          flags_i,        // flags
-                          permissions_i); // permissions
+    inherited::connect (handler_p,      // service handler
+                        address_in,     // remote SAP
+                        synch_options,  // synch options
+                        local_address,  // local SAP
+                        reuse_addr_i,   // re-use address ?
+                        flags_i,        // flags
+                        permissions_i); // permissions
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -154,8 +153,8 @@ Net_Client_SSL_Connector_T<HandlerType,
     handler_in->close (NORMAL_CLOSE_OPERATION);
     return -1;
   }
-  else
-    return 0;
+
+  return 0;
 }
 
 template <typename HandlerType,
@@ -181,7 +180,7 @@ Net_Client_SSL_Connector_T<HandlerType,
 
   // default behavior
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (managed_));
+                    HandlerType ());
   if (unlikely (!handler_out))
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -208,11 +207,12 @@ Net_Client_SSL_Connector_T<HandlerType,
 
   typename HandlerType::stream_type& stream_r = handler_out->peer ();
   SSL* context_p = stream_r.ssl ();
+  ACE_ASSERT (context_p);
 
   // support TLS SNI
   int result = -1;
   if (!configuration_->socketConfiguration.hostname.empty ())
-  { ACE_ASSERT (context_p);
+  {
     result =
       //SSL_ctrl (context_p, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, (void*)configuration_->socketConfiguration.hostname.c_str ());
       SSL_set_tlsext_host_name (context_p,
@@ -245,7 +245,7 @@ Net_Client_SSL_Connector_T<HandlerType,
 
   // set options
   if (configuration_->socketConfiguration.method)
-  { ACE_ASSERT (context_p);
+  {
     result = SSL_set_ssl_method (context_p,
                                  configuration_->socketConfiguration.method);
     if (unlikely (result == 0))
@@ -261,7 +261,7 @@ Net_Client_SSL_Connector_T<HandlerType,
   } // end IF
 
   if (configuration_->socketConfiguration.minimalVersion)
-  { ACE_ASSERT (context_p);
+  {
     SSL_set_min_proto_version (context_p,
                                configuration_->socketConfiguration.minimalVersion);
     ACE_DEBUG ((LM_DEBUG,
@@ -269,7 +269,7 @@ Net_Client_SSL_Connector_T<HandlerType,
                 configuration_->socketConfiguration.minimalVersion));
   } // end IF
   if (configuration_->socketConfiguration.maximalVersion)
-  { ACE_ASSERT (context_p);
+  {
     SSL_set_max_proto_version (context_p,
                                configuration_->socketConfiguration.maximalVersion);
     ACE_DEBUG ((LM_DEBUG,

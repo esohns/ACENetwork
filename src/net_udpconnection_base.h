@@ -93,9 +93,7 @@ class Net_UDPConnectionBase_T
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_UDPConnectionBase_T (bool); // managed ?
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_UDPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  Net_UDPConnectionBase_T ();
   inline virtual ~Net_UDPConnectionBase_T () {}
 
   using inherited::close;
@@ -191,7 +189,7 @@ class Net_AsynchUDPConnectionBase_T
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_AsynchUDPConnectionBase_T (bool); // managed ?
+  Net_AsynchUDPConnectionBase_T ();
   inline virtual ~Net_AsynchUDPConnectionBase_T () {}
 
   // implement (part of) Net_ITransportLayer_T
@@ -223,10 +221,6 @@ class Net_AsynchUDPConnectionBase_T
 
   // implement Common_IReset
   virtual void reset ();
-
- protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_AsynchUDPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T (const Net_AsynchUDPConnectionBase_T&))

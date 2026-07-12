@@ -135,7 +135,7 @@ class Net_TCPConnectionBase_T
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_TCPConnectionBase_T (bool); // managed ?
+  Net_TCPConnectionBase_T ();
   inline virtual ~Net_TCPConnectionBase_T () {}
 
   // implement (part of) Net_ITransportLayer_T
@@ -155,10 +155,6 @@ class Net_TCPConnectionBase_T
 
   // connector complains
   using inherited::SVC_HANDLER_T::reactor;
-
- protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_TCPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_TCPConnectionBase_T (const Net_TCPConnectionBase_T&))
@@ -224,7 +220,7 @@ class Net_AsynchTCPConnectionBase_T
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
 
-  Net_AsynchTCPConnectionBase_T (bool); // managed ?
+  Net_AsynchTCPConnectionBase_T ();
   inline virtual ~Net_AsynchTCPConnectionBase_T () {}
 
   // implement (part of) Net_ITransportLayer_T
@@ -246,10 +242,6 @@ class Net_AsynchTCPConnectionBase_T
 
   // implement (part of) Net_IStreamConnection_T
   inline virtual void info (ACE_HANDLE& handle_out, ACE_INET_Addr& localSAP_out, ACE_INET_Addr& peerSAP_out) const { handle_out = inherited::handle (); localSAP_out = inherited::localSAP_; peerSAP_out = inherited::peerSAP_; };
-
- protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Net_AsynchTCPConnectionBase_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // *IMPORTANT NOTE*: supports synchronicity-agnostic connections
   inline virtual int open (void* = NULL) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }

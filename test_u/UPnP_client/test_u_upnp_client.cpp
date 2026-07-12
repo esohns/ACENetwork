@@ -989,8 +989,8 @@ do_work (//bool requestBroadcastReplies_in,
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    UPnP_Client_InboundConnector_t connector_2 (true);
-    UPnP_Client_InboundAsynchConnector_t asynch_connector_2 (true);
+    UPnP_Client_InboundConnector_t connector_2;
+    UPnP_Client_InboundAsynchConnector_t asynch_connector_2;
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_InboundConnector_t> (connector_2,
@@ -1031,8 +1031,8 @@ do_work (//bool requestBroadcastReplies_in,
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("In_2"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    UPnP_Client_InboundConnectorMcast_t connector_3 (true);
-    UPnP_Client_InboundAsynchConnectorMcast_t asynch_connector_3 (true);
+    UPnP_Client_InboundConnectorMcast_t connector_3;
+    UPnP_Client_InboundAsynchConnectorMcast_t asynch_connector_3;
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_InboundConnectorMcast_t> (connector_3,
@@ -1076,8 +1076,8 @@ do_work (//bool requestBroadcastReplies_in,
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    UPnP_Client_OutboundConnector_t connector (true);
-    UPnP_Client_OutboundAsynchConnector_t asynch_connector (true);
+    UPnP_Client_OutboundConnector_t connector;
+    UPnP_Client_OutboundAsynchConnector_t asynch_connector;
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (connector,

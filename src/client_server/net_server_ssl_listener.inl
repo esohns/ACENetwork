@@ -443,7 +443,7 @@ Net_Server_SSL_Listener_T<HandlerType,
   // default behavior
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (handler_out,
-                    HandlerType (true)); // managed ?
+                    HandlerType ());
   if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

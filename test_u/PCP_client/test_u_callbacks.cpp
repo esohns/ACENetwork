@@ -1435,10 +1435,10 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 //    PCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
 //      connection_manager_p;
 //    ACE_ASSERT (iconnection_manager_p);
-    PCPClient_UnicastConnector_t connector (true);
-    PCPClient_UnicastAsynchConnector_t asynch_connector (true);
-    PCPClient_McastConnector_t connector_mcast (true);
-    PCPClient_McastAsynchConnector_t asynch_connector_mcast (true);
+    PCPClient_UnicastConnector_t connector;
+    PCPClient_UnicastAsynchConnector_t asynch_connector;
+    PCPClient_McastConnector_t connector_mcast;
+    PCPClient_McastAsynchConnector_t asynch_connector_mcast;
     PCPClient_IConnection_t* iconnection_p = NULL;
 
     // listen on unicast port

@@ -44,8 +44,8 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        UserDataType>::Net_UDPConnectionBase_T (bool managed_in)
- : inherited (managed_in)
+                        UserDataType>::Net_UDPConnectionBase_T ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
 
@@ -630,8 +630,8 @@ Net_AsynchUDPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              UserDataType>::Net_AsynchUDPConnectionBase_T (bool managed_in)
- : inherited (managed_in)
+                              UserDataType>::Net_AsynchUDPConnectionBase_T ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::Net_AsynchUDPConnectionBase_T"));
 

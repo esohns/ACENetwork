@@ -70,15 +70,11 @@ class Test_U_TCPConnection
   friend class ACE_Connector<Test_U_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  Test_U_TCPConnection (bool); // managed ?
+  Test_U_TCPConnection ();
   inline virtual ~Test_U_TCPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { inherited::stream_.ping (); }
-
- protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Test_U_TCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_TCPConnection (const Test_U_TCPConnection&))
@@ -105,15 +101,11 @@ class Test_U_AsynchTCPConnection
  friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
 
  public:
-  Test_U_AsynchTCPConnection (bool); // managed ?
+  Test_U_AsynchTCPConnection ();
   inline virtual ~Test_U_AsynchTCPConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { inherited::stream_.ping (); }
-
- protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Test_U_AsynchTCPConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_AsynchTCPConnection (const Test_U_AsynchTCPConnection&))
@@ -145,15 +137,11 @@ class Test_U_SSLConnection
   friend class ACE_Connector<Test_U_SSLConnection, ACE_SSL_SOCK_Connector>;
 
  public:
-  Test_U_SSLConnection (bool); // managed ?
+  Test_U_SSLConnection ();
   inline virtual ~Test_U_SSLConnection () {}
 
   // implement Net_IPing
   inline virtual void ping () { inherited::stream_.ping (); }
-
- protected:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline Test_U_SSLConnection () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_SSLConnection (const Test_U_SSLConnection&))

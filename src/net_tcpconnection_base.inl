@@ -37,8 +37,8 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
                         StateType,
                         StatisticContainerType,
                         StreamType,
-                        UserDataType>::Net_TCPConnectionBase_T (bool managed_in)
- : inherited (managed_in)
+                        UserDataType>::Net_TCPConnectionBase_T ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::Net_TCPConnectionBase_T"));
 
@@ -364,8 +364,8 @@ Net_AsynchTCPConnectionBase_T<SocketHandlerType,
                               StateType,
                               StatisticContainerType,
                               StreamType,
-                              UserDataType>::Net_AsynchTCPConnectionBase_T (bool managed_in)
- : inherited (managed_in)
+                              UserDataType>::Net_AsynchTCPConnectionBase_T ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::Net_AsynchTCPConnectionBase_T"));
 

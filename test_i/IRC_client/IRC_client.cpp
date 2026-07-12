@@ -789,8 +789,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   //IRC_Client_ConnectorConfiguration connector_configuration;
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  IRC_Client_SessionConnector_t connector (true);
-  IRC_Client_AsynchSessionConnector_t asynch_connector (true);
+  IRC_Client_SessionConnector_t connector;
+  IRC_Client_AsynchSessionConnector_t asynch_connector;
   IRC_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     connector_p = &connector;
