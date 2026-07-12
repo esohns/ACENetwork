@@ -61,6 +61,8 @@
 #include "ssdp_isession.h"
 #include "ssdp_session.h"
 
+#include "test_u_connection_stream.h"
+
 // forward declarations
 class Test_U_InboundSSDPConnectionStream;
 class Test_U_OutboundSSDPConnectionStream;

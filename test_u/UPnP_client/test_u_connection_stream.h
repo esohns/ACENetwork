@@ -38,10 +38,21 @@
 
 #include "test_u_message.h"
 #include "test_u_session_message.h"
-#include "test_u_upnp_client_common.h"
+//#include "test_u_upnp_client_common.h"
 
-// forward declarations
-// class Test_U_SessionMessage;
+struct UPnP_Client_StreamState
+ : Test_U_StreamState
+{
+  UPnP_Client_StreamState ()
+   : Test_U_StreamState ()
+   //, sessionData (NULL)
+   , userData (NULL)
+  {}
+
+  //struct UPnP_Client_SessionData* sessionData;
+
+  struct Stream_UserData*        userData;
+};
 
 typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  enum Stream_SessionMessageType,

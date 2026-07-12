@@ -178,20 +178,6 @@ struct UPnP_Client_StreamConfiguration
   struct Stream_Module_XMLParser_SAXParserContextBase* parserContext; // XML-
 };
 
-struct UPnP_Client_StreamState
- : Test_U_StreamState
-{
-  UPnP_Client_StreamState ()
-   : Test_U_StreamState ()
-   , sessionData (NULL)
-   , userData (NULL)
-  {}
-
-  struct UPnP_Client_SessionData* sessionData;
-
-  struct Stream_UserData*        userData;
-};
-
 struct UPnP_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
@@ -288,6 +274,13 @@ struct UPnP_Client_UI_CBData
    , gatewayAddress ()
    , interfaceAddress ()
    , progressData ()
+   ///////////////////////////////////////
+   , connector_out ()
+   , asynch_connector_out ()
+   , connector ()
+   , asynch_connector ()
+   , connector_mcast ()
+   , asynch_connector_mcast ()
   {}
 
   struct UPnP_Client_Configuration*  configuration;
@@ -297,6 +290,16 @@ struct UPnP_Client_UI_CBData
   ACE_INET_Addr                      gatewayAddress;
   ACE_INET_Addr                      interfaceAddress;
   struct UPnP_Client_UI_ProgressData progressData;
+
+  ////////////////////////////////////////
+
+  // *NOTE*: this ensures these do not fall off the stack early...
+  UPnP_Client_OutboundConnector_t           connector_out;
+  UPnP_Client_OutboundAsynchConnector_t     asynch_connector_out;
+  UPnP_Client_InboundConnector_t            connector;
+  UPnP_Client_InboundAsynchConnector_t      asynch_connector;
+  UPnP_Client_InboundConnectorMcast_t       connector_mcast;
+  UPnP_Client_InboundAsynchConnectorMcast_t asynch_connector_mcast;
 };
 
 struct UPnP_Client_ThreadData

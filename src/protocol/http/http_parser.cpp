@@ -1310,6 +1310,13 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
   case 2: /* $@1: %empty  */
                                                      { if (unlikely (iparser_p->headerOnly ()))
                                                        {
+                                                          try {
+                                                           iparser_p->finished ();
+                                                         } catch (...) {
+                                                           ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                                                         }
+
                                                          struct HTTP_Record& record_r =
                                                            iparser_p->current ();
                                                          struct HTTP_Record* record_p =

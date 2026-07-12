@@ -226,15 +226,27 @@ Net_ConnectionBase_T<ACE_SYNCH_USE,
               manager_p->count ()));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  if (connector_p || listener_p)
+  // (try to) notify the (UDP-) connector and/or listener (server-side only !)
+  // *NOTE*: make sure the connector/listener have not fallen of the stack yet
+  // notify the (UDP-) connector (server-side only !)
+  if (connector_p)
   {
-    // notify the (UDP-) connector (server-side only !)
-    if (connector_p)
+    try {
       connector_p->disconnect (handle_h);
-
-    // notify the listener (server-side only !)
-    if (listener_p)
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_IConnector_T::disconnect(), continuing\n")));
+    }
+  } // end IF
+  // notify the listener (server-side only !)
+  if (listener_p)
+  {
+    try {
       listener_p->disconnect (handle_h);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_IListener_T::disconnect(), continuing\n")));
+    }
   } // end IF
 }
 

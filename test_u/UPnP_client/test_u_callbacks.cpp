@@ -1491,9 +1491,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #else
-          connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #endif // ACE_WIN32 || ACE_WIN64
       if (iconnection_p)
       {
@@ -1504,18 +1504,8 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 
     Net_ConnectionConfigurationsIterator_t iterator_3;
-//    UPnP_Client_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
-//      connection_manager_p;
-//    ACE_ASSERT (iconnection_manager_p);
-    UPnP_Client_OutboundConnector_t connector_out;
-    UPnP_Client_OutboundAsynchConnector_t asynch_connector_out;
-    UPnP_Client_InboundConnector_t connector;
-    UPnP_Client_InboundAsynchConnector_t asynch_connector;
-    UPnP_Client_InboundConnectorMcast_t connector_mcast;
-    UPnP_Client_InboundAsynchConnectorMcast_t asynch_connector_mcast;
-    //UPnP_Client_IConnection_t* iconnection_p = NULL;
 
-    // *IMPORTANT NOTE*: bind()ing is weird. On Windows systems, the FIRST bound
+    // *IMPORTANT NOTE*: bind()ing is weird. On Win32 systems, the FIRST bound
     //                   socket will receive the inbound data. On Linux, it is
     //                   the LAST...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1525,18 +1515,18 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     // connect (multicast out)
     iterator_3 =
-        data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->outboundHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (connector_out,
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (data_p->connector_out,
                                                                            *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
                                                                            data_p->configuration->userData,
                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
                                                                            true, true);
     else
       data_p->configuration->outboundHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnector_t> (asynch_connector_out,
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnector_t> (data_p->asynch_connector_out,
                                                                                  *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
                                                                                  data_p->configuration->userData,
                                                                                  NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
@@ -1565,7 +1555,7 @@ continue_:
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<UPnP_Client_InboundConnector_t> (connector,
+        Net_Client_Common_Tools::connect<UPnP_Client_InboundConnector_t> (data_p->connector,
                                                                           *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
                                                                           data_p->configuration->userData,
                                                                           NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1573,7 +1563,7 @@ continue_:
                                                                           false);
     else
       data_p->configuration->handle =
-        Net_Client_Common_Tools::connect<UPnP_Client_InboundAsynchConnector_t> (asynch_connector,
+        Net_Client_Common_Tools::connect<UPnP_Client_InboundAsynchConnector_t> (data_p->asynch_connector,
                                                                                 *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
                                                                                 data_p->configuration->userData,
                                                                                 NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1604,14 +1594,14 @@ continue_:
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_InboundConnectorMcast_t> (connector_mcast,
-                                                                               *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
-                                                                               data_p->configuration->userData,
-                                                                               NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
-                                                                               true, false);
+        Net_Client_Common_Tools::connect (data_p->connector_mcast,
+                                          *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
+                                          data_p->configuration->userData,
+                                          NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
+                                          true, false);
     else
       data_p->configuration->multicastHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_InboundAsynchConnectorMcast_t> (asynch_connector_mcast,
+        Net_Client_Common_Tools::connect<UPnP_Client_InboundAsynchConnectorMcast_t> (data_p->asynch_connector_mcast,
                                                                                      *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
                                                                                      data_p->configuration->userData,
                                                                                      NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.listenAddress,
@@ -1645,14 +1635,14 @@ continue_:
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       data_p->configuration->outboundHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (connector_out,
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (data_p->connector_out,
                                                                            *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
                                                                            data_p->configuration->userData,
                                                                            NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,
                                                                            true, true);
     else
       data_p->configuration->outboundHandle =
-        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnector_t> (asynch_connector_out,
+        Net_Client_Common_Tools::connect<UPnP_Client_OutboundAsynchConnector_t> (data_p->asynch_connector_out,
                                                                                  *static_cast<UPnP_Client_SSDP_ConnectionConfiguration*> ((*iterator_3).second),
                                                                                  data_p->configuration->userData,
                                                                                  NET_CONFIGURATION_UDP_CAST ((*iterator_3).second)->socketConfiguration.peerAddress,

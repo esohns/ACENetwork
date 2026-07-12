@@ -31,8 +31,12 @@
 #include "http_common.h"
 //#include "upnp_session.h"
 
-#include "test_u_connection_common.h"
+//#include "test_u_connection_common.h"
 #include "test_u_message.h"
+
+// forward declarations
+class UPnP_Client_HTTP_ConnectionConfiguration;
+class UPnP_Client_SSDP_ConnectionConfiguration;
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  UPnP_Client_SSDP_ConnectionConfiguration,
