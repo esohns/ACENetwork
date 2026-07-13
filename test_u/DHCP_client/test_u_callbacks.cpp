@@ -1312,9 +1312,10 @@ action_inform_activate_cb (GtkAction* action_in,
   ACE_ASSERT (istream_connection_2);
   struct DHCP_ConnectionState& state_r =
     const_cast<struct DHCP_ConnectionState&> (istream_connection_2->state ());
-
+  const Test_U_InboundConnectionStream& stream_r =
+    istream_connection_2->stream ();
   struct DHCPClient_SessionData& session_data_r =
-    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR ());
+    const_cast<struct DHCPClient_SessionData&> (Test_U_SessionManager_t::SINGLETON_T::instance ()->getR (stream_r.id ()));
 
   // clean up
   iconnection_p->decrease (); iconnection_p = NULL;
@@ -1412,9 +1413,7 @@ allocate:
     Net_Common_Tools::interfaceToLinkLayerAddress (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (DHCP_CHADDR_SIZE > ETH_ALEN);
-  ACE_OS::memcpy (&(DHCP_record.chaddr),
-                  &(ether_addrs_s.ether_addr_octet),
-                  ETH_ALEN);
+  ACE_OS::memcpy (&(DHCP_record.chaddr), &(ether_addrs_s.ether_addr_octet), ETH_ALEN);
   // *TODO*: support optional options:
   //         - 'overload'                (52)
   char message_type = DHCP_Codes::DHCP_MESSAGE_INFORM;

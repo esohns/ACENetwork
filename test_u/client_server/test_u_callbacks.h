@@ -28,6 +28,7 @@
 // idle routines
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
+gboolean idle_update_log_display_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
 gboolean idle_end_session_cb (gpointer);

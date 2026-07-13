@@ -173,6 +173,85 @@ idle_update_info_display_cb (gpointer userData_in)
   return G_SOURCE_CONTINUE;
 }
 
+gboolean
+idle_update_log_display_cb (gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
+
+  // sanity check(s)
+  struct Test_U_GTK_CBData* data_p =
+    static_cast<struct Test_U_GTK_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  GtkTextView* view_p =
+    GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_TEXTVIEW_NAME)));
+  ACE_ASSERT (view_p);
+  GtkTextBuffer* buffer_p = gtk_text_view_get_buffer (view_p);
+  ACE_ASSERT (buffer_p);
+
+  GtkTextIter text_iterator;
+  gtk_text_buffer_get_end_iter (buffer_p,
+                                &text_iterator);
+
+  gchar* string_p = NULL;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->logQueueLock, G_SOURCE_REMOVE);
+    while (!data_p->UIState->logQueue.empty ())
+    {
+      // step1: convert text
+      string_p = Common_UI_GTK_Tools::localeToUTF8 (data_p->UIState->logQueue.front ());
+      if (!string_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
+                    ACE_TEXT (data_p->UIState->logQueue.front ().c_str ())));
+        return G_SOURCE_REMOVE;
+      } // end IF
+
+      // step2: display text
+      gtk_text_buffer_insert (buffer_p,
+                              &text_iterator,
+                              string_p,
+                              -1);
+
+      // clean up
+      g_free (string_p); string_p = NULL;
+
+      data_p->UIState->logQueue.pop_front ();
+    } // end WHILE
+  } // end lock scope
+
+  // step3: scroll the view accordingly
+//  // move the iterator to the beginning of line, so it doesn't scroll
+//  // in horizontal direction
+//  gtk_text_iter_set_line_offset (&text_iterator, 0);
+
+//  // ...and place the mark at iter. The mark will stay there after insertion
+//  // because it has "right" gravity
+//  GtkTextMark* text_mark_p =
+//      gtk_text_buffer_get_mark (buffer_p,
+//                                ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_SCROLLMARK_NAME));
+////  gtk_text_buffer_move_mark (buffer_p,
+////                             text_mark_p,
+////                             &text_iterator);
+
+//  // scroll the mark onscreen
+//  gtk_text_view_scroll_mark_onscreen (view_p,
+//                                      text_mark_p);
+  //GtkAdjustment* adjustment_p =
+  //    GTK_ADJUSTMENT (gtk_builder_get_object ((*iterator).second.second,
+  //                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_STREAM_UI_GTK_ADJUSTMENT_NAME)));
+  //ACE_ASSERT (adjustment_p);
+  //gtk_adjustment_set_value (adjustment_p,
+  //                          adjustment_p->upper - adjustment_p->page_size));
+
+  return G_SOURCE_CONTINUE;
+}
+
 //////////////////////////////////////////
 
 gboolean
@@ -315,7 +394,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   unsigned int ping_interval =
     data_p->configuration->protocolConfiguration.pingInterval.msec ();
   gtk_spin_button_set_value (spin_button_p,
-    static_cast<gdouble> (ping_interval));
+                             static_cast<gdouble> (ping_interval));
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -330,7 +409,19 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   // step5: initialize updates
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the info view
-    guint event_source_id =
+    guint event_source_id = g_timeout_add_seconds (1,
+                                                   idle_update_log_display_cb,
+                                                   userData_in);
+    if (event_source_id > 0)
+      data_p->UIState->eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
+      return G_SOURCE_REMOVE;
+    } // end ELSE
+  
+    event_source_id =
       g_timeout_add (NET_UI_GTK_EVENT_RESOLUTION,
                      idle_update_info_display_cb,
                      userData_in);
@@ -606,7 +697,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   unsigned int ping_interval =
     data_p->configuration->protocolConfiguration.pingInterval.msec ();
   gtk_spin_button_set_value (spin_button_p,
-    static_cast<gdouble> (ping_interval));
+                             static_cast<gdouble> (ping_interval));
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -623,7 +714,19 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   // step4: initialize updates
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the log view
-    guint event_source_id =
+    guint event_source_id = g_timeout_add_seconds (1,
+                                                   idle_update_log_display_cb,
+                                                   userData_in);
+    if (event_source_id > 0)
+      data_p->UIState->eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
+      return G_SOURCE_REMOVE;
+    } // end ELSE
+
+    event_source_id =
       g_timeout_add (NET_UI_GTK_EVENT_RESOLUTION,
                      idle_update_info_display_cb,
                      userData_in);
@@ -1451,6 +1554,7 @@ continue_:
 //    gtk_spin_button_set_value (spin_button_p, 0.0);
 //  } // end IF
 } // spinbutton_connections_value_changed_client_cb
+
 void
 spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
                                                 gpointer userData_in)
@@ -1545,6 +1649,7 @@ spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton* spinButton_in,
   gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   data_p->configuration->protocolConfiguration.pingInterval.set_msec (value);
 } // spinbutton_ping_interval_value_changed_client_cb
+
 void
 spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton* spinButton_in,
                                                   gpointer userData_in)

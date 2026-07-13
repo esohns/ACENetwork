@@ -1227,11 +1227,11 @@ ACE_TMAIN (int argc_in,
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
   std::string network_interface =
-      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
@@ -1329,9 +1329,8 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
   std::string log_file_name;
   if (log_to_file)
-    log_file_name =
-      Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                    Common_File_Tools::basename (ACE_TEXT_ALWAYS_CHAR (argv_in[0]), true));
+    log_file_name = Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                                 Common_File_Tools::basename (ACE_TEXT_ALWAYS_CHAR (argv_in[0]), true));
   if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]),    // program name
                                      log_file_name,                 // log file name
                                      true,                          // log to syslog ?

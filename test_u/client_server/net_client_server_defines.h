@@ -72,6 +72,7 @@
 #define NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME          "spinbutton_messages"
 #define NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME   "spinbutton_session_messages"
 #define NET_UI_GTK_SPINBUTTON_PINGINTERVAL_NAME         "spinbutton_ping_interval"
+#define NET_UI_GTK_TEXTVIEW_NAME                        "textview"
 
 // -----------------------------------------------------------------------------
 
