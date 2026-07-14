@@ -22,7 +22,13 @@
 #define WLAN_MONITOR_DEFINES_H
 
 // --- gtk ---
+#if defined (GTK2_USE)
+#define WLAN_MONITOR_UI_DEFINITION_FILE                   "wlan_monitor.gtk2"
+#elif defined (GTK3_USE)
+#define WLAN_MONITOR_UI_DEFINITION_FILE                   "wlan_monitor.gtk3"
+#else
 #define WLAN_MONITOR_UI_DEFINITION_FILE                   "wlan_monitor.glade"
+#endif // GTK2_USE || GTK3_USE
 
 #define WLAN_MONITOR_GTK_ABOUTDIALOG_NAME                 "aboutdialog"
 #define WLAN_MONITOR_GTK_ADJUSTMENT_SCROLLEDWINDOW_V_NAME "adjustment_scrolledwindow_v"

@@ -31,7 +31,7 @@ endif (UNIX)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -41,7 +41,7 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -119,25 +119,28 @@ endif (WXWIDGETS_SUPPORT)
 set (ui_definition_file "")
 if (GTK_USE)
  if (GTK3_USE)
-#   set (ui_definition_file ${EXECUTABLE}.gtk3)
+  set (ui_definition_file ${EXECUTABLE}.gtk3)
  elseif (GTK2_USE)
-#   set (ui_definition_file ${EXECUTABLE}.gtk2)
+  set (ui_definition_file ${EXECUTABLE}.gtk2)
+ else ()
+  set (ui_definition_file ${EXECUTABLE}.glade)
  endif ()
- set (ui_definition_file ${EXECUTABLE}.glade)
 elseif (WXWIDGETS_USE)
  if (WIN32)
-  add_definitions(-DUNICODE -D_UNICODE)
+  add_definitions (-DUNICODE -D_UNICODE)
  endif (WIN32)
 #  set (ui_definition_file ${EXECUTABLE}.xrc)
 endif ()
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${${EXECUTABLE}_EXE_SRCS}
-                etc/${ui_definition_file})
+                etc/${EXECUTABLE}.gtk3
+                etc/${EXECUTABLE}.gtk2
+                etc/${EXECUTABLE}.glade)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (UNIX)
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_INTERFACE_MULTIPLICITY 4)
- set_target_properties (${EXECUTABLE} PROPERTIES IMPORTED_LINK_INTERFACE_MULTIPLICITY 4)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_INTERFACE_MULTIPLICITY 4)
+# set_target_properties (${EXECUTABLE} PROPERTIES IMPORTED_LINK_INTERFACE_MULTIPLICITY 4)
 elseif (WIN32)
  if (NOT BUILD_TEST_U)
   set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
@@ -289,14 +292,14 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 endif (CMAKE_BUILD_TYPE STREQUAL Debug)
 if (UNIX)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}" COMMAND)
- if (GTK_SUPPORT)
+ if (GTK_USE)
   set (ARGS "-g./etc/${ui_definition_file} ${ARGS}")
- endif (GTK_SUPPORT)
+ endif (GTK_USE)
 
- if (GTK_SUPPORT)
+ if (GTK_USE)
  else ()
   set (ARGS "-g ${ARGS}")
- endif (GTK_SUPPORT)
+ endif (GTK_USE)
 
  set (RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib)
 # set (ENVIRONMENT "GDK_BACKEND=x11")

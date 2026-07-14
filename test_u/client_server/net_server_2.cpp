@@ -1359,9 +1359,8 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
   std::string log_file_name;
   if (log_to_file)
-    log_file_name =
-      Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                   Common_File_Tools::basename (ACE_TEXT_ALWAYS_CHAR (argv_in[0]), true));
+    log_file_name = Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                                 Common_File_Tools::basename (ACE_TEXT_ALWAYS_CHAR (argv_in[0]), true));
   if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]),    // program name
                                      log_file_name,                 // log file name
                                      true,                          // log to syslog ?

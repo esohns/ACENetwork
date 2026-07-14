@@ -582,15 +582,8 @@
                 </child>
               </object>
             </child>
-            <child type="label">
-              <object class="GtkLabel" id="label_log">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="valign">start</property>
-                <property name="use_markup">True</property>
-                <property name="track_visited_links">False</property>
-              </object>
+            <child type="label_item">
+              <placeholder/>
             </child>
           </object>
           <packing>

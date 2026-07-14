@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_CALLBACKS_H
-#define NET_CALLBACKS_H
+#ifndef TEST_U_CALLBACKS_2_H
+#define TEST_U_CALLBACKS_2_H
 
 #include "gtk/gtk.h"
 
@@ -27,6 +27,7 @@
 
 // idle routines
 gboolean idle_finalize_UI_cb (gpointer);
+gboolean idle_update_log_display_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);

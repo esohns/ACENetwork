@@ -910,19 +910,16 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
   std::string log_file_name;
   if (log_to_file)
-    log_file_name =
-      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                             ACE_DIRECTORY_SEPARATOR_CHAR)));
+    log_file_name = Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
   if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]),                    // program name
                                      log_file_name,                                 // log file name
                                      true,                                          // log to syslog ?
                                      false,                                         // trace messages ?
                                      trace_information,                             // debug messages ?
 #if defined (GTK_USE)
-                                     NULL))                                         // (ui) logger ?
-//                                            (UI_definition_file_path.empty () ? NULL
-//                                                                              : &logger))) // (ui) logger ?
+                                     (UI_definition_file_path.empty () ? NULL
+                                                                       : &logger))) // (ui) logger ?
 #elif defined (WXWIDGETS_USE)
                                      NULL))                                         // (ui) logger ?
 #else
