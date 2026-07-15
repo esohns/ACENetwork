@@ -22,7 +22,7 @@
 #define TEST_I_URLSTREAMLOAD_DEFINES_H
 
 #define TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE          "output.ts"
-#define TEST_I_URLSTREAMLOAD_DEFAULT_URL                  "https://mcdn.daserste.de/daserste/de/master.m3u8"
+#define TEST_I_URLSTREAMLOAD_DEFAULT_URL                  "https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
 
 #define TEST_I_URLSTREAMLOAD_DEFAULT_BUFFER_SIZE          HTTP_BUFFER_SIZE
 

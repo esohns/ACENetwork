@@ -21,7 +21,6 @@
 #ifndef NET_CLIENT_COMMON_TOOLS_H
 #define NET_CLIENT_COMMON_TOOLS_H
 
-#include "ace/config-macros.h"
 #include "ace/Global_Macros.h"
 
 class Net_Client_Common_Tools
@@ -34,7 +33,8 @@ class Net_Client_Common_Tools
                              const typename ConnectorType::ADDRESS_T&,       // (peer) address
                              bool = true,                                    // wait ?
                              bool = true,                                    // peer address ? : local address
-                             unsigned int = 0);                              // #retries
+                             int = 0);                                       // #retries
+
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Client_Common_Tools ())

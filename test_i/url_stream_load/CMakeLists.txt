@@ -5,7 +5,7 @@ include (PreXMLImplementation)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
@@ -15,7 +15,7 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
@@ -156,7 +156,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 if (UNIX)
 # target_link_libraries (${EXECUTABLE} PUBLIC X11)
 elseif (WIN32)
- set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
+# set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
 
  target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
 endif ()
@@ -247,7 +247,7 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/url_stream_load
+                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/${EXECUTABLE}
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
@@ -262,13 +262,15 @@ elseif (WIN32)
   file (TO_CMAKE_PATH $ENV{LIB_ROOT}/openssl SSL_PATH)
  endif (SSL_SUPPORT)
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
- file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
+ file (TO_CMAKE_PATH "${VCPKG_BIN_DIR}" VCPKG_LIB_PATH)
+ file (TO_CMAKE_PATH "${VCPKG_RELEASE_BIN_DIR}" VCPKG_LIB_PATH_2)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
- set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+ set (RUNTIME_LIBRARY_DIRS ${LIBXML2_PATH}
                            ${SSL_PATH}
                            ${VCPKG_LIB_PATH}
+                           ${VCPKG_LIB_PATH_2}
                            ${FFMPEG_PATH}
                            ${IMAGEMAGICK_PATH}
                            ${GTK_PATH}
@@ -276,7 +278,7 @@ elseif (WIN32)
                            ${ACE_LIBRARY_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-l -r -t -u https://mcdn.daserste.de/daserste/de/master.m3u8"
+                         ARGS "-l -r -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_i/${EXECUTABLE}

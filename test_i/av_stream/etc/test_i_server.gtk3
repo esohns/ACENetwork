@@ -190,6 +190,8 @@
   <object class="GtkTextBuffer" id="textview_textbuffer"/>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
     <property name="border_width">5</property>
     <property name="type_hint">normal</property>
     <property name="deletable">False</property>
@@ -197,36 +199,50 @@
       <object class="GtkBox" id="vbox_main">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <object class="GtkHBox" id="hbox_main">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <child>
               <object class="GtkVBox" id="vbox_controls">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="valign">start</property>
                 <child>
                   <object class="GtkHBox" id="hbox_actions_information">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
                     <child>
                       <object class="GtkFrame" id="frame_actions">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
                         <property name="label_xalign">0</property>
                         <property name="label_yalign">0</property>
                         <child>
                           <object class="GtkAlignment" id="alignment_actions">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <property name="xalign">0</property>
                             <property name="yalign">0</property>
                             <child>
                               <object class="GtkVButtonBox" id="vbuttonbox_actions">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="valign">start</property>
                                 <property name="homogeneous">True</property>
                                 <property name="layout_style">start</property>
                                 <child>
@@ -240,6 +256,8 @@
                                     <property name="can_default">True</property>
                                     <property name="has_default">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <property name="relief">half</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
@@ -259,6 +277,8 @@
                                     <property name="can_focus">True</property>
                                     <property name="can_default">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <property name="relief">half</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
@@ -278,6 +298,8 @@
                                     <property name="can_focus">True</property>
                                     <property name="can_default">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <property name="relief">half</property>
                                     <property name="use_underline">True</property>
                                     <property name="use_stock">True</property>
@@ -307,30 +329,41 @@
                       <object class="GtkFrame" id="frame_information">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
                         <property name="label_xalign">0</property>
                         <property name="label_yalign">0</property>
                         <child>
                           <object class="GtkAlignment" id="alignment_information">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <property name="xalign">0</property>
                             <property name="yalign">0</property>
                             <child>
                               <object class="GtkTable" id="table_information">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="valign">start</property>
                                 <property name="n_rows">3</property>
                                 <child>
                                   <object class="GtkVBox" id="vbox_messages">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <child>
                                       <object class="GtkSpinButton" id="spinbutton_session_messages">
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="tooltip_text" translatable="yes">session messages</property>
+                                        <property name="halign">start</property>
+                                        <property name="valign">start</property>
                                         <property name="editable">False</property>
+                                        <property name="has_frame">False</property>
                                         <property name="invisible_char">●</property>
                                         <property name="xalign">1</property>
                                         <property name="caps_lock_warning">False</property>
@@ -339,7 +372,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -349,7 +382,10 @@
                                         <property name="sensitive">False</property>
                                         <property name="can_focus">False</property>
                                         <property name="tooltip_text" translatable="yes">data messages</property>
+                                        <property name="halign">start</property>
+                                        <property name="valign">start</property>
                                         <property name="editable">False</property>
+                                        <property name="has_frame">False</property>
                                         <property name="invisible_char">●</property>
                                         <property name="xalign">1</property>
                                         <property name="caps_lock_warning">False</property>
@@ -358,14 +394,14 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="x_options">GTK_SHRINK | GTK_FILL</property>
-                                    <property name="y_options">GTK_SHRINK | GTK_FILL</property>
+                                    <property name="x_options"/>
+                                    <property name="y_options"/>
                                   </packing>
                                 </child>
                                 <child>
@@ -374,7 +410,10 @@
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="tooltip_text" translatable="yes">connections</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <property name="editable">False</property>
+                                    <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
                                     <property name="xalign">1</property>
                                     <property name="caps_lock_warning">False</property>
@@ -388,8 +427,8 @@
                                   <packing>
                                     <property name="top_attach">2</property>
                                     <property name="bottom_attach">3</property>
-                                    <property name="x_options">GTK_SHRINK | GTK_FILL</property>
-                                    <property name="y_options">GTK_SHRINK | GTK_FILL</property>
+                                    <property name="x_options"/>
+                                    <property name="y_options"/>
                                   </packing>
                                 </child>
                                 <child>
@@ -398,7 +437,10 @@
                                     <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="tooltip_text" translatable="yes">bytes</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <property name="editable">False</property>
+                                    <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
                                     <property name="xalign">1</property>
                                     <property name="caps_lock_warning">False</property>
@@ -408,8 +450,8 @@
                                   <packing>
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
-                                    <property name="x_options">GTK_SHRINK | GTK_FILL</property>
-                                    <property name="y_options">GTK_SHRINK | GTK_FILL</property>
+                                    <property name="x_options"/>
+                                    <property name="y_options"/>
                                   </packing>
                                 </child>
                               </object>
@@ -422,14 +464,14 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="fill">True</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -437,28 +479,38 @@
                   <object class="GtkFrame" id="frame_configuration">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
                     <property name="label_xalign">0</property>
                     <property name="label_yalign">0</property>
                     <child>
                       <object class="GtkAlignment" id="alignment_configuration">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
                         <property name="xalign">0</property>
                         <property name="yalign">0</property>
                         <child>
                           <object class="GtkVBox" id="vbox_configuration">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <child>
                               <object class="GtkFrame" id="frame_source">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="valign">start</property>
                                 <property name="label_xalign">0</property>
                                 <property name="label_yalign">0</property>
                                 <child>
                                   <object class="GtkAlignment" id="alignment_source">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <child>
                                       <object class="GtkSpinButton" id="spinbutton_port">
                                         <property name="visible">True</property>
@@ -466,6 +518,8 @@
                                         <property name="can_default">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">port</property>
+                                        <property name="halign">start</property>
+                                        <property name="valign">start</property>
                                         <property name="max_length">5</property>
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">●</property>
@@ -494,19 +548,23 @@
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkFrame" id="frame_destination">
                                 <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="valign">start</property>
                                 <property name="label_xalign">0</property>
                                 <property name="label_yalign">0</property>
                                 <child>
                                   <object class="GtkAlignment" id="alignment_destination">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <property name="xalign">0</property>
                                     <property name="yalign">0</property>
                                     <child>
@@ -516,6 +574,8 @@
                                         <property name="can_default">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="tooltip_text" translatable="yes">save folder</property>
+                                        <property name="halign">start</property>
+                                        <property name="valign">start</property>
                                         <property name="local_only">False</property>
                                         <property name="preview_widget_active">False</property>
                                         <property name="show_hidden">True</property>
@@ -536,7 +596,7 @@
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -544,44 +604,61 @@
                               <object class="GtkFrame" id="frame_options">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="valign">start</property>
                                 <property name="label_xalign">0</property>
                                 <property name="label_yalign">0</property>
                                 <child>
                                   <object class="GtkAlignment" id="alignment_options">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="valign">start</property>
                                     <property name="xalign">0</property>
                                     <property name="yalign">0</property>
                                     <child>
                                       <object class="GtkVBox" id="vbox_options">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
+                                        <property name="valign">start</property>
                                         <child>
                                           <object class="GtkFrame" id="frame_protocol_options">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="halign">start</property>
+                                            <property name="valign">start</property>
                                             <property name="label_xalign">0</property>
                                             <property name="label_yalign">0</property>
                                             <child>
                                               <object class="GtkAlignment" id="alignment_protocol_options">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
+                                                <property name="halign">start</property>
+                                                <property name="valign">start</property>
                                                 <property name="xalign">0</property>
                                                 <property name="yalign">0</property>
                                                 <child>
                                                   <object class="GtkHBox" id="hbox_protocol_options">
                                                     <property name="visible">True</property>
                                                     <property name="can_focus">False</property>
+                                                    <property name="halign">start</property>
+                                                    <property name="valign">start</property>
                                                     <child>
                                                       <object class="GtkFrame" id="frame_protocol">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">False</property>
+                                                        <property name="halign">start</property>
+                                                        <property name="valign">start</property>
                                                         <property name="label_xalign">0</property>
                                                         <property name="label_yalign">0</property>
                                                         <child>
                                                           <object class="GtkVButtonBox" id="vbuttonbox_protocol">
                                                             <property name="visible">True</property>
                                                             <property name="can_focus">False</property>
+                                                            <property name="halign">start</property>
+                                                            <property name="valign">start</property>
+                                                            <property name="homogeneous">True</property>
                                                             <property name="layout_style">start</property>
                                                             <child>
                                                             <object class="GtkRadioButton" id="radiobutton_tcp">
@@ -590,6 +667,8 @@
                                                             <property name="can_focus">True</property>
                                                             <property name="can_default">True</property>
                                                             <property name="receives_default">True</property>
+                                                            <property name="halign">start</property>
+                                                            <property name="valign">start</property>
                                                             <property name="relief">half</property>
                                                             <property name="focus_on_click">False</property>
                                                             <property name="xalign">0</property>
@@ -597,8 +676,8 @@
                                                             <signal name="toggled" handler="togglebutton_protocol_toggled_cb" swapped="no"/>
                                                             </object>
                                                             <packing>
-                                                            <property name="expand">True</property>
-                                                            <property name="fill">True</property>
+                                                            <property name="expand">False</property>
+                                                            <property name="fill">False</property>
                                                             <property name="position">0</property>
                                                             </packing>
                                                             </child>
@@ -609,6 +688,8 @@
                                                             <property name="can_focus">True</property>
                                                             <property name="can_default">True</property>
                                                             <property name="receives_default">True</property>
+                                                            <property name="halign">start</property>
+                                                            <property name="valign">start</property>
                                                             <property name="relief">half</property>
                                                             <property name="focus_on_click">False</property>
                                                             <property name="xalign">0</property>
@@ -618,8 +699,8 @@
                                                             <signal name="toggled" handler="togglebutton_protocol_toggled_cb" swapped="no"/>
                                                             </object>
                                                             <packing>
-                                                            <property name="expand">True</property>
-                                                            <property name="fill">True</property>
+                                                            <property name="expand">False</property>
+                                                            <property name="fill">False</property>
                                                             <property name="position">1</property>
                                                             </packing>
                                                             </child>
@@ -639,18 +720,25 @@
                                                       <object class="GtkFrame" id="frame_other">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">False</property>
+                                                        <property name="halign">start</property>
+                                                        <property name="valign">start</property>
                                                         <property name="label_xalign">0</property>
                                                         <property name="label_yalign">0</property>
                                                         <child>
                                                           <object class="GtkAlignment" id="alignment_other">
                                                             <property name="visible">True</property>
                                                             <property name="can_focus">False</property>
+                                                            <property name="halign">start</property>
+                                                            <property name="valign">start</property>
                                                             <property name="xalign">0</property>
                                                             <property name="yalign">0</property>
                                                             <child>
                                                             <object class="GtkVBox" id="vbox_other_options">
                                                             <property name="visible">True</property>
                                                             <property name="can_focus">False</property>
+                                                            <property name="halign">start</property>
+                                                            <property name="valign">start</property>
+                                                            <property name="homogeneous">True</property>
                                                             <child>
                                                             <object class="GtkCheckButton" id="checkbutton_asynch">
                                                             <property name="label" translatable="yes">asynchronous</property>
@@ -659,14 +747,16 @@
                                                             <property name="can_focus">True</property>
                                                             <property name="can_default">True</property>
                                                             <property name="receives_default">True</property>
+                                                            <property name="halign">start</property>
+                                                            <property name="valign">start</property>
                                                             <property name="relief">half</property>
                                                             <property name="focus_on_click">False</property>
                                                             <property name="xalign">0</property>
                                                             <property name="draw_indicator">True</property>
                                                             </object>
                                                             <packing>
-                                                            <property name="expand">True</property>
-                                                            <property name="fill">True</property>
+                                                            <property name="expand">False</property>
+                                                            <property name="fill">False</property>
                                                             <property name="position">0</property>
                                                             </packing>
                                                             </child>
@@ -678,14 +768,16 @@
                                                             <property name="can_focus">True</property>
                                                             <property name="can_default">True</property>
                                                             <property name="receives_default">True</property>
+                                                            <property name="halign">start</property>
+                                                            <property name="valign">start</property>
                                                             <property name="relief">half</property>
                                                             <property name="focus_on_click">False</property>
                                                             <property name="xalign">0</property>
                                                             <property name="draw_indicator">True</property>
                                                             </object>
                                                             <packing>
-                                                            <property name="expand">True</property>
-                                                            <property name="fill">True</property>
+                                                            <property name="expand">False</property>
+                                                            <property name="fill">False</property>
                                                             <property name="position">1</property>
                                                             </packing>
                                                             </child>
@@ -707,16 +799,8 @@
                                                 </child>
                                               </object>
                                             </child>
-                                            <child type="label">
-                                              <object class="GtkLabel" id="label_protocol_options">
-                                                <property name="sensitive">False</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="xalign">0</property>
-                                                <property name="yalign">0</property>
-                                                <property name="use_markup">True</property>
-                                                <property name="single_line_mode">True</property>
-                                                <property name="track_visited_links">False</property>
-                                              </object>
+                                            <child type="label_item">
+                                              <placeholder/>
                                             </child>
                                           </object>
                                           <packing>
@@ -728,12 +812,16 @@
                                         <child>
                                           <object class="GtkFrame" id="frame_format_options">
                                             <property name="can_focus">False</property>
+                                            <property name="halign">start</property>
+                                            <property name="valign">start</property>
                                             <property name="label_xalign">0</property>
                                             <property name="label_yalign">0</property>
                                             <child>
                                               <object class="GtkAlignment" id="alignment_format_options">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
+                                                <property name="halign">start</property>
+                                                <property name="valign">start</property>
                                                 <child>
                                                   <object class="GtkComboBox" id="combobox_format">
                                                     <property name="visible">True</property>
@@ -741,6 +829,8 @@
                                                     <property name="can_default">True</property>
                                                     <property name="receives_default">True</property>
                                                     <property name="tooltip_text" translatable="yes">save format</property>
+                                                    <property name="halign">start</property>
+                                                    <property name="valign">start</property>
                                                     <property name="model">liststore_format</property>
                                                     <property name="focus_on_click">False</property>
                                                   </object>
@@ -753,7 +843,7 @@
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
-                                            <property name="fill">True</property>
+                                            <property name="fill">False</property>
                                             <property name="position">1</property>
                                           </packing>
                                         </child>
@@ -761,30 +851,37 @@
                                           <object class="GtkFrame" id="frame_other_options">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
+                                            <property name="halign">start</property>
+                                            <property name="valign">start</property>
                                             <property name="label_xalign">0</property>
                                             <property name="label_yalign">0</property>
                                             <child>
                                               <object class="GtkAlignment" id="alignment_other_options">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
+                                                <property name="halign">start</property>
+                                                <property name="valign">start</property>
                                                 <property name="xalign">0</property>
                                                 <property name="yalign">0</property>
                                                 <child>
                                                   <object class="GtkTable" id="table_other_options">
                                                     <property name="visible">True</property>
                                                     <property name="can_focus">False</property>
+                                                    <property name="halign">start</property>
+                                                    <property name="valign">start</property>
                                                     <property name="n_columns">2</property>
-                                                    <property name="homogeneous">True</property>
                                                     <child>
                                                       <object class="GtkLabel" id="label_buffersize">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">False</property>
+                                                        <property name="halign">start</property>
+                                                        <property name="valign">start</property>
                                                         <property name="label" translatable="yes">buffer</property>
                                                         <property name="track_visited_links">False</property>
                                                       </object>
                                                       <packing>
-                                                        <property name="x_options">GTK_SHRINK | GTK_FILL</property>
-                                                        <property name="y_options">GTK_SHRINK | GTK_FILL</property>
+                                                        <property name="x_options"/>
+                                                        <property name="y_options"/>
                                                       </packing>
                                                     </child>
                                                     <child>
@@ -793,6 +890,8 @@
                                                         <property name="sensitive">False</property>
                                                         <property name="can_focus">False</property>
                                                         <property name="tooltip_text" translatable="yes">bytes</property>
+                                                        <property name="halign">start</property>
+                                                        <property name="valign">start</property>
                                                         <property name="editable">False</property>
                                                         <property name="has_frame">False</property>
                                                         <property name="invisible_char">●</property>
@@ -810,8 +909,8 @@
                                                       <packing>
                                                         <property name="left_attach">1</property>
                                                         <property name="right_attach">2</property>
-                                                        <property name="x_options">GTK_SHRINK | GTK_FILL</property>
-                                                        <property name="y_options">GTK_SHRINK | GTK_FILL</property>
+                                                        <property name="x_options"/>
+                                                        <property name="y_options"/>
                                                       </packing>
                                                     </child>
                                                   </object>
@@ -852,14 +951,14 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">True</property>
+                <property name="fill">False</property>
                 <property name="position">0</property>
               </packing>
             </child>
@@ -867,12 +966,16 @@
               <object class="GtkFrame" id="frame_video">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
                 <property name="label_xalign">0</property>
                 <property name="label_yalign">0</property>
                 <child>
                   <object class="GtkAlignment" id="alignment_video">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
                     <child>
@@ -886,6 +989,8 @@
                         <property name="has_tooltip">True</property>
                         <property name="tooltip_text" translatable="yes">video</property>
                         <property name="double_buffered">False</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
                       </object>
                     </child>
                   </object>
@@ -911,18 +1016,24 @@
           <object class="GtkFrame" id="frame_log">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <property name="label_xalign">0</property>
             <property name="label_yalign">0</property>
             <child>
               <object class="GtkAlignment" id="alignment_log">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
                 <property name="xalign">0</property>
                 <property name="yalign">0</property>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow_log">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
                     <property name="hadjustment">scrolledwindow_hadjustment</property>
                     <property name="vadjustment">scrolledwindow_vadjustment</property>
                     <child>
@@ -933,6 +1044,8 @@
                         <property name="can_focus">True</property>
                         <property name="has_tooltip">True</property>
                         <property name="tooltip_text" translatable="yes">log</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
                         <property name="editable">False</property>
                         <property name="wrap_mode">word</property>
                         <property name="cursor_visible">False</property>
@@ -987,7 +1100,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
+            <property name="fill">False</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -1055,7 +1168,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
+            <property name="fill">False</property>
             <property name="pack_type">end</property>
             <property name="position">3</property>
           </packing>

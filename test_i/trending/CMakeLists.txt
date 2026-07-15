@@ -206,13 +206,17 @@ elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
- file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
+ file (TO_CMAKE_PATH "${VCPKG_BIN_DIR}" VCPKG_LIB_PATH)
+ file (TO_CMAKE_PATH "${VCPKG_RELEASE_BIN_DIR}" VCPKG_LIB_PATH_2)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${GTK_LIB_DIRS}" GTK_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${wxWidgets_LIB_DIR}" WXWIDGETS_LIBRARY_PATH)
  file (TO_CMAKE_PATH "${LIBREOFFICE_LIB_DIRS}" OO_LIBRARY_PATH)
  file (TO_CMAKE_PATH ${ACE_LIB_DIR} ACE_LIBRARY_PATH)
+ if (LIBXML2_SUPPORT)
+  file (TO_CMAKE_PATH "${LIBXML2_LIB_DIR}" LIBXML2_PATH)
+ endif (LIBXML2_SUPPORT)
  if (SSL_SUPPORT)
   file (TO_CMAKE_PATH ${SSL_LIB_DIR} SSL_LIBRARY_PATH)
  endif (SSL_SUPPORT)
@@ -222,8 +226,10 @@ elseif (WIN32)
  set (RUNTIME_LIBRARY_DIRS ${GTK_LIBRARY_PATH}
                            ${WXWIDGETS_LIBRARY_PATH}
                            ${VCPKG_LIB_PATH}
+                           ${VCPKG_LIB_PATH_2}
                            ${FFMPEG_LIBRARY_PATH}
                            ${IMAGEMAGICK_LIBRARY_PATH}
+                           ${LIBXML2_PATH}
                            ${SSL_LIBRARY_PATH}
                            ${ZLIB_LIBRARY_PATH}
                            ${OO_LIBRARY_PATH}

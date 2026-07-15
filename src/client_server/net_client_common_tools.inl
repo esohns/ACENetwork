@@ -35,7 +35,7 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
                                   const typename ConnectorType::ADDRESS_T& address_in,
                                   bool wait_in,
                                   bool isPeerAddress_in,
-                                  unsigned int retries_in)
+                                  int retries_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Common_Tools::connect"));
 
@@ -70,8 +70,8 @@ retry:
   result = iconnector_p->connect (address_in);
   if (unlikely (result == ACE_INVALID_HANDLE))
   {
-    if (retries_in--)
-    {
+    if (retries_in > 0)
+    { --retries_in;
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("failed to connect to %s, retrying\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
@@ -113,8 +113,8 @@ retry:
                                               timeout); // relative- !
     if (unlikely (result_2))
     {
-      if (retries_in--)
-      {
+      if (retries_in > 0)
+      { --retries_in;
         ACE_DEBUG ((LM_WARNING,
                     ACE_TEXT ("failed to Net_IConnector::wait(%s): \"%s\", retrying\n"),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
@@ -155,8 +155,8 @@ retry:
   } while (COMMON_TIME_NOW < deadline);
   if (unlikely (status != NET_CONNECTION_STATUS_OK))
   {
-    if (retries_in--)
-    {
+    if (retries_in > 0)
+    { --retries_in;
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("failed to connect to %s, retrying\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
@@ -181,8 +181,8 @@ retry:
 continue_:
   if (unlikely (!connection_p))
   {
-    if (retries_in--)
-    {
+    if (retries_in > 0)
+    { --retries_in;
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("failed to connect to %s, retrying\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));

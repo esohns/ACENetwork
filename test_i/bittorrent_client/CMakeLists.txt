@@ -1,3 +1,6 @@
+include (ffmpeg)
+include (ImageMagick)
+
 include (flex)
 include (reflex)
 

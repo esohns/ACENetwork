@@ -259,6 +259,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       break;
     }
     case STREAM_SESSION_MESSAGE_STEP:
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
     {
       event_e = COMMON_UI_EVENT_STEP;
       break;
@@ -372,13 +373,18 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_ABORT:
-      event_e = COMMON_UI_EVENT_FINISHED; break;
+      event_e = COMMON_UI_EVENT_FINISHED;
+      break;
     case STREAM_SESSION_MESSAGE_CONNECT:
-      event_e = COMMON_UI_EVENT_CONNECT; break;
+      event_e = COMMON_UI_EVENT_CONNECT;
+      break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
-      event_e = COMMON_UI_EVENT_DISCONNECT; break;
+      event_e = COMMON_UI_EVENT_DISCONNECT;
+      break;
     case STREAM_SESSION_MESSAGE_STEP:
-      event_e = COMMON_UI_EVENT_STEP; break;
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
+      event_e = COMMON_UI_EVENT_STEP;
+      break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)
