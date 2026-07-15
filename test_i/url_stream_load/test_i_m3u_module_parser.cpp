@@ -135,6 +135,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
 
       result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"), 1);
       ACE_ASSERT (result != -1);
+      ++contentLength_;
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: appended missing line break to data\n"),
                   inherited::mod_->name ()));
@@ -153,6 +154,7 @@ Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
 
     result = message_block_p->copy (ACE_TEXT_ALWAYS_CHAR ("\n"), 1);
     ACE_ASSERT (result != -1);
+    ++contentLength_;
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: appended line break to data\n"),
                 inherited::mod_->name ()));
