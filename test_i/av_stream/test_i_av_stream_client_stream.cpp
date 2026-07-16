@@ -104,12 +104,11 @@ Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize (const typename inher
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize"));
 
-  //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   struct Stream_MediaFramework_DirectShow_AudioVideoFormat format_s;
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
-      const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   Test_I_Client_DirectShow_SessionManager_t* session_manager_p =
     Test_I_Client_DirectShow_SessionManager_t::SINGLETON_T::instance ();
 
@@ -119,7 +118,7 @@ Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize (const typename inher
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      false;
+    false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
@@ -129,7 +128,7 @@ Test_I_AVStream_Client_DirectShow_Audio_Stream::initialize (const typename inher
     return false;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      setup_pipeline;
+    setup_pipeline;
   reset_setup_pipeline = false;
 
   Test_I_AVStream_Client_DirectShow_StreamSessionData& session_data_r =
