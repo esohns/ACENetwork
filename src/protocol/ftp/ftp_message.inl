@@ -127,6 +127,9 @@ FTP_Message_T<MessageData,
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("\n%s"),
                 ACE_TEXT (FTP_Tools::dump (inherited::data_->getR ()).c_str ())));
+
+  // delegate to base
+  inherited::dump_state ();
 }
 
 template <typename MessageData,

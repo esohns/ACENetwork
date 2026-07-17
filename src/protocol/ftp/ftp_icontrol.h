@@ -35,6 +35,7 @@ class FTP_IControl
   virtual ACE_HANDLE connectControl () = 0;
   virtual ACE_HANDLE connectData () = 0;
 
+  virtual bool inPASVMode () const = 0; // request
   virtual void request (const struct FTP_Request&) = 0; // request
   // *NOTE*: to be executed as soon as the PASV connection has opened
   virtual void queue (const struct FTP_Request&) = 0; // request

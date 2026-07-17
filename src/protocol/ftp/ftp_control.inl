@@ -45,7 +45,10 @@ FTP_Control_T<ControlAsynchConnectorType,
  , connectionConfiguration_2 (&const_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::CONFIGURATION_T&> (connectionConfiguration2_in))
  , controlConnection_ (ACE_INVALID_HANDLE)
  , dispatch_ (dispatch_in)
+ , lock_ ()
  , loginOptions_ (loginOptions_in)
+ , PASVMode_ (false)
+ , queue_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Control_T::FTP_Control_T"));
 
@@ -73,21 +76,21 @@ FTP_Control_T<ControlAsynchConnectorType,
   ControlAsynchConnectorType asynch_connector;
   UserDataType user_data;
   if (dispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
-    handle_h =
-      Net_Client_Common_Tools::connect<ControlConnectorType> (connector,
-                                                              *connectionConfiguration_,
-                                                              user_data,
-                                                              connectionConfiguration_->socketConfiguration.address,
-                                                              true,  // wait ?
-                                                              true); // is peer address ?
+    handle_h = Net_Client_Common_Tools::connect<ControlConnectorType> (connector,
+                                                                       *connectionConfiguration_,
+                                                                       user_data,
+                                                                       connectionConfiguration_->socketConfiguration.address,
+                                                                       true,  // wait ?
+                                                                       true,  // is peer address ?
+                                                                       0);    // #retries
   else
-    handle_h =
-      Net_Client_Common_Tools::connect<ControlAsynchConnectorType> (asynch_connector,
-                                                                    *connectionConfiguration_,
-                                                                    user_data,
-                                                                    connectionConfiguration_->socketConfiguration.address,
-                                                                    true,  // wait ?
-                                                                    true); // is peer address ?
+    handle_h = Net_Client_Common_Tools::connect<ControlAsynchConnectorType> (asynch_connector,
+                                                                             *connectionConfiguration_,
+                                                                             user_data,
+                                                                             connectionConfiguration_->socketConfiguration.address,
+                                                                             true,  // wait ?
+                                                                             true,  // is peer address ?
+                                                                             0);    // #retries
   if (unlikely (!handle_h || handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -107,8 +110,22 @@ FTP_Control_T<ControlAsynchConnectorType,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (connectionConfiguration_->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
+  if (unlikely (controlConnection_))
+  {
+    typedef typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_SINGLETON_2;
+    typename ControlAsynchConnectorType::ICONNECTION_T* iconnection_p =
+      CONNECTION_MANAGER_SINGLETON_2::instance ()->get (controlConnection_);
+    if (!iconnection_p)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to retrieve control connection handle, continuing\n")));
+    else
+    {
+      iconnection_p->abort ();
+      iconnection_p->decrease (); iconnection_p = NULL;
+    } // end ELSE
+    controlConnection_ = ACE_INVALID_HANDLE;
+  } // end IF
   ACE_ASSERT (controlConnection_ == ACE_INVALID_HANDLE);
-
   controlConnection_ = handle_h;
 
   return handle_h;
@@ -136,21 +153,21 @@ FTP_Control_T<ControlAsynchConnectorType,
   DataAsynchConnectorType asynch_connector;
   UserDataType user_data;
   if (dispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
-    handle_h =
-      Net_Client_Common_Tools::connect<DataConnectorType> (connector,
-                                                           *connectionConfiguration_2,
-                                                           user_data,
-                                                           connectionConfiguration_2->socketConfiguration.address,
-                                                           true,  // wait ?
-                                                           true); // is peer address ?
+    handle_h = Net_Client_Common_Tools::connect<DataConnectorType> (connector,
+                                                                    *connectionConfiguration_2,
+                                                                    user_data,
+                                                                    connectionConfiguration_2->socketConfiguration.address,
+                                                                    true, // wait ?
+                                                                    true, // is peer address ?
+                                                                    0);   // #retries
   else
-    handle_h =
-      Net_Client_Common_Tools::connect<DataAsynchConnectorType> (asynch_connector,
-                                                                 *connectionConfiguration_2,
-                                                                 user_data,
-                                                                 connectionConfiguration_2->socketConfiguration.address,
-                                                                 true,  // wait ?
-                                                                 true); // is peer address ?
+    handle_h = Net_Client_Common_Tools::connect<DataAsynchConnectorType> (asynch_connector,
+                                                                          *connectionConfiguration_2,
+                                                                          user_data,
+                                                                          connectionConfiguration_2->socketConfiguration.address,
+                                                                          true,  // wait ?
+                                                                          true, // is peer address ?
+                                                                          0);   // #retries
   if (unlikely (handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -187,14 +204,15 @@ FTP_Control_T<ControlAsynchConnectorType,
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Control_T::request"));
 
-  typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
+  typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
+    NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
-      NULL;
+    NULL;
   ACE_Message_Block* message_block_p = NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
-      NULL;
+    NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
-      NULL;
+    NULL;
 
   // step4: send request
   if (unlikely (!getControlConnectionAndMessage (istream_connection_p,
@@ -312,6 +330,8 @@ FTP_Control_T<ControlAsynchConnectorType,
         return;
       } // end IF
 
+      PASVMode_ = true;
+
       { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
         ACE_ASSERT (!queue_.empty ());
         request_s = queue_.front ();
@@ -409,7 +429,7 @@ FTP_Control_T<ControlAsynchConnectorType,
   // *IMPORTANT NOTE*: fire-and-forget API (data_p)
   ACE_NEW_NORETURN (data_container_p,
                     typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T (data_p,
-                                                                                                     true));
+                                                                                                            true));
   if (!data_container_p)
   {
     ACE_DEBUG ((LM_CRITICAL,

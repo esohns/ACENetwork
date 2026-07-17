@@ -139,6 +139,8 @@ class FTP_ParserDriver_T
   yyscan_t                                    scannerState_;
   YY_BUFFER_STATE                             bufferState_;
 
+  ACE_Message_Queue_Base*                     queue_;
+
   bool                                        initialized_;
 };
 

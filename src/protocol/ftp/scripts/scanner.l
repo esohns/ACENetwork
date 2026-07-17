@@ -79,6 +79,7 @@ int FTP_Scanner_reset (yyscan_t);
 /* %option nounput */
 
 OCTET          [\x00-\xFF]
+OCTET_NO_CRLF  [\x00-\xFF]{-}[\x0D\x0A]
 DIGIT          [[:digit:]]
 MINUS          \x2D
 SPACE          \x20
@@ -87,7 +88,9 @@ CRLF           \x0D\x0A
 %s             reply_code
 %s             text_begin
 %s             multiline_text_begin
+%s             multi_line_minus
 %s             multiline_text
+%s             last_line_space
 %s             last_line_text
 %s             text
 
@@ -139,39 +142,62 @@ CRLF           \x0D\x0A
                            }
 } // end <text_begin>
 <multiline_text_begin>{
-{DIGIT}{3}                 { driver->offset (yyleng);
+{DIGIT}{3}/{MINUS}         { driver->offset (yyleng);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
                              converter >> yylval->ival;
                              ACE_ASSERT (yylval->ival == driver->current ().code);
-                             BEGIN(last_line_text); }
+                             BEGIN(multi_line_minus); }
+{DIGIT}{3}/{SPACE}         { driver->offset (yyleng);
+                             converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+                             converter.clear ();
+                             converter.str (yytext);
+                             converter >> yylval->ival;
+                             ACE_ASSERT (yylval->ival == driver->current ().code);
+                             BEGIN(last_line_space); }
 {OCTET}{3}                 { yycolumn -= yyleng;
                              yyless (0);
                              BEGIN(multiline_text); }
 } // end <multiline_text_begin>
+<multi_line_minus>{
+{MINUS}                    { driver->offset (yyleng);
+                             ACE_NEW_NORETURN (yylval->sval,
+                                               std::string ());
+                             ACE_ASSERT (yylval->sval);
+                             BEGIN(multiline_text); }
+} // end <multi_line_minus>
 <multiline_text>{
 {CRLF}                     { driver->offset (yyleng);
                              BEGIN(multiline_text_begin); }
-{OCTET}*/{CRLF}            { driver->offset (yyleng);
+{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext); }
+                             yylval->sval->append (yytext);
+                             return yytokentype::REPLY_TEXT; }
 } // end <multiline_text>
+<last_line_space>{
+{SPACE}                    { driver->offset (yyleng);
+                             ACE_NEW_NORETURN (yylval->sval,
+                                               std::string ());
+                             ACE_ASSERT (yylval->sval);
+                             BEGIN(last_line_text); }
+} // end <last_line_space>
 <last_line_text>{
 {CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
-{OCTET}*/{CRLF}            { driver->offset (yyleng);
+{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext); }
+                             yylval->sval->append (yytext);
+                             return yytokentype::REPLY_TEXT; }
 } // end <last_line_text>
 <text>{
 {CRLF}                     { driver->offset (yyleng);
                              BEGIN(reply_code);
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
-{OCTET}*/{CRLF}            { driver->offset (yyleng);
+{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT;

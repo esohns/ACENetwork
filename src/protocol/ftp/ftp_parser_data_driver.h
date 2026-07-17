@@ -23,10 +23,10 @@
 
 #include <string>
 
+#include "location.hh"
+
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-
-#include "location.hh"
 
 #include "common_iscanner.h"
 #include "common_parser_common.h"
@@ -143,6 +143,7 @@ class FTP_ParserDataDriver_T
   yyscan_t                                    scannerState_;
   YY_BUFFER_STATE                             bufferState_;
 
+  ACE_Message_Queue_Base*                     queue_;
   enum FTP_ProtocolDataState                  state_;
 
   bool                                        initialized_;

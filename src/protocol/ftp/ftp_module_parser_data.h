@@ -21,7 +21,6 @@
 #ifndef FTP_MODULE_PARSER_DATA_H
 #define FTP_MODULE_PARSER_DATA_H
 
-#include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 

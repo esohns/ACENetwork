@@ -23,8 +23,6 @@
 #include "ace/Malloc_Base.h"
 #include "ace/Message_Block.h"
 
-//#include "stream_dec_common.h"
-
 #include "net_macros.h"
 
 #include "http_defines.h"
@@ -137,16 +135,16 @@ HTTP_Message_T<RecordType,
        source != NULL;
        source = source->cont (), count++)
   {
-    converter.str (ACE_TEXT (""));
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter << count;
     info += converter.str ();
-    info += ACE_TEXT ("# [");
-    converter.str (ACE_TEXT (""));
+    info += ACE_TEXT_ALWAYS_CHAR ("# [");
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter << source->length ();
     info += converter.str ();
-    info += ACE_TEXT (" byte(s)]: \"");
+    info += ACE_TEXT_ALWAYS_CHAR (" byte(s)]: \"");
     info.append (source->rd_ptr (), source->length ());
-    info += ACE_TEXT ("\"\n");
+    info += ACE_TEXT_ALWAYS_CHAR ("\"\n");
   } // end FOR
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s\n%s"),

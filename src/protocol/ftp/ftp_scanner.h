@@ -680,9 +680,11 @@ void yyfree ( void * , yyscan_t yyscanner );
 #define reply_code 1
 #define text_begin 2
 #define multiline_text_begin 3
-#define multiline_text 4
-#define last_line_text 5
-#define text 6
+#define multi_line_minus 4
+#define multiline_text 5
+#define last_line_space 6
+#define last_line_text 7
+#define text 8
 
 #endif
 

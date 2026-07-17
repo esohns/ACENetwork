@@ -34,12 +34,8 @@
 #include "test_i_common.h"
 
 #include "test_i_connection_manager_common.h"
-// #include "test_i_ftp_client_common.h"
 #include "test_i_message.h"
 #include "test_i_session_message.h"
-
-// forward declarations
-// class Test_I_SessionMessage;
 
 typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  enum Stream_SessionMessageType,

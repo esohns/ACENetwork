@@ -510,9 +510,9 @@ do_work (//bool requestBroadcastReplies_in,
                      : COMMON_EVENT_DISPATCH_PROACTOR);
 
   FTP_Control_t ftp_control (configuration_in.dispatchConfiguration.dispatch,
-                            configuration_in.connectionConfiguration,
-                            configuration_in.connectionConfiguration_2,
-                            configuration_in.loginOptions);
+                             configuration_in.connectionConfiguration,
+                             configuration_in.connectionConfiguration_2,
+                             configuration_in.loginOptions);
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct FTP_Client_AllocatorConfiguration> heap_allocator;
@@ -548,11 +548,9 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // GTK_USE
 
   // *********************** parser configuration data *************************
-#if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
-  if (debugParser_in)
+  if (unlikely (debugParser_in))
     configuration_in.parserConfiguration.debugScanner = true;
-#endif // _DEBUG
   // *********************** socket configuration data *************************
   ACE_INET_Addr interface_address, gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -691,7 +689,7 @@ do_work (//bool requestBroadcastReplies_in,
   // ********************** module configuration data **************************
 //  struct FTP_Client_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
-      &configuration_in.allocatorConfiguration;
+    &configuration_in.allocatorConfiguration;
   modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.printFinalReport = true;
@@ -934,15 +932,18 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // GTK_USE
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    HWND window_p = ::GetConsoleWindow ();
-    if (!window_p)
+    if (likely (!debugParser_in))
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-      return;
+      HWND window_p = ::GetConsoleWindow ();
+      if (!window_p)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
+        return;
+      } // end IF
+      BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
+      ACE_UNUSED_ARG (was_visible_b);
     } // end IF
-    BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
-    ACE_UNUSED_ARG (was_visible_b);
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GTK_USE)

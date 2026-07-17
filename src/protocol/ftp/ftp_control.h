@@ -46,6 +46,7 @@ class FTP_Control_T
   // implement FTP_IControl
   virtual ACE_HANDLE connectControl ();
   virtual ACE_HANDLE connectData ();
+  inline virtual bool inPASVMode () const { return PASVMode_; };
   virtual void request (const struct FTP_Request&); // request
   inline virtual void queue (const struct FTP_Request& request_in) { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_); queue_.push_back (request_in); }
 
@@ -70,6 +71,7 @@ class FTP_Control_T
   enum Common_EventDispatchType                                               dispatch_;
   ACE_Thread_Mutex                                                            lock_;
   struct FTP_LoginOptions                                                     loginOptions_;
+  bool                                                                        PASVMode_;
   QUEUE_T                                                                     queue_;
 };
 

@@ -37,11 +37,9 @@ FTP_ParserDataDriver_T<SessionMessageType>::FTP_ParserDataDriver_T ()
  , fragment_ (NULL)
  , offset_ (0)
  , configuration_ (NULL)
-//, parser_ (this,               // driver
-//           &numberOfMessages_, // counter
-//           scannerState_)      // scanner
  , scannerState_ (NULL)
  , bufferState_ (NULL)
+ , queue_ (NULL)
  , state_ (FTP_STATE_DATA_INITIAL)
  , initialized_ (false)
 {
@@ -96,7 +94,9 @@ FTP_ParserDataDriver_T<SessionMessageType>::initialize (const struct Common_Flex
   } // end IF
 
   configuration_ =
-      &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+    &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+  queue_ = configuration_->messageQueue;
+  ACE_ASSERT (queue_);
 
   if (FTP_Scanner_Data_lex_init_extra (this, &scannerState_))
   {
@@ -367,14 +367,17 @@ FTP_ParserDataDriver_T<SessionMessageType>::waitBuffer ()
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->block);
-  ACE_ASSERT (configuration_->messageQueue);
+  //ACE_ASSERT (configuration_->messageQueue);
   ACE_ASSERT (!finished_);
+  ACE_ASSERT (queue_);
 
   // 1. wait for data
   do
   {
-    result = configuration_->messageQueue->dequeue_head (message_block_p,
-                                                         NULL);
+    result =
+      //configuration_->messageQueue->dequeue_head (message_block_p,
+      queue_->dequeue_head (message_block_p,
+                            NULL);
     if (result == -1)
     {
       int error = ACE_OS::last_error ();
@@ -410,7 +413,9 @@ FTP_ParserDataDriver_T<SessionMessageType>::waitBuffer ()
     // requeue message ?
     if (requeue_b)
     {
-      result = configuration_->messageQueue->enqueue_tail (message_block_p, NULL);
+      result =
+        //configuration_->messageQueue->enqueue_tail (message_block_p, NULL);
+        queue_->enqueue_tail (message_block_p, NULL);
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,

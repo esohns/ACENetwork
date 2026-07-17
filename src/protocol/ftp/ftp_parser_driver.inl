@@ -38,11 +38,9 @@ FTP_ParserDriver_T<SessionMessageType>::FTP_ParserDriver_T ()
  , offset_ (0)
  , record_ (NULL)
  , configuration_ (NULL)
-//, parser_ (this,               // driver
-//           &numberOfMessages_, // counter
-//           scannerState_)      // scanner
  , scannerState_ (NULL)
  , bufferState_ (NULL)
+ , queue_ (NULL)
  , initialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_ParserDriver_T::FTP_ParserDriver_T"));
@@ -100,7 +98,9 @@ FTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBiso
   } // end IF
 
   configuration_ =
-      &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+    &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
+  queue_ = configuration_->messageQueue;
+  ACE_ASSERT (queue_);
 
   if (FTP_Scanner_lex_init_extra (this, &scannerState_))
   {
@@ -111,16 +111,14 @@ FTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBiso
   ACE_ASSERT (scannerState_);
   //parser_.set (scannerState_);
 
-#if defined (_DEBUG)
   // trace ?
   FTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
-                          scannerState_);
+                         scannerState_);
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
   yydebug = (configuration_->debugParser ? 1 : 0);
 #endif // YYDEBUG
-#endif // _DEBUG
 
   // OK
   initialized_ = true;
@@ -221,7 +219,7 @@ FTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
 template <typename SessionMessageType>
 void
 FTP_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
-                                                const std::string& message_in)
+                                               const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_ParserDriver_T::error"));
 
@@ -261,7 +259,7 @@ FTP_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
 template <typename SessionMessageType>
 void
 FTP_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
-                                                const std::string& message_in)
+                                               const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_ParserDriver_T::error"));
 
@@ -394,14 +392,17 @@ FTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (configuration_->block);
-  ACE_ASSERT (configuration_->messageQueue);
+  //ACE_ASSERT (configuration_->messageQueue);
+  ACE_ASSERT (queue_);
   ACE_ASSERT (!finished_);
 
   // 1. wait for data
   do
   {
-    result = configuration_->messageQueue->dequeue_head (message_block_p,
-                                                         NULL);
+    result =
+      //configuration_->messageQueue->dequeue_head (message_block_p,
+      queue_->dequeue_head (message_block_p,
+                            NULL);
     if (result == -1)
     {
       int error = ACE_OS::last_error ();
@@ -437,7 +438,9 @@ FTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
     // requeue message ?
     if (requeue_b)
     {
-      result = configuration_->messageQueue->enqueue_tail (message_block_p, NULL);
+      result =
+        //configuration_->messageQueue->enqueue_tail (message_block_p, NULL);
+        queue_->enqueue_tail (message_block_p, NULL);
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,

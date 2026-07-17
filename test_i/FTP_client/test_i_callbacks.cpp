@@ -734,8 +734,11 @@ treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
 
     request_s.command = FTP_Codes::FTP_COMMAND_LIST;
     request_s.parameters.clear ();
-    data_p->control->queue (request_s);
-    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+    //if (unlikely (!data_p->control->inPASVMode ()))
+    //{
+      data_p->control->queue (request_s);
+      request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+    //} // end IF
     data_p->control->request (request_s);
   } // end IF
 }
