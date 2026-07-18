@@ -30,6 +30,24 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkListStore" id="liststore_files">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name is_directory -->
+      <column type="gboolean"/>
+      <!-- column-name size -->
+      <column type="guint64"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_interface">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name identifier -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkToggleAction" id="toggleaction_listen">
     <property name="label">Listen</property>
     <property name="short_label">Listen</property>
@@ -71,24 +89,6 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="liststore_files">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name is_directory -->
-      <column type="gboolean"/>
-      <!-- column-name size -->
-      <column type="guint64"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_interface">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name identifier -->
-      <column type="gchararray"/>
-    </columns>
   </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
@@ -415,6 +415,8 @@
                     <property name="shadow_type">etched-out</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_directories">
+                        <property name="width_request">640</property>
+                        <property name="height_request">480</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hexpand">True</property>
@@ -651,6 +653,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="pack_type">end</property>
             <property name="position">3</property>
           </packing>
         </child>

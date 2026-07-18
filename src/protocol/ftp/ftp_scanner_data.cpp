@@ -2063,8 +2063,6 @@ case 6:
 YY_RULE_SETUP
 { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
-                             ACE_ASSERT (false);
-
                              // debug info
                              std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");

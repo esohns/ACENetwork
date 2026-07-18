@@ -116,8 +116,10 @@ do_printUsage (const std::string& programName_in)
   // enable verbatim boolean output
   std::cout.setf (std::ios::boolalpha);
 
-  std::string path =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -130,10 +132,6 @@ do_printUsage (const std::string& programName_in)
             << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
-  std::string configuration_path = path;
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -213,15 +211,13 @@ do_processArguments (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
-  std::string path =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // initialize results
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
-  std::string configuration_path = path;
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GTK_USE)
   GtkRcFileName_out = configuration_path;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1043,17 +1039,16 @@ ACE_TMAIN (int argc_in,
 #else
   Common_Tools::initialize (true); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
-  std::string path =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // step1a set defaults
   //bool request_broadcast_replies = FTP_Client_DEFAULT_FLAGS_BROADCAST;
   bool debug_parser = COMMON_PARSER_DEFAULT_YACC_TRACE;
-  std::string configuration_path = path;
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1076,7 +1071,7 @@ ACE_TMAIN (int argc_in,
   //bool send_request_on_offer =
   //    Test_I_DEFAULT_FTP_Client_SEND_REQUEST_ON_OFFER;
   bool use_reactor =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
@@ -1113,8 +1108,7 @@ ACE_TMAIN (int argc_in,
                             trace_information,
                             print_version_and_exit,
                             number_of_dispatch_threads))
-  {
-    // make 'em learn
+  { // make 'em learn
     do_printUsage (ACE::basename (argv_in[0]));
 
     Common_Tools::finalize ();

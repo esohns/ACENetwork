@@ -21,8 +21,6 @@
 #ifndef FTP_ICONTROL_H
 #define FTP_ICONTROL_H
 
-#include <string>
-
 #include "ace/config-macros.h"
 
 #include "ftp_common.h"
@@ -36,9 +34,12 @@ class FTP_IControl
   virtual ACE_HANDLE connectData () = 0;
 
   virtual bool inPASVMode () const = 0; // request
+
   virtual void request (const struct FTP_Request&) = 0; // request
+
   // *NOTE*: to be executed as soon as the PASV connection has opened
   virtual void queue (const struct FTP_Request&) = 0; // request
+  virtual void clear () = 0;
 
   ////////////////////////////////////////
   virtual void responseCB (const struct FTP_Record&) = 0;

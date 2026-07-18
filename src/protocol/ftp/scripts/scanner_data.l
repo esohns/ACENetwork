@@ -180,8 +180,6 @@ CRLF           \x0D\x0A
 <<EOF>>                    { yyterminate(); }
 <*>{OCTET}{1}              { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
-                             ACE_ASSERT (false);
-
                              // debug info
                              std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");

@@ -285,6 +285,8 @@ struct FTP_Client_UI_CBData
    , entries ()
    , fileName ()
 #if defined (GTK_USE)
+   , clearingFileStore (false)
+   , treeIterIsFirst (true)
    , treeIter ()
 #endif // GTK_USE
   {}
@@ -297,6 +299,8 @@ struct FTP_Client_UI_CBData
   Common_File_Entries_t             entries; // list entries
   std::string                       fileName; // current-
 #if defined (GTK_USE)
+  bool                              clearingFileStore;
+  bool                              treeIterIsFirst;
   GtkTreeIter                       treeIter; // current-
 #endif // GTK_USE
 };
