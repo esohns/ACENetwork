@@ -337,14 +337,14 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   NULL);
 
   GtkEntry* entry_p =
-      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_SERVER_ADDRESS_NAME)));
+    GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_SERVER_ADDRESS_NAME)));
   ACE_ASSERT (entry_p);
   gtk_entry_set_text (entry_p,
                       Net_Common_Tools::IPAddressToString (data_p->configuration->connectionConfiguration.socketConfiguration.address, true, false).c_str ());
   spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> (data_p->configuration->connectionConfiguration.socketConfiguration.address.get_port_number ()));

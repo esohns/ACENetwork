@@ -442,8 +442,9 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       int result = -1; 
       if (unlikely (stream_.get_handle () == ACE_INVALID_HANDLE))
       {
-        std::string filename_string = Common_File_Tools::getWorkingDirectory ();
-        filename_string += ACE_TEXT_ALWAYS_CHAR (ACE_DIRECTORY_SEPARATOR_STR);
+        std::string filename_string =
+          Common_File_Tools::getUserDownloadDirectory (ACE_TEXT_ALWAYS_CHAR (""));
+        filename_string += ACE_DIRECTORY_SEPARATOR_STR_A;
         filename_string += CBData_->fileName;
         ACE_FILE_Addr file_address (ACE_TEXT (filename_string.c_str ()));
 

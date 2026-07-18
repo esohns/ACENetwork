@@ -506,8 +506,7 @@ do_work (//bool requestBroadcastReplies_in,
 
   // step0c: initialize configuration and stream
   configuration_in.dispatchConfiguration.dispatch =
-      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                     : COMMON_EVENT_DISPATCH_PROACTOR);
+    (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR);
 
   FTP_Control_t ftp_control (configuration_in.dispatchConfiguration.dispatch,
                              configuration_in.connectionConfiguration,
@@ -644,9 +643,8 @@ do_work (//bool requestBroadcastReplies_in,
     &configuration_in.allocatorConfiguration;
   configuration_in.connectionConfiguration.socketConfiguration.interfaceIdentifier =
     interface_identifier;
-  if (!configuration_in.loginOptions.server.is_any())
-    configuration_in.connectionConfiguration.socketConfiguration.address =
-      configuration_in.loginOptions.server;
+  if (!configuration_in.loginOptions.server.is_any ())
+    configuration_in.connectionConfiguration.socketConfiguration.address = configuration_in.loginOptions.server;
   else
     configuration_in.connectionConfiguration.socketConfiguration.address.set (static_cast<u_short> (FTP_DEFAULT_SERVER_CONTROL_PORT),
                                                                               static_cast<ACE_UINT32> (INADDR_ANY),
@@ -677,14 +675,12 @@ do_work (//bool requestBroadcastReplies_in,
     &configuration_in.allocatorConfiguration;
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module =
-    (!UIDefinitionFileName_in.empty () ? &event_handler
-                                       : NULL);
+    (!UIDefinitionFileName_in.empty () ? &event_handler : NULL);
   stream_configuration.printFinalReport = true;
 
   stream_configuration_2 = stream_configuration;
   stream_configuration_2.module =
-    (!UIDefinitionFileName_in.empty () ? &event_handler_2
-                                       : NULL);
+    (!UIDefinitionFileName_in.empty () ? &event_handler_2 : NULL);
 
   // ********************** module configuration data **************************
 //  struct FTP_Client_StreamConfiguration stream_configuration;
@@ -832,11 +828,9 @@ do_work (//bool requestBroadcastReplies_in,
 
   // step1cb: start listening
   if (useReactor_in)
-    configuration_in.listener =
-      FTP_CLIENT_LISTENER_SINGLETON::instance ();
+    configuration_in.listener = FTP_CLIENT_LISTENER_SINGLETON::instance ();
   else
-    configuration_in.listener =
-      FTP_CLIENT_ASYNCH_LISTENER_SINGLETON::instance ();
+    configuration_in.listener = FTP_CLIENT_ASYNCH_LISTENER_SINGLETON::instance ();
 //#if defined (SSL_SUPPORT)
 //    configuration_in.listener =
 //      FTP_CLIENT_SSL_LISTENER_SINGLETON::instance ();
@@ -864,19 +858,21 @@ do_work (//bool requestBroadcastReplies_in,
     FTP_Client_Connector_t connector;
     FTP_Client_AsynchConnector_t asynch_connector;
     if (useReactor_in)
-      handle =
-        Net_Client_Common_Tools::connect<FTP_Client_Connector_t> (connector,
-                                                                  configuration_in.connectionConfiguration,
-                                                                  configuration_in.userData,
-                                                                  configuration_in.connectionConfiguration.socketConfiguration.address,
-                                                                  true, true);
+      handle = Net_Client_Common_Tools::connect<FTP_Client_Connector_t> (connector,
+                                                                         configuration_in.connectionConfiguration,
+                                                                         configuration_in.userData,
+                                                                         configuration_in.connectionConfiguration.socketConfiguration.address,
+                                                                         true,
+                                                                         true,
+                                                                         0);
     else
-      handle =
-        Net_Client_Common_Tools::connect<FTP_Client_AsynchConnector_t> (asynch_connector,
-                                                                        configuration_in.connectionConfiguration,
-                                                                        configuration_in.userData,
-                                                                        configuration_in.connectionConfiguration.socketConfiguration.address,
-                                                                        true, true);
+      handle = Net_Client_Common_Tools::connect<FTP_Client_AsynchConnector_t> (asynch_connector,
+                                                                               configuration_in.connectionConfiguration,
+                                                                               configuration_in.userData,
+                                                                               configuration_in.connectionConfiguration.socketConfiguration.address,
+                                                                               true,
+                                                                               true,
+                                                                               0);
     if (unlikely (handle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -913,7 +909,7 @@ do_work (//bool requestBroadcastReplies_in,
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
-        std::make_pair (UIDefinitionFileName_in, static_cast<GtkBuilder*> (NULL));
+      std::make_pair (UIDefinitionFileName_in, static_cast<GtkBuilder*> (NULL));
 
     gtk_manager_p->start (NULL);
     ACE_Time_Value one_second (1, 0);
