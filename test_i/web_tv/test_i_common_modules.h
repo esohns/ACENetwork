@@ -233,7 +233,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       struct Stream_Statistic,
                                                       Common_Timer_Manager_t,
                                                       struct Stream_UserData> Test_I_StatisticReport_WriterTask_3_t;
-DATASTREAM_MODULE_DUPLEX (struct Test_I_WebTV_SessionData_3,                  // session data type
+DATASTREAM_MODULE_DUPLEX (Test_I_WebTV_SessionData_3,                          // session data type
                           enum Stream_SessionMessageType,                      // session event type
                           struct Test_I_WebTV_ModuleHandlerConfiguration_3,    // module handler configuration type
                           libacestream_default_stat_report_module_name_string,
@@ -245,7 +245,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_WebTV_SessionData_3,                  //
 typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  enum Stream_SessionMessageType,
                                  struct Stream_SessionManager_Configuration,
-                                 struct Test_I_WebTV_SessionData_3,
+                                 Test_I_WebTV_SessionData_3,
                                  struct Stream_Statistic,
                                  struct Stream_UserData> Test_I_SessionManager_3;
 

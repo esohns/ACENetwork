@@ -39,7 +39,7 @@ class Test_I_SessionMessage_3;
 typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  enum Stream_SessionMessageType,
                                  struct Stream_SessionManager_Configuration,
-                                 struct Test_I_WebTV_SessionData_3,
+                                 Test_I_WebTV_SessionData_3,
                                  struct Stream_Statistic,
                                  struct Stream_UserData> Test_I_SessionManager_3;
 
