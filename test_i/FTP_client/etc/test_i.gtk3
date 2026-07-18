@@ -72,6 +72,24 @@
       </object>
     </child>
   </object>
+  <object class="GtkListStore" id="liststore_files">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name is_directory -->
+      <column type="gboolean"/>
+      <!-- column-name size -->
+      <column type="guint64"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_interface">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name identifier -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -100,6 +118,8 @@
                   <object class="GtkVBox" id="vbox_actions">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
                     <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkToggleButton" id="togglebutton_listen">
@@ -107,12 +127,14 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="fill">True</property>
+                        <property name="fill">False</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -122,19 +144,41 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="fill">True</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button_disconnect">
+                        <property name="label">gtk-disconnect</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
+                        <property name="relief">half</property>
+                        <property name="use_stock">True</property>
+                        <property name="focus_on_click">False</property>
+                        <signal name="clicked" handler="button_disconnect_clicked_cb" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -142,6 +186,8 @@
                   <object class="GtkFrame" id="frame_options">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="valign">start</property>
                     <property name="label_xalign">0</property>
                     <child>
                       <object class="GtkVBox" id="vbox_options">
@@ -153,13 +199,15 @@
                             <property name="can_focus">False</property>
                             <property name="tooltip_markup">interface</property>
                             <property name="tooltip_text" translatable="yes">interface</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <property name="model">liststore_interface</property>
                             <property name="has_frame">False</property>
                             <property name="focus_on_click">False</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -167,12 +215,16 @@
                           <object class="GtkHBox" id="hbox_server">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <child>
                               <object class="GtkEntry" id="entry_server_address">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip_markup">FTP server address</property>
                                 <property name="tooltip_text" translatable="yes">FTP server address</property>
+                                <property name="halign">start</property>
+                                <property name="valign">start</property>
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
                                 <property name="text" translatable="yes">localhost</property>
@@ -182,7 +234,7 @@
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -192,6 +244,8 @@
                                 <property name="can_focus">True</property>
                                 <property name="tooltip_markup">FTP server port</property>
                                 <property name="tooltip_text" translatable="yes">FTP server port</property>
+                                <property name="halign">start</property>
+                                <property name="valign">start</property>
                                 <property name="max_length">5</property>
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
@@ -203,14 +257,14 @@
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
@@ -232,20 +286,14 @@
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
@@ -276,6 +324,8 @@
                             <property name="can_focus">False</property>
                             <property name="tooltip_markup">session messages</property>
                             <property name="tooltip_text" translatable="yes">session messages</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">●</property>
@@ -285,7 +335,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -296,6 +346,8 @@
                             <property name="can_focus">False</property>
                             <property name="tooltip_markup">data messages</property>
                             <property name="tooltip_text" translatable="yes">data messages</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="invisible_char">●</property>
@@ -305,14 +357,14 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -323,6 +375,8 @@
                         <property name="can_focus">False</property>
                         <property name="tooltip_markup">received bytes</property>
                         <property name="tooltip_text" translatable="yes">received bytes</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
                         <property name="editable">False</property>
                         <property name="has_frame">False</property>
                         <property name="invisible_char">●</property>
@@ -332,14 +386,14 @@
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="fill">True</property>
+                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
@@ -367,6 +421,7 @@
                         <property name="vexpand">True</property>
                         <property name="model">treestore_directories</property>
                         <property name="headers_clickable">False</property>
+                        <property name="search_column">0</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview_selection_directories">
                             <signal name="changed" handler="treeview_selection_directories_changed_cb" swapped="no"/>
@@ -425,54 +480,6 @@
             <property name="position">0</property>
           </packing>
         </child>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="action_area_dialog">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button_about">
-                <property name="label">gtk-about</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">half</property>
-                <property name="use_stock">True</property>
-                <property name="focus_on_click">False</property>
-                <signal name="clicked" handler="button_about_clicked_cb" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-                <property name="secondary">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_quit">
-                <property name="label">gtk-quit</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="relief">half</property>
-                <property name="use_stock">True</property>
-                <property name="focus_on_click">False</property>
-                <signal name="clicked" handler="button_quit_clicked_cb" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkFrame" id="frame_log">
             <property name="visible">True</property>
@@ -523,12 +530,16 @@
                       <object class="GtkBox" id="box_log_2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
                         <child>
                           <object class="GtkButton" id="button_clear">
                             <property name="label">C_lear</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="halign">start</property>
+                            <property name="valign">start</property>
                             <property name="relief">half</property>
                             <property name="use_underline">True</property>
                             <property name="focus_on_click">False</property>
@@ -536,12 +547,9 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
                         </child>
                       </object>
                       <packing>
@@ -561,7 +569,7 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -596,6 +604,53 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="action_area_dialog">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button_about">
+                <property name="label">gtk-about</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="relief">half</property>
+                <property name="use_stock">True</property>
+                <property name="focus_on_click">False</property>
+                <signal name="clicked" handler="button_about_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+                <property name="secondary">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_quit">
+                <property name="label">gtk-quit</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="relief">half</property>
+                <property name="use_stock">True</property>
+                <property name="focus_on_click">False</property>
+                <signal name="clicked" handler="button_quit_clicked_cb" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
             <property name="position">3</property>
           </packing>
         </child>
@@ -605,24 +660,6 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkListStore" id="liststore_files">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name is_directory -->
-      <column type="gboolean"/>
-      <!-- column-name size -->
-      <column type="guint64"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_interface">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name identifier -->
-      <column type="gchararray"/>
-    </columns>
   </object>
   <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
     <property name="upper">100</property>

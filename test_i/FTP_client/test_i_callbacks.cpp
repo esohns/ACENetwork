@@ -734,11 +734,11 @@ treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
 
     request_s.command = FTP_Codes::FTP_COMMAND_LIST;
     request_s.parameters.clear ();
-    //if (unlikely (!data_p->control->inPASVMode ()))
-    //{
+    if (unlikely (!data_p->control->inPASVMode ()))
+    {
       data_p->control->queue (request_s);
       request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-    //} // end IF
+    } // end IF
     data_p->control->request (request_s);
   } // end IF
 }
@@ -774,9 +774,12 @@ treeview_selection_files_changed_cb (GtkTreeSelection* treeSelection_in,
     struct FTP_Request request_s;
     request_s.command = FTP_Codes::FTP_COMMAND_RETR;
     request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
-    data_p->control->queue (request_s);
-    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-    request_s.parameters.clear ();
+    if (unlikely (!data_p->control->inPASVMode ()))
+    {
+      data_p->control->queue (request_s);
+      request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+      request_s.parameters.clear ();
+    } // end IF
     data_p->control->request (request_s);
 
     g_free (string_p); string_p = NULL;
@@ -790,8 +793,9 @@ idle_list_received_cb (gpointer userData_in)
 
   // sanity check(s)
   struct FTP_Client_UI_CBData* data_p =
-      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -807,7 +811,7 @@ idle_list_received_cb (gpointer userData_in)
   //gtk_tree_store_clear (tree_store_p);
   GtkTreeIter iterator_2;
 
-  data_p->configuration->parserConfiguration.messageQueue = NULL;
+  data_p->configuration->parserConfiguration_2.messageQueue = NULL;
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
 
@@ -871,6 +875,7 @@ idle_data_received_cb (gpointer userData_in)
   struct FTP_Client_UI_CBData* data_p =
       static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
@@ -886,6 +891,7 @@ idle_data_received_cb (gpointer userData_in)
   gtk_dialog_run (GTK_DIALOG (dialog_p));
   gtk_widget_destroy (dialog_p); dialog_p = NULL;
 
+  data_p->configuration->parserConfiguration_2.messageQueue = NULL;
   data_p->fileName.clear ();
 
   return G_SOURCE_REMOVE;
@@ -1223,16 +1229,16 @@ extern "C"
 #endif /* __cplusplus */
 void
 action_connect_activate_cb (GtkAction* action_in,
-                              gpointer userData_in)
+                            gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::action_connect_activate_cb"));
 
   ACE_UNUSED_ARG (action_in);
 
   // sanity check(s)
-  ACE_ASSERT (userData_in);
   struct FTP_Client_UI_CBData* data_p =
     static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -1349,7 +1355,72 @@ allocate:
   ACE_ASSERT (istream_connection_p);
   istream_connection_p->send (message_block_p);
   iconnection_p->decrease (); iconnection_p = NULL;
+
+  GtkButton* button_p =
+    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BUTTON_DISCONNECT_NAME)));
+  ACE_ASSERT (button_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (button_p), TRUE);
 } // action_connect_activate_cb
+
+void
+button_disconnect_clicked_cb (GtkButton* button_in,
+                              gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::button_disconnect_clicked_cb"));
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->control);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  // disconnect control connection
+  FTP_Client_ConnectionManager_t* connection_manager_p =
+    FTP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  FTP_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+    connection_manager_p->get (data_p->configuration->connectionConfiguration.socketConfiguration.address,
+                               true);
+  if (iconnection_p)
+  {
+    iconnection_p->abort ();
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+
+  // disconnect data connection(s)
+  ACE_ASSERT (connection_manager_p);
+  iconnection_p =
+    connection_manager_p->get (data_p->configuration->connectionConfiguration_2.socketConfiguration.address,
+                               true);
+  if (iconnection_p)
+  {
+    iconnection_p->abort ();
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+
+  GtkTreeStore* tree_store_p =
+    GTK_TREE_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME)));
+  ACE_ASSERT (tree_store_p);
+  gtk_tree_store_clear (tree_store_p);
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_FILES_NAME)));
+  ACE_ASSERT (list_store_p);
+  gtk_list_store_clear (list_store_p);
+
+  GtkAction* action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ACTION_CONNECT_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (button_in), FALSE);
+} // button_discconnect_clicked_cb
 
 void
 combobox_interface_changed_cb (GtkComboBox* comboBox_in,
@@ -1414,7 +1485,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
   // sanity check(s)
   struct FTP_Client_UI_CBData* data_p =
-      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -1460,7 +1531,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     ACE_ASSERT (progressbar_p);
     // *NOTE*: this disables "activity mode" (in Gtk2)
     gtk_progress_bar_set_fraction (progressbar_p, 0.0);
-    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), false);
+    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), FALSE);
   } // end ELSE
 
   return;
@@ -1479,7 +1550,7 @@ togglebutton_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // sanity check(s)
   struct FTP_Client_UI_CBData* data_p =
-      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -1511,7 +1582,7 @@ button_clear_clicked_cb (GtkButton* button_in,
   // sanity check(s)
   ACE_ASSERT (userData_in);
   struct FTP_Client_UI_CBData* data_p =
-      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));

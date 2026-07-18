@@ -412,7 +412,7 @@ FTP_ParserDataDriver_T<SessionMessageType>::waitBuffer ()
 
     // requeue message ?
     if (requeue_b)
-    {
+    { ACE_ASSERT (message_block_p);
       result =
         //configuration_->messageQueue->enqueue_tail (message_block_p, NULL);
         queue_->enqueue_tail (message_block_p, NULL);

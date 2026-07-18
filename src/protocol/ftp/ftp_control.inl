@@ -277,36 +277,9 @@ FTP_Control_T<ControlAsynchConnectorType,
 
   switch (record_in.code)
   {
-    case FTP_Codes::FTP_CODE_USER_OK_NEED_PASSWORD:
+    case FTP_Codes::FTP_CODE_CLOSING_DATA:
     {
-      if (unlikely (!getControlConnectionAndMessage (istream_connection_p,
-                                                     message_p)))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to FTP_Control_T::getControlConnectionAndMessage(), returning\n")));
-        return;
-      } // end IF
-      data_container_p =
-        &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T&> (message_p->getR ());
-      data_p =
-        &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T&> (data_container_p->getR ());
-      data_p->request.command = FTP_Codes::CommandType::FTP_COMMAND_PASS;
-      data_p->request.parameters.push_back (loginOptions_.password);
-
-      message_block_p = message_p;
-      typedef typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_SINGLETON;
-      typename ControlAsynchConnectorType::CONNECTION_MANAGER_T* connection_manager_p =
-        CONNECTION_MANAGER_SINGLETON::instance ();
-      ACE_ASSERT (connection_manager_p);
-      typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* iconnection_p =
-        connection_manager_p->get (controlConnection_);
-      ACE_ASSERT (iconnection_p);
-      typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
-        dynamic_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
-      ACE_ASSERT (istream_connection_p);
-      istream_connection_p->send (message_block_p);
-      message_block_p = NULL;
-      iconnection_p->decrease (); iconnection_p = NULL;
+      PASVMode_ = false;
 
       goto default_;
     }
@@ -360,6 +333,39 @@ FTP_Control_T<ControlAsynchConnectorType,
       iparser_data_p->state (request_s.command == FTP_Codes::FTP_COMMAND_LIST ? (request_s.is_directory_list ? FTP_STATE_DATA_LIST_DIRECTORY
                                                                                                              : FTP_STATE_DATA_LIST_FILE)
                                                                               : FTP_STATE_DATA_DATA);
+
+      goto default_;
+    }
+    case FTP_Codes::FTP_CODE_USER_OK_NEED_PASSWORD:
+    {
+      if (unlikely (!getControlConnectionAndMessage (istream_connection_p,
+                                                     message_p)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to FTP_Control_T::getControlConnectionAndMessage(), returning\n")));
+        return;
+      } // end IF
+      data_container_p =
+        &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T&> (message_p->getR ());
+      data_p =
+        &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T&> (data_container_p->getR ());
+      data_p->request.command = FTP_Codes::CommandType::FTP_COMMAND_PASS;
+      data_p->request.parameters.push_back (loginOptions_.password);
+
+      message_block_p = message_p;
+      typedef typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_SINGLETON;
+      typename ControlAsynchConnectorType::CONNECTION_MANAGER_T* connection_manager_p =
+        CONNECTION_MANAGER_SINGLETON::instance ();
+      ACE_ASSERT (connection_manager_p);
+      typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* iconnection_p =
+        connection_manager_p->get (controlConnection_);
+      ACE_ASSERT (iconnection_p);
+      typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
+        dynamic_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
+      ACE_ASSERT (istream_connection_p);
+      istream_connection_p->send (message_block_p);
+      message_block_p = NULL;
+      iconnection_p->decrease (); iconnection_p = NULL;
 
       goto default_;
     }

@@ -36,6 +36,7 @@
 #define TEST_I_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
 #define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
 #define TEST_I_UI_GTK_BUTTON_CLEAR_NAME                   "button_clear"
+#define TEST_I_UI_GTK_BUTTON_DISCONNECT_NAME              "button_disconnect"
 //#define TEST_I_UI_GTK_BUTTON_REPORT_NAME                  "report"
 #define TEST_I_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
 #define TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME             "checkbutton_asynch"
