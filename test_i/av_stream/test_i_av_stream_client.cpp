@@ -1558,15 +1558,15 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       ACE_ASSERT (directshow_tcp_connection_manager_p);
       directshow_tcp_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                                        ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-      directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
-                                                &user_data_s);
+      //directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
+      //                                          &user_data_s);
       directshow_udp_connection_manager_p =
         TEST_I_AVSTREAM_CLIENT_DIRECTSHOW_UDP_CONNECTIONMANAGER_SINGLETON::instance ();
       ACE_ASSERT (directshow_udp_connection_manager_p);
       directshow_udp_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                                        ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-      directshow_udp_connection_manager_p->set (directshow_udp_connection_configuration,
-                                                &user_data_s);
+      //directshow_udp_connection_manager_p->set (directshow_udp_connection_configuration,
+      //                                          &user_data_s);
 
       if (useUDP_in)
       {
@@ -1589,8 +1589,8 @@ do_work (const struct Stream_Device_Identifier& audioDeviceIdentifier_in,
       ACE_ASSERT (mediafoundation_tcp_connection_manager_p);
       mediafoundation_tcp_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-      mediafoundation_tcp_connection_manager_p->set (mediafoundation_tcp_connection_configuration,
-                                                     &user_data_s);
+      //mediafoundation_tcp_connection_manager_p->set (mediafoundation_tcp_connection_configuration,
+      //                                               &user_data_s);
 
       mediafoundation_modulehandler_iterator =
         (*mediafoundation_stream_iterator).second->find (ACE_TEXT_ALWAYS_CHAR (""));

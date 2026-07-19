@@ -1433,8 +1433,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
       directshow_tcp_connection_configuration.streamConfiguration =
         &directshow_configuration.streamConfiguration;
 
-      directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
-                                                &user_data_s);
+      //directshow_tcp_connection_manager_p->set (directshow_tcp_connection_configuration,
+      //                                          &user_data_s);
 
       result =
         directshow_udp_connection_configuration.socketConfiguration.peerAddress.set (listeningPortNumber_in + 1,
@@ -1466,8 +1466,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
       directshow_udp_connection_configuration.streamConfiguration =
         &directshow_configuration.streamConfiguration;
 
-      directshow_udp_connection_manager_p->set (directshow_udp_connection_configuration,
-                                                &user_data_s);
+      //directshow_udp_connection_manager_p->set (directshow_udp_connection_configuration,
+      //                                          &user_data_s);
       break;
     }
     case STREAM_MEDIAFRAMEWORK_MEDIAFOUNDATION:
@@ -1498,8 +1498,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
       mediafoundation_tcp_connection_configuration.streamConfiguration =
         &mediafoundation_configuration.streamConfiguration;
 
-      mediafoundation_tcp_connection_manager_p->set (mediafoundation_tcp_connection_configuration,
-                                                     &user_data_s);
+      //mediafoundation_tcp_connection_manager_p->set (mediafoundation_tcp_connection_configuration,
+      //                                               &user_data_s);
       break;
     } // end IF
     default:
