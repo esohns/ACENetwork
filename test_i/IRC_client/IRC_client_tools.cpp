@@ -225,7 +225,8 @@ IRC_Client_Tools::parseConfigurationFile (const std::string& fileName_in,
 }
 
 ACE_HANDLE
-IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
+IRC_Client_Tools::connect (IRC_Client_ConnectionConfiguration& configuration_in,
+                           IRC_Client_IConnector_t& connector_in,
                            const ACE_INET_Addr& peerAddress_in,
                            const struct IRC_LoginOptions& loginOptions_in,
                            bool cloneModule_in,
@@ -236,44 +237,40 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
 
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
-  IRC_Client_ConnectionConfiguration* configuration_p = NULL;
-  struct Net_UserData* user_data_p = NULL;
-
   // step0: retrive default configuration
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  connection_manager_p->get (configuration_p,
-                             user_data_p);
-  ACE_ASSERT (user_data_p);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->protocolConfiguration);
-  ACE_ASSERT (configuration_p->streamConfiguration);
-  ACE_ASSERT (configuration_p->streamConfiguration->configuration_);
+  // connection_manager_p->get (configuration_p,
+  //                            user_data_p);
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.protocolConfiguration);
+  ACE_ASSERT (configuration_in.streamConfiguration);
+  ACE_ASSERT (configuration_in.streamConfiguration->configuration_);
 
   // step1: set up configuration
-  configuration_p->protocolConfiguration->loginOptions =
-      loginOptions_in;
-  configuration_p->socketConfiguration.address = peerAddress_in;
+  configuration_in.protocolConfiguration->loginOptions =
+    loginOptions_in;
+  configuration_in.socketConfiguration.address = peerAddress_in;
   bool clone_module_b =
-    configuration_p->streamConfiguration->configuration_->cloneModule;
+    configuration_in.streamConfiguration->configuration_->cloneModule;
   Stream_Module_t* final_module_p =
-    configuration_p->streamConfiguration->configuration_->module;
+    configuration_in.streamConfiguration->configuration_->module;
   if (finalModule_inout)
   {
-    configuration_p->streamConfiguration->configuration_->cloneModule =
+    configuration_in.streamConfiguration->configuration_->cloneModule =
       cloneModule_in;
     //configuration_p->streamConfiguration->configuration->deleteModule =
     //  deleteModule_in;
-    configuration_p->streamConfiguration->configuration_->module =
+    configuration_in.streamConfiguration->configuration_->module =
       finalModule_inout;
     //if (cloneModule_in)
     //  finalModule_inout = NULL;
   } // end IF
 
   // step2: initialize connector
-  if (!connector_in.initialize (*configuration_p))
+  if (!connector_in.initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
@@ -287,11 +284,11 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
 
   // step3: (try to) connect to the server
   return_value = connector_in.connect (peerAddress_in);
-  if (return_value == ACE_INVALID_HANDLE)
+  if (unlikely (return_value == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in, false, false).c_str ())));
     goto error;
   } // end IF
   if (!connector_in.useReactor ())
@@ -318,12 +315,12 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in, false, false).c_str ()),
                   ACE::sock_error (result)));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in, false, false).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (result))));
 #endif // ACE_WIN32 || ACE_WIN64
       goto error;
@@ -360,8 +357,8 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
     if (status != NET_CONNECTION_STATUS_OK)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection failed to initialize (status was: %d), returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ()),
+                  ACE_TEXT ("connection failed to initialize (status was: %d), aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in, false, false).c_str ()),
                   status));
       iconnection_p->decrease (); iconnection_p = NULL;
       goto error;
@@ -372,7 +369,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
     if (!istream_connection_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
+                  ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), aborting\n"),
                   iconnection_p));
       iconnection_p->decrease (); iconnection_p = NULL;
       goto error;
@@ -383,9 +380,9 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   } // end IF
 
   // clean up
-  configuration_p->streamConfiguration->configuration_->cloneModule =
+  configuration_in.streamConfiguration->configuration_->cloneModule =
     clone_module_b;
-  configuration_p->streamConfiguration->configuration_->module =
+  configuration_in.streamConfiguration->configuration_->module =
     final_module_p;
 
   //connection_manager_p->unlock ();
@@ -401,9 +398,9 @@ error:
   //  delete finalModule_inout;
   //  finalModule_inout = NULL;
   //} // end IF
-  configuration_p->streamConfiguration->configuration_->cloneModule =
+  configuration_in.streamConfiguration->configuration_->cloneModule =
     clone_module_b;
-  configuration_p->streamConfiguration->configuration_->module =
+  configuration_in.streamConfiguration->configuration_->module =
     final_module_p;
 
   return ACE_INVALID_HANDLE;

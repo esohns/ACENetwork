@@ -98,7 +98,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     } // end IF
   } // end lock scope
   if (unlikely (do_abort))
-    abort ();
+    abort (true); // wait ?
 }
 
 template <ACE_SYNCH_DECL,
@@ -118,9 +118,135 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::initialize"));
 
+  maximumNumberOfConnections_ = maximumNumberOfConnections_in;
   resetTimeoutInterval_ = visitInterval_in;
 
-  maximumNumberOfConnections_ = maximumNumberOfConnections_in;
+  isInitialized_ = true;
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+bool
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::start (ACE_Time_Value* timeout_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
+
+  ACE_UNUSED_ARG (timeout_in);
+
+  int result = -1;
+  Common_ITimer_Manager_t* timer_interface_p =
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  const void* act_p = NULL;
+
+  // (re-)schedule the visitor interval timer
+  if (unlikely (resetTimeoutHandlerId_ != -1))
+  {
+    result = timer_interface_p->cancel_timer (resetTimeoutHandlerId_,
+                                              &act_p);
+    if (unlikely (result <= 0))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
+                  resetTimeoutHandlerId_));
+    resetTimeoutHandlerId_ = -1;
+  } // end IF
+  resetTimeoutHandlerId_ =
+    timer_interface_p->schedule_timer (&resetTimeoutHandler_,  // event handler handle
+                                       NULL,                   // asynchronous completion token
+                                       ACE_Time_Value::zero,   // first wakeup time
+                                       resetTimeoutInterval_); // interval
+  if (unlikely (resetTimeoutHandlerId_ == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_ITimer::schedule_timer(%#T): \"%m\", aborting\n"),
+                &resetTimeoutInterval_));
+    return false;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("scheduled visitor interval timer (id: %d, interval: %#T)\n"),
+              resetTimeoutHandlerId_,
+              &resetTimeoutInterval_));
+
+  isActive_ = true;
+
+  return true;
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+void
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::stop (bool waitForCompletion_in,
+                                              bool)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
+
+  isActive_ = false;
+
+  if (unlikely (resetTimeoutHandlerId_ != -1))
+  {
+    Common_ITimer_Manager_t* timer_interface_p =
+        COMMON_TIMERMANAGER_SINGLETON::instance ();
+    const void* act_p = NULL;
+    int result = timer_interface_p->cancel_timer (resetTimeoutHandlerId_,
+                                                  &act_p);
+    if (unlikely (result <= 0))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
+                  resetTimeoutHandlerId_));
+    resetTimeoutHandlerId_ = -1;
+  } // end IF
+
+  if (waitForCompletion_in)
+    wait (true); // N/A
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+void
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::wait (bool) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait"));
+
+  int result = -1;
+
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
+    while (!connections_.is_empty ())
+    {
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("waiting for %u connection(s)...\n"),
+                  connections_.size ()));
+      result = connectionsCondition_.wait ();
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_CONDITION::wait(): \"%m\", continuing\n")));
+    } // end WHILE
+  } // end lock scope
 }
 
 template <ACE_SYNCH_DECL,
@@ -189,17 +315,26 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::set (const ConfigurationType& configuration_in,
-                                             UserDataType* userData_in)
+                         UserDataType>::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
 
-  ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, configurationLock_);
+  ICONNECTION_T* connection_p = NULL;
 
-  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
-  userData_ = userData_in;
-
-  isInitialized_ = true;
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
+    for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
+         iterator.next (connection_p);
+         iterator.advance ())
+    { ACE_ASSERT (connection_p);
+      try {
+        connection_p->dump_state ();
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
+      }
+      connection_p = NULL;
+    } // end FOR
+  } // end lock scope
 }
 
 template <ACE_SYNCH_DECL,
@@ -214,23 +349,349 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::get (ConfigurationType*& configuration_out,
-                                             UserDataType*& userData_out)
+                         UserDataType>::abort (enum Net_Connection_AbortStrategy strategy_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
 
-  // sanity check(s)
-  ACE_ASSERT (isInitialized_);
-
-  // *NOTE*: this is called by managed (!) connections to retrieve their
-  //         respective configuration; (hopefully) the configurationLock_ is
-  //         being held by the initiating thread (*NOTE*: this might very well
-  //         be a different thread for asynch connections)
-  //         --> do NOT try to grab the lock here !
-  // ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, configurationLock_);
-  configuration_out = configuration_;
-  userData_out = userData_;
+  switch (strategy_in)
+  {
+    case NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST:
+      return abortLeastRecent ();
+    case NET_CONNECTION_ABORT_STRATEGY_RECENT_MOST:
+      return abortMostRecent ();
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown strategy (was: %d), returning\n"),
+                  strategy_in));
+      break;
+    }
+  } // end SWITCH
 }
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+void
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::abort (bool waitForCompletion_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
+
+  ICONNECTION_T* connection_p = NULL;
+  CONNECTION_CONTAINER_T connections_a;
+  bool is_first_b = true;
+
+begin:
+  // step1: gather a set of open connection handles
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
+    for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
+         iterator.next (connection_p);
+         iterator.advance ())
+    { ACE_ASSERT (connection_p);
+      connection_p->increase ();
+
+      if (unlikely (!connections_a.insert_tail (connection_p)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", returning\n")));
+        connection_p->decrease ();
+        return;
+      } // end IF
+    } // end FOR
+  } // end lock scope
+  if (unlikely (connections_a.is_empty ()))
+    return;
+
+  // step2: close all connections
+  connection_p = NULL;
+  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_a);
+       iterator.next (connection_p);
+       iterator.advance ())
+  { ACE_ASSERT (connection_p);
+    try {
+      connection_p->abort ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: caught exception in Net_IConnection_T::abort(), continuing\n"),
+                  connection_p->id ()));
+    }
+    connection_p->decrease (); connection_p = NULL;
+  } // end FOR
+  if (is_first_b)
+  {
+    is_first_b = false;
+
+    if (likely (connections_a.size ()))
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("aborted %u connection(s)\n"),
+                  connections_a.size ()));
+  } // end IF
+  if (unlikely (waitForCompletion_in))
+  {
+    connections_a.reset ();
+    goto begin;
+  } // end IF
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+unsigned int
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::count () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::count"));
+
+  unsigned int result = 0;
+
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_, 0);
+    result = static_cast<unsigned int> (connections_.size ());
+  } // end lock scope
+
+  return result;
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+bool
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::register_ (ICONNECTION_T* connection_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::register_"));
+
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_, false);
+    if (unlikely (!isActive_ || // --> (currently) rejecting new connections
+                  (connections_.size () >= maximumNumberOfConnections_)))
+      return false;
+
+    try {
+      connection_in->increase ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_IConnection_T::increase(), aborting\n")));
+      return false;
+    }
+    if (!unlikely (connections_.insert_tail (connection_in)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", aborting\n")));
+      connection_in->decrease ();
+      return false;
+    } // end IF
+  } // end lock scope
+
+  return true;
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+void
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::deregister (ICONNECTION_T* connection_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregister"));
+
+  ICONNECTION_T* connection_p = NULL;
+  bool found = false;
+  int result = -1;
+
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
+    for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
+         iterator.next (connection_p);
+         iterator.advance ())
+      if (unlikely (connection_p == connection_in))
+      {
+        found = true;
+        result = iterator.remove ();
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_DLList_Iterator::remove(): \"%m\", continuing\n")));
+        break;
+      } // end IF
+    if (unlikely (!found))
+    {
+      // *NOTE*: most probably cause: handle already deregistered (--> check
+      //         implementation !)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("connection (id was: %u) handle (was: 0x%@) not found, returning\n"),
+                  connection_in->id (),
+                  connection_in));
+      return;
+    } // end IF
+    ACE_ASSERT (connection_p);
+
+    // clean up
+    try {
+      connection_in->decrease ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_IConnection_T::decrease(): \"%m\", continuing\n")));
+    }
+
+    // signal any waiters
+    result = connectionsCondition_.broadcast ();
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
+  } // end lock scope
+}
+
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+void
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
+                         UserDataType>::abort (const AddressType& address_in,
+                                               bool matchPort_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
+
+  ACE_UNUSED_ARG (matchPort_in);
+
+  ICONNECTION_T* connection_p = NULL;
+  CONNECTION_CONTAINER_T connections_a;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  AddressType local_address, peer_address;
+
+  // step1: gather a set of matching connection handles
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
+    for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
+         iterator.next (connection_p);
+         iterator.advance ())
+    { ACE_ASSERT (connection_p);
+      connection_p->info (handle,
+                          local_address,
+                          peer_address);
+      if (likely ((peer_address != address_in) &&
+                  (local_address != address_in)))
+        continue;
+
+      connection_p->increase ();
+      if (unlikely (!connections_a.insert_tail (connection_p)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", returning\n")));
+        connection_p->decrease ();
+        return;
+      } // end IF
+    } // end FOR
+  } // end lock scope
+  if (unlikely (connections_a.is_empty ()))
+    return;
+
+  // step2: close all connections
+  connection_p = NULL;
+  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_a);
+       iterator.next (connection_p);
+       iterator.advance ())
+  { ACE_ASSERT (connection_p);
+    try {
+      connection_p->abort ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: caught exception in Net_IConnection_T::abort(), continuing\n"),
+                  connection_p->id ()));
+    }
+    connection_p->decrease (); connection_p = NULL;
+  } // end FOR
+  if (likely (connections_a.size ()))
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("aborted %u connection(s)\n"),
+                connections_a.size ()));
+}
+
+// template <ACE_SYNCH_DECL,
+//           typename AddressType,
+//           typename ConfigurationType,
+//           typename StateType,
+//           typename StatisticContainerType,
+//           typename UserDataType>
+// void
+// Net_Connection_Manager_T<ACE_SYNCH_USE,
+//                          AddressType,
+//                          ConfigurationType,
+//                          StateType,
+//                          StatisticContainerType,
+//                          UserDataType>::set (const ConfigurationType& configuration_in,
+//                                              UserDataType* userData_in)
+// {
+//   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
+
+//   ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, configurationLock_);
+
+//   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
+//   userData_ = userData_in;
+
+//   isInitialized_ = true;
+// }
+
+// template <ACE_SYNCH_DECL,
+//           typename AddressType,
+//           typename ConfigurationType,
+//           typename StateType,
+//           typename StatisticContainerType,
+//           typename UserDataType>
+// void
+// Net_Connection_Manager_T<ACE_SYNCH_USE,
+//                          AddressType,
+//                          ConfigurationType,
+//                          StateType,
+//                          StatisticContainerType,
+//                          UserDataType>::get (ConfigurationType*& configuration_out,
+//                                              UserDataType*& userData_out)
+// {
+//   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
+
+//   // sanity check(s)
+//   ACE_ASSERT (isInitialized_);
+
+//   // *NOTE*: this is called by managed (!) connections to retrieve their
+//   //         respective configuration; (hopefully) the configurationLock_ is
+//   //         being held by the initiating thread (*NOTE*: this might very well
+//   //         be a different thread for asynch connections)
+//   //         --> do NOT try to grab the lock here !
+//   // ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, configurationLock_);
+//   configuration_out = configuration_;
+//   userData_out = userData_;
+// }
 
 template <ACE_SYNCH_DECL,
           typename AddressType,
@@ -349,360 +810,6 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   } // end lock scope
 
   return connection_p;
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-bool
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::register_ (ICONNECTION_T* connection_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::register_"));
-
-  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_, false);
-    if (unlikely (!isActive_ || // --> (currently) rejecting new connections
-                  (connections_.size () >= maximumNumberOfConnections_)))
-      return false;
-
-    try {
-      connection_in->increase ();
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::increase(), aborting\n")));
-      return false;
-    }
-    if (!unlikely (connections_.insert_tail (connection_in)))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", aborting\n")));
-      connection_in->decrease ();
-      return false;
-    } // end IF
-  } // end lock scope
-
-  return true;
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-void
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::deregister (ICONNECTION_T* connection_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregister"));
-
-  ICONNECTION_T* connection_p = NULL;
-  bool found = false;
-  int result = -1;
-
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
-    for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
-         iterator.next (connection_p);
-         iterator.advance ())
-      if (unlikely (connection_p == connection_in))
-      {
-        found = true;
-        result = iterator.remove ();
-        if (unlikely (result == -1))
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_DLList_Iterator::remove(): \"%m\", continuing\n")));
-        break;
-      } // end IF
-    if (unlikely (!found))
-    {
-      // *NOTE*: most probably cause: handle already deregistered (--> check
-      //         implementation !)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection (id was: %u) handle (was: 0x%@) not found, returning\n"),
-                  connection_in->id (),
-                  connection_in));
-      return;
-    } // end IF
-    ACE_ASSERT (connection_p);
-
-    // clean up
-    try {
-      connection_in->decrease ();
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::decrease(): \"%m\", continuing\n")));
-    }
-
-    // signal any waiters
-    result = connectionsCondition_.broadcast ();
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
-  } // end lock scope
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-unsigned int
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::count () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::count"));
-
-  unsigned int result = 0;
-
-  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_, 0);
-    result = static_cast<unsigned int> (connections_.size ());
-  } // end lock scope
-
-  return result;
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-bool
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::start (ACE_Time_Value* timeout_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::start"));
-
-  ACE_UNUSED_ARG (timeout_in);
-
-  int result = -1;
-  Common_ITimer_Manager_t* timer_interface_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
-  const void* act_p = NULL;
-
-  // (re-)schedule the visitor interval timer
-  if (unlikely (resetTimeoutHandlerId_ != -1))
-  {
-    result = timer_interface_p->cancel_timer (resetTimeoutHandlerId_,
-                                              &act_p);
-    if (unlikely (result <= 0))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
-                  resetTimeoutHandlerId_));
-    resetTimeoutHandlerId_ = -1;
-  } // end IF
-  resetTimeoutHandlerId_ =
-    timer_interface_p->schedule_timer (&resetTimeoutHandler_,  // event handler handle
-                                       NULL,                   // asynchronous completion token
-                                       ACE_Time_Value::zero,   // first wakeup time
-                                       resetTimeoutInterval_); // interval
-  if (unlikely (resetTimeoutHandlerId_ == -1))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_ITimer::schedule_timer(%#T): \"%m\", aborting\n"),
-                &resetTimeoutInterval_));
-    return false;
-  } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("scheduled visitor interval timer (id: %d, interval: %#T)\n"),
-              resetTimeoutHandlerId_,
-              &resetTimeoutInterval_));
-
-  isActive_ = true;
-
-  return true;
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-void
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::stop (bool waitForCompletion_in,
-                                              bool)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::stop"));
-
-  isActive_ = false;
-
-  if (unlikely (resetTimeoutHandlerId_ != -1))
-  {
-    Common_ITimer_Manager_t* timer_interface_p =
-        COMMON_TIMERMANAGER_SINGLETON::instance ();
-    const void* act_p = NULL;
-    int result = timer_interface_p->cancel_timer (resetTimeoutHandlerId_,
-                                                  &act_p);
-    if (unlikely (result <= 0))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
-                  resetTimeoutHandlerId_));
-    resetTimeoutHandlerId_ = -1;
-  } // end IF
-
-  if (waitForCompletion_in)
-    wait (true); // N/A
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-void
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::abort (enum Net_Connection_AbortStrategy strategy_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
-
-  switch (strategy_in)
-  {
-    case NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST:
-      return abortLeastRecent ();
-    case NET_CONNECTION_ABORT_STRATEGY_RECENT_MOST:
-      return abortMostRecent ();
-    default:
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown strategy (was: %d), returning\n"),
-                  strategy_in));
-      break;
-    }
-  } // end SWITCH
-}
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-void
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::abort (bool waitForCompletion_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
-
-  ICONNECTION_T* connection_p = NULL;
-  CONNECTION_CONTAINER_T connections_a;
-  bool is_first_b = true;
-
-begin:
-  // step1: gather a set of open connection handles
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
-    for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
-         iterator.next (connection_p);
-         iterator.advance ())
-    { ACE_ASSERT (connection_p);
-      connection_p->increase ();
-
-      if (unlikely (!connections_a.insert_tail (connection_p)))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", returning\n")));
-        connection_p->decrease ();
-        return;
-      } // end IF
-    } // end FOR
-  } // end lock scope
-  if (unlikely (connections_a.is_empty ()))
-    return;
-
-  // step2: close all connections
-  connection_p = NULL;
-  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_a);
-       iterator.next (connection_p);
-       iterator.advance ())
-  { ACE_ASSERT (connection_p);
-    try {
-      connection_p->abort ();
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: caught exception in Net_IConnection_T::abort(), continuing\n"),
-                  connection_p->id ()));
-    }
-    connection_p->decrease (); connection_p = NULL;
-  } // end FOR
-  if (is_first_b)
-  {
-    is_first_b = false;
-
-    if (likely (connections_a.size ()))
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("aborted %u connection(s)\n"),
-                  connections_a.size ()));
-  } // end IF
-  if (unlikely (waitForCompletion_in))
-  {
-    connections_a.reset ();
-    goto begin;
-  } // end IF
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-void
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::wait (bool) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait"));
-
-  int result = -1;
-
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
-    while (!connections_.is_empty ())
-    {
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("waiting for %u connection(s)...\n"),
-                  connections_.size ()));
-      result = connectionsCondition_.wait ();
-      if (unlikely (result == -1))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_CONDITION::wait(): \"%m\", continuing\n")));
-    } // end WHILE
-  } // end lock scope
 }
 
 template <ACE_SYNCH_DECL,
@@ -966,38 +1073,4 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
               statistic_s.receivedBytes,
               (number_of_connections_i ? (statistic_s.receivedBytes / static_cast<float> (number_of_connections_i)) : 0.0F),
               statistic_s.messagesPerSecond, statistic_s.bytesPerSecond));
-}
-
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-void
-Net_Connection_Manager_T<ACE_SYNCH_USE,
-                         AddressType,
-                         ConfigurationType,
-                         StateType,
-                         StatisticContainerType,
-                         UserDataType>::dump_state () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
-
-  ICONNECTION_T* connection_p = NULL;
-
-  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, connectionsLock_);
-    for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
-         iterator.next (connection_p);
-         iterator.advance ())
-    { ACE_ASSERT (connection_p);
-      try {
-        connection_p->dump_state ();
-      } catch (...) {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
-      }
-      connection_p = NULL;
-    } // end FOR
-  } // end lock scope
 }

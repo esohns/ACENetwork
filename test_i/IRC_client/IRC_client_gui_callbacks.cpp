@@ -215,10 +215,13 @@ connection_setup_function (void* arg_in)
 
   // step2b: set up configuration passed to processing stream
   IRC_Client_ConnectionConfiguration* configuration_p = NULL;
-  struct Net_UserData* user_data_p = NULL;
-  // load defaults
-  connection_manager_p->get (configuration_p,
-                             user_data_p);
+  Net_ConnectionConfigurationsIterator_t iterator_3 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
+  configuration_p =
+    static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_3).second);
+  // connection_manager_p->get (configuration_p,
+  //                            user_data_p);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
 

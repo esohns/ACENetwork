@@ -742,8 +742,8 @@ do_work (
   // step3: initialize connection manager
   connection_manager_p->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  iconnection_manager_p->set (*static_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second),
-                              NULL);
+  // iconnection_manager_p->set (*static_cast<FileServer_TCPConnectionConfiguration*> ((*iterator).second),
+  //                             NULL);
 
   // step4: initialize listener
   //if (networkInterface_in.empty ()); // *TODO*

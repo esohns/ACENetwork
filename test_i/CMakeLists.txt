@@ -288,7 +288,7 @@ if (BUILD_TEST_I)
  add_subdirectory (web_tv)
 
  add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui trending)
- add_dependencies (test_i av_stream_client av_stream_server ftp_client url_stream_load web_tv)
+ add_dependencies (test_i av_stream_client av_stream_server FTP_client url_stream_load web_tv)
  if (WIN32)
   add_dependencies (test_i av_stream_ds_source av_stream_mf_source)
  endif (WIN32)

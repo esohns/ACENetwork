@@ -31,12 +31,14 @@
 class BitTorrent_Client_Tools
 {
  public:
-  static ACE_HANDLE connect (BitTorrent_Client_IPeerConnector_t&,    // connector handle
-                             BitTorrent_Client_ITrackerConnector_t&, // connector handle
-                             const ACE_INET_Addr&,                   // peer address
-                             bool,                                   // clone module ? // ? : delete module
-                             Stream_Module_t*&,                      // (final) module handle
-                             bool = true);                           // peer ? : tracker
+  static ACE_HANDLE connect (BitTorrent_Client_PeerConnectionConfiguration&,    // peer configuration
+                             BitTorrent_Client_TrackerConnectionConfiguration&, // tracker configuration
+                             BitTorrent_Client_IPeerConnector_t&,               // peer connector handle
+                             BitTorrent_Client_ITrackerConnector_t&,            // tracker connector handle
+                             const ACE_INET_Addr&,                              // peer address
+                             bool,                                              // clone module ? // ? : delete module
+                             Stream_Module_t*&,                                 // (final) module handle
+                             bool);                                             // make peer- ? : tracker connection
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Tools ())

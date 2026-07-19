@@ -733,13 +733,13 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   struct Net_UserData user_data;
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (tcp_connection_configuration,
-                             NULL);
+  // connection_manager_p->set (tcp_connection_configuration,
+  //                            NULL);
   connection_manager_p->start (NULL);
   connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_2->set (udp_connection_configuration,
-                             NULL);
+  // connection_manager_2->set (udp_connection_configuration,
+  //                            NULL);
   connection_manager_2->start (NULL);
 
   // step0e: initialize action timer

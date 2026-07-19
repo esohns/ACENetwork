@@ -823,8 +823,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // step4: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
-                             NULL);
+  // connection_manager_p->set (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator_2).second),
+  //                            NULL);
 
   // event loop(s):
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)

@@ -50,18 +50,18 @@ Net_Client_Common_Tools::connect (ConnectorType& connector_in,
   enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
   typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
 
-  iconnection_manager_p->lock (true);
+  // iconnection_manager_p->lock (true);
 
   // step1: initialize the connection manager
-  iconnection_manager_p->set (configuration_in,
-                              &const_cast<typename ConnectorType::USERDATA_T&> (userData_in));
+  // iconnection_manager_p->set (configuration_in,
+  //                             &const_cast<typename ConnectorType::USERDATA_T&> (userData_in));
 
   // step2: initialize the connector
   if (unlikely (!iconnector_p->initialize (configuration_in)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, aborting\n")));
-    iconnection_manager_p->unlock (false);
+    // iconnection_manager_p->unlock (false);
     return ACE_INVALID_HANDLE;
   } // end IF
 
@@ -80,12 +80,12 @@ retry:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
-    iconnection_manager_p->unlock (false);
+    // iconnection_manager_p->unlock (false);
     return ACE_INVALID_HANDLE;
   } // end IF
   if (unlikely (!wait_in))
   {
-    iconnection_manager_p->unlock (false);
+    // iconnection_manager_p->unlock (false);
     return result;
   } // end IF
 
@@ -167,7 +167,7 @@ retry:
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
     connection_p->decrease ();
-    iconnection_manager_p->unlock (false);
+    // iconnection_manager_p->unlock (false);
     return ACE_INVALID_HANDLE;
   } // end IF
 
@@ -191,11 +191,11 @@ continue_:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
-    iconnection_manager_p->unlock (false);
+    // iconnection_manager_p->unlock (false);
     return ACE_INVALID_HANDLE;
   } // end IF
   connection_p->decrease (); connection_p = NULL;
-  iconnection_manager_p->unlock (false);
+  // iconnection_manager_p->unlock (false);
 
   return result;
 }

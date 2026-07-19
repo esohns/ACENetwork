@@ -34,7 +34,9 @@
 #include "bittorrent_client_defines.h"
 
 ACE_HANDLE
-BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnector_in,
+BitTorrent_Client_Tools::connect (BitTorrent_Client_PeerConnectionConfiguration& peerConfiguration_in,
+                                  BitTorrent_Client_TrackerConnectionConfiguration& trackerConfiguration_in,
+                                  BitTorrent_Client_IPeerConnector_t& peerConnector_in,
                                   BitTorrent_Client_ITrackerConnector_t& trackerConnector_in,
                                   const ACE_INET_Addr& address_in,
                                   bool cloneModule_in, // ? ==> delete module
@@ -45,71 +47,60 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
 
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
-//  int result = -1;
-  BitTorrent_Client_PeerConnectionConfiguration* peer_configuration_p =
-      NULL;
-  struct Net_UserData* peer_user_data_p = NULL;
-  BitTorrent_Client_TrackerConnectionConfiguration* tracker_configuration_p =
-      NULL;
-  struct Net_UserData* tracker_user_data_p = NULL;
-
-  // step0: retrive default configuration
+  // step0: retrieve default configuration(s)
   BitTorrent_Client_IPeerConnection_Manager_t* peer_connection_manager_p =
     BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
   BitTorrent_Client_ITrackerConnection_Manager_t* tracker_connection_manager_p =
     BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (tracker_connection_manager_p);
-  peer_connection_manager_p->get (peer_configuration_p,
-                                  peer_user_data_p);
-  tracker_connection_manager_p->get (tracker_configuration_p,
-                                     tracker_user_data_p);
-  ACE_ASSERT (peer_user_data_p);
-  ACE_ASSERT (tracker_user_data_p);
-  // *TODO*: remove type inferences
-  ACE_ASSERT (peer_configuration_p);
-  ACE_ASSERT (peer_configuration_p->streamConfiguration);
-  ACE_ASSERT (tracker_configuration_p);
-  ACE_ASSERT (tracker_configuration_p->streamConfiguration);
+  // peer_connection_manager_p->get (peer_configuration_p,
+  //                                 peer_user_data_p);
+  // tracker_connection_manager_p->get (tracker_configuration_p,
+  //                                    tracker_user_data_p);
+
+  // sanity check(s)
+  ACE_ASSERT (peerConfiguration_in.streamConfiguration);
+  ACE_ASSERT (trackerConfiguration_in.streamConfiguration);
 
   // step1: set up configuration
   if (isPeer_in)
-    peer_configuration_p->socketConfiguration.address = address_in;
+    peerConfiguration_in.socketConfiguration.address = address_in;
   else
-    tracker_configuration_p->socketConfiguration.address = address_in;
-  bool clone_module_b = cloneModule_in;
-  Stream_Module_t* final_module_p = finalModule_inout;
+    trackerConfiguration_in.socketConfiguration.address = address_in;
+  bool clone_module_b;
+  Stream_Module_t* final_module_p;
   if (finalModule_inout)
   {
     if (isPeer_in)
     {
       clone_module_b =
-        peer_configuration_p->streamConfiguration->configuration_->cloneModule;
-      peer_configuration_p->streamConfiguration->configuration_->cloneModule =
+        peerConfiguration_in.streamConfiguration->configuration_->cloneModule;
+      peerConfiguration_in.streamConfiguration->configuration_->cloneModule =
         cloneModule_in;
       final_module_p =
-        peer_configuration_p->streamConfiguration->configuration_->module;
-      peer_configuration_p->streamConfiguration->configuration_->module =
+        peerConfiguration_in.streamConfiguration->configuration_->module;
+      peerConfiguration_in.streamConfiguration->configuration_->module =
         finalModule_inout;
     } // end IF
     else
     {
       clone_module_b =
-        tracker_configuration_p->streamConfiguration->configuration_->cloneModule;
-      tracker_configuration_p->streamConfiguration->configuration_->cloneModule =
+        trackerConfiguration_in.streamConfiguration->configuration_->cloneModule;
+      trackerConfiguration_in.streamConfiguration->configuration_->cloneModule =
         cloneModule_in;
       final_module_p =
-        tracker_configuration_p->streamConfiguration->configuration_->module;
-      tracker_configuration_p->streamConfiguration->configuration_->module =
+        trackerConfiguration_in.streamConfiguration->configuration_->module;
+      trackerConfiguration_in.streamConfiguration->configuration_->module =
         finalModule_inout;
     } // end ELSE
   } // end IF
 
   // step2: initialize connector
   bool result_2 =
-      (isPeer_in ? peerConnector_in.initialize (*peer_configuration_p)
-                 : trackerConnector_in.initialize (*tracker_configuration_p));
-  if (!result_2)
+    (isPeer_in ? peerConnector_in.initialize (peerConfiguration_in)
+               : trackerConnector_in.initialize (trackerConfiguration_in));
+  if (unlikely (!result_2))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
@@ -124,11 +115,11 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   // step3: (try to) connect to the server
   return_value = (isPeer_in ? peerConnector_in.connect (address_in)
                             : trackerConnector_in.connect (address_in));
-  if (return_value == ACE_INVALID_HANDLE)
+  if (unlikely (return_value == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to Net_IConnector_T::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
     goto error;
   } // end IF
   if (!((isPeer_in && peerConnector_in.useReactor ()) ||
@@ -166,12 +157,12 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                   ACE::sock_error (result)));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%s\" aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (result))));
 #endif // ACE_WIN32 || ACE_WIN64
       goto error;
@@ -213,8 +204,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
     if (status != NET_CONNECTION_STATUS_OK)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection failed to initialize (status was: %d), returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
+                  ACE_TEXT ("connection failed to initialize (status was: %d), aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ()),
                   status));
       if (isPeer_in)
       {
@@ -228,15 +219,13 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
     } // end IF
     // step3b: wait for the connection stream to finish initializing
     if (isPeer_in)
-      ipeer_stream_connection_p =
-        dynamic_cast<typename BitTorrent_Client_AsynchPeerConnector_t::ISTREAM_CONNECTION_T*> (ipeer_connection_p);
+      ipeer_stream_connection_p = dynamic_cast<typename BitTorrent_Client_AsynchPeerConnector_t::ISTREAM_CONNECTION_T*> (ipeer_connection_p);
     else
-      itracker_stream_connection_p =
-        dynamic_cast<typename BitTorrent_Client_AsynchTrackerConnector_t::ISTREAM_CONNECTION_T*> (itracker_connection_p);
+      itracker_stream_connection_p = dynamic_cast<typename BitTorrent_Client_AsynchTrackerConnector_t::ISTREAM_CONNECTION_T*> (itracker_connection_p);
     if (!(ipeer_stream_connection_p || itracker_stream_connection_p))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>, returning\n")));//,
+                  ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>, aborting\n")));//,
                   //(isPeer_in ? ipeer_connection_p : itracker_connection_p)));
       if (isPeer_in)
       {
@@ -267,16 +256,16 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   {
     if (isPeer_in)
     {
-      peer_configuration_p->streamConfiguration->configuration_->cloneModule =
+      peerConfiguration_in.streamConfiguration->configuration_->cloneModule =
         clone_module_b;
-      peer_configuration_p->streamConfiguration->configuration_->module =
+      peerConfiguration_in.streamConfiguration->configuration_->module =
         final_module_p;
     } // end IF
     else
     {
-      tracker_configuration_p->streamConfiguration->configuration_->cloneModule =
+      trackerConfiguration_in.streamConfiguration->configuration_->cloneModule =
         clone_module_b;
-      tracker_configuration_p->streamConfiguration->configuration_->module =
+      trackerConfiguration_in.streamConfiguration->configuration_->module =
         final_module_p;
     } // end ELSE
   } // end IF
@@ -293,16 +282,16 @@ error:
   {
     if (isPeer_in)
     {
-      peer_configuration_p->streamConfiguration->configuration_->cloneModule =
+      peerConfiguration_in.streamConfiguration->configuration_->cloneModule =
         clone_module_b;
-      peer_configuration_p->streamConfiguration->configuration_->module =
+      peerConfiguration_in.streamConfiguration->configuration_->module =
         final_module_p;
     } // end IF
     else
     {
-      tracker_configuration_p->streamConfiguration->configuration_->cloneModule =
+      trackerConfiguration_in.streamConfiguration->configuration_->cloneModule =
         clone_module_b;
-      tracker_configuration_p->streamConfiguration->configuration_->module =
+      trackerConfiguration_in.streamConfiguration->configuration_->module =
         final_module_p;
     } // end ELSE
   } // end IF

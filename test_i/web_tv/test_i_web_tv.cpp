@@ -1193,15 +1193,15 @@ do_work (const std::string& configurationFile_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (connection_configuration,
-                             NULL);
+  // connection_manager_p->set (connection_configuration,
+  //                            NULL);
   Test_I_ConnectionManager_3_t* connection_manager_3 =
     TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
   ACE_ASSERT (connection_manager_3);
   connection_manager_3->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_3->set (connection_configuration_3a,
-                             NULL);
+  // connection_manager_3->set (connection_configuration_3a,
+  //                            NULL);
 
   // step0b: initialize event dispatch
   struct Common_EventDispatchState event_dispatch_state_s;

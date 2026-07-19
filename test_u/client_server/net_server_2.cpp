@@ -785,16 +785,16 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step3: initialize connection manager
-  struct Net_UserData user_data;
+  // struct Net_UserData user_data;
   connection_manager_p->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*connection_configuration_p,
-                             &user_data);
+  // connection_manager_p->set (*connection_configuration_p,
+  //                            &user_data);
   connection_manager_p->start (NULL);
   connection_manager_2->initialize (maximumNumberOfConnections_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_2->set (*connection_configuration_p_2,
-                             &user_data);
+  // connection_manager_2->set (*connection_configuration_p_2,
+  //                            &user_data);
   connection_manager_2->start (NULL);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)

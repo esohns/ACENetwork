@@ -41,7 +41,7 @@ class Net_IConnectionManagerBase
   virtual void abort (enum Net_Connection_AbortStrategy) = 0;
   virtual void abort (bool = false) = 0; // wait for completion ? (see wait())
 
-  virtual unsigned int count () const = 0; // return value: # of connections
+  virtual unsigned int count () const = 0; // return value: #connections
 
   // *NOTE*: the inherited wait() API really makes sense only AFTER stop() has
   //         been invoked, i.e. when new connections will be rejected; otherwise
@@ -71,12 +71,17 @@ class Net_IConnectionManager_T
                             StatisticContainerType> ICONNECTION_T;
   typedef Common_IStatistic_T<StatisticContainerType> ISTATISTIC_T;
 
-  virtual void set (const ConfigurationType&, // connection handler (default)
-                                              // configuration
-                    UserDataType*) = 0;       // (stream) user data
-  virtual void get (ConfigurationType*&,  // return value: (default)
-                                          // connection handler configuration
-                    UserDataType*&) = 0;  // return value: (stream) user data
+  // *TODO*: when activating this, the gcc compiler does not find the inherited
+  //         abort() methods...:-(
+  // virtual void abort (const AddressType&, // peer address
+  //                     bool = true) = 0;   // match port# ? : address only
+
+  // virtual void set (const ConfigurationType&, // connection handler (default)
+  //                                             // configuration
+  //                   UserDataType*) = 0;       // (stream) user data
+  // virtual void get (ConfigurationType*&,  // return value: (default)
+  //                                         // connection handler configuration
+  //                   UserDataType*&) = 0;  // return value: (stream) user data
 
   // *WARNING*: if (!= NULL) callers must decrease() the returned handle
   virtual ICONNECTION_T* operator[] (unsigned int) const = 0; // index

@@ -790,13 +790,13 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step5: initialize connection manager
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                          ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  peer_connection_manager_p->set (peer_connection_configuration,
-                                  NULL);
+  // peer_connection_manager_p->set (peer_connection_configuration,
+  //                                 NULL);
   peer_connection_manager_p->start (NULL);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  tracker_connection_manager_p->set (tracker_connection_configuration,
-                                     NULL);
+  // tracker_connection_manager_p->set (tracker_connection_configuration,
+  //                                    NULL);
   tracker_connection_manager_p->start (NULL);
 
   if (statisticReportingInterval_in != ACE_Time_Value::zero)

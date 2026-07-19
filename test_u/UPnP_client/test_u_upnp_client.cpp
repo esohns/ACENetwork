@@ -852,8 +852,8 @@ do_work (//bool requestBroadcastReplies_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
   connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_2->set (connection_configuration_http,
-                             &configuration_in.userData);
+  // connection_manager_2->set (connection_configuration_http,
+  //                            &configuration_in.userData);
 
   // step0d: initialize regular (global) statistic reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -949,8 +949,8 @@ do_work (//bool requestBroadcastReplies_in,
     iterator =
       configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
     ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
-    UPnP_Client_OutboundConnector_t connector (true);
-    UPnP_Client_OutboundAsynchConnector_t asynch_connector (true);
+    UPnP_Client_OutboundConnector_t connector;
+    UPnP_Client_OutboundAsynchConnector_t asynch_connector;
     if (useReactor_in)
       handle =
         Net_Client_Common_Tools::connect<UPnP_Client_OutboundConnector_t> (connector,

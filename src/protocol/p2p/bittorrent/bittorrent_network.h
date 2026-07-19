@@ -198,6 +198,7 @@ struct BitTorrent_SessionConfiguration
    , requestCompactPeerAddresses (BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES)
    , sendBitfieldAfterHandshake (BITTORRENT_DEFAULT_SEND_BITFIELD_AFTER_PEER_HANDSHAKE)
    , subscriber (NULL)
+   // , peerConnectionConfiguration (NULL)
    , peerModuleHandlerConfiguration (NULL)
    , peerStreamConfiguration (NULL)
    , trackerConnectionConfiguration (NULL)
@@ -214,6 +215,7 @@ struct BitTorrent_SessionConfiguration
   bool                                      sendBitfieldAfterHandshake;
   BitTorrent_ISessionProgress*              subscriber; // session --> UI events
 
+  // struct Net_ConnectionConfigurationBase*   peerConnectionConfiguration;
   struct Stream_ModuleHandlerConfiguration* peerModuleHandlerConfiguration;
   struct Stream_Configuration*              peerStreamConfiguration;
   struct Net_ConnectionConfigurationBase*   trackerConnectionConfiguration;

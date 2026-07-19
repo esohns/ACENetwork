@@ -101,25 +101,25 @@ class Net_Connection_Manager_T
   virtual int unlock (bool = false); // unblock ?
   virtual void dump_state () const;
   virtual void abort (enum Net_Connection_AbortStrategy); // strategy
-                                                          // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead
+  // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead
   virtual void abort (bool = false); // wait for completion ?
   virtual unsigned int count () const; // return value: # of connections
-                                       // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
-                                       //                   invoked, i.e. when new connections will be rejected;
-                                       //                   otherwise this may block indefinetly
+
   virtual bool register_ (ICONNECTION_T*); // connection handle
   virtual void deregister (ICONNECTION_T*); // connection handle
 
-  // *WARNING*: these two methods are NOT (!) re-entrant. To set a specific
-  //            configuration/user data per connection, use the locking API
-  virtual void set (const ConfigurationType&, // (connection-) configuration
-                    UserDataType*);           // user data
-  // *IMPORTANT NOTE*: to be called by connections during construction, unless
-  //                   the configuration is already passed in via the Connector/
-  //                   Acceptor framework (see also: ACE_Event_Handler::open()
-  //                   overloads)
-  virtual void get (ConfigurationType*&, // return value: (connection-) configuration handle
-                    UserDataType*&);     // return value: user data handle
+  virtual void abort (const AddressType&, // peer address
+                      bool = true);       // match port# ? : address only
+  // // *WARNING*: these two methods are NOT (!) re-entrant. To set a specific
+  // //            configuration/user data per connection, use the locking API
+  // virtual void set (const ConfigurationType&, // (connection-) configuration
+  //                   UserDataType*);           // user data
+  // // *IMPORTANT NOTE*: to be called by connections during construction, unless
+  // //                   the configuration is already passed in via the Connector/
+  // //                   Acceptor framework (see also: ACE_Event_Handler::open()
+  // //                   overloads)
+  // virtual void get (ConfigurationType*&, // return value: (connection-) configuration handle
+  //                   UserDataType*&);     // return value: user data handle
 
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
   virtual ICONNECTION_T* get (const AddressType&, // address

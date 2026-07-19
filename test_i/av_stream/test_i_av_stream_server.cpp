@@ -1535,8 +1535,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   tcp_connection_configuration.streamConfiguration =
     &configuration.streamConfiguration;
 
-  tcp_connection_manager_p->set (tcp_connection_configuration,
-                                 &user_data_s);
+  // tcp_connection_manager_p->set (tcp_connection_configuration,
+  //                                &user_data_s);
 
   result =
     udp_connection_configuration.socketConfiguration.peerAddress.set (listeningPortNumber_in + 1,
@@ -1569,8 +1569,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   udp_connection_configuration.streamConfiguration =
     &configuration.streamConfiguration;
 
-  udp_connection_manager_p->set (udp_connection_configuration,
-                                 &user_data_s);
+  // udp_connection_manager_p->set (udp_connection_configuration,
+  //                                &user_data_s);
 #endif // ACE_WIN32 || ACE_WIN64
 
   // **************************** stream data **********************************

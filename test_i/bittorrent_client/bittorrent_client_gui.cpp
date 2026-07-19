@@ -588,15 +588,15 @@ do_work (bool requestCompactPeerAddresses_in,
   ACE_ASSERT (peer_connection_manager_p);
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                          ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  peer_connection_manager_p->set (*static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
-                                  NULL);
+  // peer_connection_manager_p->set (*static_cast<BitTorrent_Client_PeerConnectionConfiguration*> ((*iterator).second),
+  //                                 NULL);
   BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =
     BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (tracker_connection_manager_p);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                             ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  tracker_connection_manager_p->set (*static_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
-                                     NULL);
+  // tracker_connection_manager_p->set (*static_cast<BitTorrent_Client_TrackerConnectionConfiguration*> ((*iterator_2).second),
+  //                                    NULL);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -607,7 +607,7 @@ do_work (bool requestCompactPeerAddresses_in,
   timer_manager_p->start (NULL);
 
   // step4: initialize signal handling
-  BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
+  struct BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.controller = &bittorrent_control;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {

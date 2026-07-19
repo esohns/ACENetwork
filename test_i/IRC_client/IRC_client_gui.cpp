@@ -550,12 +550,12 @@ do_work (unsigned int numberOfDispatchThreads_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  connection_manager_p->set (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator).second),
-                             NULL);
+  // connection_manager_p->set (*static_cast<IRC_Client_ConnectionConfiguration*> ((*iterator).second),
+  //                            NULL);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
-      COMMON_TIMERMANAGER_SINGLETON::instance ();
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);

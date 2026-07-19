@@ -470,17 +470,20 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::connect"));
 
-  PeerConnectionConfigurationType* connection_configuration_p = NULL;
-  PeerUserDataType* user_data_p = NULL;
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
+
+  PeerConnectionConfigurationType* connection_configuration_p =
+    static_cast<PeerConnectionConfigurationType*> (inherited::configuration_->connectionConfiguration);
   typename PeerStreamType::CONFIGURATION_T::ITERATOR_T iterator;
   typename PeerConnectorType::CONNECTION_MANAGER_T::INTERFACE_T* iconnection_manager_p =
     PeerConnectorType::CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   //iconnection_manager_p->lock (true);
-
-  iconnection_manager_p->get (connection_configuration_p,
-                              user_data_p);
+  // iconnection_manager_p->get (connection_configuration_p,
+  //                             user_data_p);
 
   // sanity check(s)
   ACE_ASSERT (connection_configuration_p);
@@ -507,15 +510,15 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
   connection_configuration_2->streamConfiguration->configuration_->module =
     peerHandlerModule_;
 
-  iconnection_manager_p->set (*connection_configuration_2,
-                              user_data_p);
+  // iconnection_manager_p->set (*connection_configuration_2,
+  //                             user_data_p);
 
   // step2: (try to) connect
   inherited::connect (address_in);
 
   delete connection_configuration_2; connection_configuration_2 = NULL;
-  iconnection_manager_p->set (*connection_configuration_p,
-                              user_data_p);
+  // iconnection_manager_p->set (*connection_configuration_p,
+  //                             user_data_p);
 
   //iconnection_manager_p->unlock (false);
 }
@@ -1764,50 +1767,53 @@ BitTorrent_Session_T<PeerConnectionConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
-  TrackerConnectionConfigurationType* configuration_p = NULL;
-  TrackerUserDataType* user_data_p = NULL;
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration);
+
+  TrackerConnectionConfigurationType* connection_configuration_p =
+    static_cast<TrackerConnectionConfigurationType*> (inherited::configuration_->trackerConnectionConfiguration);
   typename TrackerStreamType::CONFIGURATION_T::ITERATOR_T iterator;
   TrackerConnectorType connector;
   TrackerUserDataType user_data_s;
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
 
-  TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (configuration_p,
-                                                            user_data_p);
+  // TRACKER_CONNECTION_MANAGER_SINGLETON_T::instance ()->get (configuration_p,
+  //                                                           user_data_p);
 
   // sanity check(s)
-  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (connection_configuration_p);
   // *TODO*: remove type inferences
-  ACE_ASSERT (configuration_p->streamConfiguration);
-  ACE_ASSERT (configuration_p->streamConfiguration->configuration_);
+  ACE_ASSERT (connection_configuration_p->streamConfiguration);
+  ACE_ASSERT (connection_configuration_p->streamConfiguration->configuration_);
 
   // step1: set up configuration
-  configuration_p->socketConfiguration.address = address_in;
+  connection_configuration_p->socketConfiguration.address = address_in;
 
   iterator =
-    configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
+    connection_configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->end ());
   (*iterator).second.second->subscriber =
     inherited::state_.trackerStreamHandler;
 
-  configuration_p->streamConfiguration->configuration_->cloneModule =
+  connection_configuration_p->streamConfiguration->configuration_->cloneModule =
     false;
-  configuration_p->streamConfiguration->configuration_->module =
+  connection_configuration_p->streamConfiguration->configuration_->module =
     trackerHandlerModule_;
 
   // step2: try to connect
-  handle_h =
-    Net_Client_Common_Tools::connect (connector,
-                                      *static_cast<TrackerConnectionConfigurationType*> (inherited::configuration_->trackerConnectionConfiguration),
-                                      user_data_s,
-                                      address_in,
-                                      true,
-                                      true);
+  handle_h = Net_Client_Common_Tools::connect (connector,
+                                               *connection_configuration_p,
+                                               user_data_s,
+                                               address_in,
+                                               true,
+                                               true,
+                                               0);
   if (handle_h == ACE_INVALID_HANDLE)
   { ACE_ASSERT (inherited::configuration_);
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to tracker %s: \"%m\", returning\n"),
-                ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()),
-                               ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE::basename (ACE_TEXT (inherited::configuration_->metaInfoFileName.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in, false, false).c_str ())));
     goto error;
   } // end IF

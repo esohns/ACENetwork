@@ -1415,7 +1415,7 @@ button_disconnect_clicked_cb (GtkButton* button_in,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME)));
   ACE_ASSERT (tree_store_p);
   gtk_tree_store_clear (tree_store_p);
-  gtk_tree_iter_free (&data_p->treeIter);
+  ACE_OS::memset (&data_p->treeIter, 0, sizeof (GtkTreeIter));
   data_p->treeIterIsFirst = true;
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,

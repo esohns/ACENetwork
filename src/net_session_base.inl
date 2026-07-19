@@ -164,6 +164,7 @@ Net_SessionBase_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
 
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   ConnectorType connector;
@@ -171,11 +172,12 @@ Net_SessionBase_T<AddressType,
   typename ConnectorType::CONNECTION_MANAGER_T::INTERFACE_T* iconnection_manager_p =
     ConnectorType::CONNECTION_MANAGER_T::SINGLETON_T::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  ConnectionConfigurationType* connection_configuration_p = NULL;
-  struct Net_UserData* user_data_p = NULL;
+  ConnectionConfigurationType* connection_configuration_p =
+    static_cast<ConnectionConfigurationType*> (configuration_->connectionConfiguration);
+  struct Net_UserData user_data_s;
 
-  iconnection_manager_p->get (connection_configuration_p,
-                              user_data_p);
+  // iconnection_manager_p->get (connection_configuration_p,
+  //                             user_data_p);
 
   // *NOTE*: this memory is cleaned up when the session closes (see also:
   //         Net_SessionBase_T::close())
@@ -211,14 +213,13 @@ Net_SessionBase_T<AddressType,
   Net_SessionConnectionConfigurationsIterator_t iterator;
   std::pair<Net_SessionConnectionConfigurationsIterator_t, bool> result_s;
 
-  handle_h =
-    Net_Client_Common_Tools::connect (connector,
-                                      *connection_configuration_2,
-                                      *user_data_p,
-                                      address_in,
-                                      true,
-                                      true,
-                                      0);
+  handle_h = Net_Client_Common_Tools::connect (connector,
+                                               *connection_configuration_2,
+                                               user_data_s,
+                                               address_in,
+                                               true,
+                                               true,
+                                               0);
   if (handle_h == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -272,8 +273,8 @@ Net_SessionBase_T<AddressType,
 
   iconnection_p->decrease (); iconnection_p = NULL;
 
-  iconnection_manager_p->set (*connection_configuration_p,
-                              user_data_p);
+  // iconnection_manager_p->set (*connection_configuration_p,
+  //                             user_data_p);
 
   return;
 
@@ -290,8 +291,8 @@ error:
       delete (*iterator).second.second;
   delete stream_configuration_p;
   delete connection_configuration_2;
-  iconnection_manager_p->set (*connection_configuration_p,
-                              user_data_p);
+  // iconnection_manager_p->set (*connection_configuration_p,
+  //                             user_data_p);
 }
 
 template <typename AddressType,

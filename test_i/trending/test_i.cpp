@@ -723,9 +723,9 @@ do_work (const std::string& bootstrapFileName_in,
 
   // step0b: initialize event dispatch
   event_dispatch_configuration_s.numberOfProactorThreads =
-          (!useReactor_in ? numberOfDispatchThreads_in : 0);
+    (!useReactor_in ? numberOfDispatchThreads_in : 0);
   event_dispatch_configuration_s.numberOfReactorThreads =
-          (useReactor_in ? numberOfDispatchThreads_in : 0);
+    (useReactor_in ? numberOfDispatchThreads_in : 0);
   if (!Common_Event_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -736,8 +736,8 @@ do_work (const std::string& bootstrapFileName_in,
   // step0c: (re-)configure connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL_MS, 0));
-  connection_manager_p->set (*static_cast<Test_I_Trending_ConnectionConfiguration_t*> ((*iterator).second),
-                             &user_data_s);
+  // connection_manager_p->set (*static_cast<Test_I_Trending_ConnectionConfiguration_t*> ((*iterator).second),
+  //                            &user_data_s);
 
   // step0d: initialize regular (global) statistic reporting
   timer_manager_p = COMMON_TIMERMANAGER_SINGLETON::instance ();

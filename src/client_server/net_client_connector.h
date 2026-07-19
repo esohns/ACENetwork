@@ -364,7 +364,6 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   virtual int make_svc_handler (HandlerType*&);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
