@@ -71,10 +71,11 @@ class Net_IConnectionManager_T
                             StatisticContainerType> ICONNECTION_T;
   typedef Common_IStatistic_T<StatisticContainerType> ISTATISTIC_T;
 
-  // *TODO*: when activating this, the gcc compiler does not find the inherited
-  //         abort() methods...:-(
-  // virtual void abort (const AddressType&, // peer address
-  //                     bool = true) = 0;   // match port# ? : address only
+  // *NOTE*: without this, the cl.exe|gcc compilers do not find the
+  //         inherited abort() method(s)
+  using Net_IConnectionManagerBase::abort;
+  virtual void abort (const AddressType&, // peer address
+                      bool = true) = 0;   // match port# ? : address only
 
   // virtual void set (const ConfigurationType&, // connection handler (default)
   //                                             // configuration

@@ -41,26 +41,26 @@
 
 typedef Net_IListener_T<FTP_Client_ConnectionConfiguration> FTP_Client_IListener_t;
 
-typedef Net_Server_AsynchListener_T<FTP_Client_AsynchConnection_t,
+typedef Net_Server_AsynchListener_T<FTP_Client_AsynchConnection_2,
                                     ACE_INET_Addr,
                                     FTP_Client_ConnectionConfiguration,
                                     struct Net_StreamConnectionState,
-                                    FTP_Client_AsynchConnection_t::STREAM_T,
+                                    FTP_Client_AsynchConnection_2::STREAM_T,
                                     struct Net_UserData> FTP_Client_AsynchListener_t;
-typedef Net_Server_Listener_T<FTP_Client_Connection_t,
+typedef Net_Server_Listener_T<FTP_Client_Connection_2,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
                               FTP_Client_ConnectionConfiguration,
                               struct Net_StreamConnectionState,
-                              FTP_Client_Connection_t::STREAM_T,
+                              FTP_Client_Connection_2::STREAM_T,
                               struct Net_UserData> FTP_Client_Listener_t;
 #if defined (SSL_SUPPORT)
-typedef Net_Server_Listener_T<FTP_Client_SSLConnection_t,
+typedef Net_Server_Listener_T<FTP_Client_SSLConnection_2,
                               ACE_SSL_SOCK_Acceptor,
                               ACE_INET_Addr,
                               FTP_Client_ConnectionConfiguration,
                               struct Net_StreamConnectionState,
-                              FTP_Client_SSLConnection_t::STREAM_T,
+                              FTP_Client_SSLConnection_2::STREAM_T,
                               struct Net_UserData> FTP_Client_SSLListener_t;
 #endif // SSL_SUPPORT
 

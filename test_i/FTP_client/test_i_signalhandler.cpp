@@ -142,11 +142,11 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // step2: stop/abort(/wait) for connections
     FTP_Client_IConnectionManager_t* iconnection_manager_p =
-        FTP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+      FTP_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
     iconnection_manager_p->stop (false, // wait ?
                                  true); // high priority ?
-    iconnection_manager_p->abort ();
+    iconnection_manager_p->abort (false);
 
     // stop event dispatch ?
     if (inherited::configuration_->stopEventDispatchOnShutdown)

@@ -660,6 +660,26 @@ do_work (//bool requestBroadcastReplies_in,
   configuration_in.connectionConfiguration_2.streamConfiguration =
     &configuration_in.streamConfiguration_2;
 
+  if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
+                                                       CBData_in.externalAddress))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (interface_identifier.c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (interface_identifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+  CBData_in.externalAddress.set_port_number (static_cast<u_short> (FTP_DEFAULT_CLIENT_DATA_PORT),
+                                             1);
+
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct FTP_Client_ModuleHandlerConfiguration modulehandler_configuration;
@@ -721,11 +741,9 @@ do_work (//bool requestBroadcastReplies_in,
 
   // step0b: initialize event dispatch
   if (useReactor_in)
-    configuration_in.dispatchConfiguration.numberOfReactorThreads =
-      numberOfDispatchThreads_in;
+    configuration_in.dispatchConfiguration.numberOfReactorThreads = numberOfDispatchThreads_in;
   else
-    configuration_in.dispatchConfiguration.numberOfProactorThreads =
-      numberOfDispatchThreads_in;
+    configuration_in.dispatchConfiguration.numberOfProactorThreads = numberOfDispatchThreads_in;
   if (!Common_Event_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -838,6 +856,10 @@ do_work (//bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to initialize listener, returning\n")));
     return;
   } // end IF
+  Common_ISubscribe_T<Net_IConnectionState>* isubscribe_p =
+    dynamic_cast<Common_ISubscribe_T<Net_IConnectionState>*> (configuration_in.listener);
+  ACE_ASSERT (isubscribe_p);
+  isubscribe_p->subscribe (&ftp_control);
   if (!configuration_in.listener->start (NULL))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -846,7 +868,7 @@ do_work (//bool requestBroadcastReplies_in,
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("started listening (%s)\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_in.connectionConfiguration_2.socketConfiguration.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_in.connectionConfiguration_2.socketConfiguration.address, false, false).c_str ())));
 
   if (UIDefinitionFileName_in.empty ())
   {

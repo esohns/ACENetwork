@@ -45,6 +45,7 @@ FTP_Control_T<ControlAsynchConnectorType,
  , connectionConfiguration_2 (&const_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::CONFIGURATION_T&> (connectionConfiguration2_in))
  , controlConnection_ (ACE_INVALID_HANDLE)
  , dispatch_ (dispatch_in)
+ , expectingPORTResponse_ (false)
  , lock_ ()
  , loginOptions_ (loginOptions_in)
  , PASVMode_ (false)
@@ -76,21 +77,21 @@ FTP_Control_T<ControlAsynchConnectorType,
   ControlAsynchConnectorType asynch_connector;
   UserDataType user_data;
   if (dispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
-    handle_h = Net_Client_Common_Tools::connect<ControlConnectorType> (connector,
-                                                                       *connectionConfiguration_,
-                                                                       user_data,
-                                                                       connectionConfiguration_->socketConfiguration.address,
-                                                                       true,  // wait ?
-                                                                       true,  // is peer address ?
-                                                                       0);    // #retries
+    handle_h = Net_Client_Common_Tools::connect (connector,
+                                                 *connectionConfiguration_,
+                                                 user_data,
+                                                 connectionConfiguration_->socketConfiguration.address,
+                                                 true,  // wait ?
+                                                 true,  // is peer address ?
+                                                 0);    // #retries
   else
-    handle_h = Net_Client_Common_Tools::connect<ControlAsynchConnectorType> (asynch_connector,
-                                                                             *connectionConfiguration_,
-                                                                             user_data,
-                                                                             connectionConfiguration_->socketConfiguration.address,
-                                                                             true,  // wait ?
-                                                                             true,  // is peer address ?
-                                                                             0);    // #retries
+    handle_h = Net_Client_Common_Tools::connect (asynch_connector,
+                                                 *connectionConfiguration_,
+                                                 user_data,
+                                                 connectionConfiguration_->socketConfiguration.address,
+                                                 true,  // wait ?
+                                                 true,  // is peer address ?
+                                                 0);    // #retries
   if (unlikely (!handle_h || handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -112,9 +113,9 @@ FTP_Control_T<ControlAsynchConnectorType,
 
   if (unlikely (controlConnection_))
   {
-    typedef typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_SINGLETON_2;
+    typedef typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_SINGLETON;
     typename ControlAsynchConnectorType::ICONNECTION_T* iconnection_p =
-      CONNECTION_MANAGER_SINGLETON_2::instance ()->get (controlConnection_);
+      CONNECTION_MANAGER_SINGLETON::instance ()->get (controlConnection_);
     if (!iconnection_p)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to retrieve control connection handle, continuing\n")));
@@ -153,21 +154,21 @@ FTP_Control_T<ControlAsynchConnectorType,
   DataAsynchConnectorType asynch_connector;
   UserDataType user_data;
   if (dispatch_ == COMMON_EVENT_DISPATCH_REACTOR)
-    handle_h = Net_Client_Common_Tools::connect<DataConnectorType> (connector,
-                                                                    *connectionConfiguration_2,
-                                                                    user_data,
-                                                                    connectionConfiguration_2->socketConfiguration.address,
-                                                                    true, // wait ?
-                                                                    true, // is peer address ?
-                                                                    0);   // #retries
+    handle_h = Net_Client_Common_Tools::connect (connector,
+                                                 *connectionConfiguration_2,
+                                                 user_data,
+                                                 connectionConfiguration_2->socketConfiguration.address,
+                                                 true, // wait ?
+                                                 true, // is peer address ?
+                                                 0);   // #retries
   else
-    handle_h = Net_Client_Common_Tools::connect<DataAsynchConnectorType> (asynch_connector,
-                                                                          *connectionConfiguration_2,
-                                                                          user_data,
-                                                                          connectionConfiguration_2->socketConfiguration.address,
-                                                                          true,  // wait ?
-                                                                          true, // is peer address ?
-                                                                          0);   // #retries
+    handle_h = Net_Client_Common_Tools::connect (asynch_connector,
+                                                 *connectionConfiguration_2,
+                                                 user_data,
+                                                 connectionConfiguration_2->socketConfiguration.address,
+                                                 true,  // wait ?
+                                                 true, // is peer address ?
+                                                 0);   // #retries
   if (unlikely (handle_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -267,16 +268,30 @@ FTP_Control_T<ControlAsynchConnectorType,
 
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
-      NULL;
+    NULL;
   ACE_Message_Block* message_block_p = NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T::DATA_T* data_p =
-      NULL;
+    NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
-      NULL;
+    NULL;
   struct FTP_Request request_s;
 
   switch (record_in.code)
   {
+    case FTP_Codes::FTP_CODE_OK:
+    {
+      if (!expectingPORTResponse_)
+        goto default_; // some other OK
+      expectingPORTResponse_ = false; // reset state
+
+      { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
+        ACE_ASSERT (!queue_.empty ());
+        request_s = queue_.front ();
+        queue_.pop_front ();
+      } // end lock scope
+
+      goto default_;
+    }
     case FTP_Codes::FTP_CODE_CLOSING_DATA:
     {
       PASVMode_ = false;
@@ -290,7 +305,7 @@ FTP_Control_T<ControlAsynchConnectorType,
       connectionConfiguration_2->socketConfiguration.address =
         FTP_Tools::parsePASVResponse (record_in.text.front ());
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("PASV mode response: server is listening at \"%s\"\n"),
+                  ACE_TEXT ("PASV response: server is listening at \"%s\"\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (connectionConfiguration_2->socketConfiguration.address).c_str ())));
 
       // connect to PASV server address
@@ -319,11 +334,11 @@ FTP_Control_T<ControlAsynchConnectorType,
       typename DataAsynchConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* iconnection_p =
         connection_manager_p->get (handle_h);
       ACE_ASSERT (iconnection_p);
-      typename DataAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
+      typename DataAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_2 =
         dynamic_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
-      ACE_ASSERT (istream_connection_p);
+      ACE_ASSERT (istream_connection_2);
       typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T& stream_r =
-        const_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T&> (istream_connection_p->stream ());
+        const_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T&> (istream_connection_2->stream ());
       Stream_Module_t* module_p =
         const_cast<Stream_Module_t*> (stream_r.find (ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING), false, false));
       ACE_ASSERT (module_p);
@@ -333,6 +348,7 @@ FTP_Control_T<ControlAsynchConnectorType,
       iparser_data_p->state (request_s.command == FTP_Codes::FTP_COMMAND_LIST ? (request_s.is_directory_list ? FTP_STATE_DATA_LIST_DIRECTORY
                                                                                                              : FTP_STATE_DATA_LIST_FILE)
                                                                               : FTP_STATE_DATA_DATA);
+      iconnection_p->decrease ();
 
       goto default_;
     }
@@ -345,6 +361,7 @@ FTP_Control_T<ControlAsynchConnectorType,
                     ACE_TEXT ("failed to FTP_Control_T::getControlConnectionAndMessage(), returning\n")));
         return;
       } // end IF
+      ACE_ASSERT (istream_connection_p && message_p);
       data_container_p =
         &const_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T&> (message_p->getR ());
       data_p =
@@ -353,19 +370,9 @@ FTP_Control_T<ControlAsynchConnectorType,
       data_p->request.parameters.push_back (loginOptions_.password);
 
       message_block_p = message_p;
-      typedef typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_SINGLETON;
-      typename ControlAsynchConnectorType::CONNECTION_MANAGER_T* connection_manager_p =
-        CONNECTION_MANAGER_SINGLETON::instance ();
-      ACE_ASSERT (connection_manager_p);
-      typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* iconnection_p =
-        connection_manager_p->get (controlConnection_);
-      ACE_ASSERT (iconnection_p);
-      typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
-        dynamic_cast<typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
-      ACE_ASSERT (istream_connection_p);
       istream_connection_p->send (message_block_p);
       message_block_p = NULL;
-      iconnection_p->decrease (); iconnection_p = NULL;
+      istream_connection_p->decrease ();
 
       goto default_;
     }
@@ -388,6 +395,47 @@ default_:
 
   if (request_s.command != FTP_Codes::FTP_COMMAND_INVALID)
     request (request_s);
+}
+
+template <typename ControlAsynchConnectorType,
+          typename ControlConnectorType,
+          typename DataAsynchConnectorType,
+          typename DataConnectorType,
+          typename UserDataType>
+void
+FTP_Control_T<ControlAsynchConnectorType,
+              ControlConnectorType,
+              DataAsynchConnectorType,
+              DataConnectorType,
+              UserDataType>::connect (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("FTP_Control_T::connect"));
+
+  // sanity check(s)
+  if (unlikely (handle_in == ACE_INVALID_HANDLE))
+    return;
+
+  // set initial data parser state
+  typedef typename DataAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_2_SINGLETON;
+  typename DataAsynchConnectorType::CONNECTION_MANAGER_T* connection_manager_p =
+    CONNECTION_MANAGER_2_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  typename DataAsynchConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* iconnection_p =
+    connection_manager_p->get (handle_in);
+  ACE_ASSERT (iconnection_p);
+  typename DataAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_2 =
+    dynamic_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
+  ACE_ASSERT (istream_connection_2);
+  typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T& stream_r =
+    const_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T&> (istream_connection_2->stream ());
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (stream_r.find (ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING), false, false));
+  ACE_ASSERT (module_p);
+  FTP_IParserData* iparser_data_p =
+    dynamic_cast<FTP_IParserData*> (module_p->writer ());
+  ACE_ASSERT (iparser_data_p);
+  iparser_data_p->state (FTP_STATE_DATA_LIST_DIRECTORY);
+  iconnection_p->decrease ();
 }
 
 template <typename ControlAsynchConnectorType,
@@ -419,7 +467,6 @@ FTP_Control_T<ControlAsynchConnectorType,
     NULL;
   typename ControlAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
     NULL;
-  Net_ConnectionId_t tracker_connection_id = 0;
   typename ControlAsynchConnectorType::ICONNECTION_T* iconnection_p = NULL;
   unsigned int buffer_size_i = 0;
 

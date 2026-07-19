@@ -711,36 +711,54 @@ treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
   struct FTP_Client_UI_CBData* data_p =
     static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  if (data_p->clearingStore)
+    return;
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkTreeModel* tree_model_p = NULL;
   char* string_p = NULL;
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
+  
+  if (!gtk_tree_selection_get_selected (treeSelection_in,
+                                        &tree_model_p,
+                                        &data_p->treeIter))
+    return;
 
-  if (gtk_tree_selection_get_selected (treeSelection_in,
-                                       &tree_model_p,
-                                       &data_p->treeIter))
+  gtk_tree_model_get (tree_model_p,
+                      &data_p->treeIter,
+                      0, &string_p,
+                      -1);
+  ACE_ASSERT (string_p);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("selected directory: \"%s\"\n"),
+              ACE_TEXT (string_p)));
+  struct FTP_Request request_s;
+  request_s.command = FTP_Codes::FTP_COMMAND_CWD;
+  request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
+  data_p->control->request (request_s);
+  request_s.parameters.clear ();
+  g_free (string_p); string_p = NULL;
+
+  request_s.command = FTP_Codes::FTP_COMMAND_LIST;
+  if (likely (pasv_mode_b))
   {
-    gtk_tree_model_get (tree_model_p,
-                        &data_p->treeIter,
-                        0, &string_p,
-                        -1);
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("selected directory: \"%s\"\n"),
-                ACE_TEXT (string_p)));
-    struct FTP_Request request_s;
-    request_s.command = FTP_Codes::FTP_COMMAND_CWD;
-    request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
-    data_p->control->request (request_s);
-    g_free (string_p); string_p = NULL;
-
-    request_s.command = FTP_Codes::FTP_COMMAND_LIST;
-    request_s.parameters.clear ();
-    if (unlikely (!data_p->control->inPASVMode ()))
-    {
-      data_p->control->queue (request_s);
-      request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-    } // end IF
-    data_p->control->request (request_s);
+    data_p->control->queue (request_s);
+    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
   } // end IF
+  else
+  {
+    data_p->control->queue (request_s);
+    request_s.command = FTP_Codes::FTP_COMMAND_PORT;
+    request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
+    data_p->control->expectPORTResponse ();
+  } // end ELSE
+  data_p->control->request (request_s);
 }
 
 void
@@ -753,39 +771,54 @@ treeview_selection_files_changed_cb (GtkTreeSelection* treeSelection_in,
   struct FTP_Client_UI_CBData* data_p =
     static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  if (data_p->clearingFileStore)
+  if (data_p->clearingStore)
     return;
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkTreeModel* tree_model_p = NULL;
-  gchar* string_p = NULL;
   GtkTreeIter tree_iter;
-  if (gtk_tree_selection_get_selected (treeSelection_in,
-                                       &tree_model_p,
-                                       &tree_iter))
+  if (!gtk_tree_selection_get_selected (treeSelection_in,
+                                        &tree_model_p,
+                                        &tree_iter))
+    return;
+
+  gchar* string_p = NULL;
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
+
+  gtk_tree_model_get (tree_model_p,
+                      &tree_iter,
+                      0, &string_p,
+                      -1);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("selected file: \"%s\"\n"),
+              ACE_TEXT (string_p)));
+
+  data_p->fileName = ACE_TEXT_ALWAYS_CHAR (string_p);
+
+  struct FTP_Request request_s;
+  request_s.command = FTP_Codes::FTP_COMMAND_RETR;
+  request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
+  g_free (string_p); string_p = NULL;
+  if (likely (pasv_mode_b))
   {
-    gtk_tree_model_get (tree_model_p,
-                        &tree_iter,
-                        0, &string_p,
-                        -1);
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("selected file: \"%s\"\n"),
-                ACE_TEXT (string_p)));
-
-    data_p->fileName = ACE_TEXT_ALWAYS_CHAR (string_p);
-
-    struct FTP_Request request_s;
-    request_s.command = FTP_Codes::FTP_COMMAND_RETR;
-    request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
-    if (unlikely (!data_p->control->inPASVMode ()))
-    {
-      data_p->control->queue (request_s);
-      request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-      request_s.parameters.clear ();
-    } // end IF
-    data_p->control->request (request_s);
-
-    g_free (string_p); string_p = NULL;
+    data_p->control->queue (request_s);
+    request_s.parameters.clear ();
+    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
   } // end IF
+  else
+  {
+    data_p->control->queue (request_s);
+    request_s.command = FTP_Codes::FTP_COMMAND_PORT;
+    request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
+    data_p->control->expectPORTResponse ();
+  } // end ELSE
+  data_p->control->request (request_s);
 }
 
 gboolean
@@ -842,9 +875,9 @@ idle_list_received_cb (gpointer userData_in)
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_FILES_NAME)));
   ACE_ASSERT (list_store_p);
-  data_p->clearingFileStore = true;
+  data_p->clearingStore = true;
   gtk_list_store_clear (list_store_p);
-  data_p->clearingFileStore = false;
+  data_p->clearingStore = false;
 
   for (Common_File_EntriesIterator_t iterator_3 = data_p->entries.begin ();
        iterator_3 != data_p->entries.end ();
@@ -907,7 +940,7 @@ idle_login_complete_cb (gpointer userData_in)
 
   // sanity check(s)
   struct FTP_Client_UI_CBData* data_p =
-      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -919,15 +952,32 @@ idle_login_complete_cb (gpointer userData_in)
   gtk_action_set_sensitive (action_p, FALSE);
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_MODE_NAME)));
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
   ACE_ASSERT (toggle_button_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), TRUE);
+  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
 
   struct FTP_Request request_s;
   request_s.command = FTP_Codes::FTP_COMMAND_LIST;
-  data_p->control->queue (request_s);
-  request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+
+  if (likely (pasv_mode_b))
+  {
+    data_p->control->queue (request_s);
+    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+  } // end IF
+  else
+  {
+    data_p->control->queue (request_s);
+    request_s.command = FTP_Codes::FTP_COMMAND_PORT;
+    request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
+    data_p->control->expectPORTResponse ();
+  } // end ELSE
   data_p->control->request (request_s);
+
+  toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_MODE_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p), TRUE);
 
   return G_SOURCE_REMOVE;
 }
@@ -1414,16 +1464,18 @@ button_disconnect_clicked_cb (GtkButton* button_in,
     GTK_TREE_STORE (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREESTORE_DIRECTORIES_NAME)));
   ACE_ASSERT (tree_store_p);
+  data_p->clearingStore = true;
   gtk_tree_store_clear (tree_store_p);
+  data_p->clearingStore = false;
   ACE_OS::memset (&data_p->treeIter, 0, sizeof (GtkTreeIter));
   data_p->treeIterIsFirst = true;
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_FILES_NAME)));
   ACE_ASSERT (list_store_p);
-  data_p->clearingFileStore = true;
+  data_p->clearingStore = true;
   gtk_list_store_clear (list_store_p);
-  data_p->clearingFileStore = false;
+  data_p->clearingStore = false;
 
   GtkAction* action_p =
     GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
@@ -1545,7 +1597,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), FALSE);
   } // end ELSE
 
-  return;
+  //return;
 
 // error:
 //   gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_CONNECT);

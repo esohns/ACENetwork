@@ -72,7 +72,7 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
   passMessageDownstream_out = true;
 
   const typename DataMessageType::DATA_T& data_container_r =
-      message_inout->getR ();
+    message_inout->getR ();
   const typename DataMessageType::DATA_T::DATA_T& data_r =
     data_container_r.getR ();
 
@@ -114,9 +114,9 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       break;
     }
     case FTP_Codes::FTP_COMMAND_PORT:
-    {
-      text_string = ACE_TEXT_ALWAYS_CHAR ("PORT");
-      ACE_ASSERT (false); // *TODO*
+    { ACE_ASSERT (!data_r.request.parameters.empty ());
+      text_string = ACE_TEXT_ALWAYS_CHAR ("PORT ");
+      text_string += data_r.request.parameters.front ();
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
@@ -207,8 +207,9 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
   } // end SWITCH
 
   //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("[%u]: streamed [%u byte(s)]...\n"),
-  //            message_inout->getID (),
+  //            ACE_TEXT ("%s: [%u]: streamed [%u byte(s)]...\n"),
+  //            inherited::mod_->name (),
+  //            message_inout->id (),
   //            message_inout->length ()));
 
   return;

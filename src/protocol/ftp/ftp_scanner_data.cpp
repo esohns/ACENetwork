@@ -1394,7 +1394,7 @@ static const yy_state_type yy_NUL_trans[17] =
 
 static const flex_int32_t yy_rule_linenum[7] =
     {   0,
-      111,  151,  156,  161,  172,  182
+      111,  152,  157,  162,  173,  183
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1985,7 +1985,10 @@ YY_RULE_SETUP
                                  break;
                                }
                                case FTP_STATE_DATA_DATA:
-                                 BEGIN(data); break;
+                               {
+                                 BEGIN(data);
+                                 break;
+                               }
                                default:
                                {
                                  /* *NOTE*: should not be reached, unless something
@@ -2001,7 +2004,6 @@ YY_RULE_SETUP
                                  yyterminate();
                                }
                              } // end SWITCH
-                             yycolumn -= yyleng;
                              yyless (0); }
 	YY_BREAK
 // end <INITIAL>
@@ -2063,6 +2065,7 @@ case 6:
 YY_RULE_SETUP
 { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
+                             ACE_ASSERT (false);
                              // debug info
                              std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");

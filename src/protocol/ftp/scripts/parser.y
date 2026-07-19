@@ -21,10 +21,10 @@
 /* %define api.location.type         {} */
 /* %define namespace                 {yy} */
 /* %define api.namespace             {yy} */
-%name-prefix                      "yy"
-/* %define api.prefix                {yy} */
-%pure-parser
-/* %define api.pure                  true */
+/* %name-prefix                      "yy"*/
+%define api.prefix                   {yy}
+/* %pure-parser */
+%define api.pure                     true
 /* *TODO*: implement a push parser */
 /* %define api.push-pull             push */
 /* %define api.token.constructor */
@@ -37,8 +37,8 @@
 /* %define lr.type                   lalr */
 
 /* %define parse.assert              {true} */
-%error-verbose
-/* %define parse.error               verbose */
+/* %error-verbose */
+%define parse.error                  verbose
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
 /* %define parser_class_name         {FTP_Parser} */
@@ -155,13 +155,13 @@ using namespace std;
 %start                   message;
 
 message:                 "reply_code"                               { driver->current ().code = static_cast<FTP_Code_t> ($1); }
-                         text_lines "reply_end"                     { $$ = 3 + 1 + $3;
+                         text_lines "reply_end"                     { $$ = $3;
                                                                       struct FTP_Record* record_p = &driver->current ();
                                                                       driver->record (record_p);
                                                                       YYACCEPT; }
-text_lines:              text_line text_lines                       { $$ = 3 + 1 + $1 + $2; }
-                         | /* empty */                              { $$ = 2; }
-text_line:               "text"                                     { $$ = $1->length () + 2;
+text_lines:              text_line text_lines                       { $$ = $1 + $2; }
+                         | %empty                                   { $$ = 3; }
+text_line:               "text"                                     { $$ = 3 + 1 + $1->length () + 2;
                                                                       driver->current ().text.push_back (*$1); }
 %%
 

@@ -142,11 +142,11 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // step2: stop/abort(/wait) for connections
     DHCPClient_IConnectionManager_t* iconnection_manager_p =
-        DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+      DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
     iconnection_manager_p->stop (false, // wait ?
                                  true); // high priority ?
-    iconnection_manager_p->abort ();
+    iconnection_manager_p->abort (false);
 
     //// step5: stop reactor (&& proactor, if applicable)
     //Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,

@@ -1192,22 +1192,22 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 3: /* message: "reply_code" $@1 text_lines "reply_end"  */
-                                                                    { ((*yyvalp).ival) = 3 + 1 + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival);
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival);
                                                                       struct FTP_Record* record_p = &driver->current ();
                                                                       driver->record (record_p);
                                                                       YYACCEPT; }
     break;
 
   case 4: /* text_lines: text_line text_lines  */
-                                                                    { ((*yyvalp).ival) = 3 + 1 + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival); }
+                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival); }
     break;
 
   case 5: /* text_lines: %empty  */
-                                                                    { ((*yyvalp).ival) = 2; }
+                                                                    { ((*yyvalp).ival) = 3; }
     break;
 
   case 6: /* text_line: "text"  */
-                                                                    { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->length () + 2;
+                                                                    { ((*yyvalp).ival) = 3 + 1 + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->length () + 2;
                                                                       driver->current ().text.push_back (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)); }
     break;
 

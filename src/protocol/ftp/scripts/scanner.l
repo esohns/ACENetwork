@@ -112,13 +112,11 @@ CRLF           \x0D\x0A
 %}
 
 <INITIAL>{
-{DIGIT}{1}                 {
-                             BEGIN(reply_code);
-                             yycolumn -= yyleng;
+{DIGIT}{1}                 { BEGIN(reply_code);
                              yyless (0); }
 } // end <INITIAL>
 <reply_code>{
-{DIGIT}{3}                 { driver->offset (yyleng);
+{DIGIT}{3}                 { driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
@@ -128,13 +126,13 @@ CRLF           \x0D\x0A
                              /* return yy::FTP_Parser::token::REPLY_CODE; */ }
 } // end <reply_code>
 <text_begin>{
-{MINUS}                    { driver->offset (yyleng);
+{MINUS}                    { driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              BEGIN(multiline_text);
                            }
-{SPACE}                    { driver->offset (yyleng);
+{SPACE}                    { driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -142,33 +140,32 @@ CRLF           \x0D\x0A
                            }
 } // end <text_begin>
 <multiline_text_begin>{
-{DIGIT}{3}/{MINUS}         { driver->offset (yyleng);
+{DIGIT}{3}/{MINUS}         { driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
                              converter >> yylval->ival;
                              ACE_ASSERT (yylval->ival == driver->current ().code);
                              BEGIN(multi_line_minus); }
-{DIGIT}{3}/{SPACE}         { driver->offset (yyleng);
+{DIGIT}{3}/{SPACE}         { driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
                              converter >> yylval->ival;
                              ACE_ASSERT (yylval->ival == driver->current ().code);
                              BEGIN(last_line_space); }
-{OCTET}{3}                 { yycolumn -= yyleng;
-                             yyless (0);
+{OCTET}{3}                 { yyless (0);
                              BEGIN(multiline_text); }
 } // end <multiline_text_begin>
 <multi_line_minus>{
-{MINUS}                    { driver->offset (yyleng);
+{MINUS}                    { driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              BEGIN(multiline_text); }
 } // end <multi_line_minus>
 <multiline_text>{
-{CRLF}                     { driver->offset (yyleng);
+{CRLF}                     { driver->offset (2);
                              BEGIN(multiline_text_begin); }
 {OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
@@ -176,15 +173,17 @@ CRLF           \x0D\x0A
                              return yytokentype::REPLY_TEXT; }
 } // end <multiline_text>
 <last_line_space>{
-{SPACE}                    { driver->offset (yyleng);
+{SPACE}                    { driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
                              BEGIN(last_line_text); }
 } // end <last_line_space>
 <last_line_text>{
-{CRLF}                     { driver->offset (yyleng);
-                             BEGIN(reply_code);
+{CRLF}                     { driver->offset (2);
+                             BEGIN(INITIAL);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
 {OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
@@ -193,8 +192,10 @@ CRLF           \x0D\x0A
                              return yytokentype::REPLY_TEXT; }
 } // end <last_line_text>
 <text>{
-{CRLF}                     { driver->offset (yyleng);
-                             BEGIN(reply_code);
+{CRLF}                     { driver->offset (2);
+                             BEGIN(INITIAL);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
 {OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
@@ -206,8 +207,6 @@ CRLF           \x0D\x0A
 <<EOF>>                    { yyterminate(); }
 <*>{OCTET}{1}              { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
-                             ACE_ASSERT (false);
-
                              // debug info
                              std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");

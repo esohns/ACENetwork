@@ -600,8 +600,13 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
       connection_p->info (handle,
                           local_address,
                           peer_address);
-      if (likely ((peer_address != address_in) &&
-                  (local_address != address_in)))
+      if (likely (matchPort_in))
+      {
+        if (likely ((peer_address != address_in) && (local_address != address_in)))
+          continue;
+      } // end IF
+      else if (likely (!address_in.is_ip_equal (peer_address) &&
+                       !address_in.is_ip_equal (local_address)))
         continue;
 
       connection_p->increase ();

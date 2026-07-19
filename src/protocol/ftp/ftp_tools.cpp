@@ -316,14 +316,75 @@ FTP_Tools::DataStateToString (enum FTP_ProtocolDataState state_in)
   return result;
 }
 
+std::string
+FTP_Tools::generatePORTArgument (const ACE_INET_Addr& address_in)
+{
+  // initialize return value(s)
+  std::string result;
+
+  char address_a[BUFSIZ];
+  ACE_OS::memset (address_a, 0, sizeof (char[BUFSIZ]));
+  const char* address_p = address_in.get_host_addr (address_a, sizeof (char[BUFSIZ]));
+  ACE_ASSERT (address_p);
+  u_short port_i = address_in.get_port_number ();
+  std::ostringstream converter;
+  converter << port_i;
+  std::string address_string = address_a;
+  address_string += ':';
+  address_string += converter.str ();
+
+  static std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{1,3})(?:\\.)([[:digit:]]{1,3})(?:\\.)([[:digit:]]{1,3})(?:\\.)([[:digit:]]{1,3})(?:\\:)([[:digit:]]{1,5})$");
+  std::regex::flag_type flags = std::regex_constants::ECMAScript;
+  std::regex regex;
+  std::smatch match_results;
+  regex.assign (regex_string, flags);
+  if (unlikely (!std::regex_match (address_string,
+                                   match_results,
+                                   regex,
+                                   std::regex_constants::match_default)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to parse address (was: \"%s\"), aborting\n"),
+                ACE_TEXT (address_string.c_str ())));
+    return result;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  ACE_ASSERT (match_results[1].matched);
+  ACE_ASSERT (match_results[2].matched);
+  ACE_ASSERT (match_results[3].matched);
+  ACE_ASSERT (match_results[4].matched);
+  ACE_ASSERT (match_results[5].matched);
+  result = match_results[1].str ();
+  result += ',';
+  result += match_results[2].str ();
+  result += ',';
+  result += match_results[3].str ();
+  result += ',';
+  result += match_results[4].str ();
+  result += ',';
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << (port_i >> 8);
+  result += converter.str ();
+  result += ',';
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+  converter.clear ();
+  converter << (port_i & 0xFF);
+  result += converter.str ();
+
+  return result;
+}
+
 ACE_INET_Addr
 FTP_Tools::parsePASVResponse (const std::string& PASVLine1_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Tools::parsePASVResponse"));
 
+  // initialize return value(s)
   ACE_INET_Addr result;
 
-  std::string regex_string =
+  static std::string regex_string =
     ACE_TEXT_ALWAYS_CHAR ("^(?:[^\\(]*\\()([[:digit:]]{1,3})(?:,)([[:digit:]]{1,3})(?:,)([[:digit:]]{1,3})(?:,)([[:digit:]]{1,3})(?:,)([[:digit:]]{1,3})(?:,)([[:digit:]]{1,3})(?:\\))(?:.*)$");
   std::regex::flag_type flags = std::regex_constants::ECMAScript;
   std::regex regex;

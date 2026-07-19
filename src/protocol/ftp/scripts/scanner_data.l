@@ -127,13 +127,14 @@ CRLF           \x0D\x0A
                                  break;
                                }
                                case FTP_STATE_DATA_DATA:
-                                 BEGIN(data); break;
+                               {
+                                 BEGIN(data);
+                                 break;
+                               }
                                default:
                                {
                                  /* *NOTE*: should not be reached, unless something
                                             went terribly wrong */
-                                 ACE_ASSERT (false);
-
                                  // debug info
                                  std::string error_message =
                                    ACE_TEXT_ALWAYS_CHAR ("invalid state: \"");
@@ -143,7 +144,6 @@ CRLF           \x0D\x0A
                                  yyterminate();
                                }
                              } // end SWITCH
-                             yycolumn -= yyleng;
                              yyless (0); }
 } // end <INITIAL>
 <list_directory>{

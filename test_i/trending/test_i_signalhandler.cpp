@@ -140,15 +140,15 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // step2: stop/abort(/wait) for connections
     Test_I_Trending_IInetConnectionManager_t* connection_manager_p =
-        TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+      TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (connection_manager_p);
     connection_manager_p->stop (false, true);
-    connection_manager_p->abort ();
-    connection_manager_p->wait (false); // N/A
+    connection_manager_p->abort (false);
+    //connection_manager_p->wait (false); // N/A
 
-    // step5: stop reactor (&& proactor, if applicable)
-    Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
-                                               false);                                    // wait ?
+    //// step5: stop reactor (&& proactor, if applicable)
+    //Common_Event_Tools::finalizeEventDispatch (*inherited::configuration_->dispatchState,
+    //                                           false);                                    // wait ?
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF

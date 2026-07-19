@@ -2603,8 +2603,8 @@ static const yy_state_type yy_NUL_trans[55] =
 
 static const flex_int32_t yy_rule_linenum[17] =
     {   0,
-      116,  122,  132,  138,  146,  153,  160,  165,  172,  174,
-      180,  187,  191,  197,  201,  208
+      116,  120,  130,  136,  144,  151,  158,  162,  169,  171,
+      177,  184,  190,  196,  202,  209
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -3198,16 +3198,14 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-{
-                             BEGIN(reply_code);
-                             yycolumn -= yyleng;
+{ BEGIN(reply_code);
                              yyless (0); }
 	YY_BREAK
 // end <INITIAL>
 
 case 2:
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
@@ -3220,7 +3218,7 @@ YY_RULE_SETUP
 
 case 3:
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -3229,7 +3227,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -3243,7 +3241,7 @@ case 5:
 yyg->yy_c_buf_p = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
@@ -3256,7 +3254,7 @@ case 6:
 yyg->yy_c_buf_p = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
@@ -3267,15 +3265,14 @@ YY_RULE_SETUP
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-{ yycolumn -= yyleng;
-                             yyless (0);
+{ yyless (0);
                              BEGIN(multiline_text); }
 	YY_BREAK
 // end <multiline_text_begin>
 
 case 8:
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -3286,7 +3283,7 @@ YY_RULE_SETUP
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (2);
                              BEGIN(multiline_text_begin); }
 	YY_BREAK
 case 10:
@@ -3305,7 +3302,7 @@ YY_RULE_SETUP
 
 case 11:
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
                                                std::string ());
                              ACE_ASSERT (yylval->sval);
@@ -3316,8 +3313,10 @@ YY_RULE_SETUP
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
-                             BEGIN(reply_code);
+{ driver->offset (2);
+                             BEGIN(INITIAL);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
 	YY_BREAK
@@ -3338,8 +3337,10 @@ YY_RULE_SETUP
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
-                             BEGIN(reply_code);
+{ driver->offset (2);
+                             BEGIN(INITIAL);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
 	YY_BREAK
@@ -3373,8 +3374,6 @@ case 16:
 YY_RULE_SETUP
 { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
-                             ACE_ASSERT (false);
-
                              // debug info
                              std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");

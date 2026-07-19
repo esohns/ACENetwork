@@ -280,12 +280,14 @@ struct FTP_Client_UI_CBData
    : configuration (NULL)
 #endif // GTK_USE
    , control (NULL)
+   , eventHandler (NULL)
+   , externalAddress ()
    , progressData ()
    , records ()
    , entries ()
    , fileName ()
 #if defined (GTK_USE)
-   , clearingFileStore (false)
+   , clearingStore (false)
    , treeIterIsFirst (true)
    , treeIter ()
 #endif // GTK_USE
@@ -294,12 +296,13 @@ struct FTP_Client_UI_CBData
   struct FTP_Client_Configuration*  configuration;
   FTP_IControl*                     control;
   Test_I_EventHandler_2*            eventHandler;
+  ACE_INET_Addr                     externalAddress; // to circumvent NAT
   struct FTP_Client_UI_ProgressData progressData;
   FTP_Records_t                     records; // responses
   Common_File_Entries_t             entries; // list entries
   std::string                       fileName; // current-
 #if defined (GTK_USE)
-  bool                              clearingFileStore;
+  bool                              clearingStore;
   bool                              treeIterIsFirst;
   GtkTreeIter                       treeIter; // current-
 #endif // GTK_USE

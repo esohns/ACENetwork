@@ -147,13 +147,13 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
     ACE_ASSERT (iconnection_manager_p);
     iconnection_manager_p->stop (false, // wait ?
                                  true); // high priority ?
-    iconnection_manager_p->abort ();
+    iconnection_manager_p->abort (false);
     Test_I_IConnectionManager_2_t* iconnection_manager_2 =
       TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
     ACE_ASSERT (iconnection_manager_2);
     iconnection_manager_2->stop (false, // wait ?
                                  true); // high priority ?
-    iconnection_manager_2->abort ();
+    iconnection_manager_2->abort (false);
 
     // step5: stop reactor (&& proactor, if applicable)
     //Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,

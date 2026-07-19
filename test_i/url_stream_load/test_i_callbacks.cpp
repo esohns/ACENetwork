@@ -1460,7 +1460,7 @@ continue_:
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;
-  iconnection_manager_2->abort ();
+  iconnection_manager_2->abort (false);
 
   return;
 

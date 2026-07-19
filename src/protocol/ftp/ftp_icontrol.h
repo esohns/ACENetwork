@@ -33,7 +33,8 @@ class FTP_IControl
   virtual ACE_HANDLE connectControl () = 0;
   virtual ACE_HANDLE connectData () = 0;
 
-  virtual bool inPASVMode () const = 0; // request
+  virtual void expectPORTResponse () = 0;
+  virtual bool inPASVMode () const = 0;
 
   virtual void request (const struct FTP_Request&) = 0; // request
 

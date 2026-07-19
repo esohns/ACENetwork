@@ -41,6 +41,7 @@ class FTP_Tools
 
   inline static bool isSuccess (FTP_Code_t code_in) { return ((code_in >= 200) && (code_in < 300)); }
 
+  static std::string generatePORTArgument (const ACE_INET_Addr&); // (external-) address
   static ACE_INET_Addr parsePASVResponse (const std::string&); // PASV response line #1
 
  private:
