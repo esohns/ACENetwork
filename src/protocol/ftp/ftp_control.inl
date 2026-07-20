@@ -287,7 +287,7 @@ FTP_Control_T<ControlAsynchConnectorType,
       { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
         ACE_ASSERT (!queue_.empty ());
         request_s = queue_.front ();
-        queue_.pop_front ();
+        // *IMPORTANT NOTE*: the request is pop()ed on connect(); see below...
       } // end lock scope
 
       goto default_;
@@ -415,6 +415,19 @@ FTP_Control_T<ControlAsynchConnectorType,
   if (unlikely (handle_in == ACE_INVALID_HANDLE))
     return;
 
+  enum FTP_ProtocolDataState state_e = FTP_STATE_DATA_LIST_DIRECTORY;
+  { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
+    if (!queue_.empty ())
+    {
+      struct FTP_Request request_s = queue_.front ();
+      state_e =
+        (request_s.command == FTP_Codes::FTP_COMMAND_LIST ? (request_s.is_directory_list ? FTP_STATE_DATA_LIST_DIRECTORY
+                                                                                         : FTP_STATE_DATA_LIST_FILE)
+                                                          : FTP_STATE_DATA_DATA);
+      queue_.pop_front ();
+    } // end IF
+  } // end lock scope
+
   // set initial data parser state
   typedef typename DataAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_2_SINGLETON;
   typename DataAsynchConnectorType::CONNECTION_MANAGER_T* connection_manager_p =
@@ -423,18 +436,19 @@ FTP_Control_T<ControlAsynchConnectorType,
   typename DataAsynchConnectorType::CONNECTION_MANAGER_T::ICONNECTION_T* iconnection_p =
     connection_manager_p->get (handle_in);
   ACE_ASSERT (iconnection_p);
-  typename DataAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_2 =
+  typename DataAsynchConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
     dynamic_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
-  ACE_ASSERT (istream_connection_2);
+  ACE_ASSERT (istream_connection_p);
   typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T& stream_r =
-    const_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T&> (istream_connection_2->stream ());
+    const_cast<typename DataAsynchConnectorType::ISTREAM_CONNECTION_T::STREAM_T&> (istream_connection_p->stream ());
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (stream_r.find (ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING), false, false));
   ACE_ASSERT (module_p);
   FTP_IParserData* iparser_data_p =
     dynamic_cast<FTP_IParserData*> (module_p->writer ());
   ACE_ASSERT (iparser_data_p);
-  iparser_data_p->state (FTP_STATE_DATA_LIST_DIRECTORY);
+  iparser_data_p->state (state_e);
+
   iconnection_p->decrease ();
 }
 

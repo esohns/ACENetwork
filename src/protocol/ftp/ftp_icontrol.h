@@ -38,7 +38,7 @@ class FTP_IControl
 
   virtual void request (const struct FTP_Request&) = 0; // request
 
-  // *NOTE*: to be executed as soon as the PASV connection has opened
+  // *NOTE*: to be executed as soon as the PASV/PORT connection has opened
   virtual void queue (const struct FTP_Request&) = 0; // request
   virtual void clear () = 0;
 

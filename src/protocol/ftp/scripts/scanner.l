@@ -144,17 +144,19 @@ CRLF           \x0D\x0A
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
-                             converter >> yylval->ival;
-                             ACE_ASSERT (yylval->ival == driver->current ().code);
+                             int status_i;
+                             converter >> status_i;
+                             ACE_ASSERT (status_i == driver->current ().code);
                              BEGIN(multi_line_minus); }
 {DIGIT}{3}/{SPACE}         { driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                              converter.clear ();
                              converter.str (yytext);
-                             converter >> yylval->ival;
-                             ACE_ASSERT (yylval->ival == driver->current ().code);
+                             int status_i;
+                             converter >> status_i;
+                             ACE_ASSERT (status_i == driver->current ().code);
                              BEGIN(last_line_space); }
-{OCTET}{3}                 { yyless (0);
+{OCTET}{1}                 { yyless (0);
                              BEGIN(multiline_text); }
 } // end <multiline_text_begin>
 <multi_line_minus>{
@@ -169,7 +171,7 @@ CRLF           \x0D\x0A
                              BEGIN(multiline_text_begin); }
 {OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext);
+                             yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT; }
 } // end <multiline_text>
 <last_line_space>{
@@ -188,7 +190,7 @@ CRLF           \x0D\x0A
                              /* return yy::FTP_Parser::token::REPLY; */ }
 {OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
-                             yylval->sval->append (yytext);
+                             yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT; }
 } // end <last_line_text>
 <text>{
@@ -207,6 +209,8 @@ CRLF           \x0D\x0A
 <<EOF>>                    { yyterminate(); }
 <*>{OCTET}{1}              { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
+                             ACE_ASSERT (false);
+
                              // debug info
                              std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");

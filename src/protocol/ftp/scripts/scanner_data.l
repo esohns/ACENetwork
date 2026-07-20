@@ -80,6 +80,7 @@ int FTP_Scanner_Data_reset (yyscan_t);
 /* %option nounput */
 
 OCTET          [\x00-\xFF]
+OCTET_NO_CRLF  [\x00-\xFF]{-}[\x0D\x0A]
 DIGIT          [[:digit:]]
 MINUS          \x2D
 SPACE          \x20
@@ -135,6 +136,8 @@ CRLF           \x0D\x0A
                                {
                                  /* *NOTE*: should not be reached, unless something
                                             went terribly wrong */
+                                ACE_ASSERT (false);
+
                                  // debug info
                                  std::string error_message =
                                    ACE_TEXT_ALWAYS_CHAR ("invalid state: \"");
@@ -152,7 +155,7 @@ CRLF           \x0D\x0A
                              return yytokentype::LIST_DIRECTORY;
                              /* return yy::FTP_Parser_Data::token::LIST_DIRECTORY; */
                            }
-[^\r]+                     { driver->offset (yyleng);
+{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
                              yylval->sval->append (yytext);
                            }
 } // end <list_directory>
@@ -180,6 +183,8 @@ CRLF           \x0D\x0A
 <<EOF>>                    { yyterminate(); }
 <*>{OCTET}{1}              { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
+                             ACE_ASSERT (false);
+
                              // debug info
                              std::string error_message =
                                ACE_TEXT_ALWAYS_CHAR ("invalid character: \"");

@@ -217,7 +217,7 @@ start_progress_reporting (gpointer userData_in)
 
   // sanity check(s)
   struct FTP_Client_UI_CBData* data_p =
-      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -225,7 +225,7 @@ start_progress_reporting (gpointer userData_in)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkProgressBar* progress_bar_p =
-      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
@@ -663,7 +663,7 @@ idle_response_received_cb (gpointer userData_in)
 
   // sanity check(s)
   struct FTP_Client_UI_CBData* data_p =
-      static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -741,19 +741,16 @@ treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
   struct FTP_Request request_s;
   request_s.command = FTP_Codes::FTP_COMMAND_CWD;
   request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
+  g_free (string_p); string_p = NULL;
   data_p->control->request (request_s);
   request_s.parameters.clear ();
-  g_free (string_p); string_p = NULL;
 
   request_s.command = FTP_Codes::FTP_COMMAND_LIST;
+  data_p->control->queue (request_s);
   if (likely (pasv_mode_b))
-  {
-    data_p->control->queue (request_s);
     request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-  } // end IF
   else
   {
-    data_p->control->queue (request_s);
     request_s.command = FTP_Codes::FTP_COMMAND_PORT;
     request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
     data_p->control->expectPORTResponse ();
@@ -805,15 +802,12 @@ treeview_selection_files_changed_cb (GtkTreeSelection* treeSelection_in,
   request_s.command = FTP_Codes::FTP_COMMAND_RETR;
   request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
   g_free (string_p); string_p = NULL;
+  data_p->control->queue (request_s);
+  request_s.parameters.clear ();
   if (likely (pasv_mode_b))
-  {
-    data_p->control->queue (request_s);
-    request_s.parameters.clear ();
     request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-  } // end IF
   else
   {
-    data_p->control->queue (request_s);
     request_s.command = FTP_Codes::FTP_COMMAND_PORT;
     request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
     data_p->control->expectPORTResponse ();
@@ -958,15 +952,11 @@ idle_login_complete_cb (gpointer userData_in)
 
   struct FTP_Request request_s;
   request_s.command = FTP_Codes::FTP_COMMAND_LIST;
-
+  data_p->control->queue (request_s);
   if (likely (pasv_mode_b))
-  {
-    data_p->control->queue (request_s);
     request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-  } // end IF
   else
   {
-    data_p->control->queue (request_s);
     request_s.command = FTP_Codes::FTP_COMMAND_PORT;
     request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
     data_p->control->expectPORTResponse ();
@@ -988,9 +978,9 @@ idle_update_progress_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
   // sanity check(s)
-  ACE_ASSERT (userData_in);
   struct FTP_Client_UI_ProgressData* data_p =
-      static_cast<struct FTP_Client_UI_ProgressData*> (userData_in);
+    static_cast<struct FTP_Client_UI_ProgressData*> (userData_in);
+  ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->state);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
