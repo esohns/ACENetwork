@@ -82,7 +82,7 @@ FTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBiso
     if (bufferState_)
     { ACE_ASSERT (scannerState_);
       FTP_Scanner__delete_buffer (bufferState_,
-                                   scannerState_);
+                                  scannerState_);
       bufferState_ = NULL;
     } // end IF
 
@@ -112,6 +112,7 @@ FTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBiso
   //parser_.set (scannerState_);
 
   // trace ?
+#if defined (_DEBUG)
   FTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                          scannerState_);
 #if YYDEBUG
@@ -119,6 +120,7 @@ FTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_FlexBiso
   //                                         : 0); // binary (see bison manual)
   yydebug = (configuration_->debugParser ? 1 : 0);
 #endif // YYDEBUG
+#endif // _DEBUG
 
   // OK
   initialized_ = true;
