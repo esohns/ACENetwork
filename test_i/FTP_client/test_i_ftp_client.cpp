@@ -543,9 +543,11 @@ do_work (//bool requestBroadcastReplies_in,
 #endif // GTK_USE
 
   // *********************** parser configuration data *************************
+#if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (unlikely (debugParser_in))
     configuration_in.parserConfiguration.debugScanner = true;
+#endif // _DEBUG
   // *********************** socket configuration data *************************
   ACE_INET_Addr interface_address, gateway_address;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
