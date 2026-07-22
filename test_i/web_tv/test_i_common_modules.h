@@ -45,6 +45,7 @@
 #include "stream_dec_faad_decoder.h"
 #endif // FAAD_SUPPORT
 #if defined (FFMPEG_SUPPORT)
+#include "stream_dec_libav_mpeg_ts_demuxer.h"
 #include "stream_dec_libav_audio_decoder.h"
 #include "stream_dec_libav_decoder.h"
 //#include "stream_dec_libav_encoder.h"
@@ -268,6 +269,19 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                       
                               Stream_INotify_t,                                    // stream notification interface type
                               Test_I_QueueSource);                                 // writer type
 
+typedef Stream_Decoder_LibAV_MPEG_TS_Demuxer_T<ACE_MT_SYNCH,
+                                               Common_TimePolicy_t,
+                                               struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                                               Stream_ControlMessage_t,
+                                               Test_I_Message,
+                                               Test_I_SessionMessage_3,
+                                               struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_LibAV_MPEG_TS_Decoder;
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                                // session data type
+                              enum Stream_SessionMessageType,                            // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,          // module handler configuration type
+                              libacestream_default_dec_libav_mpeg_ts_module_name_string,
+                              Stream_INotify_t,                                          // stream notification interface type
+                              Test_I_LibAV_MPEG_TS_Decoder);                             // writer type
 typedef Stream_Decoder_MPEG_TS_Decoder_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct Test_I_WebTV_ModuleHandlerConfiguration_3,
@@ -275,12 +289,12 @@ typedef Stream_Decoder_MPEG_TS_Decoder_T<ACE_MT_SYNCH,
                                          Test_I_Message,
                                          Test_I_SessionMessage_3,
                                          Test_I_WebTV_SessionData_3_t> Test_I_MPEGTSDecoder;
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3, // session data type
-                              enum Stream_SessionMessageType,            // session event type
-                              struct Test_I_WebTV_ModuleHandlerConfiguration_3, // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                          // session data type
+                              enum Stream_SessionMessageType,                      // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,    // module handler configuration type
                               libacestream_default_dec_mpeg_ts_module_name_string,
-                              Stream_INotify_t,                          // stream notification interface type
-                              Test_I_MPEGTSDecoder);                     // writer type
+                              Stream_INotify_t,                                    // stream notification interface type
+                              Test_I_MPEGTSDecoder);                               // writer type
 
 typedef Stream_Miscellaneous_MediaSplitter_T<ACE_MT_SYNCH,
                                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,

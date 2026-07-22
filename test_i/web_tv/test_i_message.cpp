@@ -74,7 +74,7 @@ Test_I_MessageDataContainer::setPR (struct HTTP_Record*& record_inout)
 //////////////////////////////////////////
 
 Test_I_Message::Test_I_Message (Stream_SessionId_t sessionId_in,
-                                unsigned int size_in)
+                                size_t size_in)
  : inherited (sessionId_in,
               size_in)
  , mediaType_ (STREAM_MEDIATYPE_INVALID)
@@ -176,8 +176,8 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
   result_p->set (inherited::type_);
   result_p->setMediaType (mediaType_);
 
-  // initialize
-  if (inherited::isInitialized_)
+  // initialize ?
+  if (inherited::data_)
   {
     Test_I_MessageDataContainer* data_container_p = NULL;
     ACE_NEW_NORETURN (data_container_p,
@@ -189,6 +189,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
       result_p->release ();
       return NULL;
     } // end IF
+    
     data_container_p->setR (inherited::data_->getR ());
     result_p->initialize (data_container_p,
                           inherited::sessionId_,

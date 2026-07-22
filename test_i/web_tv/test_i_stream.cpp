@@ -80,10 +80,17 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
+#if defined (FFMPEG_SUPPORT)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_LibAV_MPEG_TS_Decoder_Module (this,
+                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_MPEG_TS_DEMUXER_DEFAULT_NAME_STRING)),
+                  false);
+#else
   ACE_NEW_RETURN (module_p,
                   Test_I_MPEGTSDecoder_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
                   false);
+#endif // FFMPEG_SUPPORT
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 

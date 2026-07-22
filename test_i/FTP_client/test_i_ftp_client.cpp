@@ -85,10 +85,6 @@
 
 #include "ftp_defines.h"
 
-#if defined (GTK_SUPPORT)
-#include "test_i_callbacks.h"
-#endif // GTK_SUPPORT
-
 #include "test_i_common.h"
 #include "test_i_defines.h"
 
@@ -104,6 +100,10 @@
 #include "test_i_signalhandler.h"
 #include "test_i_ftp_client_common.h"
 #include "test_i_ftp_client_defines.h"
+
+#if defined (GTK_SUPPORT)
+#include "test_i_callbacks.h"
+#endif // GTK_SUPPORT
 
 const char connection_stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("FTPConnectionStream");
 const char data_connection_stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("FTPDataConnectionStream");
