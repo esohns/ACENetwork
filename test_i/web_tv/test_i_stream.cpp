@@ -36,7 +36,7 @@
 #include "test_i_module_encoder.h"
 
 Test_I_AVStream::Test_I_AVStream ()
-    : inherited ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream::Test_I_AVStream"));
 
@@ -80,17 +80,17 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-#if defined (FFMPEG_SUPPORT)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_LibAV_MPEG_TS_Decoder_Module (this,
-                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_MPEG_TS_DEMUXER_DEFAULT_NAME_STRING)),
-                  false);
-#else
+//#if defined (FFMPEG_SUPPORT)
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_LibAV_MPEG_TS_Decoder_Module (this,
+//                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_MPEG_TS_DEMUXER_DEFAULT_NAME_STRING)),
+//                  false);
+//#else
   ACE_NEW_RETURN (module_p,
                   Test_I_MPEGTSDecoder_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
                   false);
-#endif // FFMPEG_SUPPORT
+//#endif // FFMPEG_SUPPORT
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
@@ -120,26 +120,24 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
   Stream_IDistributorModule* idistributor_p =
-      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+    dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
   ACE_ASSERT (idistributor_p);
   idistributor_p->initialize (branches_a);
   module_p = NULL;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_AudioDecoder_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
                   false);
-#endif // FFMPEG_SUPPORT
-#else
-#if defined (FAAD_SUPPORT)
+#elif defined (FAAD_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_FAADDecoder_Module (this,
                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_FAAD_DEFAULT_NAME_STRING)),
                   false);
-#endif // FAAD_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
+#else
+#error "no supported audio decoder, aborting"
+#endif // FFMPEG_SUPPORT || FAAD_SUPPORT
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 
@@ -206,6 +204,8 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   ++index_i;
 
 //continue_:
+
+#if defined (FFMPEG_SUPPORT)
   if (inherited::configuration_->configuration_->useHardwareDecoder)
     ACE_NEW_RETURN (module_p,
                     Test_I_VideoHWDecoder_Module (this,
@@ -216,6 +216,9 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
                     Test_I_VideoDecoder_Module (this,
                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
                     false);
+#else
+#error "no supported video decoder, aborting"
+#endif // FFMPEG_SUPPORT
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 
@@ -241,15 +244,19 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
     branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
     Stream_IDistributorModule* idistributor_2 =
-        dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
     ACE_ASSERT (idistributor_2);
     idistributor_2->initialize (branches_a);
     module_p = NULL;
 
+#if defined (FFMPEG_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_VideoResize_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
                     false);
+#else
+#error "no supported video resizer, aborting"
+#endif // FFMPEG_SUPPORT
     layout_in->append (module_p, branch_2, index_2);
     module_p = NULL;
 
@@ -260,10 +267,14 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     layout_in->append (module_p, branch_2, index_2);
     module_p = NULL;
 
+#if defined (GTK_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_GTKCairo_Module (this,
                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                     false);
+#else
+#error "no supported GUI, aborting"
+#endif // GTK_SUPPORT
     layout_in->append (module_p, branch_2, index_2);
     module_p = NULL;
 
@@ -276,10 +287,14 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     layout_in->append (module_p, branch_2, index_2);
     module_p = NULL;
 
+#if defined (FFMPEG_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_LibAVConverter_Module (this,
                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
                     false);
+#else
+#error "no supported video converter, aborting"
+#endif // FFMPEG_SUPPORT
     layout_in->append (module_p, branch_2, index_2);
     module_p = NULL;
 
@@ -322,10 +337,14 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
         (*iterator_2).second.second->outputFormat.video.format =
           AV_PIX_FMT_NV12;
         
+#if defined (FFMPEG_SUPPORT)
         ACE_NEW_RETURN (module_p,
                         Test_I_Encoder_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING)),
                         false);
+#else
+#error "no supported a/v encoder, aborting"
+#endif // FFMPEG_SUPPORT
         layout_in->append (module_p, branch_2, index_2);
         module_p = NULL;
 
@@ -346,10 +365,14 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   } // end IF
   else
   {
+#if defined (FFMPEG_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_VideoResize_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
                     false);
+#else
+#error "no supported video resizer, aborting"
+#endif // FFMPEG_SUPPORT
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
 
@@ -360,10 +383,14 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
 
+#if defined (GTK_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_GTKCairo_Module (this,
                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                     false);
+#else
+#error "no supported GUI, aborting"
+#endif // GTK_SUPPORT
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
   } // end ELSE
@@ -403,7 +430,7 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
     goto failed;
   } // end IF
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      setup_pipeline;
+    setup_pipeline;
   reset_setup_pipeline = false;
 
   session_data_p =
@@ -448,8 +475,7 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-        setup_pipeline;
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
@@ -530,7 +556,7 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
 
   // allocate a new session state, reset stream
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      false;
+    false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
@@ -540,7 +566,7 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
     goto failed;
   } // end IF
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      setup_pipeline;
+    setup_pipeline;
   reset_setup_pipeline = false;
 
   session_data_p =
@@ -573,8 +599,7 @@ Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-        setup_pipeline;
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
