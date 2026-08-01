@@ -399,6 +399,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("%s: no content length header, continuing\n"),
                   inherited::mod_->name ()));
+      inherited2::finished_ = true;
       bytes_to_skip = headFragment_->total_length ();
     } // end ELSE
     // *NOTE*: might not have received ALL of the body; OTOH may have received

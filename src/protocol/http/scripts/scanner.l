@@ -715,8 +715,11 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 <<EOF>>                    { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                 { /* *TODO*: use (?s:.) ? */
                              if (!iparser_p->isBlocking ())
+                             { // *IMPORTANT NOTE*: put the data back
+                               *yy_cp = yyg->yy_hold_char;
                                yyterminate (); // not enough data, cannot proceed
 //                               return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+                             } // end IF
 
                              // wait for more data fragment(s)
                              if (!iparser_p->switchBuffer ())
@@ -724,6 +727,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                //         has been closed --> session end
                                ACE_DEBUG ((LM_DEBUG,
                                            ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
+                               // *IMPORTANT NOTE*: put the data back
+                               *yy_cp = yyg->yy_hold_char;
                                yyterminate (); // not enough data, cannot proceed
                              } // end IF
                              yyless (0); }

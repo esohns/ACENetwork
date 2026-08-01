@@ -75,6 +75,7 @@
 
 #define HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING "chunked"
 
+#define HTTP_PRT_MIMETYPE_AUDIO_MPEGURL_STRING    "audio/x-mpegurl"
 #define HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING   "application/x-www-form-urlencoded"
 
 // parser

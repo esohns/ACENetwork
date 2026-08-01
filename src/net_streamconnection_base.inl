@@ -525,8 +525,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   // step0b: notify stream ?
 //  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
     if (likely (notify_ && !initialization_failed_b))
-    {
-      notify_ = false;
+    { notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
                       true,   // recurse upstream (if any) ?
                       false); // expedite ?
