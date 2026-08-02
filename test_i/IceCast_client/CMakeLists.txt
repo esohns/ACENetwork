@@ -1,3 +1,6 @@
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/math/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/math/scripts")
+include (fftw)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
 include (mpg123)
 
@@ -147,9 +150,13 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 if (UNIX)
  target_link_options (${EXECUTABLE} PUBLIC "-rdynamic")
+ target_link_options (${EXECUTABLE} PUBLIC "LINKER:--allow-multiple-definition")
 
  target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (UNIX)
+if (FFTW_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${FFTW_LIBRARIES})
+endif (FFTW_SUPPORT)
 if (MPG123_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${MPG123_LIBRARIES})
 endif (MPG123_SUPPORT)
@@ -166,12 +173,15 @@ endif (SSL_SUPPORT)
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 if (UNIX)
 elseif (WIN32)
+ target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
+
  target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
 endif ()
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonEvent)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonLog)
+target_link_libraries (${EXECUTABLE} PUBLIC CommonMath)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonParser)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonParser_M3U)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonSignal)
@@ -189,6 +199,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network_Protocol_HTTPGet)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Visualization)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
@@ -273,6 +284,9 @@ elseif (WIN32)
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
  file (TO_CMAKE_PATH "${VCPKG_BIN_DIR}" VCPKG_LIB_PATH)
  file (TO_CMAKE_PATH "${VCPKG_RELEASE_BIN_DIR}" VCPKG_LIB_PATH_2)
+ if (FFTW_SUPPORT)
+  file (TO_CMAKE_PATH "${FFTW_LIB_DIR}" FFTW_PATH)
+ endif (FFTW_SUPPORT)
  file (TO_CMAKE_PATH "${MPG123_LIB_DIR}" MPG123_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
@@ -281,6 +295,7 @@ elseif (WIN32)
 #                           ${LIBXML2_PATH}
                            ${VCPKG_LIB_PATH}
                            ${VCPKG_LIB_PATH_2}
+                           ${FFTW_PATH}
                            ${MPG123_PATH}
                            ${FFMPEG_PATH}
                            ${IMAGEMAGICK_PATH}

@@ -597,10 +597,17 @@
             <child>
               <object class="GtkDrawingArea" id="drawingarea">
                 <property name="width_request">320</property>
+                <property name="height_request">240</property>
                 <property name="visible">True</property>
+                <property name="app_paintable">True</property>
                 <property name="can_focus">False</property>
                 <property name="has_tooltip">True</property>
-                <property name="tooltip_text" translatable="yes">video</property>
+                <property name="tooltip_text" translatable="yes">analyzer</property>
+                <property name="double_buffered">False</property>
+                <signal name="draw" handler="drawingarea_draw_cb" swapped="no"/>
+                <signal name="configure-event" handler="drawingarea_configure_event_cb" swapped="no"/>
+                <signal name="realize" handler="drawingarea_realize_cb" swapped="no"/>
+                <signal name="query-tooltip" handler="drawingarea_query_tooltip_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -713,6 +720,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>

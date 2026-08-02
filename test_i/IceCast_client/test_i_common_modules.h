@@ -45,20 +45,18 @@
 #include "stream_file_sink.h"
 
 #include "stream_misc_defragment.h"
+#include "stream_misc_delay.h"
 #include "stream_misc_distributor.h"
 #include "stream_misc_messagehandler.h"
 
 #include "stream_stat_statistic_report.h"
 
-//#include "stream_module_source_http_get.h"
-
-#include "stream_vis_gtk_pixbuf.h"
+#if defined (GTK_SUPPORT)
+#include "stream_vis_gtk_cairo_spectrum_analyzer.h"
+#endif // GTK_SUPPORT
 
 #include "http_common.h"
-// #include "http_module_parser.h"
-// #include "http_module_streamer.h"
 #include "http_network.h"
-// #include "http_parser_driver.h"
 
 #include "test_i_common.h"
 
@@ -111,19 +109,6 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,          
                               Stream_INotify_t,                                        // stream notification interface type
                               Test_I_Defragment);                                      // writer type
 
-//typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
-//                                            Common_TimePolicy_t,
-//                                            struct Test_I_IceCastClient_ModuleHandlerConfiguration,
-//                                            Stream_ControlMessage_t,
-//                                            Test_I_Message,
-//                                            Test_I_SessionMessage> Test_I_HTTPGet;
-//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,   // session data type
-//                              enum Stream_SessionMessageType,            // session event type
-//                              struct Test_I_IceCastClient_ModuleHandlerConfiguration, // module handler configuration type
-//                              libacestream_default_net_http_get_module_name_string,
-//                              Stream_INotify_t,                          // stream notification interface type
-//                              Test_I_HTTPGet);                           // writer type
-
 //////////////////////////////////////////
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
@@ -154,19 +139,6 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_IceCastClient_SessionData_2,            
                           Test_I_StatisticReport_ReaderTask_2_t,                    // reader type
                           Test_I_StatisticReport_WriterTask_2_t,                    // writer type
                           Test_I_StatisticReport_2);                                // name
-
-//typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
-//                                            Common_TimePolicy_t,
-//                                            struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
-//                                            Stream_ControlMessage_t,
-//                                            Test_I_Message,
-//                                            Test_I_SessionMessage_2> Test_I_HTTPGet_2;
-//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
-//                              enum Stream_SessionMessageType,                           // session event type
-//                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
-//                              libacestream_default_net_http_get_module_name_string,
-//                              Stream_INotify_t,                                         // stream notification interface type
-//                              Test_I_HTTPGet_2);                                        // writer type
 
 #if defined (MPG123_SUPPORT)
 typedef Stream_Decoder_MP3Decoder_T<ACE_MT_SYNCH,
@@ -242,6 +214,44 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                          // stream notification interface type
                               Test_I_WASAPIOut);                                         // writer type
 
+typedef Stream_Module_Delay_T<ACE_MT_SYNCH,
+                              Common_TimePolicy_t,
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                              Stream_ControlMessage_t,
+                              Test_I_Message,
+                              Test_I_SessionMessage_2,
+                              struct _AMMediaType,
+                              struct Stream_UserData> Test_I_Delay;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_misc_delay_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_Delay);                                            // writer type
+
+#if defined (GTK_SUPPORT)
+typedef Common_Math_FFT_T<float, FFT_ALGORITHM_UNKNOWN> Common_Math_FFT_t;
+typedef Common_ISetP_T<GdkWindow> Common_ISetP_t;
+typedef Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_T<ACE_MT_SYNCH,
+                                                          Common_TimePolicy_t,
+                                                          struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                                          Stream_ControlMessage_t,
+                                                          Test_I_Message,
+                                                          Test_I_SessionMessage_2,
+                                                          struct Test_I_IceCastClient_SessionData_2,
+                                                          Test_I_IceCastClient_SessionData_2_t,
+                                                          Common_Timer_Manager_t,
+                                                          struct _AMMediaType,
+                                                          float,
+                                                          FFT_ALGORITHM_UNKNOWN> Test_I_Vis_SpectrumAnalyzer;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                     // session data type
+                              enum Stream_SessionMessageType,                                // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,      // module handler configuration type
+                              libacestream_default_vis_spectrum_analyzer_module_name_string,
+                              Stream_INotify_t,                                              // stream notification interface type
+                              Test_I_Vis_SpectrumAnalyzer);                                  // writer type
+#endif // GTK_SUPPORT
+
 typedef Stream_Decoder_WAVEncoder_T<ACE_MT_SYNCH,
                                     Common_TimePolicy_t,
                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
@@ -284,6 +294,29 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_ALSA);                                             // writer type
 
+#if defined (GTK_SUPPORT)
+typedef Common_Math_FFT_T<float, FFT_ALGORITHM_UNKNOWN> Common_Math_FFT_t;
+typedef Common_ISetP_T<GdkWindow> Common_ISetP_t;
+typedef Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_T<ACE_MT_SYNCH,
+                                                          Common_TimePolicy_t,
+                                                          struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                                          Stream_ControlMessage_t,
+                                                          Test_I_Message,
+                                                          Test_I_SessionMessage_2,
+                                                          struct Test_I_IceCastClient_SessionData_2,
+                                                          Test_I_IceCastClient_SessionData_2_t,
+                                                          Common_Timer_Manager_t,
+                                                          struct Stream_MediaFramework_ALSA_MediaType,
+                                                          float,
+                                                          FFT_ALGORITHM_UNKNOWN> Test_I_Vis_SpectrumAnalyzer;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                     // session data type
+                              enum Stream_SessionMessageType,                                // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,      // module handler configuration type
+                              libacestream_default_vis_spectrum_analyzer_module_name_string,
+                              Stream_INotify_t,                                              // stream notification interface type
+                              Test_I_Vis_SpectrumAnalyzer);                                  // writer type
+#endif // GTK_SUPPORT
+
 typedef Stream_Decoder_WAVEncoder_T<ACE_MT_SYNCH,
                                     Common_TimePolicy_t,
                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
@@ -292,7 +325,7 @@ typedef Stream_Decoder_WAVEncoder_T<ACE_MT_SYNCH,
                                     Test_I_SessionMessage_2,
                                     Test_I_IceCastClient_SessionData_2_t,
                                     struct Test_I_IceCastClient_SessionData_2,
-                                    struct _AMMediaType,
+                                    struct Stream_MediaFramework_ALSA_MediaType,
                                     struct Stream_UserData> Test_I_WAV_Encoder;
 #endif // ACE_WIN32 || ACE_WIN64
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type

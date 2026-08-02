@@ -375,6 +375,30 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     case STREAM_SESSION_MESSAGE_ABORT:
     case STREAM_SESSION_MESSAGE_END:
     {
+//#if defined (GTK_USE)
+//      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+//
+//      guint event_source_id = g_idle_add (idle_end_session_cb,
+//                                          CBData_);
+//      if (event_source_id == 0)
+//      {
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+//        return;
+//      } // end IF
+//      state_r.eventSourceIds.insert (event_source_id);
+//#endif // GTK_USE
+
+      event_e =
+        (sessionMessage_in.type () == STREAM_SESSION_MESSAGE_END) ? COMMON_UI_EVENT_FINISHED
+                                                                  : COMMON_UI_EVENT_ABORT;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_CONNECT:
+      event_e = COMMON_UI_EVENT_CONNECT;
+      break;
+    case STREAM_SESSION_MESSAGE_DISCONNECT:
+    {
 #if defined (GTK_USE)
       ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
@@ -389,17 +413,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 
-      event_e =
-        (sessionMessage_in.type () == STREAM_SESSION_MESSAGE_END) ? COMMON_UI_EVENT_FINISHED
-                                                                  : COMMON_UI_EVENT_ABORT;
-      break;
-    }
-    case STREAM_SESSION_MESSAGE_CONNECT:
-      event_e = COMMON_UI_EVENT_CONNECT;
-      break;
-    case STREAM_SESSION_MESSAGE_DISCONNECT:
       event_e = COMMON_UI_EVENT_DISCONNECT;
       break;
+    }
     case STREAM_SESSION_MESSAGE_STEP:
     case STREAM_SESSION_MESSAGE_STEP_DATA:
       event_e = COMMON_UI_EVENT_STEP;

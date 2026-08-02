@@ -248,7 +248,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   ACE_ASSERT (module_p);
   branch_p = module_p;
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
-  //branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
 #if defined (PROJECTM_SUPPORT)
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DECODE_NAME));
@@ -280,6 +280,22 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
                   false);
 #endif // ACE_WIN32 || ACE_WIN64
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
+  ++index_i;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Delay_Module (this,
+                                       ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Vis_SpectrumAnalyzer_Module (this,
+                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_SPECTRUM_ANALYZER_DEFAULT_NAME_STRING)),
+                  false);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
 

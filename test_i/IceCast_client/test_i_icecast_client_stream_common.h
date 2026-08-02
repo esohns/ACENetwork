@@ -74,7 +74,9 @@ extern "C"
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-// #include "stream_module_htmlparser.h"
+#include "stream_misc_common.h"
+
+#include "stream_vis_common.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -193,13 +195,17 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
    , codecId (AV_CODEC_ID_MP3)
 #endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
+   , delayConfiguration (NULL)
    , deviceIdentifier ()
    , subscriber (NULL)
    , targetFileName ()
    , outputFormat ()
-#if defined (GTK_USE)
-   , window (NULL)
-#endif // GTK_USE
+#if defined (GTK_SUPPORT)
+   , spectrumAnalyzerConfiguration (NULL)
+#endif // GTK_SUPPORT
+//#if defined (GTK_USE)
+//   , window (NULL)
+//#endif // GTK_USE
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
 
@@ -216,6 +222,7 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
   enum AVCodecID                                    codecId;
 #endif // FFMPEG_SUPPORT
   Net_ConnectionConfigurations_t*                   connectionConfigurations;
+  struct Stream_Miscellaneous_DelayConfiguration*   delayConfiguration;
   struct Stream_Device_Identifier                   deviceIdentifier; // render
   Test_I_ISessionNotify_2_t*                        subscriber;
   std::string                                       targetFileName; // dump module
@@ -224,9 +231,12 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 #else
   struct Stream_MediaFramework_ALSA_MediaType       outputFormat;
 #endif // ACE_WIN32 || ACE_WIN64
-#if defined (GTK_USE)
-  GdkWindow*                                        window;
-#endif // GTK_USE
+#if defined (GTK_SUPPORT)
+  struct Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_Configuration* spectrumAnalyzerConfiguration;
+#endif // GTK_SUPPORT
+//#if defined (GTK_USE)
+//  GdkWindow*                                        window;
+//#endif // GTK_USE
 };
 
 struct Test_I_IceCastClient_StreamConfiguration_2

@@ -27,6 +27,10 @@
 #include "stream_control_message.h"
 #include "stream_messageallocatorheap_base.h"
 
+#if defined (GTK_SUPPORT)
+#include "stream_vis_gtk_cairo_spectrum_analyzer.h"
+#endif // GTK_SUPPORT
+
 #include "http_common.h"
 
 #include "test_i_common.h"
@@ -37,6 +41,7 @@
 #include "test_i_wxwidgets_common.h"
 #endif // WXWIDGETS_SUPPORT
 
+#include "test_i_common_modules.h"
 #include "test_i_icecast_client_stream_common.h"
 
 // forward declarations
@@ -147,16 +152,26 @@ struct Test_I_IceCastClient_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
+#if defined (GTK_SUPPORT)
+   , eventSourceId (0)
+   , fft (NULL)
+   , spectrumAnalyzerCBData ()
+#endif // GTK_SUPPORT
    , subscribers ()
    , URL ()
   {}
 
-  struct Test_I_IceCastClient_Configuration*  configuration;
+  struct Test_I_IceCastClient_Configuration*      configuration;
 
-  ACE_HANDLE                                  handle;
-  struct Test_I_IceCastClient_UI_ProgressData progressData;
-  Test_I_Subscribers_t                        subscribers;
-  std::string                                 URL;
+  ACE_HANDLE                                      handle;
+  struct Test_I_IceCastClient_UI_ProgressData     progressData;
+#if defined (GTK_SUPPORT)
+  guint                                           eventSourceId; // display-
+  Common_Math_FFT_t*                              fft;
+  struct acestream_visualization_gtk_cairo_cbdata spectrumAnalyzerCBData;
+#endif // GTK_SUPPORT
+  Test_I_Subscribers_t                            subscribers;
+  std::string                                     URL;
 };
 
 //struct Test_I_IceCastClient_ThreadData

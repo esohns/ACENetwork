@@ -679,6 +679,9 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.URL = URL_in;
   modulehandler_configuration_2.waitForConnect = false;
 
+  struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
+  modulehandler_configuration_2.delayConfiguration = &delay_configuration;
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct tWAVEFORMATEX waveformatex_s;
   ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
@@ -710,6 +713,12 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.outputFormat.format = SND_PCM_FORMAT_FLOAT;
   modulehandler_configuration_2.outputFormat.rate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
+
+#if defined (GTK_SUPPORT)
+  struct Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_Configuration spectrum_analyzer_configuration;
+  modulehandler_configuration_2.spectrumAnalyzerConfiguration =
+    &spectrum_analyzer_configuration;
+#endif // GTK_SUPPORT
 
   struct Test_I_IceCastClient_StreamConfiguration_2 stream_configuration_2;
   stream_configuration_2.messageAllocator = &message_allocator_2;

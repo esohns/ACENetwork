@@ -50,6 +50,7 @@
 #include "test_i_common.h"
 #include "test_i_defines.h"
 
+#include "test_i_common_modules.h"
 #include "test_i_connection_common.h"
 #include "test_i_connection_manager_common.h"
 #include "test_i_connection_stream.h"
@@ -72,17 +73,14 @@ idle_end_session_cb (gpointer userData_in)
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  data_p->fft = NULL;
+  data_p->spectrumAnalyzerCBData.dispatch = NULL;
+  data_p->spectrumAnalyzerCBData.resizeNotification = NULL;
 
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -104,14 +102,14 @@ idle_end_session_cb (gpointer userData_in)
   gtk_spinner_stop (spinner_p);
   gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
-  //ACE_ASSERT (data_p->progressData.eventSourceId);
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    if (!g_source_remove (data_p->progressData.eventSourceId))
+  ACE_ASSERT (data_p->eventSourceId);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+    if (!g_source_remove (data_p->eventSourceId))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                  data_p->progressData.eventSourceId));
-    state_r.eventSourceIds.erase (data_p->progressData.eventSourceId);
-    data_p->progressData.eventSourceId = 0;
+                  data_p->eventSourceId));
+    data_p->UIState->eventSourceIds.erase (data_p->eventSourceId);
+    data_p->eventSourceId = 0;
   } // end lock scope
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -308,6 +306,84 @@ idle_load_segment_cb (gpointer userData_in)
 //                data_p->handle,
 //                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
 //#endif
+
+  Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
+    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
+  ACE_ASSERT (iconnection_manager_2);
+  Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_2 = NULL;
+  Test_I_IStreamConnection_2_t* istream_connection_p = NULL;
+  Stream_IStream_t* istream_p = NULL;
+  const Stream_Module_t* module_p = NULL;
+
+  iconnection_2 =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+    iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  if (!iconnection_2)
+    return G_SOURCE_REMOVE;
+  istream_connection_p =
+    dynamic_cast<Test_I_IStreamConnection_2_t*> (iconnection_2);
+  ACE_ASSERT (istream_connection_p);
+  istream_p = &const_cast<Test_I_ConnectionStream_2&> (istream_connection_p->stream ());
+  ACE_ASSERT (istream_p);
+
+  module_p =
+    istream_p->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_SPECTRUM_ANALYZER_DEFAULT_NAME_STRING));
+  if (unlikely (!module_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_IStream::find(%s), returning\n"),
+                ACE_TEXT (STREAM_VIS_GTK_SPECTRUM_ANALYZER_DEFAULT_NAME_STRING)));
+    iconnection_2->decrease ();
+    return G_SOURCE_REMOVE;
+  } // end IF
+  data_p->fft =
+    dynamic_cast<Common_Math_FFT_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (unlikely (!data_p->fft))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Common_Math_FFT_t*>(%@), returning\n"),
+                const_cast<Stream_Module_t*> (module_p)->writer ()));
+    iconnection_2->decrease ();
+    return G_SOURCE_REMOVE;
+  } // end IF
+  data_p->spectrumAnalyzerCBData.dispatch =
+    dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (unlikely (!data_p->spectrumAnalyzerCBData.dispatch))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Common_IDispatch*>(%@), returning\n"),
+                const_cast<Stream_Module_t*> (module_p)->writer ()));
+    iconnection_2->decrease ();
+    return G_SOURCE_REMOVE;
+  } // end IF
+  data_p->spectrumAnalyzerCBData.resizeNotification =
+    dynamic_cast<Common_ISetP_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  if (unlikely (!data_p->spectrumAnalyzerCBData.resizeNotification))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Common_ISetP_t*>(%@), returning\n"),
+                const_cast<Stream_Module_t*> (module_p)->writer ()));
+    iconnection_2->decrease ();
+    return G_SOURCE_REMOVE;
+  } // end IF
+  iconnection_2->decrease (); iconnection_2 = NULL;
+
+  // step12: initialize updates
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+    // schedule asynchronous updates of the info view
+    data_p->eventSourceId =
+      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_CAIRO_MS, // ~30fps
+                     idle_update_display_cb,
+                     userData_in);
+    if (data_p->eventSourceId > 0)
+      state_r.eventSourceIds.insert (data_p->eventSourceId);
+    else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add(idle_update_display_cb): \"%m\", continuing\n")));
+  } // end lock scope
 
   return G_SOURCE_REMOVE;
 }
@@ -653,7 +729,9 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
-  (*iterator_3).second.second->window = window_p;
+  ACE_ASSERT ((*iterator_3).second.second->spectrumAnalyzerConfiguration);
+  //(*iterator_3).second.second->window = window_p;
+  (*iterator_3).second.second->spectrumAnalyzerConfiguration->window = window_p;
 
   return G_SOURCE_REMOVE;
 }
@@ -805,7 +883,7 @@ idle_update_info_display_cb (gpointer userData_in)
 
   // sanity check(s)
   struct Test_I_IceCastClient_UI_CBData* data_p =
-      static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   GtkSpinButton* spin_button_p = NULL;
@@ -944,92 +1022,59 @@ idle_update_info_display_cb (gpointer userData_in)
   return G_SOURCE_CONTINUE;
 }
 
-//gboolean
-//idle_update_log_display_cb (gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
+gboolean
+idle_update_display_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_display_cb"));
+
+  // sanity check(s)
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  // trigger refresh of the 2D area ?
+  GtkDrawingArea* drawing_area_p = NULL;
+  GdkWindow* window_p = NULL;
+  drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+  ACE_ASSERT (drawing_area_p);
+  window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+  if (unlikely (!window_p))
+    goto continue_2; // <-- not realized yet
+
+  gdk_window_invalidate_rect (window_p,
+                              NULL,   // whole window
+                              FALSE); // invalidate children ?
+
+continue_2:
+//#if defined (GTKGL_SUPPORT)
+//  ACE_ASSERT (!data_p->UIState->OpenGLContexts.empty ());
+//  Common_UI_GTK_GLContextsIterator_t iterator_2 =
+//    data_p->UIState->OpenGLContexts.begin ();
+//#if GTK_CHECK_VERSION (3,0,0)
+//#if GTK_CHECK_VERSION (3,16,0)
+//  window_p = gtk_widget_get_window (GTK_WIDGET ((*iterator_2).first));
+//#else
+//  window_p = gtk_widget_get_window (GTK_WIDGET (&(*iterator_2).first->darea));
+//#endif // GTK_CHECK_VERSION (3,16,0)
+//#else
+//  window_p = gtk_widget_get_window (GTK_WIDGET (&(*iterator_2).first->darea));
+//#endif // GTK_CHECK_VERSION
+//  if (unlikely (!window_p))
+//    goto continue_3; // <-- not realized yet
 //
-//  struct Test_I_IceCastClient_UI_CBData* data_p =
-//      static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
-//
-//  // sanity check(s)
-//  ACE_ASSERT (data_p);
-//
-//  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-//
-//  Common_UI_GTK_BuildersConstIterator_t iterator =
-//      data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  // sanity check(s)
-//  ACE_ASSERT (iterator != data_p->builders.end ());
-//
-//  GtkTextView* view_p =
-//    GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
-//                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TEXTVIEW_NAME)));
-//  ACE_ASSERT (view_p);
-//  GtkTextBuffer* buffer_p = gtk_text_view_get_buffer (view_p);
-//  ACE_ASSERT (buffer_p);
-//
-//  GtkTextIter text_iterator;
-//  gtk_text_buffer_get_end_iter (buffer_p,
-//                                &text_iterator);
-//
-//  gchar* string_p = NULL;
-//  // sanity check
-//  if (data_p->logStack.empty ())
-//    return G_SOURCE_CONTINUE;
-//
-//  // step1: convert text
-//  for (Common_MessageStackConstIterator_t iterator_2 = data_p->logStack.begin ();
-//       iterator_2 != data_p->logStack.end ();
-//       iterator_2++)
-//  {
-//    string_p = Common_UI_GTK_Tools::Locale2UTF8 (*iterator_2);
-//    if (!string_p)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
-//                  ACE_TEXT ((*iterator_2).c_str ())));
-//      return G_SOURCE_REMOVE;
-//    } // end IF
-//
-//    // step2: display text
-//    gtk_text_buffer_insert (buffer_p,
-//                            &text_iterator,
-//                            string_p,
-//                            -1);
-//
-//    // clean up
-//    g_free (string_p);
-//  } // end FOR
-//
-//  data_p->logStack.clear ();
-//
-//  // step3: scroll the view accordingly
-////  // move the iterator to the beginning of line, so it doesn't scroll
-////  // in horizontal direction
-////  gtk_text_iter_set_line_offset (&text_iterator, 0);
-//
-////  // ...and place the mark at iter. The mark will stay there after insertion
-////  // because it has "right" gravity
-////  GtkTextMark* text_mark_p =
-////      gtk_text_buffer_get_mark (buffer_p,
-////                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SCROLLMARK_NAME));
-//////  gtk_text_buffer_move_mark (buffer_p,
-//////                             text_mark_p,
-//////                             &text_iterator);
-//
-////  // scroll the mark onscreen
-////  gtk_text_view_scroll_mark_onscreen (view_p,
-////                                      text_mark_p);
-//  //GtkAdjustment* adjustment_p =
-//  //    GTK_ADJUSTMENT (gtk_builder_get_object ((*iterator).second.second,
-//  //                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ADJUSTMENT_NAME)));
-//  //ACE_ASSERT (adjustment_p);
-//  //gtk_adjustment_set_value (adjustment_p,
-//  //                          adjustment_p->upper - adjustment_p->page_size));
-//
-//  return G_SOURCE_CONTINUE;
-//}
+//  gdk_window_invalidate_rect (window_p,
+//                              NULL,
+//                              FALSE);
+//continue_3:
+//#endif /* GTKGL_SUPPORT */
+  return G_SOURCE_CONTINUE;
+}
 
 /////////////////////////////////////////
 
@@ -1475,7 +1520,7 @@ entry_url_activate_cb (GtkEntry* entry_in,
 
   // sanity check(s)
   struct Test_I_IceCastClient_UI_CBData* data_p =
-      static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -1494,6 +1539,248 @@ entry_url_activate_cb (GtkEntry* entry_in,
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_toggled (toggle_button_p);
 }
+
+gboolean
+drawingarea_query_tooltip_cb (GtkWidget*  widget_in,
+                              gint        x_in, gint y_in,
+                              gboolean    keyboardMode_in,
+                              GtkTooltip* tooltip_in,
+                              gpointer    userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_query_tooltip_cb"));
+
+  ACE_UNUSED_ARG (keyboardMode_in);
+
+  // sanity check(s)
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  if (!data_p->fft)
+    return FALSE;
+  Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T modulehandler_configuration_iterator =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_configuration_iterator != data_p->configuration->streamConfiguration_2.end ());
+
+  enum Stream_Visualization_SpectrumAnalyzer_2DMode mode =
+    STREAM_VISUALIZATION_SPECTRUMANALYZER_2DMODE_INVALID;
+  unsigned int sample_size = 0; // bytes
+  bool is_signed_format = true;
+  bool is_float_format = false;
+  unsigned int channels = 0;
+
+  mode =
+    (*modulehandler_configuration_iterator).second.second->spectrumAnalyzerConfiguration->mode;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct tWAVEFORMATEX* waveformatex_p =
+    reinterpret_cast<struct tWAVEFORMATEX*> ((*modulehandler_configuration_iterator).second.second->outputFormat.pbFormat);
+  ACE_ASSERT (waveformatex_p);
+  sample_size = waveformatex_p->wBitsPerSample / 8;
+  channels = waveformatex_p->nChannels;
+  // *NOTE*: "...If the audio contains 8 bits per sample, the audio samples
+  //         are unsigned values. (Each audio sample has the range 0255.)
+  //         If the audio contains 16 bits per sample or higher, the audio
+  //         samples are signed values. ..."
+  is_signed_format = !(sample_size == 1);
+  is_float_format = Stream_MediaFramework_DirectSound_Tools::isFloat (*waveformatex_p);
+#else
+  is_signed_format =
+    snd_pcm_format_signed ((*modulehandler_configuration_iterator)->second.second->outputFormat.format);
+  sample_size =
+    (snd_pcm_format_width ((*modulehandler_configuration_iterator)->second.second->outputFormat.format) / 8);
+  channels =
+    (*modulehandler_configuration_iterator)->second.second->outputFormat.channels;
+#endif // ACE_WIN32 || ACE_WIN64
+
+  GtkAllocation allocation;
+  gtk_widget_get_allocation (widget_in,
+                             &allocation);
+  double half_height = allocation.height / 2.0;
+  uint64_t maximum_value =
+    (is_float_format ? 1 : Common_Tools::max<uint64_t> (sample_size,
+                                                        is_signed_format));
+  std::ostringstream converter;
+  if (is_float_format)
+    converter << static_cast<float> (((half_height - y_in) * static_cast<int64_t> (maximum_value)) / half_height);
+  else if (is_signed_format)
+    converter << static_cast<int64_t> (((half_height - y_in) * static_cast<int64_t> (maximum_value)) / half_height);
+  else
+    converter << (static_cast<uint64_t> (allocation.height - y_in) * maximum_value) / static_cast<uint64_t> (allocation.height);
+  switch (mode)
+  {
+    case STREAM_VISUALIZATION_SPECTRUMANALYZER_2DMODE_OSCILLOSCOPE:
+      break;
+    case STREAM_VISUALIZATION_SPECTRUMANALYZER_2DMODE_SPECTRUM:
+    {
+      unsigned int allocation_per_channel = (allocation.width / channels);
+      unsigned int slot =
+        static_cast<unsigned int> ((x_in % allocation_per_channel) * (data_p->fft->Slots () / static_cast<double> (allocation_per_channel)));
+      converter << ACE_TEXT_ALWAYS_CHAR (", ")
+                << data_p->fft->Frequency (slot)
+                << ACE_TEXT_ALWAYS_CHAR (" Hz");
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown mode (was: %d), returning\n"),
+                  mode));
+      return FALSE;
+    }
+  } // end SWITCH
+
+  gtk_tooltip_set_text (tooltip_in,
+                        converter.str ().c_str ());
+
+  return TRUE;
+}
+
+void
+drawingarea_realize_cb (GtkWidget* widget_in,
+                        gpointer   userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_realize_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+
+  // sanity check(s)
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T modulehandler_configuration_iterator =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (modulehandler_configuration_iterator != data_p->configuration->streamConfiguration_2.end ());
+} // drawingarea_realize_cb
+
+void
+drawingarea_size_allocate_cb (GtkWidget* widget_in,
+                              GdkRectangle* allocation_in,
+                              gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_size_allocate_cb"));
+
+  ACE_UNUSED_ARG (allocation_in);
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  if (!data_p->spectrumAnalyzerCBData.resizeNotification)
+    return;
+
+  GdkWindow* window_p = gtk_widget_get_window (widget_in);
+  if (!window_p)
+    return; // <-- not realized yet
+
+  try {
+    data_p->spectrumAnalyzerCBData.resizeNotification->setP (window_p);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_ISetP_T::setP(), continuing\n")));
+  }
+} // drawingarea_size_allocate_cb
+
+#if GTK_CHECK_VERSION (3,0,0)
+gboolean
+drawingarea_configure_event_cb (GtkWidget* widget_in,
+                                GdkEvent* event_in,
+                                gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_configure_event_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  if (unlikely (event_in->type != GDK_CONFIGURE))
+    return FALSE;
+  ACE_ASSERT (userData_in);
+
+  drawingarea_size_allocate_cb (widget_in,
+                                NULL,
+                                userData_in);
+
+  return TRUE;
+} // drawingarea_configure_event_cb
+
+gboolean
+drawingarea_draw_cb (GtkWidget* widget_in,
+                     cairo_t* context_in,
+                     gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  ACE_ASSERT (context_in);
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  // sanity check(s)
+  data_p->spectrumAnalyzerCBData.window =
+    gtk_widget_get_window (widget_in);
+  if (!data_p->spectrumAnalyzerCBData.window)
+    return FALSE; // not realized (yet)
+  if (!data_p->spectrumAnalyzerCBData.dispatch)
+    return FALSE; // stream not running (yet)
+  data_p->spectrumAnalyzerCBData.context = context_in;
+
+  try {
+    data_p->spectrumAnalyzerCBData.dispatch->dispatch (&data_p->spectrumAnalyzerCBData);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
+  }
+
+  return FALSE;
+}
+#else
+gboolean
+drawingarea_expose_event_cb (GtkWidget* widget_in,
+                             GdkEvent* event_in,
+                             gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::drawingarea_expose_event_cb"));
+
+  ACE_UNUSED_ARG (event_in);
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  ACE_ASSERT (context_in);
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  // sanity check(s)
+  data_p->spectrumAnalyzerCBData.window = gtk_widget_get_window (widget_in);
+  if (!data_p->spectrumAnalyzerCBData.window)
+    return FALSE; // not realized (yet)
+  if (!data_p->spectrumAnalyzerCBData.dispatch)
+    return FALSE; // stream not running (yet)
+  if (!data_p->spectrumAnalyzerCBData.context)
+  {
+    data_p->spectrumAnalyzerCBData.context =
+      gdk_cairo_create (GDK_DRAWABLE (data_p->spectrumAnalyzerCBData.window));
+    if (unlikely (!data_p->spectrumAnalyzerCBData.context))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to gdk_cairo_create(), aborting\n")));
+      return FALSE;
+    } // end IF
+  } // end IF
+
+  try {
+    data_p->spectrumAnalyzerCBData.dispatch->dispatch (&data_p->spectrumAnalyzerCBData);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
+  }
+//  cairo_destroy (data_p->spectrumAnalyzerCBData.context); data_p->spectrumAnalyzerCBData.context = NULL;
+
+  return FALSE;
+} // drawingarea_expose_event_cb
+#endif // GTK_CHECK_VERSION (3,0,0)
 
 gint
 button_about_clicked_cb (GtkWidget* widget_in,

@@ -18,13 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_I_CALLBACKS_H
-#define TEST_I_CALLBACKS_H
+#ifndef TEST_I_GTK_CALLBACKS_H
+#define TEST_I_GTK_CALLBACKS_H
 
 #include "gtk/gtk.h"
-
-//// thread functions
-//ACE_THR_FUNC_RETURN stream_processing_function (void*);
 
 //------------------------------------------------------------------------------
 
@@ -37,7 +34,7 @@ gboolean idle_reset_UI_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
-//gboolean idle_update_log_display_cb (gpointer);
+gboolean idle_update_display_cb (gpointer);
 
 //------------------------------------------------------------------------------
 
@@ -52,6 +49,15 @@ G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
 //G_MODULE_EXPORT void filechooserbutton_output_file_set_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void spinbutton_buffer_value_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void checkbutton_save_toggled_cb (GtkCheckButton*, gpointer);
+G_MODULE_EXPORT gboolean drawingarea_query_tooltip_cb (GtkWidget*, gint, gint, gboolean, GtkTooltip*, gpointer);
+G_MODULE_EXPORT void drawingarea_realize_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void drawingarea_size_allocate_cb (GtkWidget*, GdkRectangle*, gpointer);
+#if GTK_CHECK_VERSION (3,0,0)
+G_MODULE_EXPORT gboolean drawingarea_configure_event_cb (GtkWidget*, GdkEvent*, gpointer);
+G_MODULE_EXPORT gboolean drawingarea_draw_cb (GtkWidget*, cairo_t*, gpointer);
+#else
+G_MODULE_EXPORT gboolean drawingarea_expose_event_cb (GtkWidget*, GdkEvent*, gpointer);
+#endif // GTK_CHECK_VERSION (3,0,0)
 G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);
 #ifdef __cplusplus
