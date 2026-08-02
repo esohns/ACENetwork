@@ -547,7 +547,13 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                                ACE_TEXT ((*iterator).second.c_str ())));
                                } // end IF
                                else
-                                 BEGIN (INITIAL); // no data
+                               { // no content length or chunked transfer encoding --> assume body is the rest of the stream (until EOF)
+                                 ACE_Message_Block* message_block_p = iparser_p->head ();
+                                 ACE_ASSERT (message_block_p);
+                                 ACE_UINT64 content_length_i = message_block_p->total_length () - iparser_p->offset ();
+                                 iparser_p->contentLengthOrChunkSize (content_length_i);
+                                 BEGIN (body);
+                               } // end ELSE
                              } // end ELSE
                              yylval->ival = 2;
 //                             return yy::HTTP_Parser::token::DELIMITER;
@@ -556,7 +562,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 } // end <response_headers>
 <body>{
 {OCTET}{1}                 {
-                             struct HTTP_Record& record_r =
+/*                             struct HTTP_Record& record_r =
                                iparser_p->current ();
                              HTTP_HeadersIterator_t iterator =
                                record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
@@ -565,13 +571,20 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              converter.str ((*iterator).second);
                              ACE_UINT64 content_length_or_chunk_size = 0;
                              converter >> content_length_or_chunk_size;
-                             iparser_p->contentLengthOrChunkSize (content_length_or_chunk_size);
-                             ACE_UINT64 missing_bytes = content_length_or_chunk_size;
-                             if (yy_flex_debug)
-                               ACE_DEBUG ((LM_DEBUG,
-                                           ACE_TEXT ("found body @%d of %d byte(s)\n"),
-                                           iparser_p->offset (),
-                                           content_length_or_chunk_size));
+                             iparser_p->contentLengthOrChunkSize (content_length_or_chunk_size); */
+                             ACE_UINT64 missing_bytes = iparser_p->bodyOrChunkBytesToSkip ();
+/*                             ACE_DEBUG ((LM_DEBUG,
+                                         ACE_TEXT ("found body @%d of %d byte(s)\n"),
+                                         iparser_p->offset (),
+                                         content_length_or_chunk_size)); */
+                             if (!missing_bytes)
+                             {
+                               ACE_Message_Block* message_block_p = iparser_p->head ();
+                               ACE_ASSERT (message_block_p);
+                               ACE_UINT64 content_length_i = message_block_p->total_length () - iparser_p->offset ();
+                               iparser_p->contentLengthOrChunkSize (content_length_i);
+                               iparser_p->multiBody ();
+                             } // end IF
                              --missing_bytes;
                              iparser_p->bodyOrChunkBytesSkipped (1);
 /*                             char c = 0;
@@ -591,14 +604,19 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              iparser_p->bodyOrChunkBytesSkipped (1);
                              if (unlikely (!iparser_p->bodyOrChunkBytesToSkip ()))
                              {
-                               try {
-                                 iparser_p->finished ();
-                               } catch (...) {
-                                 ACE_DEBUG ((LM_ERROR,
-                                           ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
-                               }
+                               if (likely (!iparser_p->isMultiBody ()))
+                               {
+                                 try {
+                                   iparser_p->finished ();
+                                 } catch (...) {
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                                 }
 
-                               BEGIN (INITIAL);
+                                 BEGIN (INITIAL);
+                               } // end IF
+                               else
+                                 BEGIN (body);
                                yylval->ival = iparser_p->contentLengthOrChunkSize ();
 //                               return yy::HTTP_Parser::token::BODY;
                                return yytokentype::BODY;

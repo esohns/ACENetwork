@@ -99,7 +99,7 @@ typedef void* yyscan_t;
 #define YYDEBUG 1
 extern int yydebug;
 #define YYERROR_VERBOSE 1
-#define YYLTYPE_IS_DECLARED 1
+//#define YYLTYPE_IS_DECLARED 1
 
 #undef YYTOKENTYPE
 }
@@ -192,7 +192,7 @@ using namespace std;
 %token <ival> END 0           "end"
 
 %type  <ival> message head body
-%type  <ival> chunked_body chunks
+%type  <ival> chunked_body chunks bodies
 %type  <ival> head_rest1 head_rest2 headers
 %type  <ival> request_line_rest1 request_line_rest2
 %type  <ival> status_line_rest1 status_line_rest2
@@ -277,13 +277,13 @@ head:               "method" head_rest1              { $$ = static_cast<int> ($1
 
                                                        record_r.version =
                                                            HTTP_Tools::VersionToType (match_results[1].str ());
-                                                     }
-head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; }
+                                                     };
+head_rest1:         request_line_rest1 headers       { $$ = $1 + $2; };
 request_line_rest1: "uri" request_line_rest2         { $$ = static_cast<int> ($1->size ()) + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.URI = *$1;
-                                                     }
+                                                     };
 request_line_rest2: "version"                        { $$ = static_cast<int> ($1->size ()) + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
@@ -312,8 +312,8 @@ request_line_rest2: "version"                        { $$ = static_cast<int> ($1
 
                                                        record_r.version =
                                                          HTTP_Tools::VersionToType (match_results[1].str ());
-                                                     }
-head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; }
+                                                     };
+head_rest2:         status_line_rest1 headers        { $$ = $1 + $2; };
 status_line_rest1:  "status" status_line_rest2       { $$ = static_cast<int> ($1->size ()) + $2 + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
@@ -323,12 +323,12 @@ status_line_rest1:  "status" status_line_rest2       { $$ = static_cast<int> ($1
                                                        converter >> status;
                                                        record_r.status =
                                                            static_cast<HTTP_Status_t> (status);
-                                                     }
+                                                     };
 status_line_rest2:  "reason"                         { $$ = static_cast<int> ($1->size ()) + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.reason = *$1;
-                                                     }
+                                                     };
 headers:            headers "header"                 { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
                                                                  act on any set transfer encoding. */
@@ -370,19 +370,10 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                                                          }
                                                        } // end IF
                                                      }
-                    |                                { $$ = 0; }
-/*                    | %empty                         { $$ = 0; }; */
-body:               "body"                           { $$ = $1;
+                    | /* empty */                    { $$ = 0; };
+body:               "body"                           {
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-//                                                       HTTP_HeadersIterator_t iterator =
-//                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-//                                                       ACE_ASSERT (iterator != record_r.headers.end ());
-//                                                       std::istringstream converter;
-//                                                       converter.str ((*iterator).second);
-//                                                       unsigned int content_length = 0;
-//                                                       converter >> content_length;
-//                                                       ACE_ASSERT ($1 == static_cast<int> (content_length));
                                                        struct HTTP_Record* record_p =
                                                          &record_r;
                                                        try {
@@ -391,8 +382,11 @@ body:               "body"                           { $$ = $1;
                                                          ACE_DEBUG ((LM_ERROR,
                                                                      ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
                                                        }
-                                                       YYACCEPT;
+                                                       
+                                                       if (likely (!iparser_p->isMultiBody ()))
+                                                         YYACCEPT;
                                                      }
+                      bodies                         { $$ = $1; };
                     | "chunk"                        {
                                                        try {
                                                          iparser_p->chunk ($1);
@@ -402,28 +396,7 @@ body:               "body"                           { $$ = $1;
                                                        }
                                                      }
                       chunked_body                   { $$ = $1; }
-                    |                                { $$ = 0;
-                                                       struct HTTP_Record& record_r =
-                                                         iparser_p->current ();
-                                                       HTTP_HeadersIterator_t iterator =
-                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-                                                       ACE_ASSERT (iterator != record_r.headers.end ());
-                                                       std::istringstream converter;
-                                                       converter.str ((*iterator).second);
-                                                       unsigned int content_length = 0;
-                                                       converter >> content_length;
-                                                       ACE_ASSERT (!content_length);
-                                                       struct HTTP_Record* record_p =
-                                                         &record_r;
-                                                       try {
-                                                         iparser_p->record (record_p);
-                                                       } catch (...) {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
-                                                       }
-                                                       YYACCEPT;
-                                                     }
-/*                    | %empty                         { $$ = 0; }; */
+                    | /* empty */                    { $$ = 0; };
 chunked_body:       chunks headers "delimiter"       { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
@@ -436,7 +409,7 @@ chunked_body:       chunks headers "delimiter"       { $$ = $1 + $2 + $3; // *TO
                                                                    ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
                                                        }
                                                        YYACCEPT;
-                                                     }
+                                                     };
 chunks:             "chunk"                          {
                                                        try {
                                                          iparser_p->chunk ($1);
@@ -445,9 +418,22 @@ chunks:             "chunk"                          {
                                                                      ACE_TEXT ("caught exception in HTTP_IParser::chunk(), continuing\n")));
                                                        }
                                                      }
-                    chunks                           { $$ = $1; }
-                    |                                { $$ = 0; }
-/*                    | %empty                         { $$ = 0; } */
+                      chunks                         { $$ = $1; }
+                    | /* empty */                    { $$ = 0; };
+bodies:             "body"                           {
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       struct HTTP_Record* record_p =
+                                                         &record_r;
+                                                       try {
+                                                         iparser_p->record (record_p);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                       }
+                                                     }
+                      bodies                         { $$ = $1; }
+                    | /* empty */                    { $$ = 0; };
 %%
 
 /*

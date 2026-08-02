@@ -34,7 +34,7 @@
 #include "test_i_message.h"
 #include "test_i_session_message.h"
 
-class Test_I_Module_HTTPGet
+class Test_I_HTTPGet
  : public Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
                                               Common_TimePolicy_t,
                                               struct Test_I_IceCastClient_ModuleHandlerConfiguration,
@@ -50,17 +50,19 @@ class Test_I_Module_HTTPGet
                                               Test_I_SessionMessage> inherited;
 
  public:
-  Test_I_Module_HTTPGet (ISTREAM_T*); // stream handle
-  inline virtual ~Test_I_Module_HTTPGet () {}
+  Test_I_HTTPGet (ISTREAM_T*); // stream handle
+  inline virtual ~Test_I_HTTPGet () {}
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_I_Message*&, // data message handle
                                   bool&);           // return value: pass message downstream ?
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_I_Module_HTTPGet ())
-  ACE_UNIMPLEMENTED_FUNC (Test_I_Module_HTTPGet (const Test_I_Module_HTTPGet&))
-  ACE_UNIMPLEMENTED_FUNC (Test_I_Module_HTTPGet& operator= (const Test_I_Module_HTTPGet&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet (const Test_I_HTTPGet&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet& operator= (const Test_I_HTTPGet&))
+
+  bool handleBody_;
 };
 
 // declare module
@@ -69,6 +71,47 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,          
                               struct Test_I_IceCastClient_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_net_http_get_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
-                              Test_I_Module_HTTPGet);                                 // writer type
+                              Test_I_HTTPGet);                                        // writer type
+
+//////////////////////////////////////////
+
+class Test_I_HTTPGet_2
+ : public Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
+                                              Common_TimePolicy_t,
+                                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                              Stream_ControlMessage_t,
+                                              Test_I_Message,
+                                              Test_I_SessionMessage_2>
+{
+  typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
+                                              Common_TimePolicy_t,
+                                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                              Stream_ControlMessage_t,
+                                              Test_I_Message,
+                                              Test_I_SessionMessage_2> inherited;
+
+ public:
+  Test_I_HTTPGet_2 (ISTREAM_T*); // stream handle
+  inline virtual ~Test_I_HTTPGet_2 () {}
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (Test_I_Message*&, // data message handle
+                                  bool&);           // return value: pass message downstream ?
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_2 ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_2 (const Test_I_HTTPGet_2&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_2& operator= (const Test_I_HTTPGet_2&))
+
+  bool handleBody_;
+};
+
+// declare module
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_net_http_get_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_HTTPGet_2);                                        // writer type
 
 #endif

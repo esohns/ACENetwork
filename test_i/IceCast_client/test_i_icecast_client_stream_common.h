@@ -74,7 +74,7 @@ extern "C"
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include "stream_module_htmlparser.h"
+// #include "stream_module_htmlparser.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -185,6 +185,10 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 {
   Test_I_IceCastClient_ModuleHandlerConfiguration_2 ()
    : HTTP_ModuleHandlerConfiguration ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+   , ALSAConfiguration (NULL)
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
    , codecId (AV_CODEC_ID_MP3)
 #endif // FFMPEG_SUPPORT
@@ -204,22 +208,24 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 #endif // ACE_WIN32 || ACE_WIN64
   }
 
-#if defined (FFMPEG_SUPPORT)
-  enum AVCodecID                  codecId;
-#endif // FFMPEG_SUPPORT
-  Net_ConnectionConfigurations_t* connectionConfigurations;
-  struct Stream_Device_Identifier deviceIdentifier; // render
-  Test_I_ISessionNotify_2_t*      subscriber;
-  std::string                     targetFileName; // dump module
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType             outputFormat;
 #else
+  struct Stream_MediaFramework_ALSA_Configuration* ALSAConfiguration;
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_ALSA_MediaType outputFormat;
+  enum AVCodecID                                    codecId;
 #endif // FFMPEG_SUPPORT
+  Net_ConnectionConfigurations_t*                   connectionConfigurations;
+  struct Stream_Device_Identifier                   deviceIdentifier; // render
+  Test_I_ISessionNotify_2_t*                        subscriber;
+  std::string                                       targetFileName; // dump module
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _AMMediaType                               outputFormat;
+#else
+  struct Stream_MediaFramework_ALSA_MediaType       outputFormat;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (GTK_USE)
-  GdkWindow*                      window;
+  GdkWindow*                                        window;
 #endif // GTK_USE
 };
 

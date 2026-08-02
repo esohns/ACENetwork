@@ -640,7 +640,7 @@ do_work (bool debugParser_in,
 //  modulehandler_configuration.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration.subscriber = &message_handler;
-  modulehandler_configuration.targetFileName = fileName_in;
+  //modulehandler_configuration.targetFileName = fileName_in;
   modulehandler_configuration.URL = URL_in;
   modulehandler_configuration.waitForConnect = false;
   // ******************** (sub-)stream configuration data *********************
@@ -664,7 +664,7 @@ do_work (bool debugParser_in,
     &allocator_configuration;
   modulehandler_configuration_2.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_2.codecId = AV_CODEC_ID_VORBIS;
+  modulehandler_configuration_2.codecId = AV_CODEC_ID_MP3;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_2.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
@@ -682,7 +682,6 @@ do_work (bool debugParser_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct tWAVEFORMATEX waveformatex_s;
   ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
-  Stream_MediaFramework_Tools::initialize (STREAM_MEDIAFRAMEWORK_DIRECTSHOW);
 
   // initialize return value(s)
   Stream_MediaFramework_DirectShow_Tools::free (modulehandler_configuration_2.outputFormat);
@@ -703,6 +702,13 @@ do_work (bool debugParser_in,
                 ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), returning\n")));
     return;
   } // end IF
+#else
+  struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
+  modulehandler_configuration_2.ALSAConfiguration = &ALSA_configuration;
+
+  modulehandler_configuration_2.outputFormat.channels = 2;
+  modulehandler_configuration_2.outputFormat.format = SND_PCM_FORMAT_FLOAT;
+  modulehandler_configuration_2.outputFormat.rate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
 
   struct Test_I_IceCastClient_StreamConfiguration_2 stream_configuration_2;
@@ -1022,6 +1028,7 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Stream_MediaFramework_Tools::initialize (STREAM_MEDIAFRAMEWORK_DIRECTSHOW);
   Stream_MediaFramework_DirectSound_Tools::initialize ();
 #endif // ACE_WIN32 || ACE_WIN64
 

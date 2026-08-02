@@ -48,6 +48,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
  : inherited (stream_in)
  , inherited2 (this)
  , headFragment_ (NULL)
+ , multiBody_ (false)
  , bodyOrChunkBytesToSkip_ (0)
  , chunks_ ()
  , contentLengthOrChunkSize_ (0)
@@ -536,16 +537,19 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   {
     case STREAM_MESSAGE_DATA:
     case STREAM_MESSAGE_OBJECT:
-    {
+    { // sanity check(s)
+      ACE_ASSERT (inherited::configuration_);
+      ACE_ASSERT (inherited::configuration_->parserConfiguration);
+      if (likely (!inherited::configuration_->parserConfiguration->notifyProgress))
+        break;
+
       typename SessionMessageType::DATA_T* session_data_container_p =
         inherited::sessionData_;
-
       // *IMPORTANT NOTE*: send 'step data' session message so downstream modules know
-      //                   that some data has arrived
+      //                   that some data has arrived ?
       if (likely (session_data_container_p))
       {
         session_data_container_p->increase ();
-
         typename SessionMessageType::DATA_T::DATA_T& session_data_r =
           const_cast<typename SessionMessageType::DATA_T::DATA_T&> (session_data_container_p->getR ());
         session_data_r.bytes += messageBlock_in->total_length ();
@@ -964,9 +968,10 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
  : inherited (stream_in) // stream handle
  , inherited2 (this)
  , headFragment_ (NULL)
+ , multiBody_ (false)
+ , bodyOrChunkBytesToSkip_ (0)
  , chunks_ ()
  , contentLengthOrChunkSize_ (0)
- , bodyOrChunkBytesToSkip_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
 

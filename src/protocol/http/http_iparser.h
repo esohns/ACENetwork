@@ -64,6 +64,7 @@ class HTTP_IParser
   virtual ACE_UINT32 currentChunkSize () = 0; // returns: current chunk size
   virtual ACE_UINT64 contentLengthOrChunkSize () = 0;
   virtual ACE_UINT64 bodyOrChunkBytesToSkip () = 0;
+  virtual bool isMultiBody () = 0;
 
   ////////////////////////////////////////
   // callbacks
@@ -71,6 +72,7 @@ class HTTP_IParser
   virtual void chunk (ACE_UINT32) = 0; // size
   virtual void contentLengthOrChunkSize (ACE_UINT64) = 0; // size
   virtual void bodyOrChunkBytesSkipped (ACE_UINT64) = 0; // content bytes skipped
+  virtual void multiBody () = 0; // content is "chunked" (i.e. multiple "bodies")
 };
 
 #endif

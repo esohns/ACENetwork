@@ -90,6 +90,7 @@ class HTTP_Module_Parser_T
 
  protected:
   DataMessageType*                    headFragment_;
+  bool                                multiBody_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T ())
@@ -116,11 +117,13 @@ class HTTP_Module_Parser_T
   inline virtual ACE_UINT32 currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); } // returns: current chunk size
   inline virtual ACE_UINT64 contentLengthOrChunkSize () { return contentLengthOrChunkSize_; }
   inline virtual ACE_UINT64 bodyOrChunkBytesToSkip () { return bodyOrChunkBytesToSkip_; }
+  inline virtual bool isMultiBody () { return multiBody_; }
 
   inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void chunk (ACE_UINT32 size_in) { chunks_.push_back (std::make_pair (inherited2::offset (), size_in)); }
   inline virtual void contentLengthOrChunkSize (ACE_UINT64 size_in) { contentLengthOrChunkSize_ = size_in; bodyOrChunkBytesToSkip_ = contentLengthOrChunkSize_; }
   inline virtual void bodyOrChunkBytesSkipped (ACE_UINT64 bytesSkipped_in) { bodyOrChunkBytesToSkip_ -= bytesSkipped_in; }
+  inline virtual void multiBody () { multiBody_ = true; }
 
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
@@ -225,6 +228,7 @@ class HTTP_Module_ParserH_T
 
  protected:
   DataMessageType* headFragment_;
+  bool             multiBody_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
@@ -241,19 +245,21 @@ class HTTP_Module_ParserH_T
   inline virtual unsigned int currentChunkSize () { return (chunks_.empty () ? 0 : chunks_.back ().second); }; // current chunk size
   inline virtual ACE_UINT64 contentLengthOrChunkSize () { return contentLengthOrChunkSize_; }
   inline virtual ACE_UINT64 bodyOrChunkBytesToSkip () { return bodyOrChunkBytesToSkip_; }
+  inline virtual bool isMultiBody () { return multiBody_; }
 
   inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual void chunk (ACE_UINT32 size_in) { chunks_.push_back (std::make_pair (inherited2::offset (), size_in)); }
   inline virtual void contentLengthOrChunkSize (ACE_UINT64 size_in) { contentLengthOrChunkSize_ = size_in; bodyOrChunkBytesToSkip_ = contentLengthOrChunkSize_; }
   inline virtual void bodyOrChunkBytesSkipped (ACE_UINT64 bytesSkipped_in) { bodyOrChunkBytesToSkip_ -= bytesSkipped_in; }
+  inline virtual void multiBody () { multiBody_ = true; }
 
   // convenience types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
+  ACE_UINT64       bodyOrChunkBytesToSkip_;
   HTTP_Chunks_t    chunks_;
   ACE_UINT64       contentLengthOrChunkSize_;
-  ACE_UINT64       bodyOrChunkBytesToSkip_;
 };
 
 // include template definition

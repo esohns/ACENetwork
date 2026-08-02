@@ -51,8 +51,6 @@ extern int yydebug;
 
 #include "common_iparser.h"
 
-#include "http_iparser.h"
-
 /* enum yytokentype
 {
   END = 0,
@@ -91,7 +89,7 @@ typedef void* yyscan_t;
 #define YYDEBUG 1
 extern int yydebug;
 #define YYERROR_VERBOSE 1
-#define YYLTYPE_IS_DECLARED 1
+//#define YYLTYPE_IS_DECLARED 1
 
 #undef YYTOKENTYPE
 

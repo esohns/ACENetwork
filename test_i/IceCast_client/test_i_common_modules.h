@@ -50,15 +50,15 @@
 
 #include "stream_stat_statistic_report.h"
 
-#include "stream_module_source_http_get.h"
+//#include "stream_module_source_http_get.h"
 
 #include "stream_vis_gtk_pixbuf.h"
 
 #include "http_common.h"
-#include "http_module_parser.h"
-#include "http_module_streamer.h"
+// #include "http_module_parser.h"
+// #include "http_module_streamer.h"
 #include "http_network.h"
-#include "http_parser_driver.h"
+// #include "http_parser_driver.h"
 
 #include "test_i_common.h"
 
@@ -69,30 +69,6 @@ class Test_I_SessionMessage;
 class Test_I_Message;
 
 // declare module(s)
-typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-                               struct Test_I_IceCastClient_ModuleHandlerConfiguration,
-                               Stream_ControlMessage_t,
-                               Test_I_Message,
-                               Test_I_SessionMessage> Test_I_HTTPStreamer;
-typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
-                             Common_TimePolicy_t,
-                             struct Test_I_IceCastClient_ModuleHandlerConfiguration,
-                             Stream_ControlMessage_t,
-                             Test_I_Message,
-                             Test_I_SessionMessage,
-                             HTTP_ParserDriver_T<ACE_MT_SYNCH,
-                                                 Common_TimePolicy_t,
-                                                 Test_I_SessionMessage> > Test_I_HTTPParser;
-DATASTREAM_MODULE_DUPLEX (struct Test_I_IceCastClient_SessionData,                // session data type
-                         enum Stream_SessionMessageType,                         // session event type
-                         struct Test_I_IceCastClient_ModuleHandlerConfiguration, // module handler configuration type
-                         libacenetwork_protocol_default_http_parser_module_name_string,
-                         Stream_INotify_t,                                       // stream notification interface type
-                         Test_I_HTTPStreamer,                                    // reader type
-                         Test_I_HTTPParser,                                      // writer type
-                         Test_I_HTTPMarshal);                                    // name
-
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct Test_I_IceCastClient_ModuleHandlerConfiguration,
@@ -150,30 +126,6 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,          
 
 //////////////////////////////////////////
 
-typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
-                               Stream_ControlMessage_t,
-                               Test_I_Message,
-                               Test_I_SessionMessage_2> Test_I_HTTPStreamer_2;
-typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
-                             Common_TimePolicy_t,
-                             struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
-                             Stream_ControlMessage_t,
-                             Test_I_Message,
-                             Test_I_SessionMessage_2,
-                             HTTP_ParserDriver_T<ACE_MT_SYNCH,
-                                                 Common_TimePolicy_t,
-                                                 Test_I_SessionMessage_2> > Test_I_HTTPParser_2;
-DATASTREAM_MODULE_DUPLEX (struct Test_I_IceCastClient_SessionData_2,                // session data type
-                         enum Stream_SessionMessageType,                         // session event type
-                         struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
-                         libacenetwork_protocol_default_http_parser_module_name_string,
-                         Stream_INotify_t,                                       // stream notification interface type
-                         Test_I_HTTPStreamer_2,                                    // reader type
-                         Test_I_HTTPParser_2,                                      // writer type
-                         Test_I_HTTPMarshal_2);                                    // name
-
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
@@ -203,18 +155,18 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_IceCastClient_SessionData_2,            
                           Test_I_StatisticReport_WriterTask_2_t,                    // writer type
                           Test_I_StatisticReport_2);                                // name
 
-typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
-                                            Stream_ControlMessage_t,
-                                            Test_I_Message,
-                                            Test_I_SessionMessage_2> Test_I_HTTPGet_2;
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
-                              enum Stream_SessionMessageType,                           // session event type
-                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
-                              libacestream_default_net_http_get_module_name_string,
-                              Stream_INotify_t,                                         // stream notification interface type
-                              Test_I_HTTPGet_2);                                        // writer type
+//typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
+//                                            Common_TimePolicy_t,
+//                                            struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+//                                            Stream_ControlMessage_t,
+//                                            Test_I_Message,
+//                                            Test_I_SessionMessage_2> Test_I_HTTPGet_2;
+//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+//                              enum Stream_SessionMessageType,                           // session event type
+//                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+//                              libacestream_default_net_http_get_module_name_string,
+//                              Stream_INotify_t,                                         // stream notification interface type
+//                              Test_I_HTTPGet_2);                                        // writer type
 
 #if defined (MPG123_SUPPORT)
 typedef Stream_Decoder_MP3Decoder_T<ACE_MT_SYNCH,
@@ -227,7 +179,7 @@ typedef Stream_Decoder_MP3Decoder_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
                               enum Stream_SessionMessageType,                           // session event type
                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
-                              libacestream_default_net_http_get_module_name_string,
+                              libacestream_default_dec_mp3_decoder_module_name_string,
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_MP3_Decoder);                                      // writer type
 #endif // MPG123_SUPPORT
@@ -301,13 +253,30 @@ typedef Stream_Decoder_WAVEncoder_T<ACE_MT_SYNCH,
                                     struct _AMMediaType,
                                     struct Stream_UserData> Test_I_WAV_Encoder;
 #else
+#if defined (FFMPEG_SUPPORT)
+typedef Stream_Decoder_LibAVFilter_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
+                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                     Stream_ControlMessage_t,
+                                     Test_I_Message,
+                                     Test_I_SessionMessage_2,
+                                     Test_I_IceCastClient_SessionData_2_t,
+                                     struct Stream_MediaFramework_ALSA_MediaType> Test_I_LibAVResampler;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_dec_libav_filter_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_LibAVResampler);                                   // writer type
+#endif // FFMPEG_SUPPORT
+
 typedef Stream_Dev_Target_ALSA_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
                                  Stream_ControlMessage_t,
                                  Test_I_Message,
                                  Test_I_SessionMessage_2,
-                                 Test_I_IceCastClient_SessionData_2_t> Test_I_ALSA;
+                                 struct Test_I_IceCastClient_SessionData_2> Test_I_ALSA;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
                               enum Stream_SessionMessageType,                           // session event type
                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
@@ -342,7 +311,7 @@ typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2, // session data type
                               enum Stream_SessionMessageType,            // session event type
                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
-                              libacestream_default_net_http_get_module_name_string,
+                              libacestream_default_file_sink_module_name_string,
                               Stream_INotify_t,                          // stream notification interface type
                               Test_I_FileSink);                          // writer type
 

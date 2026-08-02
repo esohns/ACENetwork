@@ -433,9 +433,9 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
   ACE_ASSERT (entry_p);
-  Test_I_IceCastClient_StreamConfiguration_t::ITERATOR_T iterator_3 =
-    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+  Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
   gchar* text_p =
     Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).second.second->URL);
   gtk_entry_set_text (entry_p,
@@ -1051,7 +1051,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // sanity check(s)
   struct Test_I_IceCastClient_UI_CBData* data_p =
-      static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
@@ -1200,7 +1200,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p)))
     {
       (*iterator_3).second.second->targetFileName.clear ();
-      goto continue_;
+      goto continue_2;
     } // end IF
     // retrieve output filename
     file_chooser_button_p =
@@ -1208,11 +1208,11 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
     ACE_ASSERT (file_chooser_button_p);
     directory_p =
-      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_button_p));
+      gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
     if (!directory_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to gtk_file_chooser_get_filename(), aborting\n")));
+                  ACE_TEXT ("failed to gtk_file_chooser_get_current_folder(), aborting\n")));
       goto error;
     } // end IF
     directory_string =
@@ -1224,6 +1224,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     (*iterator_3).second.second->targetFileName +=
       ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE);
 
+continue_2:
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     {
@@ -1235,7 +1236,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                             user_data_s,
                                             static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
                                             true,
-                                            true);
+                                            true,
+                                            0);
       else
 #endif // SSL_SUPPORT
         data_p->handle =
@@ -1244,7 +1246,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                               user_data_s,
                                               static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
                                               true,
-                                              true);
+                                              true,
+                                              0);
     } // end IF
     else
     {
@@ -1258,7 +1261,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                             user_data_s,
                                             static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
                                             true,
-                                            true);
+                                            true,
+                                            0);
     } // end ELSE
     if (data_p->handle == ACE_INVALID_HANDLE)
     {
@@ -1403,8 +1407,20 @@ continue_:
     iconnection_p->abort ();
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
+
+  iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    iconnection_manager_2->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+    iconnection_manager_2->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  if (iconnection_p)
+  {
+    iconnection_p->abort ();
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+
   data_p->handle = ACE_INVALID_HANDLE;
-  iconnection_manager_2->abort (false);
 
   return;
 

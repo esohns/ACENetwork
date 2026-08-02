@@ -111,9 +111,12 @@ enum yysymbol_kind_t
   YYSYMBOL_headers = 23,                   /* headers  */
   YYSYMBOL_body = 24,                      /* body  */
   YYSYMBOL_25_2 = 25,                      /* $@2  */
-  YYSYMBOL_chunked_body = 26,              /* chunked_body  */
-  YYSYMBOL_chunks = 27,                    /* chunks  */
-  YYSYMBOL_28_3 = 28                       /* $@3  */
+  YYSYMBOL_26_3 = 26,                      /* $@3  */
+  YYSYMBOL_chunked_body = 27,              /* chunked_body  */
+  YYSYMBOL_chunks = 28,                    /* chunks  */
+  YYSYMBOL_29_4 = 29,                      /* $@4  */
+  YYSYMBOL_bodies = 30,                    /* bodies  */
+  YYSYMBOL_31_5 = 31                       /* $@5  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -420,16 +423,16 @@ typedef int yytype_uint16;
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  11
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   19
+#define YYLAST   21
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  13
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  16
+#define YYNNTS  19
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  21
+#define YYNRULES  25
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  32
+#define YYNSTATES  37
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
 #define YYMAXRHS 4
 /* YYMAXLEFT -- Maximum number of symbols to the left of a handle
@@ -483,23 +486,23 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   224,   224,   224,   240,   246,   274,   275,   280,   309,
-     310,   320,   325,   366,   368,   389,   389,   398,   420,   433,
-     433,   442
+       0,   224,   224,   224,   247,   253,   281,   282,   287,   316,
+     317,   327,   332,   373,   374,   374,   390,   390,   399,   400,
+     413,   413,   422,   423,   423,   436
 };
 #endif
 
-#define YYPACT_NINF (-17)
+#define YYPACT_NINF (-21)
 #define YYTABLE_NINF (-1)
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -2,     4,     1,     2,     3,     6,   -17,   -17,     5,   -17,
-     -17,   -17,   -17,   -17,   -17,     7,   -17,   -17,     7,    -6,
-     -17,   -17,   -17,   -17,     8,   -17,   -17,   -17,     8,     0,
-     -17,   -17
+      -2,     4,     1,     2,     3,     6,   -21,   -21,     5,   -21,
+     -21,   -21,   -21,   -21,   -21,     7,   -21,   -21,     7,    -6,
+     -21,   -21,   -21,   -21,     8,    10,   -21,   -21,   -21,   -21,
+     -21,     8,    10,     0,   -21,   -21,   -21
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -508,23 +511,23 @@ static const yytype_int8 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     0,     4,    13,     0,     5,
-      13,     1,     2,     8,     7,     6,    11,    10,     9,    17,
-      12,    14,    15,     3,    21,    19,    16,    13,    21,     0,
-      20,    18
+      13,     1,     2,     8,     7,     6,    11,    10,     9,    18,
+      12,    14,    16,     3,    25,    22,    23,    15,    20,    17,
+      13,    25,    22,     0,    24,    21,    19
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17,   -17,
-     -10,   -17,   -17,   -17,   -16,   -17
+     -21,   -21,   -21,   -21,   -21,   -21,   -21,   -21,   -21,   -21,
+     -10,   -21,   -21,   -21,   -21,   -20,   -21,   -16,   -21
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
        0,     3,    19,     4,     6,     7,    14,     9,    10,    17,
-      15,    23,    24,    26,    27,    28
+      15,    23,    24,    25,    29,    30,    32,    27,    31
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -532,14 +535,16 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      18,     1,    11,     2,    21,    22,    20,    31,     5,     8,
-      12,    13,    30,    20,    16,     0,     0,    29,     0,    25
+      18,     1,    11,     2,    21,    22,    20,    36,     5,     8,
+      12,    13,    35,    20,    16,    34,     0,     0,    26,     0,
+      33,    28
 };
 
 static const yytype_int8 yycheck[] =
 {
       10,     3,     0,     5,    10,    11,     6,     7,     4,     8,
-       7,     5,    28,     6,     9,    -1,    -1,    27,    -1,    11
+       7,     5,    32,     6,     9,    31,    -1,    -1,    10,    -1,
+      30,    11
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -548,24 +553,24 @@ static const yytype_int8 yystos[] =
 {
        0,     3,     5,    14,    16,     4,    17,    18,     8,    20,
       21,     0,     7,     5,    19,    23,     9,    22,    23,    15,
-       6,    10,    11,    24,    25,    11,    26,    27,    28,    23,
-      27,     7
+       6,    10,    11,    24,    25,    26,    10,    30,    11,    27,
+      28,    31,    29,    23,    30,    28,     7
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    13,    15,    14,    16,    16,    17,    18,    19,    20,
-      21,    22,    23,    23,    24,    25,    24,    24,    26,    28,
-      27,    27
+      21,    22,    23,    23,    25,    24,    26,    24,    24,    27,
+      29,    28,    28,    31,    30,    30
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     4,     2,     2,     2,     2,     1,     2,
-       2,     1,     2,     0,     1,     0,     3,     0,     3,     0,
-       3,     0
+       2,     1,     2,     0,     0,     3,     0,     3,     0,     3,
+       0,     3,     0,     0,     3,     0
 };
 
 
@@ -574,7 +579,7 @@ static const yytype_int8 yydprec[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0
+       0,     0,     0,     0,     0,     0
 };
 
 /* YYMERGER[RULE-NUM] -- Index of merging function for rule #RULE-NUM.  */
@@ -582,7 +587,7 @@ static const yytype_int8 yymerger[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0
+       0,     0,     0,     0,     0,     0
 };
 
 /* YYIMMEDIATE[RULE-NUM] -- True iff rule #RULE-NUM is not to be deferred, as
@@ -591,7 +596,7 @@ static const yybool yyimmediate[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0
+       0,     0,     0,     0,     0,     0
 };
 
 /* YYCONFLP[YYPACT[STATE-NUM]] -- Pointer into YYCONFL of start of
@@ -601,7 +606,8 @@ static const yybool yyimmediate[] =
 static const yytype_int8 yyconflp[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by
@@ -836,7 +842,7 @@ static const char *const yytname[] =
   "\"body\"", "\"chunk\"", "\"end_of_fragment\"", "$accept", "message",
   "$@1", "head", "head_rest1", "request_line_rest1", "request_line_rest2",
   "head_rest2", "status_line_rest1", "status_line_rest2", "headers",
-  "body", "$@2", "chunked_body", "chunks", "$@3", YY_NULLPTR
+  "body", "$@2", "$@3", "chunked_body", "chunks", "$@4", "bodies", "$@5", YY_NULLPTR
 };
 
 static const char *
@@ -1046,6 +1052,10 @@ yy_symbol_value_print (FILE *yyo,
         break;
 
     case YYSYMBOL_chunks: /* chunks  */
+                          { ACE_OS::fprintf (yyoutput, ACE_TEXT ("%d"), ((*yyvaluep).ival)); }
+        break;
+
+    case YYSYMBOL_bodies: /* bodies  */
                           { ACE_OS::fprintf (yyoutput, ACE_TEXT ("%d"), ((*yyvaluep).ival)); }
         break;
 
@@ -1310,11 +1320,11 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
   case 2: /* $@1: %empty  */
                                                      { if (unlikely (iparser_p->headerOnly ()))
                                                        {
-                                                          try {
+                                                         try {
                                                            iparser_p->finished ();
                                                          } catch (...) {
                                                            ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
+                                                                       ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
                                                          }
 
                                                          struct HTTP_Record& record_r =
@@ -1493,18 +1503,10 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      { ((*yyvalp).ival) = 0; }
     break;
 
-  case 14: /* body: "body"  */
-                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
+  case 14: /* $@2: %empty  */
+                                                     {
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-//                                                       HTTP_HeadersIterator_t iterator =
-//                                                         record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-//                                                       ACE_ASSERT (iterator != record_r.headers.end ());
-//                                                       std::istringstream converter;
-//                                                       converter.str ((*iterator).second);
-//                                                       unsigned int content_length = 0;
-//                                                       converter >> content_length;
-//                                                       ACE_ASSERT ($1 == static_cast<int> (content_length));
                                                        struct HTTP_Record* record_p =
                                                          &record_r;
                                                        try {
@@ -1513,11 +1515,17 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                          ACE_DEBUG ((LM_ERROR,
                                                                      ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
                                                        }
-                                                       YYACCEPT;
+                                                       
+                                                       if (likely (!iparser_p->isMultiBody ()))
+                                                         YYACCEPT;
                                                      }
     break;
 
-  case 15: /* $@2: %empty  */
+  case 15: /* body: "body" $@2 bodies  */
+                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yyval.ival); }
+    break;
+
+  case 16: /* $@3: %empty  */
                                                      {
                                                        try {
                                                          iparser_p->chunk ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival));
@@ -1528,35 +1536,15 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      }
     break;
 
-  case 16: /* body: "chunk" $@2 chunked_body  */
+  case 17: /* body: "chunk" $@3 chunked_body  */
                                                      { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yyval.ival); }
     break;
 
-  case 17: /* body: %empty  */
-                                                     { ((*yyvalp).ival) = 0;
-                                                       struct HTTP_Record& record_r =
-                                                         iparser_p->current ();
-                                                       //HTTP_HeadersIterator_t iterator =
-                                                       //  record_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-                                                       //ACE_ASSERT (iterator != record_r.headers.end ());
-                                                       //std::istringstream converter;
-                                                       //converter.str ((*iterator).second);
-                                                       //unsigned int content_length = 0;
-                                                       //converter >> content_length;
-                                                       //ACE_ASSERT (!content_length);
-                                                       struct HTTP_Record* record_p =
-                                                         &record_r;
-                                                       try {
-                                                         iparser_p->record (record_p);
-                                                       } catch (...) {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
-                                                       }
-                                                       YYACCEPT;
-                                                     }
+  case 18: /* body: %empty  */
+                                                     { ((*yyvalp).ival) = 0; }
     break;
 
-  case 18: /* chunked_body: chunks headers "delimiter"  */
+  case 19: /* chunked_body: chunks headers "delimiter"  */
                                                      { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
@@ -1572,7 +1560,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      }
     break;
 
-  case 19: /* $@3: %empty  */
+  case 20: /* $@4: %empty  */
                                                      {
                                                        try {
                                                          iparser_p->chunk ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival));
@@ -1583,11 +1571,34 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                      }
     break;
 
-  case 20: /* chunks: "chunk" $@3 chunks  */
+  case 21: /* chunks: "chunk" $@4 chunks  */
                                                      { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yyval.ival); }
     break;
 
-  case 21: /* chunks: %empty  */
+  case 22: /* chunks: %empty  */
+                                                     { ((*yyvalp).ival) = 0; }
+    break;
+
+  case 23: /* $@5: %empty  */
+                                                     {
+                                                       struct HTTP_Record& record_r =
+                                                         iparser_p->current ();
+                                                       struct HTTP_Record* record_p =
+                                                         &record_r;
+                                                       try {
+                                                         iparser_p->record (record_p);
+                                                       } catch (...) {
+                                                         ACE_DEBUG ((LM_ERROR,
+                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                       }
+                                                     }
+    break;
+
+  case 24: /* bodies: "body" $@5 bodies  */
+                                                     { ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-2)].yystate.yysemantics.yyval.ival); }
+    break;
+
+  case 25: /* bodies: %empty  */
                                                      { ((*yyvalp).ival) = 0; }
     break;
 
@@ -1732,6 +1743,10 @@ yydestruct (const char *yymsg,
         break;
 
     case YYSYMBOL_chunks: /* chunks  */
+                          { ((*yyvaluep).ival) = 0; }
+        break;
+
+    case YYSYMBOL_bodies: /* bodies  */
                           { ((*yyvaluep).ival) = 0; }
         break;
 
@@ -3513,7 +3528,7 @@ yyerror (YYLTYPE* location_in,
 
   try {
     iparser_in->error (*location_in,
-                       message_in);
+                       std::string (message_in));
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in HTTP_IParser::error(), continuing\n")));

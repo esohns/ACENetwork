@@ -101,6 +101,8 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_message.h
      test_i_module_httpget.cpp
      test_i_module_httpget.h
+     test_i_module_httpparser.cpp
+     test_i_module_httpparser.h
      test_i_m3u_module_parser.cpp
      test_i_m3u_module_parser.h
      test_i_session_message.cpp
@@ -144,6 +146,8 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 if (UNIX)
+ target_link_options (${EXECUTABLE} PUBLIC "-rdynamic")
+
  target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (UNIX)
 if (MPG123_SUPPORT)
@@ -176,7 +180,8 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
-target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_File)
+#target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
 if (WIN32)
  target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
 endif (WIN32)

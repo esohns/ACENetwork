@@ -120,7 +120,7 @@ struct Test_I_IceCastClient_SessionData_2
                                  struct _AMMediaType,
 #else
 #if defined (FFMPEG_SUPPORT)
-                                 struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                 struct Stream_MediaFramework_ALSA_MediaType,
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                                  struct Test_I_IceCastClient_StreamState_2,
@@ -133,7 +133,7 @@ struct Test_I_IceCastClient_SessionData_2
                                    struct _AMMediaType,
 #else
 #if defined (FFMPEG_SUPPORT)
-                                   struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                   struct Stream_MediaFramework_ALSA_MediaType,
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                                    struct Test_I_IceCastClient_StreamState_2,
@@ -153,7 +153,7 @@ struct Test_I_IceCastClient_SessionData_2
                                   struct _AMMediaType,
 #else
 #if defined (FFMPEG_SUPPORT)
-                                  struct Stream_MediaFramework_FFMPEG_VideoMediaType,
+                                  struct Stream_MediaFramework_ALSA_MediaType,
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
                                   struct Test_I_IceCastClient_StreamState_2,
