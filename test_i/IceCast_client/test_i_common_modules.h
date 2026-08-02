@@ -54,6 +54,9 @@
 #if defined (GTK_SUPPORT)
 #include "stream_vis_gtk_cairo_spectrum_analyzer.h"
 #endif // GTK_SUPPORT
+#if defined (PROJECTM_SUPPORT)
+#include "stream_vis_projectm.h"
+#endif // PROJECTM_SUPPORT
 
 #include "http_common.h"
 #include "http_network.h"
@@ -347,6 +350,32 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2, // sess
                               libacestream_default_file_sink_module_name_string,
                               Stream_INotify_t,                          // stream notification interface type
                               Test_I_FileSink);                          // writer type
+
+#if defined (PROJECTM_SUPPORT)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+typedef Stream_Module_Vis_ProjectM_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
+                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                     Stream_ControlMessage_t,
+                                     Test_I_Message,
+                                     Test_I_SessionMessage_2,
+                                     struct _AMMediaType> Test_I_Vis_ProjectM;
+#else
+typedef Stream_Module_Vis_ProjectM_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
+                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                     Stream_ControlMessage_t,
+                                     Test_I_Message,
+                                     Test_I_SessionMessage_2,
+                                     struct Stream_MediaFramework_ALSA_MediaType> Test_I_Vis_ProjectM;
+#endif // ACE_WIN32 || ACE_WIN64
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_vis_projectm_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_Vis_ProjectM);                                     // writer type
+#endif // PROJECTM_SUPPORT
 
 typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,

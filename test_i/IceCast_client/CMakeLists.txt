@@ -1,3 +1,10 @@
+include (OpenGL)
+
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/gl/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/gl/scripts")
+include (glut)
+include (glew)
+include (glm)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/math/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/math/scripts")
 include (fftw)
 
@@ -8,6 +15,9 @@ include (ffmpeg)
 include (ImageMagick)
 #set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 #include (PreXMLImplementation)
+
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/vis/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/vis/scripts")
+include (projectm)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -31,6 +41,9 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
+if (GLEW_SUPPORT)
+ include_directories (${GLEW_INCLUDE_DIRS})
+endif (GLEW_SUPPORT)
 if (MPG123_SUPPORT)
  include_directories (${MPG123_INCLUDE_DIRS})
 endif (MPG123_SUPPORT)
@@ -40,6 +53,9 @@ endif (FFMPEG_SUPPORT)
 #if (LIBXML2_SUPPORT)
 # include_directories (${LIBXML2_INCLUDE_DIRS})
 #endif (LIBXML2_SUPPORT)
+if (PROJECTM_SUPPORT)
+ include_directories (${PROJECTM_INCLUDE_DIRS})
+endif (PROJECTM_SUPPORT)
 if (SSL_SUPPORT)
  include_directories (${SSL_INCLUDE_DIRS})
 endif (SSL_SUPPORT)
@@ -154,6 +170,9 @@ if (UNIX)
 
  target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (UNIX)
+if (GLEW_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${GLEW_LIBRARIES})
+endif (GLEW_SUPPORT)
 if (FFTW_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${FFTW_LIBRARIES})
 endif (FFTW_SUPPORT)
@@ -166,6 +185,9 @@ endif (FFMPEG_SUPPORT)
 #if (LIBXML2_SUPPORT)
 # target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
 #endif (LIBXML2_SUPPORT)
+if (PROJECTM_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECTM_LIBRARIES})
+endif (PROJECTM_SUPPORT)
 if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${SSL_LIBRARIES})
  target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_SSL_LIBRARY})
@@ -284,21 +306,29 @@ elseif (WIN32)
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
  file (TO_CMAKE_PATH "${VCPKG_BIN_DIR}" VCPKG_LIB_PATH)
  file (TO_CMAKE_PATH "${VCPKG_RELEASE_BIN_DIR}" VCPKG_LIB_PATH_2)
+ if (GLEW_SUPPORT)
+  file (TO_CMAKE_PATH ${GLEW_LIB_DIR} GLEW_PATH)
+ endif (GLEW_SUPPORT)
  if (FFTW_SUPPORT)
   file (TO_CMAKE_PATH "${FFTW_LIB_DIR}" FFTW_PATH)
  endif (FFTW_SUPPORT)
  file (TO_CMAKE_PATH "${MPG123_LIB_DIR}" MPG123_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
+ if (PROJECTM_SUPPORT)
+  file (TO_CMAKE_PATH "${PROJECTM_LIB_DIRS}" PROJECTM_PATH)
+ endif (PROJECTM_SUPPORT)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${SSL_PATH}
 #                           ${LIBXML2_PATH}
                            ${VCPKG_LIB_PATH}
                            ${VCPKG_LIB_PATH_2}
+                           ${GLEW_PATH}
                            ${FFTW_PATH}
                            ${MPG123_PATH}
                            ${FFMPEG_PATH}
                            ${IMAGEMAGICK_PATH}
+                           ${PROJECTM_PATH}
                            ${GTK_PATH}
                            ${WXWIDGETS_PATH}
                            ${ACE_LIBRARY_PATH})

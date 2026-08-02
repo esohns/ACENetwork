@@ -25,11 +25,35 @@
 
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE          "output.wav"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_URL                  "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
+//#define TEST_I_ICECAST_CLIENT_DEFAULT_FPS                  60
 
 #define TEST_I_ICECAST_CLIENT_DEFAULT_BUFFER_SIZE          NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE
 
 //---------------------------------------
 
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PRESET_DURATION_D             30.0
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PRESET_TRANSITION_DURATION_D  3.0
+// *NOTE*: relative to ${LIB_ROOT}
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_TEXTURES_DIRECTORY            "presets-cream-of-the-crop-textures"
+//#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_TEXTURES_DIRECTORY            "presets-milkdrop-texture-pack"
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PRESETS_DIRECTORY             "presets-cream-of-the-crop"
+//#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PRESETS_DIRECTORY             "presets-milkdrop-original"
+
+// Milkdrop default
+//#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PER_VERTEX_MESH_RESOLUTION_X  48
+//#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PER_VERTEX_MESH_RESOLUTION_Y  32
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PER_VERTEX_MESH_RESOLUTION_X  220
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_PER_VERTEX_MESH_RESOLUTION_Y  125
+
+// Milkdrop default
+//#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_TEXTEL_OFFSET_X               0.5f
+//#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_TEXTEL_OFFSET_Y               0.5f
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_TEXTEL_OFFSET_X               0.0f
+#define TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_TEXTEL_OFFSET_Y               0.0f
+
+//---------------------------------------
+
+#define TEST_I_UI_GTK_BOX_DISPLAY_NAME                    "box_display"
 #define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
 #define TEST_I_UI_GTK_BUTTON_CUT_NAME                     "button_cut"
 #define TEST_I_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
@@ -38,7 +62,8 @@
 #define TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME               "checkbutton_save"
 #define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                   "dialog_about"
 #define TEST_I_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
-#define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea"
+#define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea_analyzer"
+#define TEST_I_UI_GTK_DRAWINGAREA_PROJECTM_NAME           "drawingarea_projectm"
 #define TEST_I_UI_GTK_ENTRY_URL_NAME                      "entry_url"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                    "progressbar"

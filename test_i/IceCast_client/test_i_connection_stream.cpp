@@ -320,22 +320,17 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 
 #if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
-                  Test_U_MicVisualize_DirectShow_LibAVResampler_Module (this,
-                                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_FILTER_DEFAULT_NAME_STRING)),
+                  Test_I_LibAVResampler_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR ("LibAV_Filter_2")),
                   false);
-#elif defined (SOX_SUPPORT)
-  ACE_NEW_RETURN (module_p,
-                  Test_U_MicVisualize_DirectShow_SoXResampler_Module (this,
-                                                                      ACE_TEXT_ALWAYS_CHAR ("SoX_Resampler_2")),
-                  false);
-#endif // FFMPEG_SUPPORT || SOX_SUPPORT
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;
+#endif // FFMPEG_SUPPORT
 
   ACE_NEW_RETURN (module_p,
-                  Test_U_MicVisualize_DirectShow_Vis_ProjectM_Module (this,
-                                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_PROJECTM_DEFAULT_NAME_STRING)),
-                    false);
+                  Test_I_Vis_ProjectM_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_PROJECTM_DEFAULT_NAME_STRING)),
+                  false);
   ACE_ASSERT (module_p);
   layout_in->append (module_p, branch_p, index_i);
   module_p = NULL;

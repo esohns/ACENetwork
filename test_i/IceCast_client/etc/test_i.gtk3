@@ -9,9 +9,9 @@
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
-    <property name="program_name">URL stream load</property>
+    <property name="program_name">IceCast client</property>
     <property name="version">0.1</property>
-    <property name="website">http://www.github.com/esohns/libACENetwork</property>
+    <property name="website">https://www.github.com/esohns/ACENetwork</property>
     <property name="website_label" translatable="yes">github project</property>
     <property name="authors">Erik Sohns</property>
     <child internal-child="vbox">
@@ -388,7 +388,7 @@
                                 <property name="has_frame">False</property>
                                 <property name="invisible_char">●</property>
                                 <property name="activates_default">True</property>
-                                <property name="text" translatable="yes">https://www.youtube.com/watch?v=fvq5uhqGCWM&amp;list=RDGMEMYH9CUrFO7CfLJpaD7UR85wVMfvq5uhqGCWM</property>
+                                <property name="text" translatable="yes">http://streaming.fueralle.org:8000/bermudafunk_high.m3u</property>
                                 <property name="xalign">1</property>
                                 <property name="shadow_type">etched-in</property>
                                 <property name="caps_lock_warning">False</property>
@@ -595,19 +595,51 @@
               </packing>
             </child>
             <child>
-              <object class="GtkDrawingArea" id="drawingarea">
-                <property name="width_request">320</property>
-                <property name="height_request">240</property>
+              <object class="GtkBox" id="box_display">
                 <property name="visible">True</property>
-                <property name="app_paintable">True</property>
                 <property name="can_focus">False</property>
-                <property name="has_tooltip">True</property>
-                <property name="tooltip_text" translatable="yes">analyzer</property>
-                <property name="double_buffered">False</property>
-                <signal name="draw" handler="drawingarea_draw_cb" swapped="no"/>
-                <signal name="configure-event" handler="drawingarea_configure_event_cb" swapped="no"/>
-                <signal name="realize" handler="drawingarea_realize_cb" swapped="no"/>
-                <signal name="query-tooltip" handler="drawingarea_query_tooltip_cb" swapped="no"/>
+                <property name="orientation">vertical</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <object class="GtkDrawingArea" id="drawingarea_analyzer">
+                    <property name="width_request">320</property>
+                    <property name="height_request">240</property>
+                    <property name="visible">True</property>
+                    <property name="app_paintable">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="has_tooltip">True</property>
+                    <property name="tooltip_text" translatable="yes">analyzer</property>
+                    <property name="double_buffered">False</property>
+                    <signal name="draw" handler="drawingarea_draw_cb" swapped="no"/>
+                    <signal name="configure-event" handler="drawingarea_configure_event_cb" swapped="no"/>
+                    <signal name="realize" handler="drawingarea_realize_cb" swapped="no"/>
+                    <signal name="query-tooltip" handler="drawingarea_query_tooltip_cb" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkDrawingArea" id="drawingarea_projectm">
+                    <property name="width_request">320</property>
+                    <property name="height_request">240</property>
+                    <property name="visible">True</property>
+                    <property name="app_paintable">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">projectM</property>
+                    <property name="double_buffered">False</property>
+                    <signal name="draw" handler="drawingarea_projectm_draw_cb" swapped="no"/>
+                    <signal name="configure-event" handler="drawingarea_projectm_configure_event_cb" swapped="no"/>
+                    <signal name="realize" handler="drawingarea_projectm_realize_cb" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>

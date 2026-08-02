@@ -152,6 +152,9 @@ struct Test_I_IceCastClient_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
+#if defined (PROJECTM_SUPPORT)
+   , projectMConfiguration (NULL)
+#endif // PROJECTM_SUPPORT
 #if defined (GTK_SUPPORT)
    , eventSourceId (0)
    , fft (NULL)
@@ -161,17 +164,20 @@ struct Test_I_IceCastClient_UI_CBData
    , URL ()
   {}
 
-  struct Test_I_IceCastClient_Configuration*      configuration;
+  struct Test_I_IceCastClient_Configuration*          configuration;
 
-  ACE_HANDLE                                      handle;
-  struct Test_I_IceCastClient_UI_ProgressData     progressData;
+  ACE_HANDLE                                          handle;
+  struct Test_I_IceCastClient_UI_ProgressData         progressData;
+#if defined (PROJECTM_SUPPORT)
+  struct Stream_Visualization_ProjectM_Configuration* projectMConfiguration;
+#endif // PROJECTM_SUPPORT
 #if defined (GTK_SUPPORT)
-  guint                                           eventSourceId; // display-
-  Common_Math_FFT_t*                              fft;
-  struct acestream_visualization_gtk_cairo_cbdata spectrumAnalyzerCBData;
+  guint                                               eventSourceId; // display-
+  Common_Math_FFT_t*                                  fft;
+  struct acestream_visualization_gtk_cairo_cbdata     spectrumAnalyzerCBData;
 #endif // GTK_SUPPORT
-  Test_I_Subscribers_t                            subscribers;
-  std::string                                     URL;
+  Test_I_Subscribers_t                                subscribers;
+  std::string                                         URL;
 };
 
 //struct Test_I_IceCastClient_ThreadData

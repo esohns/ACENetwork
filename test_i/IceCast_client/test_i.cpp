@@ -109,6 +109,51 @@
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IceCastClientStream");
 
+#if defined (PROJECTM_SUPPORT)
+void
+acestream_projectm_log_cb (const char* message_in,
+                           projectm_log_level logLevel_in,
+                           void* userData_in)
+{
+  // sanity check(s)
+  ACE_ASSERT (message_in);
+
+  enum ACE_Log_Priority log_priority_e = LM_INFO;
+  switch (logLevel_in)
+  {
+    case PROJECTM_LOG_LEVEL_NOTSET:
+      break;
+    case PROJECTM_LOG_LEVEL_TRACE:
+      log_priority_e = LM_TRACE;
+      break;
+    case PROJECTM_LOG_LEVEL_DEBUG:
+      log_priority_e = LM_DEBUG;
+      break;
+    case PROJECTM_LOG_LEVEL_INFO:
+      break;
+    case PROJECTM_LOG_LEVEL_WARN:
+      log_priority_e = LM_WARNING;
+      break;
+    case PROJECTM_LOG_LEVEL_ERROR:
+      log_priority_e = LM_ERROR;
+      break;
+    case PROJECTM_LOG_LEVEL_FATAL:
+      log_priority_e = LM_CRITICAL;
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("projectM: invalid/unknown log level (was: %d), returning\n"),
+                  logLevel_in));
+      return;
+    }
+  } // end SWITCH
+  ACE_DEBUG ((log_priority_e,
+              ACE_TEXT ("projectM: %s\n"),
+              ACE_TEXT (message_in)));
+}
+#endif // PROJECTM_SUPPORT
+
 void
 do_print_usage (const std::string& programName_in)
 {
@@ -727,6 +772,58 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration_2.initialize (module_configuration,
                                                      modulehandler_configuration_2,
                                                      stream_configuration_2);
+
+#if defined (PROJECTM_SUPPORT)
+  struct Stream_Visualization_ProjectM_Configuration projectm_configuration;
+  std::string textures_path_string, presets_path_string;
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_2; // LibAV_Filter_2
+
+#if defined (_DEBUG)
+  projectm_set_log_callback (acestream_projectm_log_cb,
+                              false,
+                              NULL);
+  projectm_set_log_level (PROJECTM_LOG_LEVEL_NOTSET,
+                          false);
+#endif // _DEBUG
+  char* version_string_p = projectm_get_version_string ();
+  ACE_DEBUG ((LM_INFO,
+              ACE_TEXT ("using projectM version: %s\n"),
+              ACE_TEXT (version_string_p)));
+  projectm_free_string (version_string_p); version_string_p = NULL;
+
+  modulehandler_configuration_2.projectMConfiguration =
+    &projectm_configuration;
+
+  modulehandler_configuration_2_2 = modulehandler_configuration_2;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_OS::memset (&modulehandler_configuration_2_2.outputFormat, 0, sizeof (struct _AMMediaType));
+  ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
+  waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+  waveformatex_s.nChannels = 2;
+  waveformatex_s.nSamplesPerSec = 44100;
+  waveformatex_s.wBitsPerSample = 32;
+  waveformatex_s.nBlockAlign =
+    (waveformatex_s.nChannels * (waveformatex_s.wBitsPerSample / 8));
+  waveformatex_s.nAvgBytesPerSec =
+    (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
+  if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
+                                                                 modulehandler_configuration_2_2.outputFormat))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), returning\n")));
+    return;
+  } // end IF
+#else
+  modulehandler_configuration_2_2.outputFormat.format = SND_PCM_FORMAT_FLOAT;
+  modulehandler_configuration_2_2.outputFormat.rate = 44100;
+#endif // ACE_WIN32 || ACE_WIN64
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Filter_2"),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2_2)));
+
+  CBData_in.projectMConfiguration = &projectm_configuration;
+#endif // PROJECTM_SUPPORT
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =

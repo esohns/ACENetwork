@@ -200,12 +200,12 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
    , subscriber (NULL)
    , targetFileName ()
    , outputFormat ()
+#if defined (PROJECTM_SUPPORT)
+   , projectMConfiguration (NULL)
+#endif // PROJECTM_SUPPORT
 #if defined (GTK_SUPPORT)
    , spectrumAnalyzerConfiguration (NULL)
 #endif // GTK_SUPPORT
-//#if defined (GTK_USE)
-//   , window (NULL)
-//#endif // GTK_USE
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
 
@@ -216,27 +216,27 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  struct Stream_MediaFramework_ALSA_Configuration* ALSAConfiguration;
+  struct Stream_MediaFramework_ALSA_Configuration*                      ALSAConfiguration;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
-  enum AVCodecID                                    codecId;
+  enum AVCodecID                                                        codecId;
 #endif // FFMPEG_SUPPORT
-  Net_ConnectionConfigurations_t*                   connectionConfigurations;
-  struct Stream_Miscellaneous_DelayConfiguration*   delayConfiguration;
-  struct Stream_Device_Identifier                   deviceIdentifier; // render
-  Test_I_ISessionNotify_2_t*                        subscriber;
-  std::string                                       targetFileName; // dump module
+  Net_ConnectionConfigurations_t*                                       connectionConfigurations;
+  struct Stream_Miscellaneous_DelayConfiguration*                       delayConfiguration;
+  struct Stream_Device_Identifier                                       deviceIdentifier; // render
+  Test_I_ISessionNotify_2_t*                                            subscriber;
+  std::string                                                           targetFileName; // dump module
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType                               outputFormat;
+  struct _AMMediaType                                                   outputFormat;
 #else
-  struct Stream_MediaFramework_ALSA_MediaType       outputFormat;
+  struct Stream_MediaFramework_ALSA_MediaType                           outputFormat;
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (PROJECTM_SUPPORT)
+  struct Stream_Visualization_ProjectM_Configuration*                   projectMConfiguration;
+#endif // PROJECTM_SUPPORT
 #if defined (GTK_SUPPORT)
   struct Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_Configuration* spectrumAnalyzerConfiguration;
 #endif // GTK_SUPPORT
-//#if defined (GTK_USE)
-//  GdkWindow*                                        window;
-//#endif // GTK_USE
 };
 
 struct Test_I_IceCastClient_StreamConfiguration_2
