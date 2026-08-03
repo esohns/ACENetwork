@@ -72,7 +72,9 @@
                             <property name="label">gtk-connect</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
+                            <property name="has_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
                             <property name="tooltip_text" translatable="yes">connect</property>
                             <property name="relief">half</property>
                             <property name="use_stock">True</property>
@@ -91,6 +93,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="has_tooltip">True</property>
                             <property name="tooltip_text" translatable="yes">cut</property>
                             <property name="relief">half</property>
                             <property name="use_stock">True</property>
@@ -472,6 +475,8 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_text" translatable="yes">fullscreen</property>
                                         <property name="relief">half</property>
                                         <property name="use_stock">True</property>
                                         <property name="focus_on_click">False</property>
@@ -522,7 +527,7 @@
                                         <property name="label" translatable="yes">Asynchronous</property>
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
-                                        <property name="can_focus">True</property>
+                                        <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip_markup" translatable="yes">asynchronous event dispatch</property>
@@ -543,7 +548,7 @@
                                         <property name="label">Loopback</property>
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
-                                        <property name="can_focus">True</property>
+                                        <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
                                         <property name="tooltip_markup" translatable="yes">loopback interface</property>
@@ -628,11 +633,9 @@
                     <property name="visible">True</property>
                     <property name="app_paintable">True</property>
                     <property name="can_focus">False</property>
+                    <property name="has_tooltip">True</property>
                     <property name="tooltip_text" translatable="yes">projectM</property>
                     <property name="double_buffered">False</property>
-                    <signal name="draw" handler="drawingarea_projectm_draw_cb" swapped="no"/>
-                    <signal name="configure-event" handler="drawingarea_projectm_configure_event_cb" swapped="no"/>
-                    <signal name="realize" handler="drawingarea_projectm_realize_cb" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>

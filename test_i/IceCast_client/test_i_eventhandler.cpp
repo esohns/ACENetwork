@@ -165,12 +165,15 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 
   CBData_->progressData.transferred += message_in.total_length ();
+  CBData_->progressData.statistic.bytes += message_in.total_length ();
+
 #if defined (GTK_USE)
-  state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+  } // end lock scope
 #endif // GTK_USE
 
   Test_I_MessageDataContainer& data_container_r =
@@ -184,21 +187,24 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("loading \"%s\"...\n"),
                 ACE_TEXT (element_r.URL.c_str ())));
-#if defined (GTK_USE)
     CBData_->URL = element_r.URL;
-    guint event_source_id = g_idle_add (idle_load_segment_cb,
-                                        CBData_);
-    if (event_source_id == 0)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add(idle_load_segment_cb): \"%m\", returning\n")));
-      return;
-    } // end IF
-    state_r.eventSourceIds.insert (event_source_id);
+#if defined (GTK_USE)
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+      guint event_source_id =
+        //g_idle_add (idle_load_segment_cb,
+        g_timeout_add (0,
+                       idle_load_segment_cb,
+                       CBData_);
+      if (event_source_id == 0)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_load_segment_cb): \"%m\", returning\n")));
+        return;
+      } // end IF
+      state_r.eventSourceIds.insert (event_source_id);
+    } // end lock scope
 #endif // GTK_USE
   } // end IF
-
-  CBData_->progressData.statistic.bytes += message_in.total_length ();
 }
 
 void
@@ -220,7 +226,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 #endif // GTK_USE
 
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
@@ -274,9 +279,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
 
-#if defined (GTK_USE) || defined (WXWIDGETS_USE)
       CBData_->progressData.statistic = (*iterator).second->statistic;
-#endif // GTK_USE || WXWIDGETS_USE
 
       if ((*iterator).second->lock)
       {
@@ -298,7 +301,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     }
   } // end SWITCH
 #if defined (GTK_USE)
-  state_r.eventStack.push (event_e);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (event_e);
+  } // end lock scope
 #endif // GTK_USE
 }
 
@@ -327,23 +332,25 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
   sessionDataMap2_.insert (std::make_pair (sessionId_in,
                                            &const_cast<struct Test_I_IceCastClient_SessionData_2&> (sessionData_in)));
 
-#if defined (GTK_USE)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_USE
-
-#if defined (GTK_USE)
 //  CBData_->progressData.transferred = 0;
-  state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
 
-  guint event_source_id = g_idle_add (idle_start_session_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
+#if defined (GTK_USE)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
+
+    guint event_source_id = 
+      //g_idle_add (idle_start_session_cb,
+      g_timeout_add (0,
+                     idle_start_session_cb,
+                     CBData_);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
+    state_r.eventSourceIds.insert (event_source_id);
+  } // end lock scope
 #endif // GTK_USE
 }
 
@@ -398,18 +405,27 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       break;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
     {
-#if defined (GTK_USE)
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+#if defined (GTK_SUPPORT)
+      CBData_->fft = NULL;
+      CBData_->spectrumAnalyzerCBData.dispatch = NULL;
+      CBData_->spectrumAnalyzerCBData.resizeNotification = NULL;
+#endif // GTK_SUPPORT
 
-      guint event_source_id = g_idle_add (idle_end_session_cb,
-                                          CBData_);
-      if (event_source_id == 0)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
-        return;
-      } // end IF
-      state_r.eventSourceIds.insert (event_source_id);
+#if defined (GTK_USE)
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+        guint event_source_id = 
+          //g_idle_add (idle_end_session_cb,
+          g_timeout_add (0,
+                         idle_end_session_cb,
+                         CBData_);
+        if (event_source_id == 0)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+          return;
+        } // end IF
+        state_r.eventSourceIds.insert (event_source_id);
+      } // end lock scope
 #endif // GTK_USE
 
       event_e = COMMON_UI_EVENT_DISCONNECT;
@@ -429,9 +445,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
 
-#if defined (GTK_USE) || defined (WXWIDGETS_USE)
       CBData_->progressData.statistic = (*iterator).second->statistic;
-#endif // GTK_USE || WXWIDGETS_USE
 
       if ((*iterator).second->lock)
       {

@@ -105,10 +105,6 @@ idle_end_session_cb (gpointer userData_in)
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
-  data_p->fft = NULL;
-  data_p->spectrumAnalyzerCBData.dispatch = NULL;
-  data_p->spectrumAnalyzerCBData.resizeNotification = NULL;
-
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
@@ -129,16 +125,8 @@ idle_end_session_cb (gpointer userData_in)
   gtk_spinner_stop (spinner_p);
   gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
-  ACE_ASSERT (data_p->eventSourceId);
   ACE_ASSERT (data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-    if (!g_source_remove (data_p->eventSourceId))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                  data_p->eventSourceId));
-    data_p->UIState->eventSourceIds.erase (data_p->eventSourceId);
-    data_p->eventSourceId = 0;
-
     if (!g_source_remove (data_p->progressData.eventSourceId))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
@@ -405,20 +393,6 @@ idle_load_segment_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   iconnection_2->decrease (); iconnection_2 = NULL;
-
-  // step12: initialize updates
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    // schedule asynchronous updates of the info view
-    data_p->eventSourceId =
-      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_CAIRO_MS, // ~30fps
-                     idle_update_display_cb,
-                     userData_in);
-    if (data_p->eventSourceId > 0)
-      state_r.eventSourceIds.insert (data_p->eventSourceId);
-    else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_timeout_add(idle_update_display_cb): \"%m\", continuing\n")));
-  } // end lock scope
 
   return G_SOURCE_REMOVE;
 }
@@ -708,6 +682,17 @@ idle_initialize_UI_cb (gpointer userData_in)
                   ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
       return G_SOURCE_REMOVE;
     } // end ELSE
+
+    // schedule asynchronous updates of the display views
+    data_p->eventSourceId =
+      g_timeout_add (std::min (COMMON_UI_GTK_REFRESH_DEFAULT_CAIRO_MS, COMMON_UI_GTK_REFRESH_DEFAULT_OPENGL_MS),
+                     idle_update_display_cb,
+                     userData_in);
+    if (data_p->eventSourceId > 0)
+      state_r.eventSourceIds.insert (data_p->eventSourceId);
+    else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add(idle_update_display_cb): \"%m\", continuing\n")));
   } // end lock scope
 
   // step6: disable some functions ?
@@ -861,20 +846,23 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if GTK_CHECK_VERSION (3,0,0)
 #if GTK_CHECK_VERSION (3,16,0)
   gtk_widget_set_events (GTK_WIDGET (gl_area_p),
-                         GDK_EXPOSURE_MASK |
-                         GDK_BUTTON_PRESS_MASK);
+                         GDK_EXPOSURE_MASK     |
+                         GDK_BUTTON_PRESS_MASK |
+                         GDK_KEY_PRESS_MASK);
 #else
 #if defined (GTKGLAREA_SUPPORT)
   gtk_widget_set_events (GTK_WIDGET (gl_area_p),
-                         GDK_EXPOSURE_MASK |
-                         GDK_BUTTON_PRESS_MASK);
+                         GDK_EXPOSURE_MASK     |
+                         GDK_BUTTON_PRESS_MASK |
+                         GDK_KEY_PRESS_MASK);
 #endif // GTKGLAREA_SUPPORT
 #endif /* GTK_CHECK_VERSION (3,16,0) */
 #else
 #if defined (GTKGLAREA_SUPPORT)
   gtk_widget_set_events (GTK_WIDGET ((*opengl_contexts_iterator).first),
-                         GDK_EXPOSURE_MASK |
-                         GDK_BUTTON_PRESS_MASK);
+                         GDK_EXPOSURE_MASK     |
+                         GDK_BUTTON_PRESS_MASK |
+                         GDK_KEY_PRESS_MASK);
 #endif // GTKGLAREA_SUPPORT
 #endif /* GTK_CHECK_VERSION (3,0,0) */
 
@@ -897,11 +885,22 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_gl_area_set_has_stencil_buffer ((*opengl_contexts_iterator).first, FALSE);
   gtk_gl_area_set_auto_render ((*opengl_contexts_iterator).first, TRUE);
   gtk_widget_set_app_paintable (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
-  gtk_widget_set_can_focus (GTK_WIDGET ((*opengl_contexts_iterator).first), FALSE);
+  gtk_widget_set_can_focus (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
+  gtk_widget_set_focus_on_click (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
   gtk_widget_set_hexpand (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
   gtk_widget_set_visible (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
   gtk_widget_set_double_buffered (GTK_WIDGET ((*opengl_contexts_iterator).first), FALSE);
+#else
+#if defined (GTKGLAREA_SUPPORT)
+  gtk_widget_set_app_paintable (GTK_WIDGET (gl_area_p), TRUE);
+  gtk_widget_set_can_focus (GTK_WIDGET (gl_area_p), TRUE);
+  //gtk_widget_set_focus_on_click (GTK_WIDGET (gl_area_p), TRUE);
+  gtk_widget_set_hexpand (GTK_WIDGET (gl_area_p), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (gl_area_p), TRUE);
+  gtk_widget_set_visible (GTK_WIDGET (gl_area_p), TRUE);
+  gtk_widget_set_double_buffered (GTK_WIDGET (gl_area_p), FALSE);
+#endif // GTKGLAREA_SUPPORT
 #endif /* GTK_CHECK_VERSION (3,16,0) */
 #endif /* GTK_CHECK_VERSION (3,0,0) */
 
@@ -960,12 +959,18 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
 
 #if defined (GTKGL_SUPPORT)
-  // result =
-  //   g_signal_connect (G_OBJECT ((*opengl_contexts_iterator).first),
-  //                     ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
-  //                     G_CALLBACK (glarea_clicked_cb),
-  //                     userData_in);
-  // ACE_ASSERT (result);
+  result =
+    g_signal_connect (G_OBJECT ((*opengl_contexts_iterator).first),
+                      ACE_TEXT_ALWAYS_CHAR ("key-press-event"),
+                      G_CALLBACK (glarea_key_press_cb),
+                      userData_in);
+  ACE_ASSERT (result);
+  result =
+    g_signal_connect (G_OBJECT ((*opengl_contexts_iterator).first),
+                      ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
+                      G_CALLBACK (glarea_clicked_cb),
+                      userData_in);
+  ACE_ASSERT (result);
   result =
     g_signal_connect (G_OBJECT ((*opengl_contexts_iterator).first),
                       ACE_TEXT_ALWAYS_CHAR ("realize"),
@@ -1664,7 +1669,7 @@ continue_2:
     gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
     gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
 
-    ACE_ASSERT (!data_p->progressData.eventSourceId);
+    //ACE_ASSERT (!data_p->progressData.eventSourceId);
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       data_p->progressData.eventSourceId =
         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -1727,10 +1732,10 @@ error:
     GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME)));
   ACE_ASSERT (box_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (box_p), true);
+  gtk_widget_set_sensitive (GTK_WIDGET (box_p), TRUE);
 
   un_toggling_connect = true;
-  gtk_toggle_button_set_active (toggleButton_in, false);
+  gtk_toggle_button_set_active (toggleButton_in, FALSE);
 } // toggle_button_connect_toggled_cb
 
 gint
@@ -2129,6 +2134,78 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 } // button_quit_clicked_cb
 
 gboolean
+glarea_key_press_cb (GtkWidget* widget_in,
+                     GdkEventKey event_in,
+                     gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::glarea_key_press_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+#if defined (PROJECTM_SUPPORT)
+  ACE_ASSERT (data_p->projectMConfiguration);
+  ACE_ASSERT (data_p->projectMConfiguration->playlist);
+#endif // PROJECTM_SUPPORT
+
+  switch (event_in.keyval)
+  {
+#if GTK_CHECK_VERSION (3,0,0)
+    case GDK_KEY_l:
+    case GDK_KEY_L:
+#else
+    case GDK_l:
+    case GDK_L:
+#endif // GTK_CHECK_VERSION (3,0,0)
+    {
+#if defined (PROJECTM_SUPPORT)
+      data_p->projectMConfiguration->presetIsLocked =
+        !data_p->projectMConfiguration->presetIsLocked;
+      projectm_set_preset_locked (data_p->projectMConfiguration->handle,
+                                  data_p->projectMConfiguration->presetIsLocked);
+#endif // PROJECTM_SUPPORT
+      break;
+    }
+#if GTK_CHECK_VERSION (3,0,0)
+    case GDK_KEY_space:
+    case GDK_KEY_n:
+    case GDK_KEY_N:
+#else
+    case GDK_space:
+    case GDK_n:
+    case GDK_N:
+#endif // GTK_CHECK_VERSION (3,0,0)
+    {
+#if defined (PROJECTM_SUPPORT)
+      projectm_playlist_play_next (data_p->projectMConfiguration->playlist,
+                                   false);
+#endif // PROJECTM_SUPPORT
+      break;
+    }
+#if GTK_CHECK_VERSION (3,0,0)
+    case GDK_KEY_p:
+    case GDK_KEY_P:
+#else
+    case GDK_p:
+    case GDK_P:
+#endif // GTK_CHECK_VERSION (3,0,0)
+    {
+#if defined (PROJECTM_SUPPORT)
+      projectm_playlist_play_previous (data_p->projectMConfiguration->playlist,
+                                       false);
+#endif // PROJECTM_SUPPORT
+      break;
+    }
+    default:
+      return FALSE; // propagate
+  } // end SWITCH
+
+  return TRUE; // do not propagate
+}
+
+gboolean
 glarea_clicked_cb (GtkWidget* widget_in,
                    GdkEventButton event_in,
                    gpointer userData_in)
@@ -2150,7 +2227,9 @@ glarea_clicked_cb (GtkWidget* widget_in,
                                false);
 #endif // PROJECTM_SUPPORT
 
-  return FALSE;
+  gtk_widget_grab_focus (widget_in);
+
+  return TRUE; // do not propagate
 }
 
 void
@@ -2387,6 +2466,9 @@ glarea_unrealize_cb (GtkWidget* widget_in,
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+#if defined (PROJECTM_SUPPORT)
+  ACE_ASSERT (data_p->projectMConfiguration);
+#endif // PROJECTM_SUPPORT
 
 #if GTK_CHECK_VERSION (3,0,0)
 #if GTK_CHECK_VERSION (3,16,0)
@@ -2472,6 +2554,17 @@ glarea_unrealize_cb (GtkWidget* widget_in,
     return;
 #endif // GTKGLAREA_SUPPORT
 #endif // GTK_CHECK_VERSION (3,0,0)
+
+#if defined (PROJECTM_SUPPORT)
+  if (data_p->projectMConfiguration->playlist)
+  {
+    projectm_playlist_destroy (data_p->projectMConfiguration->playlist); data_p->projectMConfiguration->playlist = NULL;
+  } // end IF
+  if (data_p->projectMConfiguration->handle)
+  {
+    projectm_destroy (data_p->projectMConfiguration->handle); data_p->projectMConfiguration->handle = NULL;
+  } // end IF
+#endif // PROJECTM_SUPPORT
 
 #if GTK_CHECK_VERSION (3,0,0)
 #else
@@ -2739,7 +2832,63 @@ glarea_expose_event_cb (GtkWidget* widget_in,
 #if defined (PROJECTM_SUPPORT)
   ACE_ASSERT (data_p->projectMConfiguration);
   ACE_ASSERT (data_p->projectMConfiguration->handle);
+  ACE_ASSERT (data_p->projectMConfiguration->playlist);
 #endif // PROJECTM_SUPPORT
+
+  // compute fps
+  static int last_frame_count_i = 0;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static std::chrono::steady_clock::time_point last_second = std::chrono::high_resolution_clock::now ();
+  std::chrono::steady_clock::time_point current_second = std::chrono::high_resolution_clock::now ();
+#elif defined (ACE_LINUX)
+  static std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> last_second = std::chrono::high_resolution_clock::now ();
+  std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> current_second = std::chrono::high_resolution_clock::now ();
+#else
+#error missing implementation, aborting
+#endif // ACE_WIN32 || ACE_WIN64 || ACE_LINUX
+  std::chrono::duration<float> elapsed_seconds = current_second - last_second;
+  if (elapsed_seconds.count () > 1.0f)
+  {
+    float fps_f = last_frame_count_i / elapsed_seconds.count ();
+    std::string title_string =
+      ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE);
+    title_string += ACE_TEXT_ALWAYS_CHAR (" [");
+    std::ostringstream converter;
+    converter << std::setprecision (2) << std::fixed << fps_f;
+    title_string += converter.str ();
+    title_string += ACE_TEXT_ALWAYS_CHAR (" fps]");
+
+    title_string += ACE_TEXT_ALWAYS_CHAR (" \"");
+    char* preset_name_p =
+      projectm_playlist_item (data_p->projectMConfiguration->playlist,
+                              projectm_playlist_get_position (data_p->projectMConfiguration->playlist));
+    ACE_ASSERT (preset_name_p);
+    title_string += Common_File_Tools::basename (preset_name_p, true);
+    projectm_playlist_free_string (preset_name_p);
+    preset_name_p = NULL;
+    title_string += ACE_TEXT_ALWAYS_CHAR ("\"");
+    if (data_p->projectMConfiguration->presetIsLocked)
+      title_string += ACE_TEXT_ALWAYS_CHAR (" [LOCKED]");
+
+    // sanity check(s)
+    Common_UI_GTK_BuildersConstIterator_t iterator =
+      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+    GtkDialog* dialog_p =
+      GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+    ACE_ASSERT (dialog_p);
+    gtk_window_set_title (GTK_WINDOW (dialog_p),
+                          title_string.c_str ());
+
+    last_second = current_second;
+    last_frame_count_i = 0;
+
+    projectm_set_fps (data_p->projectMConfiguration->handle,
+                      static_cast<int32_t> (std::round (fps_f)));
+  } // end IF
+  else
+    ++last_frame_count_i;
 
   if (!ggla_area_make_current (GGLA_AREA (widget_in)))
     return FALSE;
