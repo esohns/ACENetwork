@@ -88,6 +88,9 @@
 
 // initialize statics
 static bool un_toggling_connect = false;
+#if defined (GTKGL_SUPPORT)
+static GLuint dummy_vao_i = 0;
+#endif // GTKGL_SUPPORT
 
 /////////////////////////////////////////
 
@@ -428,20 +431,18 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   // sanity check(s)
   struct Test_I_IceCastClient_UI_CBData* data_p =
-      static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
+  ACE_ASSERT (data_p->UIState);
+  // Common_UI_GTK_Manager_t* gtk_manager_p =
+  //   COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  // ACE_ASSERT (gtk_manager_p);
+  // Common_UI_GTK_State_t& state_r =
+  //   const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // step1: initialize dialog window(s)
   GtkDialog* dialog_p =
@@ -645,17 +646,17 @@ idle_initialize_UI_cb (gpointer userData_in)
   guint context_id =
     gtk_statusbar_get_context_id (statusbar_p,
                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_CONTEXT_DATA));
-  state_r.contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_DATA,
-                                             context_id));
+  data_p->UIState->contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_DATA,
+                                                      context_id));
   context_id =
     gtk_statusbar_get_context_id (statusbar_p,
                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_CONTEXT_INFORMATION));
-  state_r.contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_INFORMATION,
-                                             context_id));
+  data_p->UIState->contextIds.insert (std::make_pair (COMMON_UI_GTK_STATUSCONTEXT_INFORMATION,
+                                                      context_id));
 
   // step5: initialize updates
   guint event_source_id = 0;
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     //// schedule asynchronous updates of the log view
     //event_source_id = g_timeout_add_seconds (1,
     //                                         idle_update_log_display_cb,
@@ -675,7 +676,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                      idle_update_info_display_cb,
                      data_p);
     if (event_source_id > 0)
-      state_r.eventSourceIds.insert (event_source_id);
+      data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -689,7 +690,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                      idle_update_display_cb,
                      userData_in);
     if (data_p->eventSourceId > 0)
-      state_r.eventSourceIds.insert (data_p->eventSourceId);
+      data_p->UIState->eventSourceIds.insert (data_p->eventSourceId);
     else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_timeout_add(idle_update_display_cb): \"%m\", continuing\n")));
@@ -756,8 +757,9 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_widget_realize (GTK_WIDGET (gl_area_p));
   gl_context_p = gtk_gl_area_get_context (gl_area_p);
   //ACE_ASSERT (gl_context_p);
-  state_r.OpenGLContexts.insert (std::make_pair (gl_area_p, gl_context_p));
-  opengl_contexts_iterator = state_r.OpenGLContexts.find (gl_area_p);
+  data_p->UIState->OpenGLContexts.insert (std::make_pair (gl_area_p,
+                                                          gl_context_p));
+  opengl_contexts_iterator = data_p->UIState->OpenGLContexts.find (gl_area_p);
 
   gint major_version, minor_version;
   gtk_gl_area_get_required_version (gl_area_p,
@@ -787,9 +789,9 @@ idle_initialize_UI_cb (gpointer userData_in)
                 ACE_TEXT ("failed to ggla_area_new(), aborting\n")));
     return G_SOURCE_REMOVE;
   } // end IF
-  state_r.OpenGLContexts.insert (std::make_pair (gl_area_p,
-                                                 gl_area_p->glcontext));
-  opengl_contexts_iterator = state_r.OpenGLContexts.find (gl_area_p);
+  data_p->UIState->OpenGLContexts.insert (std::make_pair (gl_area_p,
+                                                          gl_area_p->glcontext));
+  opengl_contexts_iterator = data_p->UIState->OpenGLContexts.find (gl_area_p);
 #else
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (G_SOURCE_REMOVE);
@@ -807,9 +809,9 @@ idle_initialize_UI_cb (gpointer userData_in)
     goto error;
   } // end IF
 
-  state_r.OpenGLContexts.insert (std::make_pair (gl_area_p,
-                                                 gl_area_p->glcontext));
-  opengl_contexts_iterator = state_r.OpenGLContexts.find (gl_area_p);
+  data_p->UIState->OpenGLContexts.insert (std::make_pair (gl_area_p,
+                                                          gl_area_p->glcontext));
+  opengl_contexts_iterator = data_p->UIState->OpenGLContexts.find (gl_area_p);
 #else
   GdkGLConfigMode features = static_cast<GdkGLConfigMode> (GDK_GL_MODE_DOUBLE  |
                                                            GDK_GL_MODE_ALPHA   |
@@ -841,7 +843,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   opengl_contexts_iterator = ui_cb_data_base_p->UIState.OpenGLContexts.find (gl_area_p);
 #endif /* GTKGLAREA_SUPPORT */
 #endif /* GTK_CHECK_VERSION(3,0,0) */
-  ACE_ASSERT (opengl_contexts_iterator != state_r.OpenGLContexts.end ());
+  ACE_ASSERT (opengl_contexts_iterator != data_p->UIState->OpenGLContexts.end ());
 
 #if GTK_CHECK_VERSION (3,0,0)
 #if GTK_CHECK_VERSION (3,16,0)
@@ -868,11 +870,11 @@ idle_initialize_UI_cb (gpointer userData_in)
 
 #if GTK_CHECK_VERSION (3,0,0)
 #if GTK_CHECK_VERSION (3,16,0)
-  // *NOTE*: (try to) enable legacy mode on Win32
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  gtk_gl_area_set_required_version ((*opengl_contexts_iterator).first, 2, 1);
-#endif // ACE_WIN32 || ACE_WIN64
-  // gtk_gl_area_set_use_es ((*opengl_contexts_iterator).first, FALSE);
+//   // *NOTE*: (try to) enable legacy mode on Win32
+// #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // gtk_gl_area_set_required_version ((*opengl_contexts_iterator).first, 2, 1);
+// #endif // ACE_WIN32 || ACE_WIN64
+  // gtk_gl_area_set_use_es ((*opengl_contexts_iterator).first, TRUE);
   // *WARNING*: the 'renderbuffer' (in place of 'texture') image attachment
   //            concept appears to be broken; setting this to 'false' gives
   //            "fb setup not supported" (see: gtkglarea.c:734)
@@ -2281,21 +2283,21 @@ glarea_realize_cb (GtkWidget* widget_in,
   GtkGLArea* gl_area_p = GTK_GL_AREA (widget_in);
   ACE_ASSERT (gl_area_p);
   // NOTE*: the OpenGL context has been created at this point
-  GdkGLContext* context_p = gtk_gl_area_get_context (gl_area_p);
-  if (!context_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gtk_gl_area_get_context(%@), returning\n"),
-                gl_area_p));
-    return;
-  } // end IF
+  // GdkGLContext* context_p = gtk_gl_area_get_context (gl_area_p);
+  // if (!context_p)
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //               ACE_TEXT ("failed to gtk_gl_area_get_context(%@), returning\n"),
+  //               gl_area_p));
+  //   return;
+  // } // end IF
 
-  // load the texture
   gtk_gl_area_attach_buffers (gl_area_p);
-  gdk_gl_context_make_current (context_p);
+  gtk_gl_area_make_current (gl_area_p);
+  // gdk_gl_context_make_current (context_p);
 
   // sanity check(s)
-  ACE_ASSERT (gtk_gl_area_get_has_depth_buffer (gl_area_p));
+  // ACE_ASSERT (gtk_gl_area_get_has_depth_buffer (gl_area_p));
 #else
 #if defined (GTKGLAREA_SUPPORT)
   if (!ggla_area_make_current (GGLA_AREA (widget_in)))
@@ -2345,12 +2347,16 @@ glarea_realize_cb (GtkWidget* widget_in,
   glEnable (GL_TEXTURE_2D);                           // Enable Texture Mapping
   glEnable (GL_BLEND);                                // Enable Semi-Transparency
   glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable (GL_DEPTH_TEST);                           // Enables Depth Testing
+  glDisable (GL_DEPTH_TEST);                           // Disables Depth Testing
   //glDepthFunc (GL_LESS);                              // The Type Of Depth Testing To Do
   //glDepthMask (GL_TRUE);
 
   // initialize options
   glClearColor (0.0F, 0.0F, 0.0F, 1.0F); // Black Background
+
+  if (!dummy_vao_i)
+    glGenVertexArrays(1, &dummy_vao_i);
+  glBindVertexArray (dummy_vao_i);
 
 #if defined (PROJECTM_SUPPORT)
   data_p->projectMConfiguration->handle = projectm_create ();
@@ -2555,6 +2561,12 @@ glarea_unrealize_cb (GtkWidget* widget_in,
 #endif // GTKGLAREA_SUPPORT
 #endif // GTK_CHECK_VERSION (3,0,0)
 
+  if (dummy_vao_i)
+  {
+    glDeleteVertexArrays (1, &dummy_vao_i);
+    dummy_vao_i = 0;
+  } // end IF
+
 #if defined (PROJECTM_SUPPORT)
   if (data_p->projectMConfiguration->playlist)
   {
@@ -2589,11 +2601,12 @@ glarea_create_context_cb (GtkGLArea* GLArea_in,
   GdkGLContext* result_p = NULL;
 
   GError* error_p = NULL;
+  GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (GLArea_in));
+  ACE_ASSERT (window_p);
   // *TODO*: this currently fails on Wayland (Gnome 3.22.24)
   // *WORKAROUND*: set GDK_BACKEND=x11 environment to force XWayland
-  result_p =
-    gdk_window_create_gl_context (gtk_widget_get_window (GTK_WIDGET (GLArea_in)),
-                                  &error_p);
+  result_p = gdk_window_create_gl_context (window_p,
+                                           &error_p);
   if (!result_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -2605,28 +2618,28 @@ glarea_create_context_cb (GtkGLArea* GLArea_in,
   } // end IF
 
   gdk_gl_context_set_required_version (result_p,
-                                       0, 0); // auto-detect
+                                       3, 2);
 #if defined (_DEBUG)
   gdk_gl_context_set_debug_enabled (result_p,
                                     TRUE);
 #endif // _DEBUG
   gdk_gl_context_set_forward_compatible (result_p,
-                                         TRUE);
+                                         FALSE);
   gdk_gl_context_set_use_es (result_p,
-                             -1); // auto-detect
+                             FALSE);
 
-  if (!gdk_gl_context_realize (result_p,
-                               &error_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to realize OpenGL context: \"%s\", continuing\n"),
-                ACE_TEXT (error_p->message)));
-    gtk_gl_area_set_error (GLArea_in, error_p);
-    g_error_free (error_p); error_p = NULL;
-    return NULL;
-  } // end IF
+  // if (!gdk_gl_context_realize (result_p,
+  //                              &error_p))
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //               ACE_TEXT ("failed to realize OpenGL context: \"%s\", continuing\n"),
+  //               ACE_TEXT (error_p->message)));
+  //   gtk_gl_area_set_error (GLArea_in, error_p);
+  //   g_error_free (error_p); error_p = NULL;
+  //   return NULL;
+  // } // end IF
 
-  gdk_gl_context_make_current (result_p);
+  // gdk_gl_context_make_current (result_p);
 
   // initialize options
   // glClearColor (0.0F, 0.0F, 0.0F, 1.0F);              // Black Background
@@ -2727,12 +2740,23 @@ glarea_render_cb (GtkGLArea* GLArea_in,
   else
     ++last_frame_count_i;
 
-  // gdk_gl_context_make_current (context_in);
+  gtk_gl_area_make_current (GLArea_in);
 
-  glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  GLint gtk_default_fbo = 0;
+  glGetIntegerv (GL_FRAMEBUFFER_BINDING, &gtk_default_fbo);
+
+  glBindFramebuffer (GL_FRAMEBUFFER, (GLuint)gtk_default_fbo);
+  glBindVertexArray (dummy_vao_i);
+
+  // *IMPORTANT NOTE*: does not render without this; why ?
+  glDisable (GL_DEPTH_TEST);                           // Disables Depth Testing
+
+  // glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 #if defined (PROJECTM_SUPPORT)
-  projectm_opengl_render_frame (data_p->projectMConfiguration->handle);
+  // projectm_opengl_render_frame (data_p->projectMConfiguration->handle);
+  projectm_opengl_render_frame_fbo (data_p->projectMConfiguration->handle,
+                                    (GLuint)gtk_default_fbo);
 #endif // PROJECTM_SUPPORT
 
   gtk_gl_area_queue_render (GLArea_in);
