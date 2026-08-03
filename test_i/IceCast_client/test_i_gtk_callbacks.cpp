@@ -21,13 +21,6 @@
 
 #include "test_i_gtk_callbacks.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "iphlpapi.h"
-#else
-#include "netinet/ether.h"
-#include "ifaddrs.h"
-#endif // ACE_WIN32 || ACE_WIN64
-
 #if defined (GLEW_SUPPORT)
 #include "GL/glew.h"
 #endif // GLEW_SUPPORT
@@ -40,7 +33,6 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "gdk/gdk.h"
-//#include "gtk/gtk.h"
 #if defined (GTKGL_SUPPORT)
 #if GTK_CHECK_VERSION (3,0,0)
 #if GTK_CHECK_VERSION (3,16,0)
@@ -59,6 +51,7 @@
 #endif /* GTK_CHECK_VERSION (3,0,0) */
 #endif /* GTKGL_SUPPORT */
 
+#include <iomanip>
 #include <limits>
 #include <sstream>
 
@@ -137,6 +130,7 @@ idle_end_session_cb (gpointer userData_in)
   gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
   ACE_ASSERT (data_p->eventSourceId);
+  ACE_ASSERT (data_p->progressData.eventSourceId);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     if (!g_source_remove (data_p->eventSourceId))
       ACE_DEBUG ((LM_ERROR,
@@ -144,6 +138,13 @@ idle_end_session_cb (gpointer userData_in)
                   data_p->eventSourceId));
     data_p->UIState->eventSourceIds.erase (data_p->eventSourceId);
     data_p->eventSourceId = 0;
+
+    if (!g_source_remove (data_p->progressData.eventSourceId))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                  data_p->progressData.eventSourceId));
+    data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
+    data_p->progressData.eventSourceId = 0;
   } // end lock scope
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -883,7 +884,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   gtk_gl_area_set_required_version ((*opengl_contexts_iterator).first, 2, 1);
 #endif // ACE_WIN32 || ACE_WIN64
-  gtk_gl_area_set_use_es ((*opengl_contexts_iterator).first, FALSE);
+  // gtk_gl_area_set_use_es ((*opengl_contexts_iterator).first, FALSE);
   // *WARNING*: the 'renderbuffer' (in place of 'texture') image attachment
   //            concept appears to be broken; setting this to 'false' gives
   //            "fb setup not supported" (see: gtkglarea.c:734)
@@ -895,10 +896,12 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_gl_area_set_has_depth_buffer ((*opengl_contexts_iterator).first, TRUE);
   gtk_gl_area_set_has_stencil_buffer ((*opengl_contexts_iterator).first, FALSE);
   gtk_gl_area_set_auto_render ((*opengl_contexts_iterator).first, TRUE);
+  gtk_widget_set_app_paintable (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
   gtk_widget_set_can_focus (GTK_WIDGET ((*opengl_contexts_iterator).first), FALSE);
   gtk_widget_set_hexpand (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
   gtk_widget_set_visible (GTK_WIDGET ((*opengl_contexts_iterator).first), TRUE);
+  gtk_widget_set_double_buffered (GTK_WIDGET ((*opengl_contexts_iterator).first), FALSE);
 #endif /* GTK_CHECK_VERSION (3,16,0) */
 #endif /* GTK_CHECK_VERSION (3,0,0) */
 
@@ -957,6 +960,12 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
 
 #if defined (GTKGL_SUPPORT)
+  // result =
+  //   g_signal_connect (G_OBJECT ((*opengl_contexts_iterator).first),
+  //                     ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
+  //                     G_CALLBACK (glarea_clicked_cb),
+  //                     userData_in);
+  // ACE_ASSERT (result);
   result =
     g_signal_connect (G_OBJECT ((*opengl_contexts_iterator).first),
                       ACE_TEXT_ALWAYS_CHAR ("realize"),
@@ -1356,7 +1365,7 @@ idle_update_info_display_cb (gpointer userData_in)
 gboolean
 idle_update_display_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_update_display_cb"));
+  // NETWORK_TRACE (ACE_TEXT ("::idle_update_display_cb"));
 
   // sanity check(s)
   struct Test_I_IceCastClient_UI_CBData* data_p =
@@ -1483,6 +1492,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_IceCastClient_StreamConfiguration_t::ITERATOR_T iterator_3 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+    Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T iterator_4 =
+      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_2.end ());
     Test_I_TCPConnector_t connector;
 #if defined (SSL_SUPPORT)
     Test_I_SSLConnector_t ssl_connector;
@@ -1501,6 +1513,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
 
     (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
+    (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
+    (*iterator_4).second.second->delayConfiguration->mode =
+      STREAM_MISCELLANEOUS_DELAY_MODE_INVALID;
 
     // retrieve stream URL
     entry_p =
@@ -1821,11 +1836,11 @@ drawingarea_query_tooltip_cb (GtkWidget*  widget_in,
   is_float_format = Stream_MediaFramework_DirectSound_Tools::isFloat (*waveformatex_p);
 #else
   is_signed_format =
-    snd_pcm_format_signed ((*modulehandler_configuration_iterator)->second.second->outputFormat.format);
+    snd_pcm_format_signed ((*modulehandler_configuration_iterator).second.second->outputFormat.format);
   sample_size =
-    (snd_pcm_format_width ((*modulehandler_configuration_iterator)->second.second->outputFormat.format) / 8);
+    (snd_pcm_format_width ((*modulehandler_configuration_iterator).second.second->outputFormat.format) / 8);
   channels =
-    (*modulehandler_configuration_iterator)->second.second->outputFormat.channels;
+    (*modulehandler_configuration_iterator).second.second->outputFormat.channels;
 #endif // ACE_WIN32 || ACE_WIN64
 
   GtkAllocation allocation;
@@ -2113,6 +2128,31 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 } // button_quit_clicked_cb
 
+gboolean
+glarea_clicked_cb (GtkWidget* widget_in,
+                   GdkEventButton event_in,
+                   gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::glarea_clicked_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+#if defined (PROJECTM_SUPPORT)
+  ACE_ASSERT (data_p->projectMConfiguration);
+  ACE_ASSERT (data_p->projectMConfiguration->playlist);
+#endif // PROJECTM_SUPPORT
+
+#if defined (PROJECTM_SUPPORT)
+  projectm_playlist_play_next (data_p->projectMConfiguration->playlist,
+                               false);
+#endif // PROJECTM_SUPPORT
+
+  return FALSE;
+}
+
 void
 glarea_realize_cb (GtkWidget* widget_in,
                    gpointer   userData_in)
@@ -2230,6 +2270,9 @@ glarea_realize_cb (GtkWidget* widget_in,
   //glDepthFunc (GL_LESS);                              // The Type Of Depth Testing To Do
   //glDepthMask (GL_TRUE);
 
+  // initialize options
+  glClearColor (0.0F, 0.0F, 0.0F, 1.0F); // Black Background
+
 #if defined (PROJECTM_SUPPORT)
   data_p->projectMConfiguration->handle = projectm_create ();
   if (unlikely (!data_p->projectMConfiguration->handle))
@@ -2304,8 +2347,10 @@ glarea_realize_cb (GtkWidget* widget_in,
                               true,
                               false);
 
-  projectm_playlist_set_shuffle (data_p->projectMConfiguration->playlist, true);
-  //projectm_playlist_play_next (data_p->projectMConfiguration->playlist, true);
+  projectm_playlist_set_shuffle (data_p->projectMConfiguration->playlist,
+                                 true);
+  // projectm_playlist_play_next (data_p->projectMConfiguration->playlist,
+  //                              true);
 
   //projectm_reset_textures (data_p->projectMConfiguration->handle);
 #endif // PROJECTM_SUPPORT
@@ -2467,13 +2512,13 @@ glarea_create_context_cb (GtkGLArea* GLArea_in,
   } // end IF
 
   gdk_gl_context_set_required_version (result_p,
-                                       3, 2);
+                                       0, 0); // auto-detect
 #if defined (_DEBUG)
   gdk_gl_context_set_debug_enabled (result_p,
                                     TRUE);
 #endif // _DEBUG
-  //gdk_gl_context_set_forward_compatible (result_p,
-  //                                       FALSE);
+  gdk_gl_context_set_forward_compatible (result_p,
+                                         TRUE);
   gdk_gl_context_set_use_es (result_p,
                              -1); // auto-detect
 
@@ -2491,7 +2536,7 @@ glarea_create_context_cb (GtkGLArea* GLArea_in,
   gdk_gl_context_make_current (result_p);
 
   // initialize options
-  glClearColor (0.0F, 0.0F, 0.0F, 1.0F);              // Black Background
+  // glClearColor (0.0F, 0.0F, 0.0F, 1.0F);              // Black Background
   //glClearDepth (1.0);                                 // Depth Buffer Setup
   /* speedups */
   //  glDisable (GL_CULL_FACE);
@@ -2504,12 +2549,12 @@ glarea_create_context_cb (GtkGLArea* GLArea_in,
   // glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Really Nice Perspective
   // glDepthFunc (GL_LESS);                              // The Type Of Depth Testing To Do
   // glDepthMask (GL_TRUE);
-  glEnable (GL_TEXTURE_2D);                           // Enable Texture Mapping
-  // glShadeModel (GL_SMOOTH);                           // Enable Smooth Shading
-  // glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-  glEnable (GL_BLEND);                                // Enable Semi-Transparency
-  glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable (GL_DEPTH_TEST);                           // Enables Depth Testing
+  // glEnable (GL_TEXTURE_2D);                           // Enable Texture Mapping
+  // // glShadeModel (GL_SMOOTH);                           // Enable Smooth Shading
+  // // glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+  // glEnable (GL_BLEND);                                // Enable Semi-Transparency
+  // glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // glEnable (GL_DEPTH_TEST);                           // Enables Depth Testing
 
   return result_p;
 }
@@ -2519,7 +2564,7 @@ glarea_render_cb (GtkGLArea* GLArea_in,
                   GdkGLContext* context_in,
                   gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::glarea_render_cb"));
+  // NETWORK_TRACE (ACE_TEXT ("::glarea_render_cb"));
 
   // sanity check(s)
   ACE_ASSERT (GLArea_in);
@@ -2528,63 +2573,74 @@ glarea_render_cb (GtkGLArea* GLArea_in,
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+#if defined (PROJECTM_SUPPORT)
+  ACE_ASSERT (data_p->projectMConfiguration);
+  ACE_ASSERT (data_p->projectMConfiguration->handle);
+#endif // PROJECTM_SUPPORT
 
-  static bool is_first = true;
-  if (unlikely (is_first))
+  // compute fps
+  static int last_frame_count_i = 0;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static std::chrono::steady_clock::time_point last_second = std::chrono::high_resolution_clock::now ();
+  std::chrono::steady_clock::time_point current_second = std::chrono::high_resolution_clock::now ();
+#elif defined (ACE_LINUX)
+  static std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> last_second = std::chrono::high_resolution_clock::now ();
+  std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> current_second = std::chrono::high_resolution_clock::now ();
+#else
+#error missing implementation, aborting
+#endif // ACE_WIN32 || ACE_WIN64 || ACE_LINUX
+  std::chrono::duration<float> elapsed_seconds = current_second - last_second;
+  if (elapsed_seconds.count () > 1.0f)
   {
-    is_first = false;
+    float fps_f = last_frame_count_i / elapsed_seconds.count ();
+    std::string title_string =
+      ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE);
+    title_string += ACE_TEXT_ALWAYS_CHAR (" [");
+    std::ostringstream converter;
+    converter << std::setprecision (2) << std::fixed << fps_f;
+    title_string += converter.str ();
+    title_string += ACE_TEXT_ALWAYS_CHAR (" fps]");
 
-    // initialize options
-    glClearColor (0.0F, 0.0F, 0.0F, 1.0F);              // Black Background
-    //glClearDepth (1.0);                                 // Depth Buffer Setup
-    /* speedups */
-    //  glDisable (GL_CULL_FACE);
-    //  glEnable (GL_DITHER);
-    //  glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-    //  glHint (GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
-    // glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST); // Really Nice Perspective
-    // glDepthFunc (GL_LESS);                              // The Type Of Depth Testing To Do
-    // glDepthMask (GL_TRUE);
-    glEnable (GL_TEXTURE_2D);                           // Enable Texture Mapping
-    // glShadeModel (GL_SMOOTH);                           // Enable Smooth Shading
-    // glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-    //glDisable (GL_BLEND);
-    glEnable (GL_BLEND);                                // Enable Semi-Transparency
-    // glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//    glBlendFunc (GL_ONE, GL_ZERO);
-//    glBlendFunc (GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable (GL_DEPTH_TEST);                           // Enables Depth Testing
+    title_string += ACE_TEXT_ALWAYS_CHAR (" \"");
+    char* preset_name_p =
+      projectm_playlist_item (data_p->projectMConfiguration->playlist,
+                              projectm_playlist_get_position (data_p->projectMConfiguration->playlist));
+    ACE_ASSERT (preset_name_p);
+    title_string += Common_File_Tools::basename (preset_name_p, true);
+    projectm_playlist_free_string (preset_name_p);
+    preset_name_p = NULL;
+    title_string += ACE_TEXT_ALWAYS_CHAR ("\"");
+    if (data_p->projectMConfiguration->presetIsLocked)
+      title_string += ACE_TEXT_ALWAYS_CHAR (" [LOCKED]");
 
-    // glColorMaterial (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-    // glEnable (GL_COLOR_MATERIAL);
-    // glEnable (GL_NORMALIZE);
-//    glEnable (GL_LIGHTING);
+    // sanity check(s)
+    Common_UI_GTK_BuildersConstIterator_t iterator =
+      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+    GtkDialog* dialog_p =
+      GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+    ACE_ASSERT (dialog_p);
+    gtk_window_set_title (GTK_WINDOW (dialog_p),
+                          title_string.c_str ());
+
+    last_second = current_second;
+    last_frame_count_i = 0;
+
+    projectm_set_fps (data_p->projectMConfiguration->handle,
+                      static_cast<int32_t> (std::round (fps_f)));
   } // end IF
+  else
+    ++last_frame_count_i;
+
+  // gdk_gl_context_make_current (context_in);
 
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // compute elapsed time
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  std::chrono::steady_clock::time_point tp2 =
-    std::chrono::high_resolution_clock::now ();
-#elif defined (ACE_LINUX)
-  std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> tp2 =
-    std::chrono::high_resolution_clock::now ();
-#else
-#error missing implementation, aborting
-#endif // ACE_WIN32 || ACE_WIN64 || ACE_LINUX
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  static std::chrono::steady_clock::time_point tp_last = tp2;
-#elif defined (ACE_LINUX)
-  static std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds> tp_last = tp2;
-#else
-#error missing implementation, aborting
-#endif // ACE_WIN32 || ACE_WIN64 || ACE_LINUX
-  std::chrono::duration<float> elapsed_time_2 = tp2 - tp_last;
-  static float duration_f = 0.0f;
-  duration_f += elapsed_time_2.count ();
-  tp_last = tp2;
+#if defined (PROJECTM_SUPPORT)
+  projectm_opengl_render_frame (data_p->projectMConfiguration->handle);
+#endif // PROJECTM_SUPPORT
 
   gtk_gl_area_queue_render (GLArea_in);
 
@@ -2604,11 +2660,21 @@ glarea_resize_cb (GtkGLArea* GLArea_in,
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+#if defined (PROJECTM_SUPPORT)
+  ACE_ASSERT (data_p->projectMConfiguration);
+  ACE_ASSERT (data_p->projectMConfiguration->handle);
+#endif // PROJECTM_SUPPORT
 
-  //gtk_gl_area_make_current (GLArea_in);
+  gtk_gl_area_make_current (GLArea_in);
 
   glViewport (0, 0,
               static_cast<GLsizei> (width_in), static_cast<GLsizei> (height_in));
+
+#if defined (PROJECTM_SUPPORT)
+  projectm_set_window_size (data_p->projectMConfiguration->handle,
+                            width_in,
+                            height_in);
+#endif // PROJECTM_SUPPORT
 
   //glMatrixMode (GL_PROJECTION);
 

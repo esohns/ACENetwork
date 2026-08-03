@@ -297,6 +297,21 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_ALSA);                                             // writer type
 
+typedef Stream_Module_Delay_T<ACE_MT_SYNCH,
+                              Common_TimePolicy_t,
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                              Stream_ControlMessage_t,
+                              Test_I_Message,
+                              Test_I_SessionMessage_2,
+                              struct Stream_MediaFramework_ALSA_MediaType,
+                              struct Stream_UserData> Test_I_Delay;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_misc_delay_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_Delay);                                            // writer type
+
 #if defined (GTK_SUPPORT)
 typedef Common_Math_FFT_T<float, FFT_ALGORITHM_UNKNOWN> Common_Math_FFT_t;
 typedef Common_ISetP_T<GdkWindow> Common_ISetP_t;

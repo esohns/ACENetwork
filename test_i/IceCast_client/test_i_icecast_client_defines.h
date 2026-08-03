@@ -26,6 +26,7 @@
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE          "output.wav"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_URL                  "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
 //#define TEST_I_ICECAST_CLIENT_DEFAULT_FPS                  60
+#define TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE         "IceCast client"
 
 #define TEST_I_ICECAST_CLIENT_DEFAULT_BUFFER_SIZE          NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE
 

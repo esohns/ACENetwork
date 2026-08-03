@@ -1,4 +1,4 @@
-include (OpenGL)
+#include (OpenGL)
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/gl/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/gl/scripts")
 include (glut)
@@ -193,12 +193,11 @@ if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
-if (UNIX)
-elseif (WIN32)
+if (WIN32)
  target_link_options (${EXECUTABLE} PUBLIC "$<$<CXX_COMPILER_ID:MSVC>:-FORCE:MULTIPLE>")
 
  target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
-endif ()
+endif (WIN32)
 
 target_link_libraries (${EXECUTABLE} PUBLIC Common)
 target_link_libraries (${EXECUTABLE} PUBLIC CommonEvent)
