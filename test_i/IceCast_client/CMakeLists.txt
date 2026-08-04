@@ -1,4 +1,4 @@
-#include (OpenGL)
+include (OpenGL)
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/gl/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/gl/scripts")
 include (glut)
@@ -10,6 +10,7 @@ include (fftw)
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
 include (mpg123)
+include (vorbis)
 
 include (ffmpeg)
 include (ImageMagick)
@@ -47,6 +48,9 @@ endif (GLEW_SUPPORT)
 if (MPG123_SUPPORT)
  include_directories (${MPG123_INCLUDE_DIRS})
 endif (MPG123_SUPPORT)
+if (VORBIS_SUPPORT)
+ include_directories (${VORBIS_INCLUDE_DIRS})
+endif (VORBIS_SUPPORT)
 if (FFMPEG_SUPPORT)
  include_directories (${ffmpeg_INCLUDE_DIRS})
 endif (FFMPEG_SUPPORT)
@@ -179,6 +183,9 @@ endif (FFTW_SUPPORT)
 if (MPG123_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${MPG123_LIBRARIES})
 endif (MPG123_SUPPORT)
+if (VORBIS_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${VORBIS_LIBRARIES})
+endif (VORBIS_SUPPORT)
 if (FFMPEG_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${ffmpeg_LIBRARIES})
 endif (FFMPEG_SUPPORT)
@@ -311,6 +318,9 @@ elseif (WIN32)
  if (FFTW_SUPPORT)
   file (TO_CMAKE_PATH "${FFTW_LIB_DIR}" FFTW_PATH)
  endif (FFTW_SUPPORT)
+ if (VORBIS_SUPPORT)
+  file (TO_CMAKE_PATH "${VORBIS_LIB_DIR}" VORBIS_PATH)
+ endif (VORBIS_SUPPORT)
  file (TO_CMAKE_PATH "${MPG123_LIB_DIR}" MPG123_PATH)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
@@ -325,6 +335,7 @@ elseif (WIN32)
                            ${GLEW_PATH}
                            ${FFTW_PATH}
                            ${MPG123_PATH}
+                           ${VORBIS_PATH}
                            ${FFMPEG_PATH}
                            ${IMAGEMAGICK_PATH}
                            ${PROJECTM_PATH}

@@ -62,9 +62,14 @@ Test_I_HTTPParser_2::handleDataMessage (Test_I_Message*& message_inout,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_HTTPParser::handleDataMessage_2"));
 
-  if (unlikely (inherited::multiBody_))
-    return;
-
+//  if (likely (inherited::multiBody_))
+//  {
+//    if (inherited::headFragment_)
+//      goto continue_;
+//    return;
+//  } // end IF
+//
+//continue_:
   inherited::handleDataMessage (message_inout,
                                 passMessageDownstream_out);
 }

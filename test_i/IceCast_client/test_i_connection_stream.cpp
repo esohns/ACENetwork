@@ -229,14 +229,23 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-#if defined (MPG123_SUPPORT)
+//#if defined (MPG123_SUPPORT)
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_MP3_Decoder_Module (this,
+//                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_1LAYER3_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//#endif // MPG123_SUPPORT
+
+#if defined (VORBIS_SUPPORT)
   ACE_NEW_RETURN (module_p,
-                  Test_I_MP3_Decoder_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_1LAYER3_DEFAULT_NAME_STRING)),
+                  Test_I_Vorbis_Decoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_VORBIS_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
-#endif // MPG123_SUPPORT
+#endif // VORBIS_SUPPORT
 
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
   unsigned int index_i = 0;
@@ -360,25 +369,26 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct _AMMediaType media_type_s;
   ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
-  media_type_s.majortype = MEDIATYPE_Audio;
-  media_type_s.subtype = MEDIASUBTYPE_PCM;
-  media_type_s.bFixedSizeSamples = TRUE;
-  media_type_s.bTemporalCompression = FALSE;
-  media_type_s.formattype = FORMAT_WaveFormatEx;
-  media_type_s.cbFormat = sizeof (struct tWAVEFORMATEX);
-  media_type_s.pbFormat =
-    reinterpret_cast<BYTE*> (CoTaskMemAlloc (sizeof (struct tWAVEFORMATEX)));
-  ACE_ASSERT (media_type_s.pbFormat);
-  ACE_OS::memset (media_type_s.pbFormat, 0, sizeof (struct tWAVEFORMATEX));
-  struct tWAVEFORMATEX* wave_format_ex_p =
-    reinterpret_cast<struct tWAVEFORMATEX*> (media_type_s.pbFormat);
-  wave_format_ex_p->wFormatTag = WAVE_FORMAT_PCM;
-  wave_format_ex_p->nChannels = 2;
-  wave_format_ex_p->nSamplesPerSec = 44100;
-  wave_format_ex_p->nAvgBytesPerSec = 176400;
-  wave_format_ex_p->nBlockAlign = 4;
-  wave_format_ex_p->wBitsPerSample = 16;
-  wave_format_ex_p->cbSize = 0;
+  struct tWAVEFORMATEX waveformatex_s;
+  ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
+  // wave_format_ex_p->wFormatTag = WAVE_FORMAT_PCM;
+  waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+  waveformatex_s.nChannels = 2;
+  waveformatex_s.nSamplesPerSec = 44100;
+  // wave_format_ex_p->wBitsPerSample = 16;
+  waveformatex_s.wBitsPerSample = 32;
+  waveformatex_s.nBlockAlign =
+    (waveformatex_s.nChannels * (waveformatex_s.wBitsPerSample / 8));
+  waveformatex_s.nAvgBytesPerSec =
+    (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
+  if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
+                                                                 media_type_s))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), aborting\n"),
+                ACE_TEXT (stream_name_string_)));
+    goto failed;
+  } // end IF
 #else
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_ALSA_MediaType media_type_s;

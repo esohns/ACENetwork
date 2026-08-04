@@ -729,11 +729,18 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::dispatch"));
 
-  ACE_Message_Block *message_block_p = NULL, *message_block_2 = NULL;
+  ACE_Message_Block* message_block_p = NULL, *message_block_2 = NULL;
   int result = -1;
   typename SessionMessageType::DATA_T* session_data_container_p =
     inherited::sessionData_;
   size_t content_length_i, total_length_i;
+
+  // sanity check(s)
+  if (unlikely (multiBody_))
+  {
+    message_block_p = message_in; 
+    goto continue_;
+  } // end IF
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT ((message_in->capacity () - message_in->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);

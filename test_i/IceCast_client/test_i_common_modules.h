@@ -33,7 +33,12 @@
 #if defined (FFMPEG_SUPPORT)
 #include "stream_dec_libav_filter.h"
 #endif // FFMPEG_SUPPORT
+#if defined (MPG123_SUPPORT)
 #include "stream_dec_mp3_decoder.h"
+#endif // MPG123_SUPPORT
+#if defined (VORBIS_SUPPORT)
+#include "stream_dec_vorbis_decoder.h"
+#endif // VORBIS_SUPPORT
 #include "stream_dec_wav_encoder.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -158,6 +163,22 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_MP3_Decoder);                                      // writer type
 #endif // MPG123_SUPPORT
+
+#if defined (VORBIS_SUPPORT)
+typedef Stream_Decoder_VorbisDecoder_T<ACE_MT_SYNCH,
+                                       Common_TimePolicy_t,
+                                       struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                       Stream_ControlMessage_t,
+                                       Test_I_Message,
+                                       Test_I_SessionMessage_2,
+                                       Test_I_IceCastClient_SessionData_2_t> Test_I_Vorbis_Decoder;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                  // session data type
+                              enum Stream_SessionMessageType,                             // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,   // module handler configuration type
+                              libacestream_default_dec_vorbis_decoder_module_name_string,
+                              Stream_INotify_t,                                           // stream notification interface type
+                              Test_I_Vorbis_Decoder);                                     // writer type
+#endif // VORBIS_SUPPORT
 
 typedef Stream_Miscellaneous_Distributor_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
