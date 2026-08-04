@@ -92,10 +92,7 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal (was: %d --> \"%S\"), returning\n"),
-                  signal_in, signal_in));
-
-      ACE_OS::last_error (EINVAL);
-
+                  signal_in.signal, signal_in.signal));
       return;
     }
   } // end SWITCH

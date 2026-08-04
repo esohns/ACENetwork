@@ -392,6 +392,10 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
 #else
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_ALSA_MediaType media_type_s;
+  media_type_s.channels = 2;
+  media_type_s.format = SND_PCM_FORMAT_FLOAT;
+  media_type_s.rate = 44100;
+  // media_type_s.subFormat = SND_PCM_SUBFORMAT_STD;
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
