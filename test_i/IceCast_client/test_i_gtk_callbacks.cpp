@@ -161,6 +161,8 @@ idle_load_segment_cb (gpointer userData_in)
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->streamConfiguration_2.configuration_);
   ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
 
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
@@ -192,27 +194,29 @@ idle_load_segment_cb (gpointer userData_in)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // update configuration
+  data_p->configuration->streamConfiguration_2.configuration_->URL =
+    data_p->URL;
   Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
     data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
   ACE_INET_Addr host_address;
   std::string hostname_string, hostname_string_2, URI_string, URL_string;
   bool use_SSL = false;
-  if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
-                             host_address,
-                             hostname_string,
-                             URI_string,
-                             use_SSL))
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-               ACE_TEXT (data_p->URL.c_str ())));
-    return G_SOURCE_REMOVE;
-  } // end IF
   bool URI_is_relative_b;
   if (HTTP_Tools::URLIsURI (data_p->URL,
                             URI_is_relative_b))
   { ACE_ASSERT (URI_is_relative_b);
+    if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
+                               host_address,
+                               hostname_string,
+                               URI_string,
+                               use_SSL))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                 ACE_TEXT (data_p->URL.c_str ())));
+      return G_SOURCE_REMOVE;
+    } // end IF
     URL_string = ACE_TEXT_ALWAYS_CHAR ("http");
     URL_string +=
       (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
@@ -230,8 +234,8 @@ idle_load_segment_cb (gpointer userData_in)
   (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
 
   // select connector
-  size_t position = std::string::npos;
-  int result = -1;
+  size_t position;
+  int result;
   Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());

@@ -70,13 +70,16 @@
 #define HTTP_PRT_HEADER_HOST_STRING               "Host"
 #define HTTP_PRT_HEADER_LOCATION_STRING           "Location"
 #define HTTP_PRT_HEADER_REFERER_STRING            "Referer"
+#define HTTP_PRT_HEADER_SERVER_STRING             "Server"
 #define HTTP_PRT_HEADER_TRACKING_STRING           "DNT"
 #define HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING  "Transfer-Encoding"
 
 #define HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING "chunked"
 
+#define HTTP_PRT_MIMETYPE_APPLICATION_OGG_STRING  "application/ogg"
+#define HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING "application/x-www-form-urlencoded"
+#define HTTP_PRT_MIMETYPE_AUDIO_MPEG_STRING       "audio/mpeg"
 #define HTTP_PRT_MIMETYPE_AUDIO_MPEGURL_STRING    "audio/x-mpegurl"
-#define HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING   "application/x-www-form-urlencoded"
 
 // parser
 #define HTTP_PRT_LEXER_DFA_TABLES_FILENAME        "http_scanner.tab"

@@ -21,11 +21,19 @@
 
 #include "test_i_module_httpget.h"
 
+#include <string>
+#include <sstream>
+#include <vector>
+
 #include "ace/Log_Msg.h"
 
 #include "common_string_tools.h"
 
 #include "net_macros.h"
+
+#include "http_defines.h"
+
+#include "test_i_icecast_client_defines.h"
 
 Test_I_HTTPGet::Test_I_HTTPGet (ISTREAM_T* stream_in)
  : inherited (stream_in)
@@ -176,7 +184,7 @@ continue_2:
         ACE_ASSERT (session_data_r.lock);
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
           if (inherited::configuration_->closeAfterReception &&
-              (content_length <= receivedBytes_)             &&
+              (content_length <= inherited::receivedBytes_)  &&
               session_data_r.connection                      &&
               close_connection_b)
           {
@@ -346,128 +354,128 @@ Test_I_HTTPGet_2::handleDataMessage (Test_I_Message*& message_inout,
 
       inherited::receivedBytes_ += message_inout->total_length ();
 
-      if (!data_r.M3UPlaylist.stream_inf_elements.empty ())
-      {
-        const struct M3U_StreamInf_Element& element_r =
-          data_r.M3UPlaylist.stream_inf_elements.front ();
-        bool is_basename_b = Common_File_Tools::isBasename (element_r.URL);
-        std::string URL_string = element_r.URL;
+      HTTP_HeadersConstIterator_t iterator =
+        data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_SERVER_STRING)));
+      if (iterator != data_r.headers.end () &&
+          Common_String_Tools::startswith ((*iterator).second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_SERVER_PREFIX)))
+      { // --> "Icecast" server
+        // retrieve format
+        iterator =
+          data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING)));
+        ACE_ASSERT (iterator != data_r.headers.end ());
 
-        // sanity check(s)
-        ACE_ASSERT (!element_r.URL.empty ());
-
-        if (!Common_String_Tools::endswith (element_r.URL,
-                                            ACE_TEXT_ALWAYS_CHAR ("m3u")) &&
-            !Common_String_Tools::endswith (element_r.URL,
-                                            ACE_TEXT_ALWAYS_CHAR ("m3u8")))
-          goto continue_2;
-
-        // send request ?
-        // *IMPORTANT NOTE*: only auto-effectuate same-server/protocol redirects
-        if (!is_basename_b &&
-            !HTTP_Tools::parseURL (element_r.URL,
-                                   host_address,
-                                   host_name_string,
-                                   uri_string,
-                                   use_SSL))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        struct _AMMediaType media_type_s;
+        ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
+        struct tWAVEFORMATEX waveformatex_s;
+        ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
+        waveformatex_s.nChannels = 2;
+        waveformatex_s.nSamplesPerSec = 44100;
+#else
+        struct Stream_MediaFramework_ALSA_MediaType media_type_s;
+#endif // ACE_WIN32 || ACE_WIN64
+        if ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_OGG_STRING))
         {
-          ACE_DEBUG ((LM_ERROR,
-                     ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
-                     inherited::mod_->name (),
-                     ACE_TEXT (element_r.URL.c_str ())));
-          goto error;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+          waveformatex_s.wBitsPerSample = 32;
+#else
+          media_type_s.format = SND_PCM_FORMAT_FLOAT;
+#endif // ACE_WIN32 || ACE_WIN64
         } // end IF
-        if (!HTTP_Tools::parseURL (inherited::configuration_->URL,
-                                   host_address,
-                                   host_name_string_2,
-                                   uri_string_2,
-                                   use_SSL_2))
+        else if ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_AUDIO_MPEG_STRING))
         {
-          ACE_DEBUG ((LM_ERROR,
-                     ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
-                     inherited::mod_->name (),
-                     ACE_TEXT ((*iterator).second.c_str ())));
-          goto error;
-        } // end IF
-        if (is_basename_b)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          waveformatex_s.wFormatTag = WAVE_FORMAT_PCM;
+          waveformatex_s.wBitsPerSample = 16;
+#else
+          media_type_s.format = SND_PCM_FORMAT_S16;
+#endif // ACE_WIN32 || ACE_WIN64
+        } // end ELSE IF
+        else
         {
-          host_name_string = host_name_string_2;
-          use_SSL = use_SSL_2;
+          ACE_DEBUG ((LM_WARNING,
+                      ACE_TEXT ("invalid/unknown MIME Type (was: \"%s\"), continuing\n"),
+                      ACE_TEXT ((*iterator).second.c_str ())));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          waveformatex_s.wFormatTag = WAVE_FORMAT_PCM; // assumed
+#else
+          media_type_s.format = SND_PCM_FORMAT_S16; // assumed
+#endif // ACE_WIN32 || ACE_WIN64
+        } // end ELSE
 
-          URL_string = ACE_TEXT_ALWAYS_CHAR ("http");
-          URL_string +=
-            (use_SSL ? ACE_TEXT_ALWAYS_CHAR ("s") : ACE_TEXT_ALWAYS_CHAR (""));
-          URL_string += ACE_TEXT_ALWAYS_CHAR ("://");
-          URL_string += host_name_string;
-          size_t position = uri_string_2.find_last_of ('/', std::string::npos);
-          ACE_ASSERT (position != std::string::npos);
-          uri_string_2.erase (position + 1, std::string::npos);
-          URL_string += uri_string_2;
-          URL_string += element_r.URL;
-        } // end IF
-        if (likely ((host_name_string != host_name_string_2) ||
-                    (use_SSL != use_SSL_2)))
-        { // *TODO*
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("%s: URL (was: \"%s\") redirects to a different host, and/or requires a HTTP(S) connection, cannot proceed\n"),
-                      inherited::mod_->name (),
-                      ACE_TEXT (inherited::configuration_->URL.c_str ())));
-          passMessageDownstream_out = false;
-          goto error;
-        } // end IF
-
-        inherited::receivedBytes_ = 0;
-        close_connection_b = false;
-        passMessageDownstream_out = false;
-
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("retrieving \"%s\"...\n"),
-                    ACE_TEXT (URL_string.c_str ())));
-        if (!inherited::send (URL_string,
-                              HTTP_Codes::HTTP_METHOD_GET,
-                              inherited::configuration_->HTTPHeaders,
-                              inherited::configuration_->HTTPForm))
+        // retrieve #channels,Hz
+        iterator =
+          data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO)));
+        ACE_ASSERT (iterator != data_r.headers.end ());
+        std::stringstream values_string ((*iterator).second);
+        std::string value_string;
+        std::vector<std::string> values_a;
+        while (std::getline (values_string, value_string, ';'))
+          values_a.push_back (value_string);
+        size_t position;
+        std::istringstream converter;
+        for (std::vector<std::string>::const_iterator iterator_2 = values_a.begin ();
+             iterator_2 != values_a.end ();
+             ++iterator_2)
         {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("%s: failed to send HTTP request \"%s\", aborting\n"),
-                      inherited::mod_->name (),
-                      ACE_TEXT (URL_string.c_str ())));
-          goto error;
-        } // end IF
-
-        goto continue_;
-      } // end IF
-
-      // got all data ? --> close connection ?
-continue_2:
-      iterator =
-        data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
-      if (iterator != data_r.headers.end ())
-      {
-        std::istringstream converter ((*iterator).second);
-        unsigned int content_length = 0;
-        converter >> content_length;
-        ACE_ASSERT (session_data_r.lock);
-        { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
-          if (inherited::configuration_->closeAfterReception &&
-              (content_length <= receivedBytes_)             &&
-              session_data_r.connection                      &&
-              close_connection_b)
+          if (Common_String_Tools::startswith (*iterator_2,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO_HZ)))
           {
-            ACE_DEBUG ((LM_DEBUG,
-                       ACE_TEXT ("%s: received all content, aborting connection\n"),
-                       inherited::mod_->name ()));
-            ACE_ASSERT (session_data_r.connection);
-            session_data_r.connection->abort ();
+            position = (*iterator_2).rfind ('=', std::string::npos);
+            ACE_ASSERT (position != std::string::npos);
+            value_string = (*iterator_2).substr (position + 1, std::string::npos);
+            converter.str (value_string);
+            converter.clear ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+            converter >> waveformatex_s.nSamplesPerSec;
+#else
+            converter >> media_type_s.rate;
+#endif // ACE_WIN32 || ACE_WIN64
           } // end IF
-        } // end lock scope
+          else if (Common_String_Tools::startswith (*iterator_2,
+                                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO_CHANNELS)))
+          {
+            position = (*iterator_2).rfind ('=', std::string::npos);
+            ACE_ASSERT (position != std::string::npos);
+            value_string = (*iterator_2).substr (position + 1, std::string::npos);
+            converter.str (value_string);
+            converter.clear ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+            converter >> waveformatex_s.nChannels;
+#else
+            converter >> media_type_s.channels;
+#endif // ACE_WIN32 || ACE_WIN64
+          } // end ELSE IF
+        } // end FOR
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        waveformatex_s.nBlockAlign =
+          (waveformatex_s.nChannels * (waveformatex_s.wBitsPerSample / 8));
+        waveformatex_s.nAvgBytesPerSec =
+          (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
+        if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
+                                                                       media_type_s))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), returning\n"),
+                      ACE_TEXT (inherited::mod_->name ())));
+          return;
+        } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
+ 
+        // --> update session data and notify stream
+        session_data_r.formats.push_back (media_type_s);
+        // *TODO*: this won't work as intended, because the stream layout has already been configured and the wrong decoder module might be used
+        this->notify (STREAM_SESSION_MESSAGE_FORMAT,
+                      true); // expedite
       } // end IF
       else
         ACE_DEBUG ((LM_WARNING,
-                   ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
-                   inherited::mod_->name (),
-                   ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-continue_:
+                    ACE_TEXT ("%s: not an icecast server, continuing\n"),
+                    ACE_TEXT (inherited::mod_->name ())));
+
       break; // done
     }
     case HTTP_Codes::HTTP_STATUS_MULTIPLECHOICES:

@@ -46,17 +46,17 @@ class Test_I_EventHandler
   virtual void notify (Stream_SessionId_t,
                        const enum Stream_SessionMessageType&,
                        bool = false);
-  virtual void end (Stream_SessionId_t);                // session id
-  virtual void notify (Stream_SessionId_t,              // session id
-                       const Test_I_Message&);          // (protocol) message
-  virtual void notify (Stream_SessionId_t,              // session id
-                       const Test_I_SessionMessage&);   // session message
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,     // session id
+                       const Test_I_Message&); // message
+  virtual void notify (Stream_SessionId_t,            // session id
+                       const Test_I_SessionMessage&); // session message
 
   // implement Stream_ISessionDataNotify_2_T
   virtual void start (Stream_SessionId_t,                                // session id
                       const struct Test_I_IceCastClient_SessionData_2&); // session data
-  virtual void notify (Stream_SessionId_t,                // session id
-                       const Test_I_SessionMessage_2&);   // session message
+  virtual void notify (Stream_SessionId_t,              // session id
+                       const Test_I_SessionMessage_2&); // session message
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler ())
@@ -70,6 +70,7 @@ class Test_I_EventHandler
   typedef SESSION_DATA_MAP_2_T::iterator SESSION_DATA_MAP_ITERATOR_2_T;
 
   struct Test_I_IceCastClient_UI_CBData* CBData_;
+  bool                                   isFirst_; // first data message ?
   SESSION_DATA_MAP_T                     sessionDataMap_;
   SESSION_DATA_MAP_2_T                   sessionDataMap2_;
 };

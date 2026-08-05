@@ -41,12 +41,12 @@
 
 #include "net_macros.h"
 
-// #include "test_i_message.h"
 #include "test_i_session_message.h"
 #include "test_i_common_modules.h"
 #include "test_i_m3u_module_parser.h"
 #include "test_i_module_httpget.h"
 #include "test_i_module_httpparser.h"
+#include "test_i_icecast_client_defines.h"
 
 Test_I_ConnectionStream::Test_I_ConnectionStream ()
  : inherited ()
@@ -203,6 +203,16 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::load"));
 
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->configuration_);
+
+  Test_I_SessionManager_2* session_manager_p =
+    Test_I_SessionManager_2::SINGLETON_T::instance ();
+  ACE_ASSERT (session_manager_p);
+  struct Test_I_IceCastClient_SessionData_2& session_data_r =
+    const_cast<struct Test_I_IceCastClient_SessionData_2&> (session_manager_p->getR (inherited::id_));
+
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
   ACE_ASSERT (result);
@@ -229,23 +239,79 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-//#if defined (MPG123_SUPPORT)
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_MP3_Decoder_Module (this,
-//                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_1LAYER3_DEFAULT_NAME_STRING)),
-//                  false);
-//  layout_in->append (module_p, NULL, 0);
-//  module_p = NULL;
-//#endif // MPG123_SUPPORT
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _AMMediaType media_type_s;
+  ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
+  struct tWAVEFORMATEX waveformatex_s;
+  ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
+  waveformatex_s.nChannels = 2;
+  waveformatex_s.nSamplesPerSec = 44100;
+#else
+  struct Stream_MediaFramework_ALSA_MediaType media_type_s;
+  media_type_s.channels = 2;
+  media_type_s.rate = 44100;
+  // media_type_s.subFormat = SND_PCM_SUBFORMAT_STD;
+#endif // ACE_WIN32 || ACE_WIN64
 
+  if (Common_String_Tools::endswith (inherited::configuration_->configuration_->URL,
+                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGG_SUFFIX)))
+  {
 #if defined (VORBIS_SUPPORT)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Vorbis_Decoder_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_VORBIS_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Vorbis_Decoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_VORBIS_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
 #endif // VORBIS_SUPPORT
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+    waveformatex_s.wBitsPerSample = 32;
+#else
+    media_type_s.format = SND_PCM_FORMAT_FLOAT;
+#endif
+  } // end IF
+  else
+  { // --> assume mp3 stream
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: \"%s\" apparently not an OGG/Vorbis stream; assuming MP3....\n"),
+                ACE_TEXT (stream_name_string_),
+                ACE_TEXT (inherited::configuration_->configuration_->URL.c_str ())));
+
+#if defined (MPG123_SUPPORT)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_MP3_Decoder_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_1LAYER3_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+#endif // MPG123_SUPPORT
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    waveformatex_s.wFormatTag = WAVE_FORMAT_PCM;
+    waveformatex_s.wBitsPerSample = 16;
+#else
+    media_type_s.format = SND_PCM_FORMAT_S16;
+#endif
+  } // end ELSE
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  waveformatex_s.nBlockAlign =
+    (waveformatex_s.nChannels * (waveformatex_s.wBitsPerSample / 8));
+  waveformatex_s.nAvgBytesPerSec =
+    (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
+  if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
+                                                                 media_type_s))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), aborting\n"),
+                ACE_TEXT (stream_name_string_)));
+    return false;
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (session_data_r.formats.empty ());
+  session_data_r.formats.push_front (media_type_s);
 
   typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
   unsigned int index_i = 0;
@@ -357,50 +423,15 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   // sanity check(s)
   ACE_ASSERT (!inherited::isRunning ());
 
-//  bool result = false;
+  // sanity check(s)
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
   struct Test_I_IceCastClient_SessionData_2* session_data_p = NULL;
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.end ());
   Test_I_SessionManager_2* session_manager_p =
     Test_I_SessionManager_2::SINGLETON_T::instance ();
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType media_type_s;
-  ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
-  struct tWAVEFORMATEX waveformatex_s;
-  ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
-  // wave_format_ex_p->wFormatTag = WAVE_FORMAT_PCM;
-  waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
-  waveformatex_s.nChannels = 2;
-  waveformatex_s.nSamplesPerSec = 44100;
-  // wave_format_ex_p->wBitsPerSample = 16;
-  waveformatex_s.wBitsPerSample = 32;
-  waveformatex_s.nBlockAlign =
-    (waveformatex_s.nChannels * (waveformatex_s.wBitsPerSample / 8));
-  waveformatex_s.nAvgBytesPerSec =
-    (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
-  if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
-                                                                 media_type_s))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    goto failed;
-  } // end IF
-#else
-#if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_ALSA_MediaType media_type_s;
-  media_type_s.channels = 2;
-  media_type_s.format = SND_PCM_FORMAT_FLOAT;
-  media_type_s.rate = 44100;
-  // media_type_s.subFormat = SND_PCM_SUBFORMAT_STD;
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-
-  // sanity check(s)
-  ACE_ASSERT (iterator != configuration_in.end ());
   ACE_ASSERT (session_manager_p);
 
   // allocate a new session state, reset stream
@@ -423,8 +454,6 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
     &const_cast<struct Test_I_IceCastClient_SessionData_2&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
-  ACE_ASSERT (session_data_p->formats.empty ());
-  session_data_p->formats.push_front (media_type_s);
 
   // ---------------------------------------------------------------------------
 

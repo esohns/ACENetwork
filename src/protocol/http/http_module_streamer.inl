@@ -150,7 +150,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
         // add content-length header ?
         converter << content_buffer.size ();
         iterator =
-            record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+          record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
         if (iterator == record_r.headers.end ())
           record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
                                                    converter.str ()));
@@ -159,14 +159,13 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
           (*iterator).second = converter.str ();
         } // end ELSE
         iterator =
-            record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING));
+          record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING));
         if (iterator == record_r.headers.end ())
           record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING),
-                                                   ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING)));
+                                                   ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING)));
         else
         { ACE_ASSERT ((*iterator).second.empty ());
-          (*iterator).second =
-            ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING);
+          (*iterator).second = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING);
         } // end ELSE
 
         break;

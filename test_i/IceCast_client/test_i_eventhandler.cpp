@@ -28,6 +28,8 @@
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_string_tools.h"
+
 #include "common_ui_common.h"
 #if defined (GTK_SUPPORT)
 #include "common_ui_gtk_manager_common.h"
@@ -40,10 +42,10 @@
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
-#include "test_i_defines.h"
 
 Test_I_EventHandler::Test_I_EventHandler (struct Test_I_IceCastClient_UI_CBData* CBData_in)
  : CBData_ (CBData_in)
+ , isFirst_ (true)
  , sessionDataMap_ ()
  , sessionDataMap2_ ()
 {
@@ -176,34 +178,38 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   } // end lock scope
 #endif // GTK_USE
 
-  Test_I_MessageDataContainer& data_container_r =
-    const_cast<Test_I_MessageDataContainer&> (message_in.getR ());
-  struct Test_I_IceCastClient_MessageData& data_r =
-    const_cast<struct Test_I_IceCastClient_MessageData&> (data_container_r.getR ());
-  if (!data_r.M3UPlaylist.ext_inf_elements.empty ())
-  {
-    const struct M3U_ExtInf_Element& element_r =
-      data_r.M3UPlaylist.ext_inf_elements.front ();
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("loading \"%s\"...\n"),
-                ACE_TEXT (element_r.URL.c_str ())));
-    CBData_->URL = element_r.URL;
+  if (unlikely (isFirst_))
+  { isFirst_ = false;
+    Test_I_MessageDataContainer& data_container_r =
+      const_cast<Test_I_MessageDataContainer&> (message_in.getR ());
+    struct Test_I_IceCastClient_MessageData& data_r =
+      const_cast<struct Test_I_IceCastClient_MessageData&> (data_container_r.getR ());
+    if (!data_r.M3UPlaylist.ext_inf_elements.empty ())
+    { isFirst_ = true; // prepare for second session
+      const struct M3U_ExtInf_Element& element_r =
+        data_r.M3UPlaylist.ext_inf_elements.front ();
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("loading \"%s\"...\n"),
+                  ACE_TEXT (element_r.URL.c_str ())));
+      CBData_->URL = element_r.URL;
+
 #if defined (GTK_USE)
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-      guint event_source_id =
-        //g_idle_add (idle_load_segment_cb,
-        g_timeout_add (0,
-                       idle_load_segment_cb,
-                       CBData_);
-      if (event_source_id == 0)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_idle_add(idle_load_segment_cb): \"%m\", returning\n")));
-        return;
-      } // end IF
-      state_r.eventSourceIds.insert (event_source_id);
-    } // end lock scope
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+        guint event_source_id =
+          //g_idle_add (idle_load_segment_cb,
+          g_timeout_add (0,
+                         idle_load_segment_cb,
+                         CBData_);
+        if (event_source_id == 0)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to g_idle_add(idle_load_segment_cb): \"%m\", returning\n")));
+          return;
+        } // end IF
+        state_r.eventSourceIds.insert (event_source_id);
+      } // end lock scope
 #endif // GTK_USE
+    } // end IF
   } // end IF
 }
 
@@ -410,6 +416,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       CBData_->spectrumAnalyzerCBData.dispatch = NULL;
       CBData_->spectrumAnalyzerCBData.resizeNotification = NULL;
 #endif // GTK_SUPPORT
+      isFirst_ = true;
 
 #if defined (GTK_USE)
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
@@ -458,6 +465,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       event_e = COMMON_UI_EVENT_STATISTIC;
       break;
     }
+    case STREAM_SESSION_MESSAGE_FORMAT:
+      event_e = COMMON_UI_EVENT_FORMAT;
+      break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -467,6 +477,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     }
   } // end SWITCH
 #if defined (GTK_USE)
-  state_r.eventStack.push (event_e);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (event_e);
+  } // end lock scope
 #endif // GTK_USE
 }

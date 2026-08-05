@@ -244,8 +244,22 @@ struct Test_I_IceCastClient_StreamConfiguration_2
 {
   Test_I_IceCastClient_StreamConfiguration_2 ()
    : HTTP_StreamConfiguration ()
-  {}
+   , format ()
+   , URL ()
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_OS::memset (&format, 0, sizeof (struct _AMMediaType));
+#endif // ACE_WIN32 || ACE_WIN64
+  }
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _AMMediaType                         format;
+#else
+  struct Stream_MediaFramework_ALSA_MediaType format;
+#endif // ACE_WIN32 || ACE_WIN64
+  std::string                                 URL;
 };
+
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_I_IceCastClient_StreamConfiguration_2,

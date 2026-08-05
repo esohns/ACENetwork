@@ -392,7 +392,6 @@
                                 <property name="invisible_char">●</property>
                                 <property name="activates_default">True</property>
                                 <property name="text" translatable="yes">http://streaming.fueralle.org:8000/bermudafunk_high.m3u</property>
-                                <property name="xalign">1</property>
                                 <property name="shadow_type">etched-in</property>
                                 <property name="caps_lock_warning">False</property>
                                 <property name="primary_icon_stock">gtk-network</property>

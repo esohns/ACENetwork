@@ -23,12 +23,21 @@
 
 #include "net_defines.h"
 
-#define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE          "output.wav"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE           "output.wav"
 //#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                  "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
-#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                  "http://streaming.fueralle.org:8000/bermudafunk.ogg.m3u"
-#define TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE         "IceCast client"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "http://streaming.fueralle.org:8000/bermudafunk.ogg.m3u"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE          "IceCast client"
 
-#define TEST_I_ICECAST_CLIENT_DEFAULT_BUFFER_SIZE          NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE
+#define TEST_I_ICECAST_CLIENT_DEFAULT_BUFFER_SIZE           NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE
+
+// HTTP headers
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_SERVER_PREFIX       "Icecast"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO          "ice-audio-info"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO_CHANNELS "ice-channels"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO_HZ       "ice-samplerate"
+
+// stream URL
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGG_SUFFIX ".ogg"
 
 //---------------------------------------
 
@@ -54,28 +63,28 @@
 
 //---------------------------------------
 
-#define TEST_I_UI_GTK_BOX_DISPLAY_NAME                    "box_display"
-#define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
-#define TEST_I_UI_GTK_BUTTON_CUT_NAME                     "button_cut"
-#define TEST_I_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
-#define TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME             "checkbutton_asynch"
-#define TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME           "checkbutton_loopback"
-#define TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME               "checkbutton_save"
-#define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                   "dialog_about"
-#define TEST_I_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
-#define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea_analyzer"
-#define TEST_I_UI_GTK_DRAWINGAREA_PROJECTM_NAME           "drawingarea_projectm"
-#define TEST_I_UI_GTK_ENTRY_URL_NAME                      "entry_url"
-#define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
-#define TEST_I_UI_GTK_PROGRESSBAR_NAME                    "progressbar"
-#define TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME          "spinbutton_buffersize"
-#define TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME         "spinbutton_connections"
-#define TEST_I_UI_GTK_SPINBUTTON_DATA_NAME                "spinbutton_data"
-#define TEST_I_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME        "spinbutton_data_messages"
-#define TEST_I_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME     "spinbutton_session_messages"
-#define TEST_I_UI_GTK_SPINNER_NAME                        "spinner"
-#define TEST_I_UI_GTK_STATUSBAR_NAME                      "statusbar"
-#define TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME           "togglebutton_connect"
-#define TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME             "vbox_configuration"
+#define TEST_I_UI_GTK_BOX_DISPLAY_NAME                      "box_display"
+#define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                     "button_about"
+#define TEST_I_UI_GTK_BUTTON_CUT_NAME                       "button_cut"
+#define TEST_I_UI_GTK_BUTTON_QUIT_NAME                      "button_quit"
+#define TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME               "checkbutton_asynch"
+#define TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME             "checkbutton_loopback"
+#define TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME                 "checkbutton_save"
+#define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                     "dialog_about"
+#define TEST_I_UI_GTK_DIALOG_MAIN_NAME                      "dialog_main"
+#define TEST_I_UI_GTK_DRAWINGAREA_NAME                      "drawingarea_analyzer"
+#define TEST_I_UI_GTK_DRAWINGAREA_PROJECTM_NAME             "drawingarea_projectm"
+#define TEST_I_UI_GTK_ENTRY_URL_NAME                        "entry_url"
+#define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME           "filechooserbutton_save"
+#define TEST_I_UI_GTK_PROGRESSBAR_NAME                      "progressbar"
+#define TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME            "spinbutton_buffersize"
+#define TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME           "spinbutton_connections"
+#define TEST_I_UI_GTK_SPINBUTTON_DATA_NAME                  "spinbutton_data"
+#define TEST_I_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME          "spinbutton_data_messages"
+#define TEST_I_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME       "spinbutton_session_messages"
+#define TEST_I_UI_GTK_SPINNER_NAME                          "spinner"
+#define TEST_I_UI_GTK_STATUSBAR_NAME                        "statusbar"
+#define TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME             "togglebutton_connect"
+#define TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME               "vbox_configuration"
 
 #endif
