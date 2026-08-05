@@ -272,6 +272,27 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
     media_type_s.format = SND_PCM_FORMAT_FLOAT;
 #endif
   } // end IF
+  else if (Common_String_Tools::endswith (inherited::configuration_->configuration_->URL,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OPUS_SUFFIX)))
+  {
+#if defined (OPUS_SUPPORT)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Opus_Decoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_OPUS_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+#endif // OPUS_SUPPORT
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+    waveformatex_s.wBitsPerSample = 32;
+    waveformatex_s.nSamplesPerSec = 48000;
+#else
+    media_type_s.format = SND_PCM_FORMAT_FLOAT;
+    media_type_s.rate = 48000;
+#endif
+  } // end IF
   else
   { // --> assume mp3 stream
     ACE_DEBUG ((LM_DEBUG,

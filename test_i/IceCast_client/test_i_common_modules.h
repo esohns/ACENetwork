@@ -36,6 +36,9 @@
 #if defined (MPG123_SUPPORT)
 #include "stream_dec_mp3_decoder.h"
 #endif // MPG123_SUPPORT
+#if defined (OPUS_SUPPORT)
+#include "stream_dec_opus_decoder.h"
+#endif // OPUS_SUPPORT
 #if defined (VORBIS_SUPPORT)
 #include "stream_dec_vorbis_decoder.h"
 #endif // VORBIS_SUPPORT
@@ -163,6 +166,22 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_MP3_Decoder);                                      // writer type
 #endif // MPG123_SUPPORT
+
+#if defined (OPUS_SUPPORT)
+typedef Stream_Decoder_OpusDecoder_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
+                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                     Stream_ControlMessage_t,
+                                     Test_I_Message,
+                                     Test_I_SessionMessage_2,
+                                     Test_I_IceCastClient_SessionData_2_t> Test_I_Opus_Decoder;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_dec_opus_decoder_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_Opus_Decoder);                                     // writer type
+#endif // OPUS_SUPPORT
 
 #if defined (VORBIS_SUPPORT)
 typedef Stream_Decoder_VorbisDecoder_T<ACE_MT_SYNCH,

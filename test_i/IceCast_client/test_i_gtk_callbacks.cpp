@@ -1326,6 +1326,7 @@ idle_update_info_display_cb (gpointer userData_in)
         case COMMON_UI_EVENT_FINISHED:
         case COMMON_UI_EVENT_ABORT:
         case COMMON_UI_EVENT_STEP:
+        case COMMON_UI_EVENT_FORMAT:
         {
           spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,

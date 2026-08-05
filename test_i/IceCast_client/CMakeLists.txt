@@ -1,5 +1,8 @@
 include (OpenGL)
 
+include (ffmpeg)
+include (ImageMagick)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/gl/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/gl/scripts")
 include (glut)
 include (glew)
@@ -10,12 +13,8 @@ include (fftw)
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
 include (mpg123)
+include (opus)
 include (vorbis)
-
-include (ffmpeg)
-include (ImageMagick)
-#set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
-#include (PreXMLImplementation)
 
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/vis/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/vis/scripts")
 include (projectm)
@@ -48,15 +47,15 @@ endif (GLEW_SUPPORT)
 if (MPG123_SUPPORT)
  include_directories (${MPG123_INCLUDE_DIRS})
 endif (MPG123_SUPPORT)
+if (OPUS_SUPPORT)
+ include_directories (${OPUS_INCLUDE_DIRS})
+endif (OPUS_SUPPORT)
 if (VORBIS_SUPPORT)
  include_directories (${VORBIS_INCLUDE_DIRS})
 endif (VORBIS_SUPPORT)
 if (FFMPEG_SUPPORT)
  include_directories (${ffmpeg_INCLUDE_DIRS})
 endif (FFMPEG_SUPPORT)
-#if (LIBXML2_SUPPORT)
-# include_directories (${LIBXML2_INCLUDE_DIRS})
-#endif (LIBXML2_SUPPORT)
 if (PROJECTM_SUPPORT)
  include_directories (${PROJECTM_INCLUDE_DIRS})
 endif (PROJECTM_SUPPORT)
@@ -183,16 +182,15 @@ endif (FFTW_SUPPORT)
 if (MPG123_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${MPG123_LIBRARIES})
 endif (MPG123_SUPPORT)
+if (OPUS_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${OPUS_LIBRARIES})
+endif (OPUS_SUPPORT)
 if (VORBIS_SUPPORT)
-# target_link_options (${EXECUTABLE} PUBLIC "-lvorbis")
  target_link_libraries (${EXECUTABLE} PUBLIC ${VORBIS_LIBRARIES})
 endif (VORBIS_SUPPORT)
 if (FFMPEG_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${ffmpeg_LIBRARIES})
 endif (FFMPEG_SUPPORT)
-#if (LIBXML2_SUPPORT)
-# target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
-#endif (LIBXML2_SUPPORT)
 if (PROJECTM_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECTM_LIBRARIES})
 endif (PROJECTM_SUPPORT)
@@ -319,6 +317,9 @@ elseif (WIN32)
  if (FFTW_SUPPORT)
   file (TO_CMAKE_PATH "${FFTW_LIB_DIR}" FFTW_PATH)
  endif (FFTW_SUPPORT)
+ if (OPUS_SUPPORT)
+  file (TO_CMAKE_PATH "${OPUS_LIB_DIR}" OPUS_PATH)
+ endif (OPUS_SUPPORT)
  if (VORBIS_SUPPORT)
   file (TO_CMAKE_PATH "${VORBIS_LIB_DIR}" VORBIS_PATH)
  endif (VORBIS_SUPPORT)
@@ -330,15 +331,15 @@ elseif (WIN32)
  endif (PROJECTM_SUPPORT)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)
  set (RUNTIME_LIBRARY_DIRS ${SSL_PATH}
-#                           ${LIBXML2_PATH}
+                           ${FFMPEG_PATH}
+                           ${IMAGEMAGICK_PATH}
                            ${VCPKG_LIB_PATH}
                            ${VCPKG_LIB_PATH_2}
                            ${GLEW_PATH}
                            ${FFTW_PATH}
                            ${MPG123_PATH}
+                           ${OPUS_PATH}
                            ${VORBIS_PATH}
-                           ${FFMPEG_PATH}
-                           ${IMAGEMAGICK_PATH}
                            ${PROJECTM_PATH}
                            ${GTK_PATH}
                            ${WXWIDGETS_PATH}

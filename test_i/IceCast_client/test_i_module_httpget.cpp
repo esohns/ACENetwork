@@ -396,7 +396,8 @@ Test_I_HTTPGet_2::handleDataMessage (Test_I_Message*& message_inout,
         else
         {
           ACE_DEBUG ((LM_WARNING,
-                      ACE_TEXT ("invalid/unknown MIME Type (was: \"%s\"), continuing\n"),
+                      ACE_TEXT ("%s: invalid/unknown MIME Type (was: \"%s\"), continuing\n"),
+                      ACE_TEXT (inherited::mod_->name ()),
                       ACE_TEXT ((*iterator).second.c_str ())));
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           waveformatex_s.wFormatTag = WAVE_FORMAT_PCM; // assumed
@@ -408,7 +409,14 @@ Test_I_HTTPGet_2::handleDataMessage (Test_I_Message*& message_inout,
         // retrieve #channels,Hz
         iterator =
           data_r.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO)));
-        ACE_ASSERT (iterator != data_r.headers.end ());
+        if (iterator == data_r.headers.end ())
+        {
+          ACE_DEBUG ((LM_WARNING,
+                      ACE_TEXT ("%s: no \"%s\" header: cannot update stream format, returning\n"),
+                      ACE_TEXT (inherited::mod_->name ()),
+                      ACE_TEXT (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO)));
+          break;
+        } // end IF
         std::stringstream values_string ((*iterator).second);
         std::string value_string;
         std::vector<std::string> values_a;
