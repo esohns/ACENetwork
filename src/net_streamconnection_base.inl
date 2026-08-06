@@ -526,6 +526,18 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 //  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
     if (likely (notify_ && !initialization_failed_b))
     { notify_ = false;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%u: (handle: 0x%@) disconnecting...\n"),
+                  id (),
+                  handle_in));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%u: (handle: %d) disconnecting...\n"),
+                  id (),
+                  handle_in));
+#endif // ACE_WIN32 || ACE_WIN64
+
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
                       true,   // recurse upstream (if any) ?
                       false); // expedite ?

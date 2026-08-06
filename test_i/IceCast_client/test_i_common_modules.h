@@ -42,6 +42,9 @@
 #if defined (VORBIS_SUPPORT)
 #include "stream_dec_vorbis_decoder.h"
 #endif // VORBIS_SUPPORT
+#if defined (WEBM_SUPPORT)
+#include "stream_dec_webm_demuxer.h"
+#endif // WEBM_SUPPORT
 #include "stream_dec_wav_encoder.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -198,6 +201,32 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                           // stream notification interface type
                               Test_I_Vorbis_Decoder);                                     // writer type
 #endif // VORBIS_SUPPORT
+
+#if defined (WEBM_SUPPORT)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+typedef Stream_Decoder_WebM_Demuxer_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                      Stream_ControlMessage_t,
+                                      Test_I_Message,
+                                      Test_I_SessionMessage_2,
+                                      struct _AMMediaType> Test_I_WebM_Demuxer;
+#else
+typedef Stream_Decoder_WebM_Demuxer_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                      Stream_ControlMessage_t,
+                                      Test_I_Message,
+                                      Test_I_SessionMessage_2,
+                                      struct Stream_MediaFramework_ALSA_MediaType> Test_I_WebM_Demuxer;
+#endif // ACE_WIN32 || ACE_WIN64
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_dec_webm_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_WebM_Demuxer);                                     // writer type
+#endif // WEBM_SUPPORT
 
 typedef Stream_Miscellaneous_Distributor_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,

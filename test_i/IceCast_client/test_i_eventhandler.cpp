@@ -188,10 +188,24 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     { isFirst_ = true; // prepare for second session
       const struct M3U_ExtInf_Element& element_r =
         data_r.M3UPlaylist.ext_inf_elements.front ();
+
+      std::string request_protocol_string =
+        Net_Common_Tools::URLToProtocol (CBData_->URL);
+      std::string request_2_protocol_string =
+        Net_Common_Tools::URLToProtocol (element_r.URL);
+      std::string URL_string = element_r.URL;
+      if (request_protocol_string != request_2_protocol_string)
+      { // *NOTE*: probably misconfigured server...
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("request protocol \"%s\" does not match protocol of the response URL: \"%s\", patching response URL...\n"),
+                    ACE_TEXT (request_protocol_string.c_str ()),
+                    ACE_TEXT (request_2_protocol_string.c_str ())));
+        URL_string.insert (4, 1, 's');
+      } // end IF
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("loading \"%s\"...\n"),
-                  ACE_TEXT (element_r.URL.c_str ())));
-      CBData_->URL = element_r.URL;
+                  ACE_TEXT (URL_string.c_str ())));
+      CBData_->URL = URL_string;
 
 #if defined (GTK_USE)
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);

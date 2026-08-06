@@ -260,6 +260,10 @@ idle_load_segment_cb (gpointer userData_in)
                           : HTTP_DEFAULT_SERVER_PORT);
     hostname_string_2 += converter.str ();
   } // end IF
+  hostname_string =
+    Net_Common_Tools::URLToHostName (URL_string,
+                                     false,  // return hostname
+                                     false); // do not return port#
   static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.hostname =
     hostname_string;
   result =
@@ -1536,6 +1540,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (entry_p);
     (*iterator_3).second.second->URL =
       Common_UI_GTK_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p), -1);
+    data_p->URL = (*iterator_3).second.second->URL; // remember the request URL
     if (!HTTP_Tools::parseURL ((*iterator_3).second.second->URL,
                                host_address,
                                hostname_string,
@@ -1547,11 +1552,15 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
       goto error;
     } // end IF
-
+    hostname_string_2 = hostname_string; // save with (potential) port#
+    // remove (potential) port#
+    hostname_string =
+      Net_Common_Tools::URLToHostName ((*iterator_3).second.second->URL,
+                                       false,  // return hostname
+                                       false); // do not return port#
     static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
       hostname_string;
 
-    hostname_string_2 = hostname_string;
     position =
       hostname_string_2.find_last_of (':', std::string::npos);
     if (position == std::string::npos)

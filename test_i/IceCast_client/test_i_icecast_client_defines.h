@@ -26,7 +26,8 @@
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE           "output.wav"
 //#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                  "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
 //#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "http://streaming.fueralle.org:8000/bermudafunk.ogg.m3u"
-#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "http://xfer.hirschmilch.de:8000/chillout.opus.m3u"
+//#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "http://xfer.hirschmilch.de:8000/chillout.opus.m3u"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "https://rdst.win:59000/dos.webm.m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE          "IceCast client"
 
 #define TEST_I_ICECAST_CLIENT_DEFAULT_BUFFER_SIZE           NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE
@@ -36,10 +37,13 @@
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO          "ice-audio-info"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO_CHANNELS "ice-channels"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO_HZ       "ice-samplerate"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_ICY_METADATA        "Icy-Metadata"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_USER_AGENT_SPOOF            "VLC/3.0.16"
 
 // stream URL
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGG_SUFFIX  ".ogg"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OPUS_SUFFIX ".opus"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_WEBM_SUFFIX ".webm"
 
 //---------------------------------------
 

@@ -375,7 +375,17 @@ Test_I_HTTPGet_2::handleDataMessage (Test_I_Message*& message_inout,
 #else
         struct Stream_MediaFramework_ALSA_MediaType media_type_s;
 #endif // ACE_WIN32 || ACE_WIN64
-        if ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_OGG_STRING))
+        if ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_VIDEO_WEBM_STRING))
+        {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+          waveformatex_s.wBitsPerSample = 32;
+          waveformatex_s.nSamplesPerSec = 48000;
+#else
+          media_type_s.format = SND_PCM_FORMAT_FLOAT;
+#endif // ACE_WIN32 || ACE_WIN64
+        } // end IF
+        else if ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_OGG_STRING))
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
@@ -383,7 +393,7 @@ Test_I_HTTPGet_2::handleDataMessage (Test_I_Message*& message_inout,
 #else
           media_type_s.format = SND_PCM_FORMAT_FLOAT;
 #endif // ACE_WIN32 || ACE_WIN64
-        } // end IF
+        } // end ELSE IF
         else if ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_AUDIO_MPEG_STRING))
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -587,4 +597,135 @@ continue_3:
   {
     message_inout->release (); message_inout = NULL;
   } // end IF
+}
+
+void
+Test_I_HTTPGet_2::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
+                                        bool& passMessageDownstream_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_HTTPGet_2::handleSessionMessage"));
+
+  // don't care (implies yes per default, if part of a stream)
+  ACE_UNUSED_ARG (passMessageDownstream_out);
+
+  switch (message_inout->type ())
+  {
+    case STREAM_SESSION_MESSAGE_BEGIN:
+    {
+      // sanity check(s)
+      ACE_ASSERT (inherited::configuration_);
+
+      // send HTTP request ?
+      if (inherited::configuration_->waitForConnect)
+        break;
+
+      HTTP_Headers_t headers_a = inherited::configuration_->HTTPHeaders;
+      if (Common_String_Tools::endswith (inherited::configuration_->URL,
+                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_WEBM_SUFFIX)))
+      {
+        HTTP_HeadersConstIterator_t iterator = headers_a.find (HTTP_PRT_HEADER_AGENT_STRING);
+        if (iterator == headers_a.end ())
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("%s: adding \"%s\" header (value: \"%s\") to HTTP request...\n"),
+                      inherited::mod_->name (),
+                      ACE_TEXT (HTTP_PRT_HEADER_AGENT_STRING),
+                      ACE_TEXT (TEST_I_ICECAST_CLIENT_DEFAULT_USER_AGENT_SPOOF)));
+          headers_a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_USER_AGENT_SPOOF)));
+        } // end IF
+        iterator = headers_a.find (HTTP_PRT_HEADER_ACCEPT_STRING);
+        if (iterator == headers_a.end ())
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("%s: adding \"%s\" header (value: \"%s\") to HTTP request...\n"),
+                      inherited::mod_->name (),
+                      ACE_TEXT (HTTP_PRT_HEADER_ACCEPT_STRING),
+                      ACE_TEXT ("*/*")));
+          headers_a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR ("*/*")));
+        } // end IF
+        iterator = headers_a.find (HTTP_PRT_HEADER_HOST_STRING);
+        if (iterator == headers_a.end ())
+        {
+          std::string hostname_string =
+            Net_Common_Tools::URLToHostName (inherited::configuration_->URL,
+                                             false,  // return hostname
+                                             false); // do not return port#
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("%s: adding \"%s\" header (value: \"%s\") to HTTP request...\n"),
+                      inherited::mod_->name (),
+                      ACE_TEXT (HTTP_PRT_HEADER_HOST_STRING),
+                      ACE_TEXT (hostname_string.c_str ())));
+          headers_a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
+                                            hostname_string));
+        } // end IF
+        iterator = headers_a.find (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_ICY_METADATA);
+        if (iterator == headers_a.end ())
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("%s: adding \"%s\" header (value: \"%s\") to HTTP request...\n"),
+                      inherited::mod_->name (),
+                      ACE_TEXT (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_ICY_METADATA),
+                      ACE_TEXT ("0")));
+          headers_a.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR ("0")));
+        } // end IF
+      } // end IF
+
+      if (!inherited::send (inherited::configuration_->URL,
+                            HTTP_Codes::HTTP_METHOD_GET,
+                            headers_a,
+                            inherited::configuration_->HTTPForm))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to send HTTP request \"%s\", aborting\n"),
+                    inherited::mod_->name (),
+                    ACE_TEXT (inherited::configuration_->URL.c_str ())));
+        goto error;
+      } // end IF
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: started HTTP request for \"%s\"\n"),
+                  inherited::mod_->name (),
+                  ACE_TEXT (inherited::configuration_->URL.c_str ())));
+      break;
+
+error:
+      this->notify (STREAM_SESSION_MESSAGE_ABORT);
+
+      break;
+    }
+//    case STREAM_SESSION_MESSAGE_CONNECT:
+//    {
+//      // sanity check(s)
+//      ACE_ASSERT (inherited::configuration_);
+//
+//      // send HTTP request ?
+//      if (!inherited::configuration_->waitForConnect)
+//        break;
+//      if (!send (inherited::configuration_->URL,
+//                 HTTP_Codes::HTTP_METHOD_GET,
+//                 inherited::configuration_->HTTPHeaders,
+//                 inherited::configuration_->HTTPForm))
+//      {
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("%s: failed to send HTTP request \"%s\", aborting\n"),
+//                    inherited::mod_->name (),
+//                    ACE_TEXT (inherited::configuration_->URL.c_str ())));
+//        goto error_2;
+//      } // end IF
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("%s: started HTTP request for \"%s\"\n"),
+//                  inherited::mod_->name (),
+//                  ACE_TEXT (inherited::configuration_->URL.c_str ())));
+//      break;
+//
+//error_2:
+//      this->notify (STREAM_SESSION_MESSAGE_ABORT);
+//
+//      break;
+//    }
+    default:
+      break;
+  } // end SWITCH
 }

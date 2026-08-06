@@ -4724,7 +4724,7 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
   std::string result;
 
   std::string regex_string =
-      ACE_TEXT_ALWAYS_CHAR ("^([[:alpha:]]+://)?([^\\/\\:]+)(\\:[[:digit:]]{1,5})?(.+)?$");
+    ACE_TEXT_ALWAYS_CHAR ("^(?:([[:alpha:]]+)://)?([^\\/\\:]+)(?:\\:([[:digit:]]{1,5}))?(?:.+)?$");
   std::regex regex (regex_string);
   std::smatch match_results;
   if (unlikely (!std::regex_match (URL_in,
@@ -4747,13 +4747,50 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
     return result;
   } // end IF
 
-  if (returnProtocol_in &&
-      match_results[1].matched)
+  if (returnProtocol_in)
+  { ACE_ASSERT (match_results[1].matched);
     result = match_results[1];
+    result += ACE_TEXT_ALWAYS_CHAR ("://");
+  } // end IF
+  ACE_ASSERT (match_results[2].matched);
   result += match_results[2];
   if (returnPort_in &&
       match_results[3].matched)
     result += match_results[3];
+
+  return result;
+}
+
+std::string
+Net_Common_Tools::URLToProtocol (const std::string& URL_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::URLToProtocol"));
+
+  std::string result;
+
+  std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^(?:([[:alpha:]]+)://)?([^\\/\\:]+)(?:\\:([[:digit:]]{1,5}))?(?:.+)?$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  if (unlikely (!std::regex_match (URL_in,
+                                   match_results,
+                                   regex,
+                                   std::regex_constants::match_default)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URL_in.c_str ())));
+    return result;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  if (unlikely (!match_results[1].matched))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URL_in.c_str ())));
+    return result;
+  } // end IF
+  result = match_results[1];
 
   return result;
 }

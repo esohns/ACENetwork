@@ -80,6 +80,7 @@
 #define HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING "application/x-www-form-urlencoded"
 #define HTTP_PRT_MIMETYPE_AUDIO_MPEG_STRING       "audio/mpeg"
 #define HTTP_PRT_MIMETYPE_AUDIO_MPEGURL_STRING    "audio/x-mpegurl"
+#define HTTP_PRT_MIMETYPE_VIDEO_WEBM_STRING       "video/webm"
 
 // parser
 #define HTTP_PRT_LEXER_DFA_TABLES_FILENAME        "http_scanner.tab"

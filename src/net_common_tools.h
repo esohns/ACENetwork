@@ -252,8 +252,9 @@ class Net_Common_Tools
   static bool getHostname (std::string&); // return value: hostname
 
   static std::string URLToHostName (const std::string&, // URL
-                                    bool = true,        // return protocol (if any) ?
+                                    bool = true,        // return protocol prefix (if any) ?
                                     bool = true);       // return port (if any) ?
+  static std::string URLToProtocol (const std::string&); // URL
 
   // buffer
   static std::string bufferToString (ACE_Message_Block*); // buffer (chain)
