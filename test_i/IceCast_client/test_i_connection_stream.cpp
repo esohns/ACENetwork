@@ -317,7 +317,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
     waveformatex_s.wBitsPerSample = 32;
-    waveformatex_s.nSamplesPerSec = 48000;
+    //waveformatex_s.nSamplesPerSec = 48000;
 #else
     media_type_s.format = SND_PCM_FORMAT_FLOAT;
     media_type_s.rate = 48000;
