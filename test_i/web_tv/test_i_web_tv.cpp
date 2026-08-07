@@ -38,7 +38,12 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (FFMPEG_SUPPORT)
+#ifdef __cplusplus
+extern "C"
+{
 #include "libavutil/pixfmt.h"
+}
+#endif /* __cplusplus */
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
