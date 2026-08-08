@@ -81,6 +81,7 @@
 #define TEST_I_UI_GTK_DRAWINGAREA_NAME                      "drawingarea_analyzer"
 #define TEST_I_UI_GTK_DRAWINGAREA_PROJECTM_NAME             "drawingarea_projectm"
 #define TEST_I_UI_GTK_ENTRY_URL_NAME                        "entry_url"
+#define TEST_I_UI_GTK_SCALE_VOLUME_NAME                     "scale_volume"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME           "filechooserbutton_save"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                      "progressbar"
 #define TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME            "spinbutton_buffersize"

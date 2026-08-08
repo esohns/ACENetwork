@@ -21,6 +21,10 @@
 #ifndef TEST_I_ICECAST_CLIENT_COMMON_H
 #define TEST_I_ICECAST_CLIENT_COMMON_H
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "endpointvolume.h"
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "common_isubscribe.h"
 
 #include "stream_common.h"
@@ -162,6 +166,9 @@ struct Test_I_IceCastClient_UI_CBData
 #endif // GTK_SUPPORT
    , subscribers ()
    , URL ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , volumeControl (NULL)
+#endif // ACE_WIN32 || ACE_WIN64
   {}
 
   struct Test_I_IceCastClient_Configuration*          configuration;
@@ -178,6 +185,9 @@ struct Test_I_IceCastClient_UI_CBData
 #endif // GTK_SUPPORT
   Test_I_Subscribers_t                                subscribers;
   std::string                                         URL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  IAudioEndpointVolume*                               volumeControl;
+#endif // ACE_WIN32 || ACE_WIN64
 };
 
 //struct Test_I_IceCastClient_ThreadData
