@@ -66,6 +66,8 @@
               <object class="GtkVBox" id="vbox_main">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="halign">start</property>
+                <property name="valign">start</property>
                 <child>
                   <object class="GtkHBox" id="hbox_actions_information">
                     <property name="visible">True</property>
@@ -149,25 +151,6 @@
                                 <property name="halign">start</property>
                                 <property name="valign">start</property>
                                 <property name="n_rows">4</property>
-                                <property name="n_columns">2</property>
-                                <child>
-                                  <object class="GtkLabel" id="label_messages">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">messages</property>
-                                    <property name="halign">start</property>
-                                    <property name="valign">start</property>
-                                    <property name="label" translatable="yes">messages</property>
-                                    <property name="track_visited_links">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="top_attach">1</property>
-                                    <property name="bottom_attach">2</property>
-                                    <property name="x_options"/>
-                                    <property name="y_options"/>
-                                  </packing>
-                                </child>
                                 <child>
                                   <object class="GtkVBox" id="vbox_messages">
                                     <property name="visible">True</property>
@@ -222,28 +205,8 @@
                                     </child>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="right_attach">2</property>
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
-                                    <property name="x_options"/>
-                                    <property name="y_options"/>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="label_data">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">bytes</property>
-                                    <property name="halign">start</property>
-                                    <property name="valign">start</property>
-                                    <property name="label" translatable="yes">data</property>
-                                    <property name="track_visited_links">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="top_attach">2</property>
-                                    <property name="bottom_attach">3</property>
                                     <property name="x_options"/>
                                     <property name="y_options"/>
                                   </packing>
@@ -265,27 +228,8 @@
                                     <property name="numeric">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="right_attach">2</property>
                                     <property name="top_attach">2</property>
                                     <property name="bottom_attach">3</property>
-                                    <property name="x_options"/>
-                                    <property name="y_options"/>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="label_connections">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">connections</property>
-                                    <property name="halign">start</property>
-                                    <property name="valign">start</property>
-                                    <property name="label" translatable="yes">connections</property>
-                                    <property name="selectable">True</property>
-                                    <property name="track_visited_links">False</property>
-                                  </object>
-                                  <packing>
                                     <property name="x_options"/>
                                     <property name="y_options"/>
                                   </packing>
@@ -307,26 +251,6 @@
                                     <property name="numeric">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="right_attach">2</property>
-                                    <property name="x_options"/>
-                                    <property name="y_options"/>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkLabel" id="label_buffer">
-                                    <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">buffer (bytes)</property>
-                                    <property name="halign">start</property>
-                                    <property name="valign">start</property>
-                                    <property name="label" translatable="yes">buffer</property>
-                                    <property name="track_visited_links">False</property>
-                                  </object>
-                                  <packing>
-                                    <property name="top_attach">3</property>
-                                    <property name="bottom_attach">4</property>
                                     <property name="x_options"/>
                                     <property name="y_options"/>
                                   </packing>
@@ -348,8 +272,6 @@
                                     <property name="numeric">True</property>
                                   </object>
                                   <packing>
-                                    <property name="left_attach">1</property>
-                                    <property name="right_attach">2</property>
                                     <property name="top_attach">3</property>
                                     <property name="bottom_attach">4</property>
                                     <property name="x_options"/>
