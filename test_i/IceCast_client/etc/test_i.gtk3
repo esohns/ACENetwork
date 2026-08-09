@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkAdjustment" id="adjustment_beat_sensitivity">
+    <property name="upper">2</property>
+    <property name="value">1</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">1</property>
+  </object>
   <object class="GtkAdjustment" id="adjustment_volume">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
@@ -14,11 +20,13 @@
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
+    <property name="has_resize_grip">False</property>
     <property name="program_name">IceCast client</property>
     <property name="version">0.1</property>
     <property name="website">https://www.github.com/esohns/ACENetwork</property>
     <property name="website_label" translatable="yes">github project</property>
     <property name="authors">Erik Sohns</property>
+    <property name="logo_icon_name">image-missing</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog_about_vbox">
         <property name="can_focus">False</property>
@@ -179,7 +187,6 @@
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">●</property>
                                         <property name="xalign">1</property>
-                                        <property name="invisible_char_set">True</property>
                                         <property name="caps_lock_warning">False</property>
                                         <property name="numeric">True</property>
                                         <property name="wrap">True</property>
@@ -203,7 +210,6 @@
                                         <property name="has_frame">False</property>
                                         <property name="invisible_char">●</property>
                                         <property name="xalign">1</property>
-                                        <property name="invisible_char_set">True</property>
                                         <property name="caps_lock_warning">False</property>
                                         <property name="numeric">True</property>
                                         <property name="wrap">True</property>
@@ -255,7 +261,6 @@
                                     <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
                                     <property name="xalign">1</property>
-                                    <property name="invisible_char_set">True</property>
                                     <property name="caps_lock_warning">False</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -298,7 +303,6 @@
                                     <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
                                     <property name="xalign">1</property>
-                                    <property name="invisible_char_set">True</property>
                                     <property name="caps_lock_warning">False</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -340,7 +344,6 @@
                                     <property name="has_frame">False</property>
                                     <property name="invisible_char">●</property>
                                     <property name="xalign">1</property>
-                                    <property name="invisible_char_set">True</property>
                                     <property name="caps_lock_warning">False</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -454,6 +457,40 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkFrame" id="frame_beat_sensitivity">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <child>
+                          <object class="GtkAlignment" id="alignment_beat_sensitivity">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkScale" id="scale_beat_sensitivity">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">beat sensitivity</property>
+                                <property name="adjustment">adjustment_beat_sensitivity</property>
+                                <property name="restrict_to_fill_level">False</property>
+                                <property name="fill_level">0</property>
+                                <property name="round_digits">2</property>
+                                <property name="digits">2</property>
+                                <signal name="value-changed" handler="scale_beat_sensitivity_value_changed_cb" swapped="no"/>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkFrame" id="frame_save">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -468,7 +505,6 @@
                                 <property name="can_focus">True</property>
                                 <property name="has_tooltip">True</property>
                                 <property name="tooltip_text" translatable="yes">save directory</property>
-                                <property name="orientation">vertical</property>
                                 <property name="action">select-folder</property>
                                 <property name="do_overwrite_confirmation">True</property>
                                 <property name="local_only">False</property>
@@ -487,7 +523,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                     <child>
@@ -621,7 +657,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">3</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>

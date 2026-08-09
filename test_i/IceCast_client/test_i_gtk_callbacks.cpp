@@ -417,14 +417,20 @@ idle_finalize_UI_cb (gpointer userData_in)
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  data_p->UIState->eventSourceIds.clear ();
 
-  state_r.eventSourceIds.clear ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if (data_p->volumeControl)
+  {
+    data_p->volumeControl->Release (); data_p->volumeControl = NULL;
+  } // end IF
+#else
+  Stream_MediaFramework_ALSA_Tools::freeMixerHandle (data_p->mixerHandle);
+  data_p->mixerHandle = NULL;
+  data_p->volumeControl = NULL;
+#endif // ACE_WIN32 || ACE_WIN64
 
   gtk_main_quit ();
 
@@ -509,8 +515,8 @@ idle_initialize_UI_cb (gpointer userData_in)
                              0.0,
                              (gdouble)std::numeric_limits<ACE_UINT64>::max ());
   spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
   ACE_ASSERT (spin_button_p);
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
@@ -586,19 +592,35 @@ idle_initialize_UI_cb (gpointer userData_in)
                        static_cast<gdouble> (volume_level_f) * 100.0);
 continue_2:
 #else
-  if (!Stream_MediaFramework_ALSA_Tools::getVolumeLevels ((*iterator_2).second.second->deviceIdentifier.identifier,
-                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME),
-                                                          false, // playback
-                                                          min_level_i,
-                                                          max_level_i,
-                                                          current_level_i))
+  if (unlikely ((*iterator_2).second.second->deviceIdentifier.identifier.empty ()))
+  {
+    (*iterator_2).second.second->deviceIdentifier.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("invalid/unknown audio output device identifier, falling back to: \"%s\"\n"),
+                ACE_TEXT ((*iterator_2).second.second->deviceIdentifier.identifier.c_str ())));
+  } // end IF
+
+  long min_level_i, max_level_i, current_level_i;
+  if (!Stream_MediaFramework_ALSA_Tools::getVolumeControl ((*iterator_2).second.second->deviceIdentifier.identifier,
+                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME),
+                                                           false, // playback
+                                                           min_level_i,
+                                                           max_level_i,
+                                                           current_level_i,
+                                                           data_p->mixerHandle,
+                                                           data_p->volumeControl))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_MediaFramework_ALSA_Tools::getVolumeLevels(\"%s\",\"%s\"), continuing\n"),
-                ACE_TEXT ((*modulehandler_configuration_iterator_2).second.second->deviceIdentifier.identifier.c_str ()),
+                ACE_TEXT ("failed to Stream_MediaFramework_ALSA_Tools::getVolumeControl(\"%s\",\"%s\"), continuing\n"),
+                ACE_TEXT ((*iterator_2).second.second->deviceIdentifier.identifier.c_str ()),
                 ACE_TEXT (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME)));
     goto continue_2;
   } // end IF
+  ACE_ASSERT (data_p->mixerHandle && data_p->volumeControl);
+
+  gtk_scale_set_digits (scale_p,
+                        0);
   gtk_range_set_range (GTK_RANGE (scale_p),
                        static_cast<gdouble> (min_level_i),
                        static_cast<gdouble> (max_level_i));
@@ -1429,6 +1451,13 @@ idle_update_info_display_cb (gpointer userData_in)
     } // end WHILE
   } // end lock scope
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  if (!data_p->mixerHandle)
+    return G_SOURCE_CONTINUE;
+  snd_mixer_handle_events (data_p->mixerHandle);
+#endif // ACE_WIN32 || ACE_WIN64
+
   return G_SOURCE_CONTINUE;
 }
 
@@ -1886,23 +1915,32 @@ scale_volume_value_changed_cb (GtkRange* range_in,
                                                        NULL);
   ACE_ASSERT (SUCCEEDED (result));
 #else
-  Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T iterator_2 =
-    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_2.end ());
-  if (!Stream_MediaFramework_ALSA_Tools::setVolumeLevel ((*iterator_2).second.second->deviceIdentifier.identifier,
-                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME),
-                                                         false, // playback
-                                                         static_cast<long> (value_d)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_MediaFramework_ALSA_Tools::setVolumeLevel(\"%s\",\"%s\",%d), returning\n"),
-                 ACE_TEXT ((*iterator_2).second.second->deviceIdentifier.identifier.c_str ()),
-                 ACE_TEXT (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME),
-                 static_cast<long> (value_d)));
+  if (!data_p->mixerHandle || !data_p->volumeControl)
     return;
-  } // end IF
+  // snd_mixer_handle_events (data_p->mixerHandle);
+  snd_mixer_selem_set_playback_volume_all (data_p->volumeControl,
+                                           static_cast<long> (value_d));
 #endif // ACE_WIN32 || ACE_WIN64
 } // scale_volume_value_changed_cb
+
+void
+scale_beat_sensitivity_value_changed_cb (GtkRange* range_in,
+                                         gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::scale_volume_value_changed_cb"));
+
+  // sanity check(s)
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  gdouble value_d = gtk_range_get_value (range_in);
+#if defined (PROJECTM_SUPPORT)
+  ACE_ASSERT (data_p->projectMConfiguration->handle);
+  projectm_set_beat_sensitivity (data_p->projectMConfiguration->handle,
+                                 static_cast<float> (value_d));
+#endif // PROJECTM_SUPPORT
+}
 
 gboolean
 drawingarea_query_tooltip_cb (GtkWidget*  widget_in,
@@ -1948,10 +1986,12 @@ drawingarea_query_tooltip_cb (GtkWidget*  widget_in,
   is_signed_format = !(sample_size == 1);
   is_float_format = Stream_MediaFramework_DirectSound_Tools::isFloat (*waveformatex_p);
 #else
-  is_signed_format =
-    snd_pcm_format_signed ((*modulehandler_configuration_iterator).second.second->outputFormat.format);
   sample_size =
     (snd_pcm_format_width ((*modulehandler_configuration_iterator).second.second->outputFormat.format) / 8);
+  is_signed_format =
+    snd_pcm_format_signed ((*modulehandler_configuration_iterator).second.second->outputFormat.format);
+  is_float_format =
+    snd_pcm_format_float ((*modulehandler_configuration_iterator).second.second->outputFormat.format);
   channels =
     (*modulehandler_configuration_iterator).second.second->outputFormat.channels;
 #endif // ACE_WIN32 || ACE_WIN64

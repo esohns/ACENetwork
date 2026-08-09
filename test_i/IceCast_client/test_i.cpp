@@ -973,7 +973,8 @@ do_work (bool debugParser_in,
   connection_manager_2->wait ();
 
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
+                                             true,   // wait ?
+                                             false); // release singletons ?
 
   timer_manager_p->stop ();
 

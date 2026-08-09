@@ -23,6 +23,14 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "endpointvolume.h"
+#else
+#define ALSA_PCM_NEW_HW_PARAMS_API
+#ifdef __cplusplus
+extern "C"
+{
+#include "alsa/asoundlib.h"
+}
+#endif /* __cplusplus */
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "common_isubscribe.h"
@@ -168,6 +176,9 @@ struct Test_I_IceCastClient_UI_CBData
    , URL ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
    , volumeControl (NULL)
+#else
+   , mixerHandle (NULL)
+   , volumeControl (NULL)
 #endif // ACE_WIN32 || ACE_WIN64
   {}
 
@@ -187,6 +198,9 @@ struct Test_I_IceCastClient_UI_CBData
   std::string                                         URL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   IAudioEndpointVolume*                               volumeControl;
+#else
+  snd_mixer_t*                                        mixerHandle;
+  snd_mixer_elem_t*                                   volumeControl;
 #endif // ACE_WIN32 || ACE_WIN64
 };
 
