@@ -1564,7 +1564,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT (iconnection_manager_2);
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   Test_I_ConnectionManager_2_t::ICONNECTION_T* iconnection_2 = NULL;
-  bool success = false;
+  // bool success = false;
   GtkBox* box_p = NULL;
 
   if (is_active)

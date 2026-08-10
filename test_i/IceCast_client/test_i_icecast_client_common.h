@@ -173,7 +173,6 @@ struct Test_I_IceCastClient_UI_CBData
    , spectrumAnalyzerCBData ()
 #endif // GTK_SUPPORT
    , subscribers ()
-   //, record ()
    , URL ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
    , volumeControl (NULL)
@@ -196,7 +195,6 @@ struct Test_I_IceCastClient_UI_CBData
   struct acestream_visualization_gtk_cairo_cbdata     spectrumAnalyzerCBData;
 #endif // GTK_SUPPORT
   Test_I_Subscribers_t                                subscribers;
-  //struct HTTP_Record                                  record; // M3U request response-
   std::string                                         URL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   IAudioEndpointVolume*                               volumeControl;

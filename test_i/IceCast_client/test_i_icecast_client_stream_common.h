@@ -206,6 +206,10 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
    , spectrumAnalyzerConfiguration (NULL)
 #endif // GTK_SUPPORT
    , window ()
+#if defined (WAYLAND_SUPPORT)
+   , surface (NULL)
+   , waylandDisplay (NULL)
+#endif // WAYLAND_SUPPORT
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
 
@@ -246,6 +250,10 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
   struct Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_Configuration* spectrumAnalyzerConfiguration;
 #endif // GTK_SUPPORT
   struct Common_UI_Window                                               window;
+#if defined (WAYLAND_SUPPORT)
+  struct wl_shell_surface*                                              surface;
+  struct wl_display*                                                    waylandDisplay;
+#endif // WAYLAND_SUPPORT
 };
 
 struct Test_I_IceCastClient_StreamConfiguration_2

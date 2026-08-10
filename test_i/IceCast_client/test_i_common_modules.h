@@ -73,6 +73,10 @@
 #endif // PROJECTM_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "stream_vis_target_direct3d.h"
+#else
+#if defined (WAYLAND_SUPPORT)
+#include "stream_vis_wayland_window.h"
+#endif // WAYLAND_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "http_common.h"
@@ -451,6 +455,23 @@ typedef Stream_Decoder_WAVEncoder_T<ACE_MT_SYNCH,
                                     struct Test_I_IceCastClient_SessionData_2,
                                     struct Stream_MediaFramework_ALSA_MediaType,
                                     struct Stream_UserData> Test_I_WAV_Encoder;
+
+#if defined (WAYLAND_SUPPORT)
+typedef Stream_Module_Vis_Wayland_Window_T<ACE_MT_SYNCH,
+                                           Common_TimePolicy_t,
+                                           struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                           Stream_ControlMessage_t,
+                                           Test_I_Message,
+                                           Test_I_SessionMessage_2,
+                                           Test_I_IceCastClient_SessionData_2_t,
+                                           struct Stream_MediaFramework_V4L_MediaType> Test_I_Wayland;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                  // session data type
+                              enum Stream_SessionMessageType,                             // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,   // module handler configuration type
+                              libacestream_default_vis_wayland_window_module_name_string,
+                              Stream_INotify_t,                                           // stream notification interface type
+                              Test_I_Wayland);                                            // writer type
+#endif // WAYLAND_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
                               enum Stream_SessionMessageType,                           // session event type

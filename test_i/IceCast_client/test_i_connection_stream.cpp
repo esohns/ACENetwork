@@ -370,9 +370,14 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                     Test_I_Direct3d_Module (this,
                                             ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECT3D_DEFAULT_NAME_STRING)),
                     false);
+#else
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Wayland_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_WAYLAND_WINDOW_DEFAULT_NAME_STRING)),
+                    false);
+#endif // ACE_WIN32 || ACE_WIN64
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
-#endif // ACE_WIN32 || ACE_WIN64
 
 continue_:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -427,11 +432,16 @@ continue_:
   struct Stream_MediaFramework_FFMPEG_MediaType media_type_final_s;
   inherited2::getMediaType (media_type_s,
                             STREAM_MEDIATYPE_AUDIO,
-                            media_type_final_s);
+                            media_type_final_s.audio);
   // *TODO*: cannot set this in advance; must be deduced at runtime and notified
   //         by corresponding 'resize' session message(s)...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   media_type_final_s.video.resolution.cx = 1920;
   media_type_final_s.video.resolution.cy = 1080;
+#else
+  media_type_final_s.video.resolution.width = 1920;
+  media_type_final_s.video.resolution.height = 1080;
+#endif // ACE_WIN32 || ACE_WIN64
   session_data_r.formats.push_front (media_type_final_s);
 #else
   session_data_r.formats.push_front (media_type_s);

@@ -783,7 +783,7 @@ do_work (bool debugParser_in,
   media_type_converter.getMediaType (media_type_s,
                                      STREAM_MEDIATYPE_AUDIO,
                                      modulehandler_configuration_2.outputFormat.audio);
-  modulehandler_configuration_2.outputFormat.video.format = AV_PIX_FMT_BGR24;
+  modulehandler_configuration_2.outputFormat.video.format = AV_PIX_FMT_BGRA;
 #else
   modulehandler_configuration_2.outputFormat = media_type_s;
 #endif // FFMPEG_SUPPORT
@@ -1073,40 +1073,41 @@ do_print_version (const std::string& programName_in)
 
   // compiler version string
   converter << ACE::compiler_major_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::compiler_minor_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::compiler_beta_version ();
 
   std::cout << programName_in
-            << ACE_TEXT (" compiled on ")
-            << ACE::compiler_name ()
-            << ACE_TEXT (" ")
+            << ACE_TEXT_ALWAYS_CHAR (" compiled with ")
+            << ACE_TEXT_ALWAYS_CHAR (ACE::compiler_name ())
+            << ACE_TEXT_ALWAYS_CHAR (" ")
             << converter.str ()
             << std::endl << std::endl;
 
-  std::cout << ACE_TEXT ("libraries: ")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("libraries: ")
             << std::endl
 #if defined (HAVE_CONFIG_H)
-            << ACE_TEXT (ACENetwork_PACKAGE_NAME)
-            << ACE_TEXT (": ")
-            << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
+            << ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME)
+            << ACE_TEXT_ALWAYS_CHAR (": ")
+            << ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION)
             << std::endl
 #endif // HAVE_CONFIG_H
             ;
 
-  converter.str ("");
+  converter.clear ();
+  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   // ACE version string
   converter << ACE::major_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::minor_version ();
-  converter << ACE_TEXT (".");
+  converter << ACE_TEXT_ALWAYS_CHAR (".");
   converter << ACE::beta_version ();
 
   // *NOTE*: cannot use ACE_VERSION, as it doesn't contain the (potential) beta
   // version number... Need this, as the library soname is compared to this
   // string
-  std::cout << ACE_TEXT ("ACE: ")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("ACE: ")
 //             << ACE_VERSION
             << converter.str ()
             << std::endl;
