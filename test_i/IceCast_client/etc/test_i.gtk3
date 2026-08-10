@@ -467,13 +467,13 @@
                                     <property name="can_focus">False</property>
                                     <property name="homogeneous">True</property>
                                     <child>
-                                      <object class="GtkCheckButton" id="checkbutton_fullscreen">
+                                      <object class="GtkCheckButton" id="checkbutton_display">
                                         <property name="label">gtk-fullscreen</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip_text" translatable="yes">fullscreen</property>
+                                        <property name="tooltip_text" translatable="yes">display video</property>
                                         <property name="relief">half</property>
                                         <property name="use_stock">True</property>
                                         <property name="focus_on_click">False</property>
@@ -482,7 +482,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -493,7 +493,6 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip_markup" translatable="yes">save to file</property>
                                         <property name="tooltip_text" translatable="yes">save to file</property>
                                         <property name="relief">half</property>
                                         <property name="use_stock">True</property>
@@ -503,14 +502,14 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
@@ -527,7 +526,6 @@
                                         <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip_markup" translatable="yes">asynchronous event dispatch</property>
                                         <property name="tooltip_text" translatable="yes">asynchronous event dispatch</property>
                                         <property name="relief">half</property>
                                         <property name="focus_on_click">False</property>
@@ -536,7 +534,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -548,7 +546,6 @@
                                         <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip_markup" translatable="yes">loopback interface</property>
                                         <property name="tooltip_text" translatable="yes">loopback interface</property>
                                         <property name="relief">half</property>
                                         <property name="focus_on_click">False</property>
@@ -557,14 +554,14 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">True</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">True</property>
+                                    <property name="fill">False</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>

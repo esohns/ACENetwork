@@ -192,6 +192,9 @@ failed:
 
 Test_I_ConnectionStream_2::Test_I_ConnectionStream_2 ()
  : inherited ()
+#if defined (FFMPEG_SUPPORT)
+ , inherited2 ()
+#endif // FFMPEG_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::Test_I_ConnectionStream_2"));
 
@@ -207,6 +210,10 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->configuration_);
 
+  typename inherited::MODULE_T* branch_p = NULL, *branch_2 = NULL; // NULL: 'main' branch
+  Stream_IDistributorModule *idistributor_p = NULL, *idistributor_2 = NULL; 
+  unsigned int index_i = 0, index_2 = 0;
+  Stream_Branches_t branches_a;
   Test_I_SessionManager_2* session_manager_p =
     Test_I_SessionManager_2::SINGLETON_T::instance ();
   ACE_ASSERT (session_manager_p);
@@ -252,6 +259,9 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   media_type_s.rate = 44100;
   // media_type_s.subFormat = SND_PCM_SUBFORMAT_STD;
 #endif // ACE_WIN32 || ACE_WIN64
+  //HTTP_HeadersConstIterator_t iterator =
+  //  inherited::configuration_->configuration_->record.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING)));
+  //ACE_ASSERT (iterator != inherited::configuration_->configuration_->record.headers.end ());
 
   if (Common_String_Tools::endswith (inherited::configuration_->configuration_->URL,
                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGG_SUFFIX)))
@@ -305,23 +315,74 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
     module_p = NULL;
 #endif // WEBM_SUPPORT
 
+    ACE_NEW_RETURN (module_p,
+                    Test_I_MediaSplitter_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MEDIASPLITTER_DEFAULT_NAME_STRING)),
+                    false);
+    branch_p = module_p;
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+  //  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
+  //#if defined (PROJECTM_SUPPORT)
+  //  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DECODE_NAME));
+  //#endif // PROJECTM_SUPPORT
+    idistributor_p =
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+    ACE_ASSERT (idistributor_p);
+    idistributor_p->initialize (branches_a);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+
+    // audio
 #if defined (VORBIS_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_Vorbis_Decoder_Module (this,
                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_VORBIS_DEFAULT_NAME_STRING)),
                     false);
-    layout_in->append (module_p, NULL, 0);
+    layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
 #endif // VORBIS_SUPPORT
 
+    ++index_i;
+
+    // video
+#if defined (FFMPEG_SUPPORT)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_LibAVDecoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
+    if (unlikely (!inherited::configuration_->configuration_->displayVideo))
+      goto continue_;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Delay_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR ("Delay_2")),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Direct3d_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECT3D_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+#endif // ACE_WIN32 || ACE_WIN64
+
+continue_:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
     waveformatex_s.wBitsPerSample = 32;
     //waveformatex_s.nSamplesPerSec = 48000;
 #else
     media_type_s.format = SND_PCM_FORMAT_FLOAT;
-    media_type_s.rate = 48000;
-#endif
+    //media_type_s.rate = 48000;
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   else
   { // --> assume mp3 stream
@@ -362,28 +423,38 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (session_data_r.formats.empty ());
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_MediaType media_type_final_s;
+  inherited2::getMediaType (media_type_s,
+                            STREAM_MEDIATYPE_AUDIO,
+                            media_type_final_s);
+  // *TODO*: cannot set this in advance; must be deduced at runtime and notified
+  //         by corresponding 'resize' session message(s)...
+  media_type_final_s.video.resolution.cx = 1920;
+  media_type_final_s.video.resolution.cy = 1080;
+  session_data_r.formats.push_front (media_type_final_s);
+#else
   session_data_r.formats.push_front (media_type_s);
+#endif // FFMPEG_SUPPORT
 
-  typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
-  unsigned int index_i = 0;
-  Stream_Branches_t branches_a;
   ACE_NEW_RETURN (module_p,
                   Test_I_Distributor_Module (this,
                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
                   false);
   ACE_ASSERT (module_p);
-  branch_p = module_p;
+  branch_2 = module_p;
+  branches_a.clear ();
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
 #if defined (PROJECTM_SUPPORT)
   branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DECODE_NAME));
 #endif // PROJECTM_SUPPORT
-  Stream_IDistributorModule* idistributor_p =
+  idistributor_2 =
     dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
-  ACE_ASSERT (idistributor_p);
-  idistributor_p->initialize (branches_a);
-  layout_in->append (module_p, NULL, 0);
+  ACE_ASSERT (idistributor_2);
+  idistributor_2->initialize (branches_a);
+  layout_in->append (module_p, branch_p, 0); // 0: audio branch
   module_p = NULL;
 
 #if defined (FFMPEG_SUPPORT)
@@ -391,7 +462,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                   Test_I_LibAVResampler_Module (this,
                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_FILTER_DEFAULT_NAME_STRING)),
                   false);
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 #endif // FFMPEG_SUPPORT
 
@@ -406,50 +477,50 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_ALSA_DEFAULT_NAME_STRING)),
                   false);
 #endif // ACE_WIN32 || ACE_WIN64
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 
-  ++index_i;
+  ++index_2;
 
   ACE_NEW_RETURN (module_p,
                   Test_I_Delay_Module (this,
                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
                   false);
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
                   Test_I_Vis_SpectrumAnalyzer_Module (this,
                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_SPECTRUM_ANALYZER_DEFAULT_NAME_STRING)),
                   false);
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 
-  ++index_i;
+  ++index_2;
 
   ACE_NEW_RETURN (module_p,
                   Test_I_WAV_Encoder_Module (this,
                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_ENCODER_WAV_DEFAULT_NAME_STRING)),
                   false);
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
                   Test_I_FileSink_Module (this,
                                           ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
                   false);
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 
 #if defined (PROJECTM_SUPPORT)
-  ++index_i;
+  ++index_2;
 
 #if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
                   Test_I_LibAVResampler_Module (this,
                                                 ACE_TEXT_ALWAYS_CHAR ("LibAV_Filter_2")),
                   false);
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 #endif // FFMPEG_SUPPORT
 
@@ -458,7 +529,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_PROJECTM_DEFAULT_NAME_STRING)),
                   false);
   ACE_ASSERT (module_p);
-  layout_in->append (module_p, branch_p, index_i);
+  layout_in->append (module_p, branch_2, index_2);
   module_p = NULL;
 #endif // PROJECTM_SUPPORT
 

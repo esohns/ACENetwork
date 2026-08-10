@@ -206,6 +206,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                   ACE_TEXT ("loading \"%s\"...\n"),
                   ACE_TEXT (URL_string.c_str ())));
       CBData_->URL = URL_string;
+      //CBData_->record = data_r;
 
 #if defined (GTK_USE)
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);

@@ -77,6 +77,7 @@ extern "C"
 #include "stream_misc_common.h"
 
 #include "stream_vis_common.h"
+#include "stream_vis_iresize.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -135,9 +136,6 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration
    , connectionConfigurations (NULL)
    , subscriber (NULL)
    , targetFileName ()
-#if defined (GTK_USE)
-   , window (NULL)
-#endif // GTK_USE
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   }
@@ -145,9 +143,6 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration
   Net_ConnectionConfigurations_t* connectionConfigurations;
   Test_I_ISessionNotify_t*        subscriber;
   std::string                     targetFileName; // dump module
-#if defined (GTK_USE)
-  GdkWindow*                      window;
-#endif // GTK_USE
 };
 
 struct Test_I_IceCastClient_StreamConfiguration
@@ -192,20 +187,25 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
    , ALSAConfiguration (NULL)
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
-   , codecId (AV_CODEC_ID_MP3)
+   , codecConfiguration (NULL)
 #endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
    , delayConfiguration (NULL)
    , deviceIdentifier ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , direct3DConfiguration (NULL)
+#endif // ACE_WIN32 || ACE_WIN64
    , subscriber (NULL)
    , targetFileName ()
    , outputFormat ()
 #if defined (PROJECTM_SUPPORT)
    , projectMConfiguration (NULL)
 #endif // PROJECTM_SUPPORT
+   , resize (NULL)
 #if defined (GTK_SUPPORT)
    , spectrumAnalyzerConfiguration (NULL)
 #endif // GTK_SUPPORT
+   , window ()
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
 
@@ -219,24 +219,33 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
   struct Stream_MediaFramework_ALSA_Configuration*                      ALSAConfiguration;
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
-  enum AVCodecID                                                        codecId;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration*               codecConfiguration;
 #endif // FFMPEG_SUPPORT
   Net_ConnectionConfigurations_t*                                       connectionConfigurations;
   struct Stream_Miscellaneous_DelayConfiguration*                       delayConfiguration;
   struct Stream_Device_Identifier                                       deviceIdentifier; // render
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct Stream_MediaFramework_Direct3D_Configuration*                  direct3DConfiguration;
+#endif // ACE_WIN32 || ACE_WIN64
   Test_I_ISessionNotify_2_t*                                            subscriber;
   std::string                                                           targetFileName; // dump module
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_MediaType                         outputFormat;
+#else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct _AMMediaType                                                   outputFormat;
 #else
   struct Stream_MediaFramework_ALSA_MediaType                           outputFormat;
 #endif // ACE_WIN32 || ACE_WIN64
+#endif // FFMPEG_SUPPORT
 #if defined (PROJECTM_SUPPORT)
   struct Stream_Visualization_ProjectM_Configuration*                   projectMConfiguration;
 #endif // PROJECTM_SUPPORT
+  Stream_Visualization_IResize*                                         resize;
 #if defined (GTK_SUPPORT)
   struct Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_Configuration* spectrumAnalyzerConfiguration;
 #endif // GTK_SUPPORT
+  struct Common_UI_Window                                               window;
 };
 
 struct Test_I_IceCastClient_StreamConfiguration_2
@@ -244,19 +253,21 @@ struct Test_I_IceCastClient_StreamConfiguration_2
 {
   Test_I_IceCastClient_StreamConfiguration_2 ()
    : HTTP_StreamConfiguration ()
-   , format ()
+   , displayVideo (true)
+   //, format ()
    , URL ()
   {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_OS::memset (&format, 0, sizeof (struct _AMMediaType));
-#endif // ACE_WIN32 || ACE_WIN64
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_OS::memset (&format, 0, sizeof (struct _AMMediaType));
+//#endif // ACE_WIN32 || ACE_WIN64
   }
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType                         format;
-#else
-  struct Stream_MediaFramework_ALSA_MediaType format;
-#endif // ACE_WIN32 || ACE_WIN64
+  bool                                        displayVideo;
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  struct _AMMediaType                         format;
+//#else
+//  struct Stream_MediaFramework_ALSA_MediaType format;
+//#endif // ACE_WIN32 || ACE_WIN64
   std::string                                 URL;
 };
 

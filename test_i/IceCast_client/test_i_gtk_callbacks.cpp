@@ -164,10 +164,14 @@ idle_load_segment_cb (gpointer userData_in)
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->streamConfiguration_2.configuration_);
   ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
-
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
+
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -182,18 +186,15 @@ idle_load_segment_cb (gpointer userData_in)
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
   // update configuration
+  GtkCheckButton* check_button_p =
+    GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_DISPLAY_NAME)));
+  ACE_ASSERT (check_button_p);
+  data_p->configuration->streamConfiguration_2.configuration_->displayVideo =
+    gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p));
+  //data_p->configuration->streamConfiguration_2.configuration_->record =
+  //  data_p->record;
   data_p->configuration->streamConfiguration_2.configuration_->URL =
     data_p->URL;
   Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
@@ -716,6 +717,13 @@ continue_2:
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
                                 !(*iterator_2).second.second->targetFileName.empty ());
+  check_button_p =
+    GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_DISPLAY_NAME)));
+  ACE_ASSERT (check_button_p);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
+                                data_p->configuration->streamConfiguration_2.configuration_->displayVideo ? TRUE : FALSE);
+
   check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME)));
@@ -1973,6 +1981,19 @@ drawingarea_query_tooltip_cb (GtkWidget*  widget_in,
 
   mode =
     (*modulehandler_configuration_iterator).second.second->spectrumAnalyzerConfiguration->mode;
+#if defined (FFMPEG_SUPPORT)
+  sample_size =
+    av_get_bytes_per_sample ((*modulehandler_configuration_iterator).second.second->outputFormat.audio.format);
+  // *NOTE*: "...If the audio contains 8 bits per sample, the audio samples
+  //         are unsigned values. (Each audio sample has the range 0255.)
+  //         If the audio contains 16 bits per sample or higher, the audio
+  //         samples are signed values. ..."
+  is_signed_format = !(sample_size == 1);
+  is_float_format =
+    Stream_MediaFramework_Tools::isFloat ((*modulehandler_configuration_iterator).second.second->outputFormat.audio.format);
+  channels =
+    (*modulehandler_configuration_iterator).second.second->outputFormat.audio.channels;
+#else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct tWAVEFORMATEX* waveformatex_p =
     reinterpret_cast<struct tWAVEFORMATEX*> ((*modulehandler_configuration_iterator).second.second->outputFormat.pbFormat);
@@ -1995,6 +2016,7 @@ drawingarea_query_tooltip_cb (GtkWidget*  widget_in,
   channels =
     (*modulehandler_configuration_iterator).second.second->outputFormat.channels;
 #endif // ACE_WIN32 || ACE_WIN64
+#endif // FFMPEG_SUPPORT
 
   GtkAllocation allocation;
   gtk_widget_get_allocation (widget_in,

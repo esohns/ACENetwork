@@ -29,6 +29,8 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
+#include "stream_lib_mediatype_converter.h"
+
 #include "stream_module_source_http_get.h"
 
 #include "test_i_message.h"
@@ -82,6 +84,9 @@ class Test_I_HTTPGet_2
                                               Stream_ControlMessage_t,
                                               Test_I_Message,
                                               Test_I_SessionMessage_2>
+#if defined (FFMPEG_SUPPORT)
+ , public Stream_MediaFramework_MediaTypeConverter_T<struct Stream_MediaFramework_FFMPEG_MediaType>
+#endif // FFMPEG_SUPPORT
 {
   typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
                                               Common_TimePolicy_t,
@@ -89,6 +94,9 @@ class Test_I_HTTPGet_2
                                               Stream_ControlMessage_t,
                                               Test_I_Message,
                                               Test_I_SessionMessage_2> inherited;
+#if defined (FFMPEG_SUPPORT)
+  typedef Stream_MediaFramework_MediaTypeConverter_T<struct Stream_MediaFramework_FFMPEG_MediaType> inherited2;
+#endif // FFMPEG_SUPPORT
 
  public:
   Test_I_HTTPGet_2 (ISTREAM_T*); // stream handle

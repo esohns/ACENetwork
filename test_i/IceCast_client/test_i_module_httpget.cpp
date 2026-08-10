@@ -311,6 +311,9 @@ continue_3:
 
 Test_I_HTTPGet_2::Test_I_HTTPGet_2 (ISTREAM_T* stream_in)
  : inherited (stream_in)
+#if defined (FFMPEG_SUPPORT)
+ , inherited2 ()
+#endif // FFMPEG_SUPPORT
  , handleBody_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_HTTPGet_2::Test_I_HTTPGet_2"));
@@ -484,8 +487,17 @@ Test_I_HTTPGet_2::handleDataMessage (Test_I_Message*& message_inout,
 #endif // ACE_WIN32 || ACE_WIN64
  
         // --> update session data and notify stream
+        // *TODO*: this won't work as intended, because the stream layout has
+        //         already been configured and the wrong decoder module might be used
+#if defined (FFMPEG_SUPPORT)
+        struct Stream_MediaFramework_FFMPEG_MediaType media_type_final_s;
+        inherited2::getMediaType (media_type_s,
+                                  STREAM_MEDIATYPE_AUDIO,
+                                  media_type_final_s);
+        session_data_r.formats.push_back (media_type_final_s);
+#else
         session_data_r.formats.push_back (media_type_s);
-        // *TODO*: this won't work as intended, because the stream layout has already been configured and the wrong decoder module might be used
+#endif // FFMPEG_SUPPORT
         this->notify (STREAM_SESSION_MESSAGE_FORMAT,
                       true); // expedite
       } // end IF

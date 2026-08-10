@@ -1295,10 +1295,12 @@ do_work (const std::string& configurationFile_in,
       goto clean;
     } // end IF
     BOOL was_visible_b = false;
+    bool show_console_b = false;
 #if defined (_DEBUG)
-#else
-    was_visible_b = ShowWindow (window_p, SW_HIDE);
+    show_console_b = true;
 #endif // _DEBUG
+    if (likely (!show_console_b))
+      was_visible_b = ShowWindow (window_p, SW_HIDE);
     ACE_UNUSED_ARG (was_visible_b);
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF

@@ -31,6 +31,7 @@
 #include "stream_streammodule_base.h"
 
 #if defined (FFMPEG_SUPPORT)
+#include "stream_dec_libav_decoder.h"
 #include "stream_dec_libav_filter.h"
 #endif // FFMPEG_SUPPORT
 #if defined (MPG123_SUPPORT)
@@ -59,6 +60,7 @@
 #include "stream_misc_defragment.h"
 #include "stream_misc_delay.h"
 #include "stream_misc_distributor.h"
+#include "stream_misc_media_splitter.h"
 #include "stream_misc_messagehandler.h"
 
 #include "stream_stat_statistic_report.h"
@@ -69,6 +71,9 @@
 #if defined (PROJECTM_SUPPORT)
 #include "stream_vis_projectm.h"
 #endif // PROJECTM_SUPPORT
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "stream_vis_target_direct3d.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "http_common.h"
 #include "http_network.h"
@@ -229,6 +234,38 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Test_I_WebM_Demuxer);                                     // writer type
 #endif // WEBM_SUPPORT
 
+typedef Stream_Miscellaneous_MediaSplitter_T<ACE_MT_SYNCH,
+                                             struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                             Stream_ControlMessage_t,
+                                             Test_I_Message,
+                                             Test_I_SessionMessage_2,
+                                             Test_I_IceCastClient_SessionData_2_t> Test_I_MediaSplitter;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                   // session data type
+                              enum Stream_SessionMessageType,                              // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,    // module handler configuration type
+                              libacestream_default_misc_media_splitter_module_name_string,
+                              Stream_INotify_t,                                            // stream notification interface type
+                              Test_I_MediaSplitter);                                       // writer type
+
+// video
+#if defined (FFMPEG_SUPPORT)
+typedef Stream_Decoder_LibAVDecoder_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
+                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                     Stream_ControlMessage_t,
+                                     Test_I_Message,
+                                     Test_I_SessionMessage_2,
+                                     Test_I_IceCastClient_SessionData_2_t,
+                                     struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_LibAVDecoder;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                 // session data type
+                              enum Stream_SessionMessageType,                            // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,  // module handler configuration type
+                              libacestream_default_dec_libav_decoder_module_name_string,
+                              Stream_INotify_t,                                          // stream notification interface type
+                              Test_I_LibAVDecoder);                                      // writer type
+#endif // FFMPEG_SUPPORT
+
+// audio
 typedef Stream_Miscellaneous_Distributor_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
@@ -252,7 +289,6 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_IceCastClient_SessionData_2,            
                           Test_I_Distributor_Writer_t,                              // writer task
                           Test_I_Distributor);                                      // name
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (FFMPEG_SUPPORT)
 typedef Stream_Decoder_LibAVFilter_T<ACE_MT_SYNCH,
                                      Common_TimePolicy_t,
@@ -261,7 +297,7 @@ typedef Stream_Decoder_LibAVFilter_T<ACE_MT_SYNCH,
                                      Test_I_Message,
                                      Test_I_SessionMessage_2,
                                      Test_I_IceCastClient_SessionData_2_t,
-                                     struct _AMMediaType> Test_I_LibAVResampler;
+                                     struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_LibAVResampler;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
                               enum Stream_SessionMessageType,                           // session event type
                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
@@ -270,6 +306,7 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Test_I_LibAVResampler);                                   // writer type
 #endif // FFMPEG_SUPPORT
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_Dev_Target_WASAPI_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
                                    struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
@@ -335,24 +372,23 @@ typedef Stream_Decoder_WAVEncoder_T<ACE_MT_SYNCH,
                                     struct Test_I_IceCastClient_SessionData_2,
                                     struct _AMMediaType,
                                     struct Stream_UserData> Test_I_WAV_Encoder;
-#else
-#if defined (FFMPEG_SUPPORT)
-typedef Stream_Decoder_LibAVFilter_T<ACE_MT_SYNCH,
+
+typedef Stream_Vis_Target_Direct3D_T<ACE_MT_SYNCH,
                                      Common_TimePolicy_t,
                                      struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
                                      Stream_ControlMessage_t,
                                      Test_I_Message,
                                      Test_I_SessionMessage_2,
+                                     Test_I_IceCastClient_SessionData_2,
                                      Test_I_IceCastClient_SessionData_2_t,
-                                     struct Stream_MediaFramework_ALSA_MediaType> Test_I_LibAVResampler;
+                                     struct _AMMediaType> Test_I_Direct3d;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
                               enum Stream_SessionMessageType,                           // session event type
                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
-                              libacestream_default_dec_libav_filter_module_name_string,
+                              libacestream_default_vis_direct3d_module_name_string,
                               Stream_INotify_t,                                         // stream notification interface type
-                              Test_I_LibAVResampler);                                   // writer type
-#endif // FFMPEG_SUPPORT
-
+                              Test_I_Direct3d);                                         // writer type
+#else
 typedef Stream_Dev_Target_ALSA_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,

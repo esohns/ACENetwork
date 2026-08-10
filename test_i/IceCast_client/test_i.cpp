@@ -667,6 +667,12 @@ do_work (bool debugParser_in,
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_IceCastClient_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_2; // LibAV_Filter_2
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_3; // Delay_2 (Video-)
+  struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
+  struct Stream_Miscellaneous_DelayConfiguration delay_configuration_2;
+
   struct Test_I_IceCastClient_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
@@ -704,12 +710,16 @@ do_work (bool debugParser_in,
 
   //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
 
-  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_s;
+  codec_configuration_s.codecId = AV_CODEC_ID_VP9;
+#endif // FFMPEG_SUPPORT
+
   modulehandler_configuration_2.allocatorConfiguration =
     &allocator_configuration;
   modulehandler_configuration_2.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_2.codecId = AV_CODEC_ID_MP3;
+  modulehandler_configuration_2.codecConfiguration = &codec_configuration_s;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_2.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
@@ -724,16 +734,21 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.URL = URL_in;
   modulehandler_configuration_2.waitForConnect = false;
 
-  struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   modulehandler_configuration_2.delayConfiguration = &delay_configuration;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct Stream_MediaFramework_Direct3D_Configuration direct3D_configuration_s;
+  if (!Stream_MediaFramework_DirectDraw_Tools::initialize ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_MediaFramework_DirectDraw_Tools::initialize(), returning\n")));
+    return;
+  } // end IF
+  modulehandler_configuration_2.direct3DConfiguration =
+    &direct3D_configuration_s;
+
   struct tWAVEFORMATEX waveformatex_s;
   ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
-
-  // initialize return value(s)
-  Stream_MediaFramework_DirectShow_Tools::free (modulehandler_configuration_2.outputFormat);
-
   waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
   waveformatex_s.nChannels = 2;
   waveformatex_s.nSamplesPerSec = 48000;
@@ -743,20 +758,37 @@ do_work (bool debugParser_in,
   waveformatex_s.nAvgBytesPerSec =
     (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
   //waveformatex_s.cbSize = 0;
+  struct _AMMediaType media_type_s;
+  ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
   if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
-                                                                 modulehandler_configuration_2.outputFormat))
+                                                                 media_type_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), returning\n")));
     return;
   } // end IF
+
+
 #else
   struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
   modulehandler_configuration_2.ALSAConfiguration = &ALSA_configuration;
 
-  modulehandler_configuration_2.outputFormat.channels = 2;
-  modulehandler_configuration_2.outputFormat.format = SND_PCM_FORMAT_FLOAT;
-  modulehandler_configuration_2.outputFormat.rate = 48000;
+  struct Stream_MediaFramework_ALSA_MediaType media_type_s;
+  media_type_s.channels = 2;
+  media_type_s.format = SND_PCM_FORMAT_FLOAT;
+  media_type_s.rate = 48000;
+#endif // ACE_WIN32 || ACE_WIN64
+#if defined (FFMPEG_SUPPORT)
+  Stream_MediaFramework_MediaTypeConverter_T<struct Stream_MediaFramework_FFMPEG_MediaType> media_type_converter;
+  media_type_converter.getMediaType (media_type_s,
+                                     STREAM_MEDIATYPE_AUDIO,
+                                     modulehandler_configuration_2.outputFormat.audio);
+  modulehandler_configuration_2.outputFormat.video.format = AV_PIX_FMT_BGR24;
+#else
+  modulehandler_configuration_2.outputFormat = media_type_s;
+#endif // FFMPEG_SUPPORT
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Stream_MediaFramework_DirectShow_Tools::free (media_type_s);
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GTK_SUPPORT)
@@ -776,8 +808,6 @@ do_work (bool debugParser_in,
 #if defined (PROJECTM_SUPPORT)
   struct Stream_Visualization_ProjectM_Configuration projectm_configuration;
   std::string textures_path_string, presets_path_string;
-  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_2; // LibAV_Filter_2
-
 #if defined (_DEBUG)
   projectm_set_log_callback (acestream_projectm_log_cb,
                               false,
@@ -797,7 +827,7 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2_2 = modulehandler_configuration_2;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_OS::memset (&modulehandler_configuration_2_2.outputFormat, 0, sizeof (struct _AMMediaType));
+  ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
   ACE_OS::memset (&waveformatex_s, 0, sizeof (struct tWAVEFORMATEX));
   waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
   waveformatex_s.nChannels = 2;
@@ -808,15 +838,26 @@ do_work (bool debugParser_in,
   waveformatex_s.nAvgBytesPerSec =
     (waveformatex_s.nSamplesPerSec * waveformatex_s.nBlockAlign);
   if (!Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx (waveformatex_s,
-                                                                 modulehandler_configuration_2_2.outputFormat))
+                                                                 media_type_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), returning\n")));
     return;
   } // end IF
 #else
-  modulehandler_configuration_2_2.outputFormat.format = SND_PCM_FORMAT_FLOAT;
-  modulehandler_configuration_2_2.outputFormat.rate = 44100;
+  media_type_s.channels = 2;
+  media_type_s.format = SND_PCM_FORMAT_FLOAT;
+  media_type_s.rate = 44100;
+#endif // ACE_WIN32 || ACE_WIN64
+#if defined (FFMPEG_SUPPORT)
+  media_type_converter.getMediaType (media_type_s,
+                                     STREAM_MEDIATYPE_AUDIO,
+                                     modulehandler_configuration_2_2.outputFormat.audio);
+#else
+  modulehandler_configuration_2_2.outputFormat = media_type_s;
+#endif // FFMPEG_SUPPORT
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Stream_MediaFramework_DirectShow_Tools::free (media_type_s);
 #endif // ACE_WIN32 || ACE_WIN64
   configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Filter_2"),
                                                                  std::make_pair (&module_configuration,
@@ -824,6 +865,16 @@ do_work (bool debugParser_in,
 
   CBData_in.projectMConfiguration = &projectm_configuration;
 #endif // PROJECTM_SUPPORT
+
+  delay_configuration_2.averageTokensPerInterval = 1;
+  delay_configuration_2.interval =
+    ACE_Time_Value (0, static_cast<suseconds_t> (1000000.0f / 60)); // fps
+  delay_configuration_2.mode =
+    STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
+  modulehandler_configuration_2_3.delayConfiguration = &delay_configuration_2;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Delay_2"),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2_3)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -987,6 +1038,10 @@ do_work (bool debugParser_in,
   //                event_handler_module.name ()));
   //} // end IF
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Stream_MediaFramework_DirectDraw_Tools::finalize ();
+#endif // ACE_WIN32 || ACE_WIN64
+
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 
@@ -1003,6 +1058,10 @@ clean:
 #else
     ;
 #endif // GTK_USE
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Stream_MediaFramework_DirectDraw_Tools::finalize ();
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 void

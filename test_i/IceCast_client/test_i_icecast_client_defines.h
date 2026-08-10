@@ -74,6 +74,7 @@
 #define TEST_I_UI_GTK_BUTTON_CUT_NAME                       "button_cut"
 #define TEST_I_UI_GTK_BUTTON_QUIT_NAME                      "button_quit"
 #define TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME               "checkbutton_asynch"
+#define TEST_I_UI_GTK_CHECKBUTTON_DISPLAY_NAME              "checkbutton_display"
 #define TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME             "checkbutton_loopback"
 #define TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME                 "checkbutton_save"
 #define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                     "dialog_about"

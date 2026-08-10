@@ -140,6 +140,9 @@ class Test_I_ConnectionStream_2
                                         ACE_INET_Addr,
                                         Test_I_ConnectionManager_2_t,
                                         struct Stream_UserData>
+#if defined (FFMPEG_SUPPORT)
+ , public Stream_MediaFramework_MediaTypeConverter_T<struct Stream_MediaFramework_FFMPEG_MediaType>
+#endif // FFMPEG_SUPPORT
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -159,6 +162,9 @@ class Test_I_ConnectionStream_2
                                         ACE_INET_Addr,
                                         Test_I_ConnectionManager_2_t,
                                         struct Stream_UserData> inherited;
+#if defined (FFMPEG_SUPPORT)
+  typedef Stream_MediaFramework_MediaTypeConverter_T<struct Stream_MediaFramework_FFMPEG_MediaType> inherited2;
+#endif // FFMPEG_SUPPORT
 
  public:
   Test_I_ConnectionStream_2 ();

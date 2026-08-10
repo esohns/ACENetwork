@@ -116,26 +116,18 @@ class Test_I_SessionMessage
 struct Test_I_IceCastClient_StreamState_2;
 struct Test_I_IceCastClient_SessionData_2
  : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                 struct _AMMediaType,
-#else
 #if defined (FFMPEG_SUPPORT)
-                                 struct Stream_MediaFramework_ALSA_MediaType,
+                                 struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
                                  struct Test_I_IceCastClient_StreamState_2,
                                  struct Stream_Statistic,
                                  struct Stream_UserData>
 {
   Test_I_IceCastClient_SessionData_2 ()
    : Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                   struct _AMMediaType,
-#else
 #if defined (FFMPEG_SUPPORT)
-                                   struct Stream_MediaFramework_ALSA_MediaType,
+                                   struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
                                    struct Test_I_IceCastClient_StreamState_2,
                                    struct Stream_Statistic,
                                    struct Stream_UserData> ()
@@ -149,13 +141,9 @@ struct Test_I_IceCastClient_SessionData_2
   struct Test_I_IceCastClient_SessionData_2& operator= (const struct Test_I_IceCastClient_SessionData_2& rhs_in)
   {
     Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                  struct _AMMediaType,
-#else
 #if defined (FFMPEG_SUPPORT)
-                                  struct Stream_MediaFramework_ALSA_MediaType,
+                                  struct Stream_MediaFramework_FFMPEG_MediaType,
 #endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
                                   struct Test_I_IceCastClient_StreamState_2,
                                   struct Stream_Statistic,
                                   struct Stream_UserData>::operator= (rhs_in);
