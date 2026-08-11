@@ -303,10 +303,13 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
                             codec_context_p->time_base,
                             stream_p->time_base);
 
-      /* Write the frame to the media file. */
-//      result = av_write_frame (formatContext_, &packet_s);
-      result = av_interleaved_write_frame (inherited::formatContext_,
-                                           &packet_s);
+      { ACE_GUARD (ACE_Thread_Mutex, aGuard, inherited::lock_);
+
+        /* Write the frame to the media file. */
+  //      result = av_write_frame (formatContext_, &packet_s);
+        result = av_interleaved_write_frame (inherited::formatContext_,
+                                             &packet_s);
+      } // end lock scope
       if (unlikely (result < 0))
       {
         ACE_DEBUG ((LM_ERROR,

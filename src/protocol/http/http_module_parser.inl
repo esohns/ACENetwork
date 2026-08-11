@@ -736,6 +736,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   size_t content_length_i, total_length_i;
 
   // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->parserConfiguration);
   if (unlikely (multiBody_))
   {
     message_block_p = message_in; 
@@ -854,6 +856,9 @@ continue_:
     goto error;
   } // end IF
 
+  if (likely (!inherited::configuration_->parserConfiguration->notifyProgress))
+    goto continue_2;
+
   // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
   //                   that the complete document data has arrived
   if (likely (session_data_container_p))
@@ -866,7 +871,9 @@ continue_:
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::putSessionMessage(%d), continuing\n"),
                 inherited::mod_->name (),
                 STREAM_SESSION_MESSAGE_STEP));
+  session_data_container_p = inherited::sessionData_;
 
+continue_2:
   if (headFragment_)
   {
     message_block_p = headFragment_;

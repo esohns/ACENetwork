@@ -661,6 +661,7 @@ do_work (bool debugParser_in,
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
+  configuration_in.parserConfiguration.notifyProgress = false;
 #if defined (_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)

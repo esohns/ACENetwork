@@ -154,6 +154,22 @@ struct Test_I_IceCastClient_SessionData_2
 
     return *this;
   }
+  struct Test_I_IceCastClient_SessionData_2& operator+= (const struct Test_I_IceCastClient_SessionData_2& rhs_in)
+  {
+    Stream_SessionDataMediaBase_T<struct Test_I_StreamSessionData,
+#if defined (FFMPEG_SUPPORT)
+                                  struct Stream_MediaFramework_FFMPEG_MediaType,
+#endif // FFMPEG_SUPPORT
+                                  struct Test_I_IceCastClient_StreamState_2,
+                                  struct Stream_Statistic,
+                                  struct Stream_UserData>::operator+= (rhs_in);
+
+    connection = (connection ? connection : rhs_in.connection);
+    targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
+                                              : targetFileName);
+
+    return *this;
+  }
 
   ACE_INET_Addr                                address;
   Test_I_IConnection_t*                        connection;
