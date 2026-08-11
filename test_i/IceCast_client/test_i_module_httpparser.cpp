@@ -56,20 +56,20 @@ Test_I_HTTPParser_2::Test_I_HTTPParser_2 (ISTREAM_T* stream_in)
 
 }
 
-void
-Test_I_HTTPParser_2::handleDataMessage (Test_I_Message*& message_inout,
-                                        bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_HTTPParser::handleDataMessage_2"));
-
-//  if (likely (inherited::multiBody_))
-//  {
-//    if (inherited::headFragment_)
-//      goto continue_;
-//    return;
-//  } // end IF
+//void
+//Test_I_HTTPParser_2::handleDataMessage (Test_I_Message*& message_inout,
+//                                        bool& passMessageDownstream_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_I_HTTPParser::handleDataMessage_2"));
 //
-//continue_:
-  inherited::handleDataMessage (message_inout,
-                                passMessageDownstream_out);
-}
+////  if (likely (inherited::multiBody_))
+////  {
+////    if (inherited::headFragment_)
+////      goto continue_;
+////    return;
+////  } // end IF
+////
+////continue_:
+//  inherited::handleDataMessage (message_inout,
+//                                passMessageDownstream_out);
+//}

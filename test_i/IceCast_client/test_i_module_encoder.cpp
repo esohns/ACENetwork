@@ -304,7 +304,6 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
                             stream_p->time_base);
 
       { ACE_GUARD (ACE_Thread_Mutex, aGuard, inherited::lock_);
-
         /* Write the frame to the media file. */
   //      result = av_write_frame (formatContext_, &packet_s);
         result = av_interleaved_write_frame (inherited::formatContext_,
@@ -739,12 +738,6 @@ continue_5:
       if (inherited::videoCodecContext_)
       {
         avcodec_free_context (&(inherited::videoCodecContext_)); ACE_ASSERT (!inherited::videoCodecContext_);
-      } // end IF
-
-      if (likely (inherited::configuration_->concurrency != STREAM_HEADMODULECONCURRENCY_CONCURRENT))
-      { Common_ITask* itask_p = this; // *TODO*: is the no other way ?
-        itask_p->stop (false,  // wait for completion ?
-                       false); // high priority ?
       } // end IF
 
 //continue_4:

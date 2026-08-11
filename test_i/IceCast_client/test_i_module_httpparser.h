@@ -123,8 +123,8 @@ class Test_I_HTTPParser_2
   inline virtual ~Test_I_HTTPParser_2 () {}
 
   // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (Test_I_Message*&, // data message handle
-                                  bool&);           // return value: pass message downstream ?
+  //virtual void handleDataMessage (Test_I_Message*&, // data message handle
+  //                                bool&);           // return value: pass message downstream ?
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPParser_2 ())
