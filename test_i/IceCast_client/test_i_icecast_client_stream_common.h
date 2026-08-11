@@ -201,6 +201,7 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 #if defined (PROJECTM_SUPPORT)
    , projectMConfiguration (NULL)
 #endif // PROJECTM_SUPPORT
+   , queue (NULL)
    , resize (NULL)
 #if defined (GTK_SUPPORT)
    , spectrumAnalyzerConfiguration (NULL)
@@ -245,6 +246,7 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 #if defined (PROJECTM_SUPPORT)
   struct Stream_Visualization_ProjectM_Configuration*                   projectMConfiguration;
 #endif // PROJECTM_SUPPORT
+  ACE_Message_Queue_Base*                                               queue;
   Stream_Visualization_IResize*                                         resize;
 #if defined (GTK_SUPPORT)
   struct Stream_Visualization_GTK_Cairo_SpectrumAnalyzer_Configuration* spectrumAnalyzerConfiguration;
@@ -289,10 +291,14 @@ struct Test_I_IceCastClient_StreamState_2
 {
   Test_I_IceCastClient_StreamState_2 ()
    : Test_I_StreamState ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  struct Test_I_IceCastClient_SessionData_2* sessionData;
+  //struct Test_I_IceCastClient_SessionData_2* sessionData;
 };
+
+typedef Stream_MessageQueue_T<ACE_MT_SYNCH,
+                              Common_TimePolicy_t,
+                              Test_I_SessionMessage_2> Test_I_IceCastClient_MessageQueue_t;
 
 #endif

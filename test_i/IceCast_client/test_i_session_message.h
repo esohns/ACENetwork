@@ -167,6 +167,7 @@ class Test_I_SessionMessage_2
                                       enum Stream_SessionMessageType,
                                       Test_I_IceCastClient_SessionData_2_t,
                                       struct Stream_UserData>
+ , public Stream_IMediaType
 {
   typedef Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
@@ -191,6 +192,10 @@ class Test_I_SessionMessage_2
   Test_I_SessionMessage_2 (const Test_I_SessionMessage_2&);
   inline virtual ~Test_I_SessionMessage_2 () {}
 
+  // implement Stream_IMediaType
+  inline virtual enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
+  inline virtual void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
+
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
 
@@ -205,6 +210,8 @@ class Test_I_SessionMessage_2
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage_2 ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage_2& operator= (const Test_I_SessionMessage_2&))
+
+  enum Stream_MediaType_Type mediaType_;
 };
 
 #endif

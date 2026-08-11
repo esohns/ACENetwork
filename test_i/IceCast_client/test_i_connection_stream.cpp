@@ -44,6 +44,7 @@
 #include "test_i_session_message.h"
 #include "test_i_common_modules.h"
 #include "test_i_m3u_module_parser.h"
+#include "test_i_module_encoder.h"
 #include "test_i_module_httpget.h"
 #include "test_i_module_httpparser.h"
 #include "test_i_icecast_client_defines.h"
@@ -210,15 +211,20 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->configuration_);
 
-  typename inherited::MODULE_T* branch_p = NULL, *branch_2 = NULL; // NULL: 'main' branch
-  Stream_IDistributorModule *idistributor_p = NULL, *idistributor_2 = NULL; 
-  unsigned int index_i = 0, index_2 = 0;
+  typename inherited::MODULE_T* branch_p = NULL, *branch_2 = NULL, *branch_3 = NULL; // NULL: 'main' branch
+  Stream_IDistributorModule *idistributor_p = NULL, *idistributor_2 = NULL, *idistributor_3 = NULL;
+  unsigned int index_i = 0, index_2 = 0, index_3 = 0;
   Stream_Branches_t branches_a;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+
   Test_I_SessionManager_2* session_manager_p =
     Test_I_SessionManager_2::SINGLETON_T::instance ();
   ACE_ASSERT (session_manager_p);
   struct Test_I_IceCastClient_SessionData_2& session_data_r =
     const_cast<struct Test_I_IceCastClient_SessionData_2&> (session_manager_p->getR (inherited::id_));
+  bool may_have_video_b = false;
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -305,7 +311,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   } // end IF
   else if (Common_String_Tools::endswith (inherited::configuration_->configuration_->URL,
                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_WEBM_SUFFIX)))
-  {
+  { may_have_video_b = true;
 #if defined (WEBM_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_WebM_Demuxer_Module (this,
@@ -343,18 +349,66 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
     module_p = NULL;
 #endif // VORBIS_SUPPORT
 
+    ACE_NEW_RETURN (module_p,
+                    Test_I_AudioTagger_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+
     ++index_i;
 
     // video
 #if defined (FFMPEG_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_LibAVDecoder_Module (this,
-                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
                     false);
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
 #endif // FFMPEG_SUPPORT
 
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Distributor_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
+                    false);
+    ACE_ASSERT (module_p);
+    branch_3 = module_p;
+    branches_a.clear ();
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    idistributor_3 =
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+    ACE_ASSERT (idistributor_3);
+    idistributor_3->initialize (branches_a);
+    layout_in->append (module_p, branch_p, index_i); // 1: video branch
+    module_p = NULL;
+
+    // save
+    ACE_NEW_RETURN (module_p,
+                    Test_I_LibAVConvert_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_3, index_3);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoTagger_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_3, index_3);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_QueueTarget_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_3, index_3);
+    module_p = NULL;
+
+    ++index_3;
+
+    // display
     if (unlikely (!inherited::configuration_->configuration_->displayVideo))
       goto continue_;
 
@@ -362,7 +416,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                     Test_I_Delay_Module (this,
                                          ACE_TEXT_ALWAYS_CHAR ("Delay_2")),
                     false);
-    layout_in->append (module_p, branch_p, index_i);
+    layout_in->append (module_p, branch_3, index_3);
     module_p = NULL;
 
 #if defined (FFMPEG_SUPPORT)
@@ -370,7 +424,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                     Test_I_LibAVResize_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
                     false);
-    layout_in->append (module_p, branch_p, index_i);
+    layout_in->append (module_p, branch_3, index_3);
     module_p = NULL;
 #endif // FFMPEG_SUPPORT
 
@@ -385,7 +439,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                            ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_WAYLAND_WINDOW_DEFAULT_NAME_STRING)),
                     false);
 #endif // ACE_WIN32 || ACE_WIN64
-    layout_in->append (module_p, branch_p, index_i);
+    layout_in->append (module_p, branch_3, index_3);
     module_p = NULL;
 
 continue_:
@@ -444,13 +498,9 @@ continue_:
                             media_type_final_s.audio);
   // *TODO*: cannot set this in advance; must be deduced at runtime and notified
   //         by corresponding 'resize' session message(s)...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  media_type_final_s.video.resolution.cx = 1920;
-  media_type_final_s.video.resolution.cy = 1080;
-#else
-  media_type_final_s.video.resolution.width = 1920;
-  media_type_final_s.video.resolution.height = 1080;
-#endif // ACE_WIN32 || ACE_WIN64
+  media_type_final_s.video.format = AV_PIX_FMT_NV12;
+  media_type_final_s.video.frameRate = {60, 1};
+  media_type_final_s.video.resolution = { 1920, 1080 };
   session_data_r.formats.push_front (media_type_final_s);
 #else
   session_data_r.formats.push_front (media_type_s);
@@ -517,19 +567,57 @@ continue_:
 
   ++index_2;
 
-  ACE_NEW_RETURN (module_p,
-                  Test_I_WAV_Encoder_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_ENCODER_WAV_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_2, index_2);
-  module_p = NULL;
+  if (unlikely (may_have_video_b))
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Video_Injector_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_INJECTOR_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
 
-  ACE_NEW_RETURN (module_p,
-                  Test_I_FileSink_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, branch_2, index_2);
-  module_p = NULL;
+#if defined (FFMPEG_SUPPORT)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Encoder_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
+    // need to patch output filename *.wav --> *.mp4
+    if (Common_String_Tools::endswith (Common_String_Tools::tolower ((*iterator).second.second->targetFileName),
+                                       ACE_TEXT_ALWAYS_CHAR (".wav")))
+    {
+      std::string target_filename_string =
+        Common_File_Tools::cropExtension ((*iterator).second.second->targetFileName);
+      target_filename_string += ACE_TEXT_ALWAYS_CHAR (".mp4");
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("%s: adjusting target filename \"%s\" to \"%s\"....\n"),
+                  ACE_TEXT (stream_name_string_),
+                  ACE_TEXT (Common_File_Tools::basename ((*iterator).second.second->targetFileName).c_str ()),
+                  ACE_TEXT (Common_File_Tools::basename (target_filename_string).c_str ())));
+      (*iterator).second.second->targetFileName = target_filename_string;
+    } // end IF
+  } // end IF
+  else
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_WAV_Encoder_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_ENCODER_WAV_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_FileSink_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+#endif // ACE_WIN32 || ACE_WIN64
+  }
 
 #if defined (PROJECTM_SUPPORT)
   ++index_2;

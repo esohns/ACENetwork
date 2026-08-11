@@ -622,6 +622,8 @@ do_work (bool debugParser_in,
   Test_I_MessageAllocator_2_t message_allocator_2 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                    &heap_allocator,         // heap allocator handle
                                                    true);                   // block ?
+  Test_I_IceCastClient_MessageQueue_t encoder_video_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                           NULL);
 
   // *********************** socket configuration data ************************
   Test_I_IceCastClient_ConnectionConfiguration_t connection_configuration;
@@ -671,6 +673,8 @@ do_work (bool debugParser_in,
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_2; // LibAV_Filter_2
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_3; // Delay_2 (Video-)
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_4; // Resize (Video-)
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_5; // Encoder
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_6; // Convert (to NV12,...)
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration_2;
 
@@ -712,8 +716,11 @@ do_work (bool debugParser_in,
   //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
 
 #if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_s;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_s; // decoder
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // encoder
   codec_configuration_s.codecId = AV_CODEC_ID_VP9;
+  codec_configuration_2.codecId = AV_CODEC_ID_H264;
+  codec_configuration_2.profile = AV_PROFILE_H264_MAIN;
 #endif // FFMPEG_SUPPORT
 
   modulehandler_configuration_2.allocatorConfiguration =
@@ -730,6 +737,7 @@ do_work (bool debugParser_in,
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
+  modulehandler_configuration_2.queue = &encoder_video_queue;
   modulehandler_configuration_2.subscriber = &message_handler;
   modulehandler_configuration_2.targetFileName = fileName_in;
   modulehandler_configuration_2.URL = URL_in;
@@ -870,6 +878,7 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2_3 = modulehandler_configuration_2;
 
   delay_configuration_2.averageTokensPerInterval = 1;
+  delay_configuration_2.catchUp = true;
   delay_configuration_2.interval =
     ACE_Time_Value (0, static_cast<suseconds_t> (1000000.0f / 60)); // fps
   delay_configuration_2.mode =
@@ -879,14 +888,22 @@ do_work (bool debugParser_in,
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_2_3)));
 
-
   modulehandler_configuration_2_4 = modulehandler_configuration_2;
-#if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_2_4.outputFormat.video.resolution = {640, 480};
   configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_2_4)));
-#endif // FFMPEG_SUPPORT
+
+  modulehandler_configuration_2_5 = modulehandler_configuration_2;
+  modulehandler_configuration_2_5.codecConfiguration = &codec_configuration_2;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2_5)));
+  modulehandler_configuration_2_6 = modulehandler_configuration_2;
+  modulehandler_configuration_2_6.outputFormat.video.format = AV_PIX_FMT_NV12;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2_6)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -1200,8 +1217,10 @@ ACE_TMAIN (int argc_in,
   process_profile.start ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Common_Tools::initialize (false,  // COM ?
+  Common_Tools::initialize (true,   // COM ?
                             false); // RNG ?
+  MFStartup (MF_VERSION,
+             MFSTARTUP_LITE);
 #else
   Common_Tools::initialize (false); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1512,6 +1531,7 @@ ACE_TMAIN (int argc_in,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+  MFShutdown ();
 #endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
@@ -1528,6 +1548,7 @@ error:
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+  MFShutdown ();
 #endif // ACE_WIN32 || ACE_WIN64
   return EXIT_FAILURE;
 } // end main

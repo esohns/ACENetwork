@@ -126,6 +126,8 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_eventhandler.h
      test_i_message.cpp
      test_i_message.h
+     test_i_module_encoder.cpp
+     test_i_module_encoder.h
      test_i_module_httpget.cpp
      test_i_module_httpget.h
      test_i_module_httpparser.cpp

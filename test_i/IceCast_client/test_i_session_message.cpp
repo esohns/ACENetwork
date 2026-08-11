@@ -121,6 +121,7 @@ Test_I_SessionMessage_2::Test_I_SessionMessage_2 (Stream_SessionId_t sessionId_i
               sessionData_in,
               userData_in,
               expedited_in) // expedited ?
+ , mediaType_ (STREAM_MEDIATYPE_INVALID)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::Test_I_SessionMessage_2"));
 
@@ -128,6 +129,7 @@ Test_I_SessionMessage_2::Test_I_SessionMessage_2 (Stream_SessionId_t sessionId_i
 
 Test_I_SessionMessage_2::Test_I_SessionMessage_2 (const Test_I_SessionMessage_2& message_in)
  : inherited (message_in)
+ , mediaType_ (message_in.mediaType_)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SessionMessage_2::Test_I_SessionMessage_2"));
 
@@ -185,8 +187,7 @@ Test_I_SessionMessage_2::duplicate (void) const
     // when things go wrong, release all resources and return
     if (message_p->cont_ == 0)
     {
-      message_p->release ();
-      message_p = NULL;
+      message_p->release (); message_p = NULL;
     } // end IF
   } // end IF
 

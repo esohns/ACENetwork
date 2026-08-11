@@ -31,6 +31,7 @@
 #include "stream_streammodule_base.h"
 
 #if defined (FFMPEG_SUPPORT)
+#include "stream_dec_libav_converter.h"
 #include "stream_dec_libav_decoder.h"
 #include "stream_dec_libav_filter.h"
 #endif // FFMPEG_SUPPORT
@@ -57,11 +58,15 @@
 
 #include "stream_file_sink.h"
 
+#include "stream_lib_tagger.h"
+
 #include "stream_misc_defragment.h"
 #include "stream_misc_delay.h"
 #include "stream_misc_distributor.h"
+#include "stream_misc_injector.h"
 #include "stream_misc_media_splitter.h"
 #include "stream_misc_messagehandler.h"
+#include "stream_misc_queue_target.h"
 
 #include "stream_stat_statistic_report.h"
 
@@ -282,6 +287,16 @@ typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                enum Stream_ControlType,
                                enum Stream_SessionMessageType,
                                struct Stream_UserData> Test_I_TaskBaseSynch_t;
+
+typedef Stream_Decoder_LibAVConverter_T<Test_I_TaskBaseSynch_t,
+                                        struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_LibAVConvert;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                   // session data type
+                              enum Stream_SessionMessageType,                              // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,    // module handler configuration type
+                              libacestream_default_dec_libav_converter_module_name_string,
+                              Stream_INotify_t,                                            // stream notification interface type
+                              Test_I_LibAVConvert);                                        // writer type
+
 typedef Stream_Visualization_LibAVResize_T<Test_I_TaskBaseSynch_t,
                                            struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_LibAVResize;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                 // session data type
@@ -503,6 +518,7 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_WAV_Encoder);                                      // writer type
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
                                    struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
@@ -515,6 +531,7 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2, // sess
                               libacestream_default_file_sink_module_name_string,
                               Stream_INotify_t,                          // stream notification interface type
                               Test_I_FileSink);                          // writer type
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (PROJECTM_SUPPORT)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -571,5 +588,63 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               libacestream_default_misc_messagehandler_module_name_string,
                               Stream_INotify_t,                                            // stream notification interface type
                               Test_I_Event_Handler_2);                                     // writer type
+
+typedef Stream_Module_Tagger_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                               Stream_ControlMessage_t,
+                               Test_I_Message,
+                               Test_I_SessionMessage_2,
+                               STREAM_MEDIATYPE_AUDIO,
+                               struct Stream_UserData> Test_I_AudioTagger;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_lib_tagger_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_AudioTagger);                                      // writer type
+
+typedef Stream_Module_Tagger_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                               Stream_ControlMessage_t,
+                               Test_I_Message,
+                               Test_I_SessionMessage_2,
+                               STREAM_MEDIATYPE_VIDEO,
+                               struct Stream_UserData> Test_I_VideoTagger;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_lib_tagger_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_VideoTagger);                                      // writer type
+
+typedef Stream_Module_QueueWriter_T<ACE_MT_SYNCH,
+                                    Common_TimePolicy_t,
+                                    struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                    Stream_ControlMessage_t,
+                                    Test_I_Message,
+                                    Test_I_SessionMessage_2,
+                                    struct Stream_UserData> Test_I_QueueTarget;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_misc_queue_sink_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_QueueTarget);                                      // writer type
+
+typedef Stream_Module_Injector_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                 Stream_ControlMessage_t,
+                                 Test_I_Message,
+                                 Test_I_SessionMessage_2,
+                                 struct Stream_UserData> Test_I_Video_Injector;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2, // module handler configuration type
+                              libacestream_default_misc_injector_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_Video_Injector);                                   // writer type
 
 #endif
