@@ -68,6 +68,9 @@
 #if defined (GTK_SUPPORT)
 #include "stream_vis_gtk_cairo_spectrum_analyzer.h"
 #endif // GTK_SUPPORT
+#if defined (FFMPEG_SUPPORT)
+#include "stream_vis_libav_resize.h"
+#endif // FFMPEG_SUPPORT
 #if defined (PROJECTM_SUPPORT)
 #include "stream_vis_projectm.h"
 #endif // PROJECTM_SUPPORT
@@ -267,6 +270,26 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               libacestream_default_dec_libav_decoder_module_name_string,
                               Stream_INotify_t,                                          // stream notification interface type
                               Test_I_LibAVDecoder);                                      // writer type
+#endif // FFMPEG_SUPPORT
+
+#if defined (FFMPEG_SUPPORT)
+typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                               Stream_ControlMessage_t,
+                               Test_I_Message,
+                               Test_I_SessionMessage_2,
+                               enum Stream_ControlType,
+                               enum Stream_SessionMessageType,
+                               struct Stream_UserData> Test_I_TaskBaseSynch_t;
+typedef Stream_Visualization_LibAVResize_T<Test_I_TaskBaseSynch_t,
+                                           struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_LibAVResize;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                 // session data type
+                              enum Stream_SessionMessageType,                            // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,  // module handler configuration type
+                              libacestream_default_vis_libav_resize_module_name_string,
+                              Stream_INotify_t,                                          // stream notification interface type
+                              Test_I_LibAVResize);                                       // writer type
 #endif // FFMPEG_SUPPORT
 
 // audio

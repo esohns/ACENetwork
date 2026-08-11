@@ -365,6 +365,15 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
 
+#if defined (FFMPEG_SUPPORT)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_LibAVResize_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_NEW_RETURN (module_p,
                     Test_I_Direct3d_Module (this,
@@ -587,6 +596,8 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   // *TODO*: remove type inferences
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
+  (*iterator).second.second->resize = this;
+
   // ---------------------------------------------------------------------------
 
   if (configuration_in.configuration_->setupPipeline)
@@ -616,4 +627,20 @@ failed:
                 ACE_TEXT (stream_name_string_)));
 
   return false;
+}
+
+void
+Test_I_ConnectionStream_2::resize (const Common_Image_Resolution_t& resolution_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::resize"));
+
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+
+  (*iterator).second.second->outputFormat.video.resolution = resolution_in;
+
+  inherited::notify (STREAM_SESSION_MESSAGE_RESIZE,
+                    false,
+                    true);
 }

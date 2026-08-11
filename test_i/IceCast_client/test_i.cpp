@@ -670,6 +670,7 @@ do_work (bool debugParser_in,
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_2; // LibAV_Filter_2
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_3; // Delay_2 (Video-)
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_4; // Resize (Video-)
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration_2;
 
@@ -866,6 +867,8 @@ do_work (bool debugParser_in,
   CBData_in.projectMConfiguration = &projectm_configuration;
 #endif // PROJECTM_SUPPORT
 
+  modulehandler_configuration_2_3 = modulehandler_configuration_2;
+
   delay_configuration_2.averageTokensPerInterval = 1;
   delay_configuration_2.interval =
     ACE_Time_Value (0, static_cast<suseconds_t> (1000000.0f / 60)); // fps
@@ -875,6 +878,15 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Delay_2"),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_2_3)));
+
+
+  modulehandler_configuration_2_4 = modulehandler_configuration_2;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_2_4.outputFormat.video.resolution = {640, 480};
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2_4)));
+#endif // FFMPEG_SUPPORT
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =

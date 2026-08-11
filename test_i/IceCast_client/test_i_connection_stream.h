@@ -33,6 +33,8 @@
 #include "stream_common.h"
 #include "stream_session_manager.h"
 
+#include "stream_vis_iresize.h"
+
 #include "stream_net_io_stream.h"
 
 #include "test_i_connection_manager_common.h"
@@ -143,6 +145,7 @@ class Test_I_ConnectionStream_2
 #if defined (FFMPEG_SUPPORT)
  , public Stream_MediaFramework_MediaTypeConverter_T<struct Stream_MediaFramework_FFMPEG_MediaType>
 #endif // FFMPEG_SUPPORT
+ , public Stream_Visualization_IResize
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
@@ -177,6 +180,10 @@ class Test_I_ConnectionStream_2
   // implement Common_IInitialize_T
   virtual bool initialize (const inherited::CONFIGURATION_T&,
                            ACE_HANDLE);
+
+  // implement Stream_Visualization_IResize
+  virtual void resize (const Common_Image_Resolution_t&); // new resolution
+  inline virtual void resizing () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_2 (const Test_I_ConnectionStream_2&))
