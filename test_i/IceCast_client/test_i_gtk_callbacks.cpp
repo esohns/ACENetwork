@@ -3047,6 +3047,7 @@ glarea_render_cb (GtkGLArea* GLArea_in,
     title_string += converter.str ();
     title_string += ACE_TEXT_ALWAYS_CHAR (" fps]");
 
+#if defined (PROJECTM_SUPPORT)
     title_string += ACE_TEXT_ALWAYS_CHAR (" \"");
     char* preset_name_p =
       projectm_playlist_item (data_p->projectMConfiguration->playlist,
@@ -3058,6 +3059,7 @@ glarea_render_cb (GtkGLArea* GLArea_in,
     title_string += ACE_TEXT_ALWAYS_CHAR ("\"");
     if (data_p->projectMConfiguration->presetIsLocked)
       title_string += ACE_TEXT_ALWAYS_CHAR (" [LOCKED]");
+#endif // PROJECTM_SUPPORT
 
     // sanity check(s)
     Common_UI_GTK_BuildersConstIterator_t iterator =
@@ -3073,8 +3075,10 @@ glarea_render_cb (GtkGLArea* GLArea_in,
     last_second = current_second;
     last_frame_count_i = 0;
 
+#if defined (PROJECTM_SUPPORT)
     projectm_set_fps (data_p->projectMConfiguration->handle,
                       static_cast<int32_t> (std::round (fps_f)));
+#endif // PROJECTM_SUPPORT
   } // end IF
   else
     ++last_frame_count_i;
@@ -3221,6 +3225,7 @@ glarea_expose_event_cb (GtkWidget* widget_in,
     title_string += converter.str ();
     title_string += ACE_TEXT_ALWAYS_CHAR (" fps]");
 
+#if defined (PROJECTM_SUPPORT)
     title_string += ACE_TEXT_ALWAYS_CHAR (" \"");
     char* preset_name_p =
       projectm_playlist_item (data_p->projectMConfiguration->playlist,
@@ -3232,6 +3237,7 @@ glarea_expose_event_cb (GtkWidget* widget_in,
     title_string += ACE_TEXT_ALWAYS_CHAR ("\"");
     if (data_p->projectMConfiguration->presetIsLocked)
       title_string += ACE_TEXT_ALWAYS_CHAR (" [LOCKED]");
+#endif // PROJECTM_SUPPORT
 
     // sanity check(s)
     Common_UI_GTK_BuildersConstIterator_t iterator =
@@ -3247,8 +3253,10 @@ glarea_expose_event_cb (GtkWidget* widget_in,
     last_second = current_second;
     last_frame_count_i = 0;
 
+#if defined (PROJECTM_SUPPORT)
     projectm_set_fps (data_p->projectMConfiguration->handle,
                       static_cast<int32_t> (std::round (fps_f)));
+#endif // PROJECTM_SUPPORT
   } // end IF
   else
     ++last_frame_count_i;
