@@ -427,6 +427,7 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
       enum AVCodecID audio_codec_id = AV_CODEC_ID_NONE;
       enum AVCodecID video_codec_id =
         inherited::configuration_->codecConfiguration->codecId;
+      AVDictionary* options_p = NULL;
 
       inherited::getMediaType (session_data_r.formats.back (),
                                STREAM_MEDIATYPE_AUDIO,
@@ -652,6 +653,16 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
       inherited::videoCodecContext_->profile =
         inherited::configuration_->codecConfiguration->profile;
 
+      // *NOTE*: these settings reduce ghosting in the output
+      inherited::videoCodecContext_->max_b_frames = 0;
+      inherited::videoCodecContext_->gop_size =
+        video_media_type_s.frameRate.num;
+      inherited::videoCodecContext_->has_b_frames = 0;
+      av_dict_set (&options_p, ACE_TEXT_ALWAYS_CHAR ("low_latency"), ACE_TEXT_ALWAYS_CHAR ("1"), 0);
+      av_dict_set (&options_p, ACE_TEXT_ALWAYS_CHAR ("bf"), ACE_TEXT_ALWAYS_CHAR ("0"), 0);
+      av_dict_set (&options_p, ACE_TEXT_ALWAYS_CHAR ("rate_control"), ACE_TEXT_ALWAYS_CHAR ("3"), 0);
+      av_dict_set (&options_p, ACE_TEXT_ALWAYS_CHAR ("quality"), ACE_TEXT_ALWAYS_CHAR ("75"), 0);
+
       if (inherited::configuration_->codecConfiguration->deviceType != AV_HWDEVICE_TYPE_NONE)
       {
         ACE_ASSERT (!deviceContext_);
@@ -722,7 +733,7 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
 continue_:
       result = avcodec_open2 (inherited::videoCodecContext_,
                               inherited::formatContext_->video_codec,
-                              NULL);
+                              &options_p);
       if (unlikely (result < 0))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -730,8 +741,10 @@ continue_:
                     inherited::mod_->name (),
                     ACE_TEXT (avcodec_get_name (video_codec_id)),
                     ACE_TEXT (Common_Image_Tools::errorToString (result).c_str ())));
+        av_dict_free (&options_p);
         goto error;
       } // end IF
+      av_dict_free (&options_p);
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s: initialized codec %s; encoded pixel format: %s\n"),
                   inherited::mod_->name (),

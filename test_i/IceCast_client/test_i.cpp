@@ -725,7 +725,7 @@ do_work (bool debugParser_in,
   codec_configuration_2.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
 #endif // ACE_WIN32 || ACE_WIN64
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
-  codec_configuration_2.profile = AV_PROFILE_H264_MAIN;
+  codec_configuration_2.profile = AV_PROFILE_H264_BASELINE;
 #endif // FFMPEG_SUPPORT
 
   modulehandler_configuration_2.allocatorConfiguration =
