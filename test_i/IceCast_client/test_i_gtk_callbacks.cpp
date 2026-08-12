@@ -94,6 +94,39 @@ static GLuint dummy_vao_i = 0;
 
 /////////////////////////////////////////
 
+static std::map<ACE_UINT8, std::string> channel_map_a = { { 1, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_MP3_URL) },
+                                                          { 2, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_VORBIS_URL) },
+                                                          { 3, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_OPUS_URL) },
+                                                          { 4, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_URL) }
+                                                        };
+
+ACE_UINT8
+URLToChannelId (const std::string& URL_in)
+{
+  //for (std::map<ACE_UINT8, std::string>::iterator iterator = channel_map_a.begin ();
+  //     iterator != channel_map_a.end ();
+  //     ++iterator)
+  //  if ((*iterator).second == URL_in)
+  //    return (*iterator).first;
+  std::map<ACE_UINT8, std::string>::iterator iterator =
+    std::find_if (channel_map_a.begin (), channel_map_a.end (),
+                  [URL_in] (const std::pair<ACE_UINT8, std::string>& entry_in) { return entry_in.second == URL_in; });
+  if (iterator != channel_map_a.end ())
+    return (*iterator).first;
+  return 0;
+}
+
+std::string
+channelIdToURL (ACE_UINT8 id_in)
+{
+  std::map<ACE_UINT8, std::string>::iterator iterator = channel_map_a.find (id_in);
+  if (iterator != channel_map_a.end ())
+    return ((*iterator).second);
+  return ACE_TEXT_ALWAYS_CHAR ("");
+}
+
+/////////////////////////////////////////
+
 gboolean
 idle_end_session_cb (gpointer userData_in)
 {
@@ -146,7 +179,11 @@ idle_end_session_cb (gpointer userData_in)
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
   //gtk_progress_bar_set_show_text (progress_bar_p, FALSE);
 
-  un_toggling_connect = true;
+  if (data_p->nextChannelSet)
+  { data_p->nextChannelSet = false;
+  } // end IF
+  else
+    un_toggling_connect = true;
   gtk_toggle_button_toggled (toggle_button_p);
 
   return G_SOURCE_REMOVE;
@@ -1801,9 +1838,13 @@ continue_2:
     return;
   } // end IF
 
-  // --> disconnect
+  // --> disconnect ?
+  gtk_button_set_label (GTK_BUTTON (toggleButton_in),
+                        GTK_STOCK_CONNECT);
 
-  ACE_ASSERT (data_p->handle != ACE_INVALID_HANDLE);
+  if (data_p->handle == ACE_INVALID_HANDLE) // *TODO*: when does this happen ?
+    return;
+
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
@@ -1872,6 +1913,138 @@ button_cut_clicked_cb (GtkWidget* widget_in,
 
   return FALSE;
 } // button_cut_clicked_cb
+
+gboolean
+dialog_main_key_press_event_cb (GtkWidget* widget_in,
+                                GdkEventKey* eventKey_in,
+                                gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::key_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+
+  // sanity check(s)
+  ACE_ASSERT (eventKey_in);
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    reinterpret_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  switch (eventKey_in->keyval)
+  {
+//#if GTK_CHECK_VERSION (3,0,0)
+//    case GDK_KEY_Escape:
+//    case GDK_KEY_f:
+//    case GDK_KEY_F:
+//#else
+//    case GDK_Escape:
+//    case GDK_f:
+//    case GDK_F:
+//#endif // GTK_CHECK_VERSION (3,0,0)
+//    {
+//      bool is_active_b = false;
+//      GtkToggleButton* toggle_button_p =
+//          GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+//                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+//      ACE_ASSERT (toggle_button_p);
+//      is_active_b = gtk_toggle_button_get_active (toggle_button_p);
+//
+//     // sanity check(s)
+//#if GTK_CHECK_VERSION (3,0,0)
+//      if ((eventKey_in->keyval == GDK_KEY_Escape) &&
+//#else
+//      if ((eventKey_in->keyval == GDK_Escape) &&
+//#endif // GTK_CHECK_VERSION (3,0,0)
+//          !is_active_b)
+//        break; // <-- not in fullscreen mode, nothing to do
+//
+//      gtk_toggle_button_set_active (toggle_button_p,
+//                                    !is_active_b);
+//
+//      break;
+//    }
+#if GTK_CHECK_VERSION (3,0,0)
+    case GDK_KEY_1:
+    case GDK_KEY_2:
+    case GDK_KEY_3:
+    case GDK_KEY_4:
+    case GDK_KEY_5:
+    case GDK_KEY_6:
+    case GDK_KEY_7:
+    case GDK_KEY_8:
+    case GDK_KEY_9:
+    case GDK_KEY_0:
+#else
+    case GDK_1:
+    case GDK_2:
+    case GDK_3:
+    case GDK_4:
+    case GDK_5:
+    case GDK_6:
+    case GDK_7:
+    case GDK_8:
+    case GDK_9:
+    case GDK_0:
+#endif // GTK_CHECK_VERSION (3,0,0)
+    {
+      // sanity check(s)
+      if (data_p->nextChannelSet)
+        return TRUE; // done (do not propagate further)
+      ACE_UINT8 next_channel_i = 0;
+#if GTK_CHECK_VERSION (3,0,0)
+      if (eventKey_in->keyval == GDK_KEY_0)
+        next_channel_i = 10;
+      else
+        next_channel_i = eventKey_in->keyval - GDK_KEY_0;
+#else
+      if (eventKey_in->keyval == GDK_0)
+        next_channel_i = 10;
+      else
+        next_channel_i = eventKey_in->keyval - GDK_0;
+#endif // GTK_CHECK_VERSION (3,0,0)
+      GtkEntry* entry_p =
+        GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
+      ACE_ASSERT (entry_p);
+      const gchar* text_p = gtk_entry_get_text (entry_p);
+      ACE_ASSERT (text_p);
+      std::string URL_string = Common_UI_GTK_Tools::UTF8ToLocale (text_p, -1);
+      ACE_UINT8 current_channel_i = URLToChannelId (URL_string);
+      // sanity check(s)
+      if (next_channel_i == current_channel_i)
+      {
+        next_channel_i = 0; // reset
+        return TRUE; // done (do not propagate further)
+      } // end IF
+      URL_string = channelIdToURL (next_channel_i);
+      gchar* text_2 = Common_UI_GTK_Tools::localeToUTF8 (URL_string);
+      gtk_entry_set_text (entry_p,
+                          text_2);
+      g_free (text_2);
+
+      GtkToggleButton* toggle_button_p =
+        GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
+      ACE_ASSERT (toggle_button_p);
+      if (gtk_toggle_button_get_active (toggle_button_p))
+      { data_p->nextChannelSet = true;
+        gtk_toggle_button_set_active (toggle_button_p, FALSE);
+        return TRUE; // done (do not propagate further)
+      } // end IF
+
+      gtk_toggle_button_set_active (toggle_button_p, TRUE);
+
+      break;
+    }
+    default:
+      return FALSE; // propagate
+  } // end SWITCH
+
+  return TRUE; // done (do not propagate further)
+} // dialog_main_key_press_event_cb
 
 void
 entry_url_activate_cb (GtkEntry* entry_in,

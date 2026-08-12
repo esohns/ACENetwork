@@ -180,6 +180,7 @@ struct Test_I_IceCastClient_UI_CBData
    , mixerHandle (NULL)
    , volumeControl (NULL)
 #endif // ACE_WIN32 || ACE_WIN64
+   , nextChannelSet (false)
   {}
 
   struct Test_I_IceCastClient_Configuration*          configuration;
@@ -202,6 +203,7 @@ struct Test_I_IceCastClient_UI_CBData
   snd_mixer_t*                                        mixerHandle;
   snd_mixer_elem_t*                                   volumeControl;
 #endif // ACE_WIN32 || ACE_WIN64
+  bool                                                nextChannelSet;
 };
 
 //struct Test_I_IceCastClient_ThreadData

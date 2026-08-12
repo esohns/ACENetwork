@@ -25,9 +25,9 @@
 
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_AV_FILE        "output.mp4"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE           "output.wav"
-//#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                  "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
-//#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "http://streaming.fueralle.org:8000/bermudafunk.ogg.m3u"
-//#define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "http://xfer.hirschmilch.de:8000/chillout.opus.m3u"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_MP3_URL               "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_VORBIS_URL            "http://streaming.fueralle.org:8000/bermudafunk.ogg.m3u"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_OPUS_URL              "http://xfer.hirschmilch.de:8000/chillout.opus.m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "https://rdst.win:59000/dos.webm.m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE          "IceCast client"
 
