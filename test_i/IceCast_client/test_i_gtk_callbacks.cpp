@@ -52,8 +52,7 @@
 #endif /* GTKGL_SUPPORT */
 
 #include <iomanip>
-#include <limits>
-#include <sstream>
+#include <map>
 
 #include "ace/Guard_T.h"
 #include "ace/Synch_Traits.h"
@@ -91,14 +90,13 @@ static bool un_toggling_connect = false;
 #if defined (GTKGL_SUPPORT)
 static GLuint dummy_vao_i = 0;
 #endif // GTKGL_SUPPORT
-
-/////////////////////////////////////////
-
 static std::map<ACE_UINT8, std::string> channel_map_a = { { 1, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_MP3_URL) },
                                                           { 2, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_VORBIS_URL) },
                                                           { 3, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_OPUS_URL) },
                                                           { 4, ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_URL) }
                                                         };
+
+/////////////////////////////////////////
 
 ACE_UINT8
 URLToChannelId (const std::string& URL_in)
