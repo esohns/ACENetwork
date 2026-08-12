@@ -60,7 +60,11 @@ class Test_I_Encoder
 #else
   Test_I_Encoder (typename inherited::ISTREAM_T*); // stream handle
 #endif // ACE_WIN32 || ACE_WIN64
-  inline virtual ~Test_I_Encoder () {}
+  virtual ~Test_I_Encoder ();
+
+  // override (part of) Stream_IModuleHandler_T
+  virtual bool initialize (const struct Test_I_IceCastClient_ModuleHandlerConfiguration_2&,
+                           Stream_IAllocator*);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_I_Message*&, // data message handle
@@ -72,6 +76,10 @@ class Test_I_Encoder
   ACE_UNIMPLEMENTED_FUNC (Test_I_Encoder ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_Encoder (const Test_I_Encoder&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_Encoder& operator= (const Test_I_Encoder&))
+
+  AVBufferRef* deviceContext_; // hardware-
+  AVBufferRef* framesContext_; // hardware-
+  AVFrame*     hwFrame_;       // hardware-
 };
 
 //////////////////////////////////////////

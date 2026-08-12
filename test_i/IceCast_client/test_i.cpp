@@ -720,6 +720,10 @@ do_work (bool debugParser_in,
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_s; // decoder
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // encoder
   codec_configuration_s.codecId = AV_CODEC_ID_VP9;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  codec_configuration_2.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+#endif // ACE_WIN32 || ACE_WIN64
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
   codec_configuration_2.profile = AV_PROFILE_H264_MAIN;
 #endif // FFMPEG_SUPPORT
@@ -777,8 +781,6 @@ do_work (bool debugParser_in,
                 ACE_TEXT ("failed to Stream_MediaFramework_DirectShow_Tools::fromWaveFormatEx(), returning\n")));
     return;
   } // end IF
-
-
 #else
   struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
   modulehandler_configuration_2.ALSAConfiguration = &ALSA_configuration;

@@ -57,9 +57,47 @@ Test_I_Encoder::Test_I_Encoder (ISTREAM_T* stream_in)
 Test_I_Encoder::Test_I_Encoder (typename inherited::ISTREAM_T* stream_in)
 #endif // ACE_WIN32 || ACE_WIN64
  : inherited (stream_in)
+ , deviceContext_ (NULL)
+ , framesContext_ (NULL)
+ , hwFrame_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Encoder::Test_I_Encoder"));
 
+}
+
+Test_I_Encoder::~Test_I_Encoder ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Encoder::~Test_I_Encoder"));
+
+  if (deviceContext_)
+    av_buffer_unref (&deviceContext_);
+  if (framesContext_)
+    av_buffer_unref (&framesContext_);
+  if (hwFrame_)
+    av_frame_free (&hwFrame_);
+}
+
+bool
+Test_I_Encoder::initialize (const struct Test_I_IceCastClient_ModuleHandlerConfiguration_2& configuration_in,
+                            Stream_IAllocator* allocator_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Encoder::initialize"));
+
+  if (inherited::isInitialized_)
+  {
+    if (deviceContext_)
+      av_buffer_unref (&deviceContext_);
+    ACE_ASSERT (!deviceContext_);
+    if (framesContext_)
+      av_buffer_unref (&framesContext_);
+    ACE_ASSERT (!framesContext_);
+    if (hwFrame_)
+      av_frame_free (&hwFrame_);
+    ACE_ASSERT (!hwFrame_);
+  } // end IF
+
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 void
@@ -144,19 +182,35 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
       }
       case STREAM_MEDIATYPE_VIDEO:
       {
-        result =
-          av_image_fill_linesizes (frame_p->linesize,
-                                   static_cast<AVPixelFormat> (frame_p->format),
-                                   static_cast<int> (frame_p->width));
+        result = av_image_fill_arrays (frame_p->data,
+                                       frame_p->linesize,
+                                       reinterpret_cast<uint8_t*> (message_block_p->rd_ptr ()),
+                                       static_cast<AVPixelFormat> (frame_p->format),
+                                       static_cast<int> (frame_p->width),
+                                       static_cast<int> (frame_p->height),
+                                       1);
         ACE_ASSERT (result >= 0);
 
-        result =
-          av_image_fill_pointers (frame_p->data,
-                                  static_cast<AVPixelFormat> (frame_p->format),
-                                  static_cast<int> (frame_p->height),
-                                  reinterpret_cast<uint8_t*> (message_block_p->rd_ptr ()),
-                                  frame_p->linesize);
-        ACE_ASSERT (result >= 0);
+        if (hwFrame_)
+        {
+          result = av_hwframe_transfer_data (hwFrame_, frame_p, 0);
+          if (unlikely (result < 0))
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("%s: failed to av_hwframe_transfer_data(): \"%s\", aborting\n"),
+                        inherited::mod_->name (),
+                        message_type_e));
+            goto error;
+          } // end IF
+          hwFrame_->pts = frame_p->pts;
+
+          // *NOTE*: work around a bug in MFT (!) H264 encoding
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+          frame_p = hwFrame_;
+#endif // ACE_WIN32 || ACE_WIN64
+        } // end IF
+
         break;
       }
       default:
@@ -365,7 +419,7 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
       ACE_ASSERT (!session_data_r.formats.empty ());
       ACE_ASSERT (!session_data_r.targetFileName.empty ());
 
-      int result = -1;
+      int result;
       struct Stream_MediaFramework_FFMPEG_AudioMediaType audio_media_type_s;
       struct Stream_MediaFramework_FFMPEG_VideoMediaType video_media_type_s;
       const struct AVOutputFormat* output_format_p = NULL;
@@ -598,6 +652,74 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
       inherited::videoCodecContext_->profile =
         inherited::configuration_->codecConfiguration->profile;
 
+      if (inherited::configuration_->codecConfiguration->deviceType != AV_HWDEVICE_TYPE_NONE)
+      {
+        ACE_ASSERT (!deviceContext_);
+        result = av_hwdevice_ctx_create (&deviceContext_,
+                                         inherited::configuration_->codecConfiguration->deviceType,
+                                         NULL,
+                                         NULL,
+                                         0);
+        if (result < 0 || !deviceContext_)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("%s: av_hwdevice_ctx_create(%d) failed: \"%m\", falling back\n"),
+                      inherited::mod_->name (),
+                      inherited::configuration_->codecConfiguration->deviceType));
+        } // end IF
+        else
+        { ACE_ASSERT (!framesContext_);
+          framesContext_ = av_hwframe_ctx_alloc (deviceContext_);
+          ACE_ASSERT (framesContext_);
+          AVHWFramesContext* frames_context_p = (AVHWFramesContext*)framesContext_->data;
+          frames_context_p->format =
+            Stream_MediaFramework_Tools::AVHWDeviceTypeToPixelFormat (inherited::configuration_->codecConfiguration->deviceType);
+          frames_context_p->sw_format =
+            Stream_MediaFramework_Tools::AVHWDeviceTypeToIntermediatePixelFormat (inherited::configuration_->codecConfiguration->deviceType,
+                                                                                  inherited::configuration_->codecConfiguration->codecId);
+          frames_context_p->width = inherited::videoCodecContext_->width;
+          frames_context_p->height = inherited::videoCodecContext_->height;
+          //frames_context_p->initial_pool_size = 4;
+          result = av_hwframe_ctx_init (framesContext_);
+          if (result < 0)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("%s: av_hwframe_ctx_init() failed: \"%m\", falling back\n"),
+                        inherited::mod_->name ()));
+            av_buffer_unref (&deviceContext_);
+            ACE_ASSERT (!deviceContext_);
+            av_buffer_unref (&framesContext_);
+            ACE_ASSERT (!framesContext_);
+            goto continue_;
+          } // end IF
+
+          ACE_ASSERT (!hwFrame_);
+          hwFrame_ = av_frame_alloc ();
+          result = av_hwframe_get_buffer (framesContext_, hwFrame_, 0);
+          if (result < 0)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("%s: av_hwframe_get_buffer() failed: \"%m\", falling back\n"),
+                        inherited::mod_->name ()));
+            av_buffer_unref (&deviceContext_);
+            ACE_ASSERT (!deviceContext_);
+            av_buffer_unref (&framesContext_);
+            ACE_ASSERT (!framesContext_);
+            av_frame_free (&hwFrame_);
+            ACE_ASSERT (!hwFrame_);
+            goto continue_;
+          } // end IF
+
+          inherited::videoCodecContext_->hw_device_ctx = av_buffer_ref (deviceContext_);
+          // *NOTE*: work around a bug in MFT (!) H264 encoding
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+          inherited::videoCodecContext_->hw_frames_ctx = av_buffer_ref (framesContext_);
+#endif // ACE_WIN32 || ACE_WIN64
+        } // end ELSE
+      } // end IF
+
+continue_:
       result = avcodec_open2 (inherited::videoCodecContext_,
                               inherited::formatContext_->video_codec,
                               NULL);
