@@ -49,9 +49,10 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
   {
     case SIGINT:
 // *PORTABILITY*: on Windows SIGQUIT is not defined
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGQUIT:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     {
 //       // *PORTABILITY*: tracing in a signal handler context is not portable
 //       // *TODO*
@@ -64,21 +65,22 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) and SIGTERM (15) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR1:
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     case SIGBREAK:
-#endif
+#else
+    case SIGUSR1:
+#endif // ACE_WIN32 || ACE_WIN64
     {
       // print statistic
       statistic = true;
 
       break;
     }
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGHUP:
     case SIGUSR2:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     case SIGTERM:
     {
       // print statistic
@@ -86,6 +88,12 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 
       break;
     }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    case SIGCHLD:
+    case 34: // realtime signal #0
+      break;
+#endif // ACE_WIN32 || ACE_WIN64
     default:
     {
       // *PORTABILITY*: tracing in a signal handler context is not portable
@@ -151,11 +159,6 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_2->stop (false, // wait ?
                                  true); // high priority ?
     iconnection_manager_2->abort (false);
-
-    // step5: stop reactor (&& proactor, if applicable)
-    //Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
-    //                                     inherited::configuration_->dispatchState->reactorGroupId,
-    //                                     false);                                                    // don't block
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF

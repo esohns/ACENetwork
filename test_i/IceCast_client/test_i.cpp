@@ -684,7 +684,7 @@ do_work (bool debugParser_in,
     &allocator_configuration;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
-      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
@@ -725,7 +725,7 @@ do_work (bool debugParser_in,
   codec_configuration_2.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
 #endif // ACE_WIN32 || ACE_WIN64
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
-  codec_configuration_2.profile = AV_PROFILE_H264_BASELINE;
+  codec_configuration_2.profile = AV_PROFILE_H264_MAIN;
 #endif // FFMPEG_SUPPORT
 
   modulehandler_configuration_2.allocatorConfiguration =
@@ -738,6 +738,7 @@ do_work (bool debugParser_in,
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration_2.connectionConfigurations =
     &configuration_in.connectionConfigurations;
+  modulehandler_configuration_2.handleResize = false;
   modulehandler_configuration_2.parserConfiguration =
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration_2.statisticReportingInterval =
@@ -796,6 +797,7 @@ do_work (bool debugParser_in,
                                      STREAM_MEDIATYPE_AUDIO,
                                      modulehandler_configuration_2.outputFormat.audio);
   modulehandler_configuration_2.outputFormat.video.format = AV_PIX_FMT_BGRA;
+  modulehandler_configuration_2.outputFormat.video.resolution = { 1920, 1080 };
 #else
   modulehandler_configuration_2.outputFormat = media_type_s;
 #endif // FFMPEG_SUPPORT
@@ -883,7 +885,7 @@ do_work (bool debugParser_in,
   delay_configuration_2.averageTokensPerInterval = 1;
   delay_configuration_2.catchUp = true;
   delay_configuration_2.interval =
-    ACE_Time_Value (0, static_cast<suseconds_t> (1000000.0f / 60)); // fps
+    ACE_Time_Value (0, static_cast<suseconds_t> (1000000.0f / TEST_I_ICECAST_CLIENT_DEFAULT_INPUT_FRAMERATE)); // fps
   delay_configuration_2.mode =
     STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   modulehandler_configuration_2_3.delayConfiguration = &delay_configuration_2;
@@ -892,7 +894,9 @@ do_work (bool debugParser_in,
                                                                                  &modulehandler_configuration_2_3)));
 
   modulehandler_configuration_2_4 = modulehandler_configuration_2;
-  modulehandler_configuration_2_4.outputFormat.video.resolution = {640, 480};
+  modulehandler_configuration_2_4.handleResize = true;
+  modulehandler_configuration_2_4.outputFormat.video.resolution =
+    { STREAM_VIS_DEFAULT_WINDOW_WIDTH, STREAM_VIS_DEFAULT_WINDOW_HEIGHT };
   configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_2_4)));
@@ -1052,7 +1056,7 @@ do_work (bool debugParser_in,
   connection_manager_p->wait ();
   connection_manager_2->stop (false, // wait ?
                               true); // high priority ?
-  connection_manager_2->abort ();
+  connection_manager_2->abort (false);
   connection_manager_2->wait ();
 
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,

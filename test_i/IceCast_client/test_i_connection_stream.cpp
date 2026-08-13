@@ -499,7 +499,8 @@ continue_:
   // *TODO*: cannot set this in advance; must be deduced at runtime and notified
   //         by corresponding 'resize' session message(s)...
   media_type_final_s.video.format = AV_PIX_FMT_NV12;
-  media_type_final_s.video.frameRate = {30, 1};
+  media_type_final_s.video.frameRate =
+    { TEST_I_ICECAST_CLIENT_DEFAULT_INPUT_FRAMERATE, 1 };
   media_type_final_s.video.resolution = { 1920, 1080 };
   session_data_r.formats.push_front (media_type_final_s);
 #else
@@ -729,6 +730,6 @@ Test_I_ConnectionStream_2::resize (const Common_Image_Resolution_t& resolution_i
   (*iterator).second.second->outputFormat.video.resolution = resolution_in;
 
   inherited::notify (STREAM_SESSION_MESSAGE_RESIZE,
-                    false,
-                    true);
+                     false,
+                     true);
 }

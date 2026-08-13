@@ -189,19 +189,19 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       const struct M3U_ExtInf_Element& element_r =
         data_r.M3UPlaylist.ext_inf_elements.front ();
 
-      std::string request_protocol_string =
-        Net_Common_Tools::URLToProtocol (CBData_->URL);
-      std::string request_2_protocol_string =
-        Net_Common_Tools::URLToProtocol (element_r.URL);
+      // std::string request_protocol_string =
+      //   Net_Common_Tools::URLToProtocol (CBData_->URL);
+      // std::string request_2_protocol_string =
+      //   Net_Common_Tools::URLToProtocol (element_r.URL);
       std::string URL_string = element_r.URL;
-      if (request_protocol_string != request_2_protocol_string)
-      { // *NOTE*: probably misconfigured server...
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("request protocol \"%s\" does not match protocol of the response URL: \"%s\", patching response URL...\n"),
-                    ACE_TEXT (request_protocol_string.c_str ()),
-                    ACE_TEXT (request_2_protocol_string.c_str ())));
-        URL_string.insert (4, 1, 's');
-      } // end IF
+      // if (request_protocol_string != request_2_protocol_string)
+      // { // *NOTE*: probably misconfigured server...
+      //   ACE_DEBUG ((LM_WARNING,
+      //               ACE_TEXT ("request protocol \"%s\" does not match protocol of the response URL: \"%s\", patching response URL...\n"),
+      //               ACE_TEXT (request_protocol_string.c_str ()),
+      //               ACE_TEXT (request_2_protocol_string.c_str ())));
+      //   URL_string.insert (4, 1, 's');
+      // } // end IF
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("loading \"%s\"...\n"),
                   ACE_TEXT (URL_string.c_str ())));
@@ -482,6 +482,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     }
     case STREAM_SESSION_MESSAGE_FORMAT:
       event_e = COMMON_UI_EVENT_FORMAT;
+      break;
+    case STREAM_SESSION_MESSAGE_RESIZE:
+      event_e = COMMON_UI_EVENT_RESIZE;
       break;
     default:
     {

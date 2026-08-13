@@ -206,6 +206,9 @@ idle_load_segment_cb (gpointer userData_in)
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
+  Common_UI_GTK_StatusContextIdsIterator_t iterator_2 =
+    data_p->UIState->contextIds.find (COMMON_UI_GTK_STATUSCONTEXT_INFORMATION);
+  ACE_ASSERT (iterator_2 != data_p->UIState->contextIds.end ());
 
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
   iconnection_p =
@@ -220,6 +223,18 @@ idle_load_segment_cb (gpointer userData_in)
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   data_p->handle = ACE_INVALID_HANDLE;
+
+  // display information
+  GtkStatusbar* statusbar_p =
+    GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_NAME)));
+  ACE_ASSERT (statusbar_p);
+  std::string status_bar_string = ACE_TEXT_ALWAYS_CHAR ("loading: \"");
+  status_bar_string += data_p->URL;
+  status_bar_string += ACE_TEXT_ALWAYS_CHAR ("\"...");
+  gtk_statusbar_push (statusbar_p,
+                      (*iterator_2).second,
+                      status_bar_string.c_str ());
 
   // update configuration
   GtkCheckButton* check_button_p =
@@ -272,9 +287,9 @@ idle_load_segment_cb (gpointer userData_in)
   // select connector
   size_t position;
   int result;
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
+  Net_ConnectionConfigurationsIterator_t iterator_4 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+  ACE_ASSERT (iterator_4 != data_p->configuration->connectionConfigurations.end ());
   if (!HTTP_Tools::parseURL (URL_string,
                              host_address,
                              hostname_string,
@@ -300,10 +315,10 @@ idle_load_segment_cb (gpointer userData_in)
     Net_Common_Tools::URLToHostName (URL_string,
                                      false,  // return hostname
                                      false); // do not return port#
-  static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.hostname =
+  static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.hostname =
     hostname_string;
   result =
-    static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
                                                                                                                             AF_INET);
   if (result == -1)
   {
@@ -312,8 +327,8 @@ idle_load_segment_cb (gpointer userData_in)
                 ACE_TEXT (hostname_string_2.c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-  static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
-    static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
+  static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.useLoopBackDevice =
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.address.is_loopback ();
 
   Test_I_TCPConnector_2_t connector;
 #if defined (SSL_SUPPORT)
@@ -328,18 +343,18 @@ idle_load_segment_cb (gpointer userData_in)
 #if defined (SSL_SUPPORT)
     if (use_SSL)
       data_p->handle = Net_Client_Common_Tools::connect (ssl_connector,
-                                                         *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second),
+                                                         *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second),
                                                          user_data_s,
-                                                         static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                         static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.address,
                                                          true,
                                                          true,
                                                          0);
     else
 #endif // SSL_SUPPORT
       data_p->handle = Net_Client_Common_Tools::connect (connector,
-                                                         *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second),
+                                                         *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second),
                                                          user_data_s,
-                                                         static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                         static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.address,
                                                          true,
                                                          true,
                                                          0);
@@ -351,9 +366,9 @@ idle_load_segment_cb (gpointer userData_in)
     ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
     data_p->handle = Net_Client_Common_Tools::connect (asynch_connector,
-                                                       *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second),
+                                                       *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second),
                                                        user_data_s,
-                                                       static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                       static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.address,
                                                        true,
                                                        true,
                                                        0);
@@ -362,19 +377,19 @@ idle_load_segment_cb (gpointer userData_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->socketConfiguration.address).c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
 //                data_p->handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->address).c_str ())));
 //#else
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("%d: opened TCP socket to %s\n"),
 //                data_p->handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_4).second)->address).c_str ())));
 //#endif
 
   Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_2 =
@@ -1450,6 +1465,7 @@ idle_update_info_display_cb (gpointer userData_in)
         case COMMON_UI_EVENT_ABORT:
         case COMMON_UI_EVENT_STEP:
         case COMMON_UI_EVENT_FORMAT:
+        case COMMON_UI_EVENT_RESIZE:
         {
           spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
