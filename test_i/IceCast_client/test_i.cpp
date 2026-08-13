@@ -602,6 +602,7 @@ do_work (bool debugParser_in,
   Test_I_EventHandler message_handler (&CBData_in);
   Test_I_Event_Handler_Module event_handler_module (NULL,
                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_EventHandler_2 message_handler_2 (&CBData_in);
   Test_I_Event_Handler_2_Module event_handler_module_2 (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
@@ -744,7 +745,7 @@ do_work (bool debugParser_in,
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_2.queue = &encoder_video_queue;
-  modulehandler_configuration_2.subscriber = &message_handler;
+  modulehandler_configuration_2.subscriber = &message_handler_2;
   modulehandler_configuration_2.targetFileName = fileName_in;
   modulehandler_configuration_2.URL = URL_in;
   modulehandler_configuration_2.waitForConnect = false;

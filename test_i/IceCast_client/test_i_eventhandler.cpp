@@ -47,7 +47,6 @@ Test_I_EventHandler::Test_I_EventHandler (struct Test_I_IceCastClient_UI_CBData*
  : CBData_ (CBData_in)
  , isFirst_ (true)
  , sessionDataMap_ ()
- , sessionDataMap2_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::Test_I_EventHandler"));
 
@@ -77,23 +76,22 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
   sessionDataMap_.insert (std::make_pair (sessionId_in,
                                           &const_cast<struct Test_I_IceCastClient_SessionData&> (sessionData_in)));
 
-#if defined (GTK_USE)
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-#endif // GTK_USE
+ //  CBData_->progressData.transferred = 0;
 
 #if defined (GTK_USE)
-//  CBData_->progressData.transferred = 0;
-  state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
 
-  guint event_source_id = g_idle_add (idle_start_session_cb,
-                                      CBData_);
-  if (event_source_id == 0)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
-    return;
-  } // end IF
-  state_r.eventSourceIds.insert (event_source_id);
+    //guint event_source_id = g_idle_add (idle_start_session_cb,
+    //                                    CBData_);
+    //if (event_source_id == 0)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
+    //  return;
+    //} // end IF
+    //state_r.eventSourceIds.insert (event_source_id);
+  } // end lock scope
 #endif // GTK_USE
 }
 
@@ -281,6 +279,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
     }
     case STREAM_SESSION_MESSAGE_DISCONNECT:
     {
+      isFirst_ = true;
       event_e = COMMON_UI_EVENT_DISCONNECT;
       break;
     }
@@ -330,11 +329,19 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
 //////////////////////////////////////////
 
-void
-Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
-                            const struct Test_I_IceCastClient_SessionData_2& sessionData_in)
+Test_I_EventHandler_2::Test_I_EventHandler_2 (struct Test_I_IceCastClient_UI_CBData* CBData_in)
+ : CBData_ (CBData_in)
+ , sessionDataMap_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::start"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::Test_I_EventHandler"));
+
+}
+
+void
+Test_I_EventHandler_2::start (Stream_SessionId_t sessionId_in,
+                              const struct Test_I_IceCastClient_SessionData_2& sessionData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::start"));
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
@@ -347,11 +354,11 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
-  SESSION_DATA_MAP_ITERATOR_2_T iterator = sessionDataMap2_.find (sessionId_in);
-  ACE_ASSERT (iterator == sessionDataMap2_.end ());
+  SESSION_DATA_MAP_ITERATOR_2_T iterator = sessionDataMap_.find (sessionId_in);
+  ACE_ASSERT (iterator == sessionDataMap_.end ());
 
-  sessionDataMap2_.insert (std::make_pair (sessionId_in,
-                                           &const_cast<struct Test_I_IceCastClient_SessionData_2&> (sessionData_in)));
+  sessionDataMap_.insert (std::make_pair (sessionId_in,
+                                          &const_cast<struct Test_I_IceCastClient_SessionData_2&> (sessionData_in)));
 
 //  CBData_->progressData.transferred = 0;
 
@@ -376,17 +383,99 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
 }
 
 void
-Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
-                             const Test_I_SessionMessage_2& sessionMessage_in)
+Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
+                               const enum Stream_SessionMessageType& sessionEvent_in,
+                               bool expedite_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::notify"));
+  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
+
+  ACE_UNUSED_ARG (sessionId_in);
+  ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
+}
+
+void
+Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::end"));
+
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+//  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
+  //ACE_ASSERT (iterator != sessionDataMap_.end ());
+
+#if defined (GTK_USE)
+  // Common_UI_GTK_Manager_t* gtk_manager_p =
+  //   COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  // ACE_ASSERT (gtk_manager_p);
+  // Common_UI_GTK_State_t& state_r =
+  //   const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+#endif // GTK_USE
+
+//#if defined (GTK_USE)
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+//  state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
+//
+//  guint event_source_id = g_idle_add (idle_end_session_cb,
+//                                      CBData_);
+//  if (event_source_id == 0)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+//    return;
+//  } // end IF
+//  state_r.eventSourceIds.insert (event_source_id);
+//#endif // GTK_USE
+
+  //sessionDataMap_.erase (iterator);
+}
+
+void
+Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
+                               const Test_I_Message& message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
+
+  ACE_UNUSED_ARG (sessionId_in);
+
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+#endif // GTK_USE
+
+  CBData_->progressData.transferred += message_in.total_length ();
+  CBData_->progressData.statistic.bytes += message_in.total_length ();
+
+#if defined (GTK_USE)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+    state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+  } // end lock scope
+#endif // GTK_USE
+}
+
+void
+Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
+                               const Test_I_SessionMessage_2& sessionMessage_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
 
   int result = -1;
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  SESSION_DATA_MAP_ITERATOR_2_T iterator = sessionDataMap2_.find (sessionId_in);
-  ACE_ASSERT (iterator != sessionDataMap2_.end ());
+  SESSION_DATA_MAP_ITERATOR_2_T iterator = sessionDataMap_.find (sessionId_in);
+  ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -431,7 +520,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
       CBData_->spectrumAnalyzerCBData.dispatch = NULL;
       CBData_->spectrumAnalyzerCBData.resizeNotification = NULL;
 #endif // GTK_SUPPORT
-      isFirst_ = true;
 
 #if defined (GTK_USE)
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
