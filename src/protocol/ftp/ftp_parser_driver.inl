@@ -459,11 +459,8 @@ FTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
   // 2. append data ?
   if (message_block_p)
   { ACE_ASSERT (fragment_);
-    ACE_Message_Block* message_block_2 = fragment_;
-    for (;
-         message_block_2->cont ();
-         message_block_2 = message_block_2->cont ());
-    message_block_2->cont (message_block_p);
+    Stream_Tools::append (fragment_,
+                          message_block_p);
   } // end IF
 }
 

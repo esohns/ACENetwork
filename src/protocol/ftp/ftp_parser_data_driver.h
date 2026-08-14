@@ -65,7 +65,7 @@ class FTP_ParserDataDriver_T
 
   // implement (part of) FTP_IParserData
   inline virtual enum FTP_ProtocolDataState state () const { return state_; }
-  inline virtual void state (enum FTP_ProtocolDataState state_in) { state_ = state_in; }
+  virtual void state (enum FTP_ProtocolDataState);
 
   inline virtual void resetOffset () { offset_ = 0; }
 

@@ -57,6 +57,8 @@ G_MODULE_EXPORT void toggleaction_listen_toggled_cb (GtkToggleAction*, gpointer)
 G_MODULE_EXPORT void togglebutton_mode_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void treeview_selection_directories_changed_cb (GtkTreeSelection*, gpointer);
 G_MODULE_EXPORT void treeview_selection_files_changed_cb (GtkTreeSelection*, gpointer);
+G_MODULE_EXPORT void treeview_directories_header_clicked_cb (GtkTreeViewColumn*, gpointer);
+G_MODULE_EXPORT void treeview_files_header_clicked_cb (GtkTreeViewColumn*, gpointer);
 
 /////////////////////////////////////////
 

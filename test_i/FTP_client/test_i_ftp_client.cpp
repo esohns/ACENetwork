@@ -544,9 +544,12 @@ do_work (//bool requestBroadcastReplies_in,
 
   // *********************** parser configuration data *************************
 #if defined (_DEBUG)
-  configuration_in.parserConfiguration.debugParser = debugParser_in;
+  // configuration_in.parserConfiguration.debugParser = debugParser_in;
+  // if (unlikely (debugParser_in))
+  //   configuration_in.parserConfiguration.debugScanner = true;
+  configuration_in.parserConfiguration_2.debugParser = debugParser_in;
   if (unlikely (debugParser_in))
-    configuration_in.parserConfiguration.debugScanner = true;
+    configuration_in.parserConfiguration_2.debugScanner = true;
 #endif // _DEBUG
   // *********************** socket configuration data *************************
   ACE_INET_Addr interface_address, gateway_address;
@@ -650,11 +653,13 @@ do_work (//bool requestBroadcastReplies_in,
                                                                               0); // map ?
   configuration_in.connectionConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration_in.connectionConfiguration.messageAllocator = &message_allocator;
+  configuration_in.connectionConfiguration.messageAllocator =
+    &message_allocator;
   configuration_in.connectionConfiguration.streamConfiguration =
     &configuration_in.streamConfiguration;
 
-  configuration_in.connectionConfiguration_2 = configuration_in.connectionConfiguration;
+  configuration_in.connectionConfiguration_2 =
+    configuration_in.connectionConfiguration;
   configuration_in.connectionConfiguration_2.socketConfiguration.address.set (static_cast<u_short> (FTP_DEFAULT_CLIENT_DATA_PORT),
                                                                               static_cast<ACE_UINT32> (INADDR_ANY),
                                                                               1, // encode

@@ -1336,8 +1336,8 @@ idle_update_progress_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer_a[BUFSIZ];
-  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+  char buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (char[BUFSIZ]));
   int result = -1;
   float speed = 0.0F;
 
@@ -1357,7 +1357,7 @@ idle_update_progress_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
+    result = ACE_OS::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%.2f %s"),
                               speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
@@ -1365,8 +1365,8 @@ idle_update_progress_cb (gpointer userData_in)
   } // end IF
   gtk_progress_bar_pulse (progress_bar_p);
   gtk_progress_bar_set_text (progress_bar_p,
-                             ACE_TEXT_ALWAYS_CHAR (buffer_a));
-  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
+                             buffer_a);
+  // gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
 
   // --> reschedule
   return G_SOURCE_CONTINUE;
@@ -1825,6 +1825,7 @@ continue_2:
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
     ACE_ASSERT (progress_bar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
+    gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
     gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
 
     //ACE_ASSERT (!data_p->progressData.eventSourceId);
@@ -2742,7 +2743,7 @@ glarea_realize_cb (GtkWidget* widget_in,
   projectm_set_hard_cut_sensitivity (data_p->projectMConfiguration->handle,
                                      1.0f);
   projectm_set_beat_sensitivity (data_p->projectMConfiguration->handle,
-                                 1.0f);
+                                 TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_BEAT_SENSITIVITY_F);
 
   projectm_set_texel_offset (data_p->projectMConfiguration->handle,
                              TEST_I_ICECAST_CLIENT_PROJECTM_DEFAULT_TEXTEL_OFFSET_X,

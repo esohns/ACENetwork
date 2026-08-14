@@ -81,7 +81,7 @@ struct FTP_Client_AllocatorConfiguration
   FTP_Client_AllocatorConfiguration ()
    : Common_Parser_FlexAllocatorConfiguration ()
   {
-    defaultBufferSize = STREAM_MESSAGE_DEFAULT_DATA_BUFFER_SIZE;
+    defaultBufferSize = STREAM_MESSAGE_DEFAULT_DATA_BUFFER_SIZE * 10;
   }
 };
 

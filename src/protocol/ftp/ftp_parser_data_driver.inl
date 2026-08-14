@@ -282,14 +282,19 @@ FTP_ParserDataDriver_T<SessionMessageType>::error (const std::string& message_in
 //   std::clog << message_in << std::endl;
 }
 
-//template <typename SessionMessageType>
-//bool
-//FTP_ParserDataDriver_T<SessionMessageType>::getDebugScanner () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("FTP_ParserDataDriver_T::getDebugScanner"));
-//
-//  return (FTP_Scanner_get_debug (scannerState_) != 0);
-//}
+template <typename SessionMessageType>
+void
+FTP_ParserDataDriver_T<SessionMessageType>::state (enum FTP_ProtocolDataState state_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("FTP_ParserDataDriver_T::state"));
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\" --> \"%s\"...\n"),
+              ACE_TEXT (FTP_Tools::DataStateToString (state_).c_str ()),
+              ACE_TEXT (FTP_Tools::DataStateToString (state_in).c_str ())));
+
+  state_ = state_in;
+}
 
 template <typename SessionMessageType>
 bool

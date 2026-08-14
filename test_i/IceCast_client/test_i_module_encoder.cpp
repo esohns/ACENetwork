@@ -144,7 +144,7 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
     {
       codec_context_p = inherited::videoCodecContext_;
       frame_p = inherited::videoFrame_;
-      ACE_ASSERT (message_block_p->length () / inherited::videoFrameSize_ == 1);
+      ACE_ASSERT ((message_block_p->length () / inherited::videoFrameSize_) == 1);
       frame_p->nb_samples = 1;
       frame_p->duration = 1;
       frame_p->pts = inherited::videoSamples_;

@@ -360,71 +360,82 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_DIRECTORIES_NAME)));
   ACE_ASSERT (tree_view_p);
-#if GTK_CHECK_VERSION (3,0,0)
-#else
-  GtkTreeSelection* tree_selection_p = gtk_tree_view_get_selection (tree_view_p);
-  gulong result_3 =
-    g_signal_connect (tree_selection_p,
-                      ACE_TEXT_ALWAYS_CHAR ("changed"),
-                      G_CALLBACK (treeview_selection_directories_changed_cb),
-                      userData_in);
-  ACE_ASSERT (result_3);
-#endif // GTK_CHECK_VERSION (3,0,0)
+  gtk_tree_view_set_headers_clickable (tree_view_p, TRUE);
+// #if GTK_CHECK_VERSION (3,0,0)
+// #else
+//   GtkTreeSelection* tree_selection_p = gtk_tree_view_get_selection (tree_view_p);
+//   gulong result_3 =
+//     g_signal_connect (tree_selection_p,
+//                       ACE_TEXT_ALWAYS_CHAR ("changed"),
+//                       G_CALLBACK (treeview_selection_directories_changed_cb),
+//                       userData_in);
+//   ACE_ASSERT (result_3);
+// #endif // GTK_CHECK_VERSION (3,0,0)
 
-  cell_renderer_p = gtk_cell_renderer_text_new ();
-  if (!cell_renderer_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  GtkTreeViewColumn* tree_view_column_p =
-    gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("directory"),
-                                              cell_renderer_p,
-                                              ACE_TEXT_ALWAYS_CHAR ("text"), 0,
-                                              NULL);
-  if (!tree_view_column_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+  // cell_renderer_p = gtk_cell_renderer_text_new ();
+  // if (!cell_renderer_p)
+  // {
+  //   ACE_DEBUG ((LM_CRITICAL,
+  //               ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
+  //   return G_SOURCE_REMOVE;
+  // } // end IF
+  // GtkTreeViewColumn* tree_view_column_p =
+  //   gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("directory"),
+  //                                             cell_renderer_p,
+  //                                             ACE_TEXT_ALWAYS_CHAR ("text"), 0,
+  //                                             NULL);
+  // if (!tree_view_column_p)
+  // {
+  //   ACE_DEBUG ((LM_CRITICAL,
+  //               ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
+  //   return G_SOURCE_REMOVE;
+  // } // end IF
+  // gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+  // g_signal_connect (tree_view_column_p,
+  //                   ACE_TEXT_ALWAYS_CHAR ("clicked"),
+  //                   G_CALLBACK (treeview_directories_header_clicked_cb),
+  //                   userData_in);
 
   tree_view_p =
     GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_FILES_NAME)));
   ACE_ASSERT (tree_view_p);
-#if GTK_CHECK_VERSION (3,0,0)
-#else
-  tree_selection_p = gtk_tree_view_get_selection (tree_view_p);
-  result_3 =
-    g_signal_connect (tree_selection_p,
-                      ACE_TEXT_ALWAYS_CHAR ("changed"),
-                      G_CALLBACK (treeview_selection_files_changed_cb),
-                      userData_in);
-  ACE_ASSERT (result_3);
-#endif // GTK_CHECK_VERSION (3,0,0)
+  gtk_tree_view_set_headers_clickable (tree_view_p, TRUE);
+// #if GTK_CHECK_VERSION (3,0,0)
+// #else
+//   tree_selection_p = gtk_tree_view_get_selection (tree_view_p);
+//   result_3 =
+//     g_signal_connect (tree_selection_p,
+//                       ACE_TEXT_ALWAYS_CHAR ("changed"),
+//                       G_CALLBACK (treeview_selection_files_changed_cb),
+//                       userData_in);
+//   ACE_ASSERT (result_3);
+// #endif // GTK_CHECK_VERSION (3,0,0)
 
-  cell_renderer_p = gtk_cell_renderer_text_new ();
-  if (!cell_renderer_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  tree_view_column_p =
-    gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("name"),
-                                              cell_renderer_p,
-                                              ACE_TEXT_ALWAYS_CHAR ("text"), 0,
-                                              NULL);
-  if (!tree_view_column_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
-  gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+  // cell_renderer_p = gtk_cell_renderer_text_new ();
+  // if (!cell_renderer_p)
+  // {
+  //   ACE_DEBUG ((LM_CRITICAL,
+  //               ACE_TEXT ("failed to gtk_cell_renderer_text_new(), aborting\n")));
+  //   return G_SOURCE_REMOVE;
+  // } // end IF
+  // tree_view_column_p =
+  //   gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("name"),
+  //                                             cell_renderer_p,
+  //                                             ACE_TEXT_ALWAYS_CHAR ("text"), 0,
+  //                                             NULL);
+  // if (!tree_view_column_p)
+  // {
+  //   ACE_DEBUG ((LM_CRITICAL,
+  //               ACE_TEXT ("failed to gtk_tree_view_column_new_with_attributes(), aborting\n")));
+  //   return G_SOURCE_REMOVE;
+  // } // end IF
+  // gtk_tree_view_append_column (tree_view_p, tree_view_column_p);
+  // g_signal_connect (tree_view_column_p,
+  //                   ACE_TEXT_ALWAYS_CHAR ("clicked"),
+  //                   G_CALLBACK (treeview_files_header_clicked_cb),
+  //                   userData_in);
+
   //tree_view_column_p =
   //  gtk_tree_view_column_new_with_attributes (ACE_TEXT_ALWAYS_CHAR ("size"),
   //                                            cell_renderer_p,
@@ -699,120 +710,6 @@ idle_response_received_cb (gpointer userData_in)
   g_free (string_p); string_p = NULL;
 
   return G_SOURCE_REMOVE;
-}
-
-void
-treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
-                                           gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::treeview_selection_directories_changed_cb"));
-
-  // sanity check(s)
-  struct FTP_Client_UI_CBData* data_p =
-    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  if (data_p->clearingStore)
-    return;
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  GtkTreeModel* tree_model_p = NULL;
-  char* string_p = NULL;
-  GtkToggleButton* toggle_button_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
-  ACE_ASSERT (toggle_button_p);
-  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
-  
-  if (!gtk_tree_selection_get_selected (treeSelection_in,
-                                        &tree_model_p,
-                                        &data_p->treeIter))
-    return;
-
-  gtk_tree_model_get (tree_model_p,
-                      &data_p->treeIter,
-                      0, &string_p,
-                      -1);
-  ACE_ASSERT (string_p);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("selected directory: \"%s\"\n"),
-              ACE_TEXT (string_p)));
-  struct FTP_Request request_s;
-  request_s.command = FTP_Codes::FTP_COMMAND_CWD;
-  request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
-  g_free (string_p); string_p = NULL;
-  data_p->control->request (request_s);
-  request_s.parameters.clear ();
-
-  request_s.command = FTP_Codes::FTP_COMMAND_LIST;
-  data_p->control->queue (request_s);
-  if (likely (pasv_mode_b))
-    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-  else
-  {
-    request_s.command = FTP_Codes::FTP_COMMAND_PORT;
-    request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
-    data_p->control->expectPORTResponse ();
-  } // end ELSE
-  data_p->control->request (request_s);
-}
-
-void
-treeview_selection_files_changed_cb (GtkTreeSelection* treeSelection_in,
-                                     gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::treeview_selection_files_changed_cb"));
-
-  // sanity check(s)
-  struct FTP_Client_UI_CBData* data_p =
-    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  if (data_p->clearingStore)
-    return;
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  GtkTreeModel* tree_model_p = NULL;
-  GtkTreeIter tree_iter;
-  if (!gtk_tree_selection_get_selected (treeSelection_in,
-                                        &tree_model_p,
-                                        &tree_iter))
-    return;
-
-  gchar* string_p = NULL;
-  GtkToggleButton* toggle_button_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
-  ACE_ASSERT (toggle_button_p);
-  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
-
-  gtk_tree_model_get (tree_model_p,
-                      &tree_iter,
-                      0, &string_p,
-                      -1);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("selected file: \"%s\"\n"),
-              ACE_TEXT (string_p)));
-
-  data_p->fileName = ACE_TEXT_ALWAYS_CHAR (string_p);
-
-  struct FTP_Request request_s;
-  request_s.command = FTP_Codes::FTP_COMMAND_RETR;
-  request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
-  g_free (string_p); string_p = NULL;
-  data_p->control->queue (request_s);
-  request_s.parameters.clear ();
-  if (likely (pasv_mode_b))
-    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
-  else
-  {
-    request_s.command = FTP_Codes::FTP_COMMAND_PORT;
-    request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
-    data_p->control->expectPORTResponse ();
-  } // end ELSE
-  data_p->control->request (request_s);
 }
 
 gboolean
@@ -1271,6 +1168,77 @@ extern "C"
 {
 #endif /* __cplusplus */
 void
+toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
+                                gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::toggleaction_listen_toggled_cb"));
+
+  if (un_toggling_listen)
+  {
+    un_toggling_listen = false;
+    return;
+  } // end IF
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  bool start_listening = gtk_toggle_action_get_active (toggleAction_in);
+  gtk_action_set_stock_id (GTK_ACTION (toggleAction_in),
+                           (start_listening ? GTK_STOCK_DISCONNECT
+                                            : GTK_STOCK_CONNECT));
+
+  // bool failed = true;
+  if (start_listening)
+  {
+    // already listening ? --> stop
+    if (data_p->configuration->listener->isRunning ())
+      data_p->configuration->listener->stop (true,   // wait ?
+                                             false); // high priority ?
+
+    data_p->configuration->listener->start (NULL);
+
+    // step3: start progress reporting
+    start_progress_reporting (userData_in);
+  } // end IF
+  else
+  {
+    data_p->configuration->listener->stop (true,   // wait ?
+                                           false); // high priority ?
+
+    // stop progress reporting
+    ACE_ASSERT (data_p->progressData.eventSourceId);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+      if (!g_source_remove (data_p->progressData.eventSourceId))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+                    data_p->progressData.eventSourceId));
+      data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
+      data_p->progressData.eventSourceId = 0;
+    } // end lock scope
+    GtkProgressBar* progressbar_p =
+      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
+    ACE_ASSERT (progressbar_p);
+    // *NOTE*: this disables "activity mode" (in Gtk2)
+    gtk_progress_bar_set_fraction (progressbar_p, 0.0);
+    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), FALSE);
+  } // end ELSE
+
+  //return;
+
+// error:
+//   gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_CONNECT);
+//   un_toggling_listen = true;
+//   gtk_toggle_action_set_active (toggleAction_in, FALSE);
+} // toggleaction_listen_toggled_cb
+
+void
 action_connect_activate_cb (GtkAction* action_in,
                             gpointer userData_in)
 {
@@ -1287,15 +1255,15 @@ action_connect_activate_cb (GtkAction* action_in,
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
   GtkSpinButton* spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
   ACE_ASSERT (spin_button_p);
   GtkEntry* entry_p =
-      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_SERVER_ADDRESS_NAME)));
-    ACE_ASSERT (entry_p);
+    GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_SERVER_ADDRESS_NAME)));
+  ACE_ASSERT (entry_p);
+
   std::string address = gtk_entry_get_text (entry_p);
   address += ':';
   std::ostringstream converter (ACE_TEXT_ALWAYS_CHAR (""));
@@ -1369,6 +1337,7 @@ allocate:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->connectionConfiguration.socketConfiguration.address).c_str ())));
+    message_block_p->release ();
     return;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1392,7 +1361,14 @@ allocate:
 #else
     connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
 #endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (iconnection_p);
+  if (unlikely (!iconnection_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve connection handle (was: %d), returning\n"),
+                handle_h));
+    message_block_p->release ();
+    return;
+  } // end IF
   FTP_Client_IStreamConnection_t* istream_connection_p =
     dynamic_cast<FTP_Client_IStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
@@ -1525,77 +1501,6 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 }
 
 void
-toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
-                                gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::toggleaction_listen_toggled_cb"));
-
-  if (un_toggling_listen)
-  {
-    un_toggling_listen = false;
-    return;
-  } // end IF
-
-  // sanity check(s)
-  struct FTP_Client_UI_CBData* data_p =
-    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  bool start_listening = gtk_toggle_action_get_active (toggleAction_in);
-  gtk_action_set_stock_id (GTK_ACTION (toggleAction_in),
-                           (start_listening ? GTK_STOCK_DISCONNECT
-                                            : GTK_STOCK_CONNECT));
-
-  // bool failed = true;
-  if (start_listening)
-  {
-    // already listening ? --> stop
-    if (data_p->configuration->listener->isRunning ())
-      data_p->configuration->listener->stop (true,   // wait ?
-                                             false); // high priority ?
-
-    data_p->configuration->listener->start (NULL);
-
-    // step3: start progress reporting
-    start_progress_reporting (userData_in);
-  } // end IF
-  else
-  {
-    data_p->configuration->listener->stop (true,   // wait ?
-                                           false); // high priority ?
-
-    // stop progress reporting
-    ACE_ASSERT (data_p->progressData.eventSourceId);
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
-      if (!g_source_remove (data_p->progressData.eventSourceId))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                    data_p->progressData.eventSourceId));
-      data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
-      data_p->progressData.eventSourceId = 0;
-    } // end lock scope
-    GtkProgressBar* progressbar_p =
-      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
-    ACE_ASSERT (progressbar_p);
-    // *NOTE*: this disables "activity mode" (in Gtk2)
-    gtk_progress_bar_set_fraction (progressbar_p, 0.0);
-    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), FALSE);
-  } // end ELSE
-
-  //return;
-
-// error:
-//   gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_CONNECT);
-//   un_toggling_listen = true;
-//   gtk_toggle_action_set_active (toggleAction_in, FALSE);
-} // toggle_action_listen_toggled_cb
-
-void
 togglebutton_mode_toggled_cb (GtkToggleButton* toggleButton_in,
                               gpointer userData_in)
 {
@@ -1620,6 +1525,160 @@ togglebutton_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   request_s.parameters.push_back ((is_mode_binary_b ? ACE_TEXT_ALWAYS_CHAR ("I")
                                                     : ACE_TEXT_ALWAYS_CHAR ("A")));
   data_p->control->request (request_s);
+}
+
+void
+treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
+                                           gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::treeview_selection_directories_changed_cb"));
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  if (data_p->clearingStore)
+    return;
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  GtkTreeModel* tree_model_p = NULL;
+  char* string_p = NULL;
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
+
+  if (!gtk_tree_selection_get_selected (treeSelection_in,
+                                        &tree_model_p,
+                                        &data_p->treeIter))
+    return;
+
+  gtk_tree_model_get (tree_model_p,
+                      &data_p->treeIter,
+                      0, &string_p,
+                      -1);
+  ACE_ASSERT (string_p);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("selected directory: \"%s\"\n"),
+              ACE_TEXT (string_p)));
+  struct FTP_Request request_s;
+  request_s.command = FTP_Codes::FTP_COMMAND_CWD;
+  request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
+  g_free (string_p); string_p = NULL;
+  data_p->control->request (request_s);
+  request_s.parameters.clear ();
+
+  request_s.command = FTP_Codes::FTP_COMMAND_LIST;
+  data_p->control->queue (request_s);
+  if (likely (pasv_mode_b))
+    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+  else
+  {
+    request_s.command = FTP_Codes::FTP_COMMAND_PORT;
+    request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
+    data_p->control->expectPORTResponse ();
+  } // end ELSE
+  data_p->control->request (request_s);
+}
+
+void
+treeview_selection_files_changed_cb (GtkTreeSelection* treeSelection_in,
+                                     gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::treeview_selection_files_changed_cb"));
+
+  // sanity check(s)
+  struct FTP_Client_UI_CBData* data_p =
+    static_cast<struct FTP_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  if (data_p->clearingStore)
+    return;
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  GtkTreeModel* tree_model_p = NULL;
+  GtkTreeIter tree_iter;
+  if (!gtk_tree_selection_get_selected (treeSelection_in,
+                                        &tree_model_p,
+                                        &tree_iter))
+    return;
+
+  gchar* string_p = NULL;
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
+
+  gtk_tree_model_get (tree_model_p,
+                      &tree_iter,
+                      0, &string_p,
+                      -1);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("selected file: \"%s\"\n"),
+              ACE_TEXT (string_p)));
+
+  data_p->fileName = ACE_TEXT_ALWAYS_CHAR (string_p);
+
+  struct FTP_Request request_s;
+  request_s.command = FTP_Codes::FTP_COMMAND_RETR;
+  request_s.parameters.push_back (ACE_TEXT_ALWAYS_CHAR (string_p));
+  g_free (string_p); string_p = NULL;
+  data_p->control->queue (request_s);
+  request_s.parameters.clear ();
+  if (likely (pasv_mode_b))
+    request_s.command = FTP_Codes::FTP_COMMAND_PASV;
+  else
+  {
+    request_s.command = FTP_Codes::FTP_COMMAND_PORT;
+    request_s.parameters.push_back (FTP_Tools::generatePORTArgument (data_p->externalAddress));
+    data_p->control->expectPORTResponse ();
+  } // end ELSE
+  data_p->control->request (request_s);
+}
+
+void
+treeview_directories_header_clicked_cb (GtkTreeViewColumn* treeViewColumn_in,
+                                        gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::treeview_directories_header_clicked_cb"));
+
+  ACE_UNUSED_ARG (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (treeViewColumn_in);
+
+  GtkTreeView* tree_view_p =
+    GTK_TREE_VIEW (gtk_tree_view_column_get_tree_view (treeViewColumn_in));
+  ACE_ASSERT (tree_view_p);
+  GtkTreeSelection* tree_selection_p =
+    gtk_tree_view_get_selection (tree_view_p);
+  ACE_ASSERT (tree_selection_p);
+  gtk_tree_selection_unselect_all (tree_selection_p);
+}
+
+void
+treeview_files_header_clicked_cb (GtkTreeViewColumn* treeViewColumn_in,
+                                  gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::treeview_files_header_clicked_cb"));
+
+  ACE_UNUSED_ARG (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (treeViewColumn_in);
+
+  GtkTreeView* tree_view_p =
+    GTK_TREE_VIEW (gtk_tree_view_column_get_tree_view (treeViewColumn_in));
+  ACE_ASSERT (tree_view_p);
+  GtkTreeSelection* tree_selection_p =
+    gtk_tree_view_get_selection (tree_view_p);
+  ACE_ASSERT (tree_selection_p);
+  gtk_tree_selection_unselect_all (tree_selection_p);
 }
 
 // -----------------------------------------------------------------------------

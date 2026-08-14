@@ -69,7 +69,7 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_HTTPMarshal_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                                             ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
@@ -235,16 +235,18 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_HTTPMarshal_2_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                                               ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_StatisticReport_Module (this,
-  //                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                 Test_I_StatisticReport_2_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                 false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
                   Test_I_HTTPGet_2_Module (this,
                                            ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
@@ -496,8 +498,11 @@ continue_:
   inherited2::getMediaType (media_type_s,
                             STREAM_MEDIATYPE_AUDIO,
                             media_type_final_s.audio);
-  // *TODO*: cannot set this in advance; must be deduced at runtime and notified
-  //         by corresponding 'resize' session message(s)...
+  // *TODO*: cannot set these in advance; must be deduced at runtime and
+  //         notified by corresponding 'resize' session message(s)...
+  // *TODO*: this needs to be NV12 because the encoder sets the input format
+  //         during session initialization (!); not upon arrival of the first
+  //         data, when the decoder sends a resize notification
   media_type_final_s.video.format = AV_PIX_FMT_NV12;
   media_type_final_s.video.frameRate =
     { TEST_I_ICECAST_CLIENT_DEFAULT_INPUT_FRAMERATE, 1 };

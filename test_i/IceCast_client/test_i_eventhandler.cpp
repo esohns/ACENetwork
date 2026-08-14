@@ -360,7 +360,8 @@ Test_I_EventHandler_2::start (Stream_SessionId_t sessionId_in,
   sessionDataMap_.insert (std::make_pair (sessionId_in,
                                           &const_cast<struct Test_I_IceCastClient_SessionData_2&> (sessionData_in)));
 
-//  CBData_->progressData.transferred = 0;
+  CBData_->progressData.transferred = 0;
+  CBData_->progressData.statistic.bytes = 0;
 
 #if defined (GTK_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);

@@ -48,7 +48,7 @@ FTP_Control_T<ControlAsynchConnectorType,
  , expectingPORTResponse_ (false)
  , lock_ ()
  , loginOptions_ (loginOptions_in)
- , PASVMode_ (false)
+ // , PASVMode_ (false)
  , queue_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Control_T::FTP_Control_T"));
@@ -111,7 +111,7 @@ FTP_Control_T<ControlAsynchConnectorType,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (connectionConfiguration_->socketConfiguration.address).c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 
-  if (unlikely (controlConnection_))
+  if (unlikely (controlConnection_ != ACE_INVALID_HANDLE))
   {
     typedef typename ControlAsynchConnectorType::CONNECTION_MANAGER_T::SINGLETON_T CONNECTION_MANAGER_SINGLETON;
     typename ControlAsynchConnectorType::ICONNECTION_T* iconnection_p =
@@ -166,7 +166,7 @@ FTP_Control_T<ControlAsynchConnectorType,
                                                  *connectionConfiguration_2,
                                                  user_data,
                                                  connectionConfiguration_2->socketConfiguration.address,
-                                                 true,  // wait ?
+                                                 true, // wait ?
                                                  true, // is peer address ?
                                                  0);   // #retries
   if (unlikely (handle_h == ACE_INVALID_HANDLE))
@@ -294,7 +294,7 @@ FTP_Control_T<ControlAsynchConnectorType,
     }
     case FTP_Codes::FTP_CODE_CLOSING_DATA:
     {
-      PASVMode_ = false;
+      // PASVMode_ = false;
 
       goto default_;
     }
@@ -318,7 +318,7 @@ FTP_Control_T<ControlAsynchConnectorType,
         return;
       } // end IF
 
-      PASVMode_ = true;
+      // PASVMode_ = true;
 
       { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_);
         ACE_ASSERT (!queue_.empty ());

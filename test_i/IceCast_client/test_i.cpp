@@ -735,6 +735,7 @@ do_work (bool debugParser_in,
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_2.codecConfiguration = &codec_configuration_s;
 #endif // FFMPEG_SUPPORT
+  modulehandler_configuration_2.computeThroughput = true;
   modulehandler_configuration_2.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration_2.connectionConfigurations =
@@ -929,10 +930,9 @@ do_work (bool debugParser_in,
   // connection_manager_2->set (*static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second),
   //                            NULL);
 
-  Common_Timer_Manager_t* timer_manager_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (timer_manager_p);
-  struct Common_TimerConfiguration timer_configuration;
+  // Common_Timer_Manager_t* timer_manager_p =
+  //   COMMON_TIMERMANAGER_SINGLETON::instance ();
+  // ACE_ASSERT (timer_manager_p);
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
@@ -978,8 +978,14 @@ do_work (bool debugParser_in,
   } // end IF
 
   // intialize timers
-  timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start (NULL);
+  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+    //useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR : COMMON_TIMER_DISPATCH_PROACTOR;
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Timer_Tools::configuration_.taskType = ACE_TEXT_ALWAYS_CHAR ("Playback");
+  Common_Timer_Tools::configuration_.taskPriority = AVRT_PRIORITY_HIGH;
+#endif // ACE_WIN32 || ACE_WIN64
+  Common_Timer_Tools::initialize ();
 
   // step1a: start GTK event loop ?
   if (!UIDefinitionFileName_in.empty ())
@@ -1064,7 +1070,7 @@ do_work (bool debugParser_in,
                                              true,   // wait ?
                                              false); // release singletons ?
 
-  timer_manager_p->stop ();
+  Common_Timer_Tools::finalize ();
 
   //if (!interfaceDefinitionFile_in.empty ())
   //{
@@ -1085,9 +1091,6 @@ do_work (bool debugParser_in,
   return;
 
 clean:
-  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
-  timer_manager_p->stop ();
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true,  // wait ?
@@ -1095,6 +1098,10 @@ clean:
 #else
     ;
 #endif // GTK_USE
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true,   // wait ?
+                                             false); // release singletons ?
+  Common_Timer_Tools::finalize ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Stream_MediaFramework_DirectDraw_Tools::finalize ();

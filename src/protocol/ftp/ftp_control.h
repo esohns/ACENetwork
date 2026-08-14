@@ -51,7 +51,7 @@ class FTP_Control_T
   virtual ACE_HANDLE connectControl ();
   virtual ACE_HANDLE connectData ();
   inline virtual void expectPORTResponse () { expectingPORTResponse_ = true; }
-  inline virtual bool inPASVMode () const { return PASVMode_; };
+  // inline virtual bool inPASVMode () const { return PASVMode_; };
   virtual void request (const struct FTP_Request&); // request
   inline virtual void queue (const struct FTP_Request& request_in) { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_); queue_.push_back (request_in); }
   inline virtual void clear () { ACE_GUARD (ACE_Thread_Mutex, aGuard, lock_); queue_.clear (); }
@@ -83,7 +83,7 @@ class FTP_Control_T
   bool                                                                        expectingPORTResponse_;
   ACE_Thread_Mutex                                                            lock_;
   struct FTP_LoginOptions                                                     loginOptions_;
-  bool                                                                        PASVMode_;
+  // bool                                                                        PASVMode_;
   QUEUE_T                                                                     queue_;
 };
 
