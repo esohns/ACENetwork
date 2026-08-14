@@ -783,8 +783,7 @@ idle_list_received_cb (gpointer userData_in)
     gtk_list_store_append (list_store_p, &iterator_2);
     gtk_list_store_set (list_store_p, &iterator_2,
                         0, string_p,
-                        1, ((*iterator_3).type == Common_File_Entry::DIRECTORY ? TRUE : FALSE),
-                        2, (*iterator_3).size,
+                        1, (*iterator_3).size,
                         -1);
     g_free (string_p);
     string_p = NULL;

@@ -43,6 +43,7 @@
     <property name="website">https://www.github.com/esohns/ACENetwork</property>
     <property name="website_label" translatable="yes">github project page</property>
     <property name="authors">Erik Sohns</property>
+    <property name="logo_icon_name">image-missing</property>
     <property name="license_type">gpl-3-0</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="vbox_dialog_3">
@@ -64,6 +65,50 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="liststore_files">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name size -->
+      <column type="guint64"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_interface">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name identifier -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
+  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
+  <object class="GtkTextBuffer" id="textbuffer"/>
+  <object class="GtkToggleAction" id="toggleaction_listen">
+    <property name="label">Listen</property>
+    <property name="short_label">Listen</property>
+    <property name="tooltip">Listen</property>
+    <property name="stock_id">gtk-connect</property>
+    <signal name="toggled" handler="toggleaction_listen_toggled_cb" swapped="no"/>
+  </object>
+  <object class="GtkTreeStore" id="treestore_directories">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name is_directory -->
+      <column type="gboolean"/>
+    </columns>
   </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
@@ -406,18 +451,32 @@
                     <property name="shadow_type">etched-out</property>
                     <child>
                       <object class="GtkTreeView" id="treeview_directories">
-                        <property name="width_request">640</property>
-                        <property name="height_request">480</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
                         <property name="model">treestore_directories</property>
-                        <property name="headers_clickable">False</property>
                         <property name="search_column">0</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview_selection_directories">
                             <signal name="changed" handler="treeview_selection_directories_changed_cb" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="column_directory">
+                            <property name="resizable">True</property>
+                            <property name="sizing">autosize</property>
+                            <property name="title" translatable="yes">directory</property>
+                            <property name="expand">True</property>
+                            <property name="clickable">True</property>
+                            <property name="sort_column_id">0</property>
+                            <signal name="clicked" handler="treeview_directories_header_clicked_cb" swapped="no"/>
+                            <child>
+                              <object class="GtkCellRendererText" id="cell_renderer_text_directory"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -441,13 +500,28 @@
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
                         <property name="model">liststore_files</property>
-                        <property name="headers_clickable">False</property>
                         <property name="search_column">0</property>
                         <property name="show_expanders">False</property>
-                        <property name="tooltip_column">0</property>
                         <child internal-child="selection">
                           <object class="GtkTreeSelection" id="treeview_selection_files">
                             <signal name="changed" handler="treeview_selection_files_changed_cb" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkTreeViewColumn" id="column_file">
+                            <property name="resizable">True</property>
+                            <property name="sizing">autosize</property>
+                            <property name="title" translatable="yes">file</property>
+                            <property name="expand">True</property>
+                            <property name="clickable">True</property>
+                            <property name="sort_column_id">0</property>
+                            <signal name="clicked" handler="treeview_files_header_clicked_cb" swapped="no"/>
+                            <child>
+                              <object class="GtkCellRendererText" id="cell_renderer_text_file"/>
+                              <attributes>
+                                <attribute name="text">0</attribute>
+                              </attributes>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -654,51 +728,5 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
-  </object>
-  <object class="GtkListStore" id="liststore_files">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name is_directory -->
-      <column type="gboolean"/>
-      <!-- column-name size -->
-      <column type="guint64"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="liststore_interface">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name identifier -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
-  </object>
-  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
-  </object>
-  <object class="GtkTextBuffer" id="textbuffer"/>
-  <object class="GtkToggleAction" id="toggleaction_listen">
-    <property name="label">Listen</property>
-    <property name="short_label">Listen</property>
-    <property name="tooltip">Listen</property>
-    <property name="stock_id">gtk-connect</property>
-    <signal name="toggled" handler="toggleaction_listen_toggled_cb" swapped="no"/>
-  </object>
-  <object class="GtkTreeStore" id="treestore_directories">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name is_directory -->
-      <column type="gboolean"/>
-    </columns>
   </object>
 </interface>

@@ -43,13 +43,10 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
                          DataMessageType,
                          SessionMessageType>::FTP_Module_Parser_Data_T (typename inherited::ISTREAM_T* stream_in)
  : inherited (stream_in)
- , record_ (NULL)
+ , record_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::FTP_Module_Parser_Data_T"));
 
-  ACE_NEW_NORETURN (record_,
-                    struct FTP_Record);
-  ACE_ASSERT (record_);
 }
 
 template <ACE_SYNCH_DECL,
@@ -68,9 +65,6 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::directory"));
 
-  // sanity check(s)
-  ACE_ASSERT (record_);
-
   // *IMPORTANT NOTE*: unfortunately, this doesn't work, because lex cannot
   //                   currently parse across fragments... that means that
   //                   entries spanning across fragments will not be
@@ -78,12 +72,12 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
   //                   event handler
   struct Common_File_Entry file_entry_s =
     Common_File_Tools::parseFileEntry (directoryEntry_in);
-  record_->entries.push_back (file_entry_s);
+  record_.entries.push_back (file_entry_s);
 
   if (inherited::offset_ == inherited::headFragment_->total_length ())
   {
     push (FTP_Codes::FTP_RECORD_DIRECTORY);
-    record_->entries.clear ();
+    record_.entries.clear ();
   } // end IF
 }
 
@@ -106,12 +100,19 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (inherited::headFragment_);
   ACE_ASSERT (!inherited::headFragment_->isInitialized ());
-  ACE_ASSERT (record_);
 
   typename DataMessageType::DATA_T::DATA_T* data_p = NULL;
   typename DataMessageType::DATA_T* data_container_p = NULL, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
-  int result = -1;
+  int result;
+
+  message_p = inherited::allocateMessage (1);
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate message: \"%m\", returning\n")));
+    return;
+  } // end IF
 
   ACE_NEW_NORETURN (data_p,
                     typename DataMessageType::DATA_T::DATA_T ());
@@ -121,7 +122,7 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
     return;
   } // end IF
-  *data_p = *record_;
+  *data_p = record_;
   data_p->type = type_in;
 
   ACE_NEW_NORETURN (data_container_p,
@@ -135,34 +136,32 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
   data_container_p->setPR (data_p);
   ACE_ASSERT (!data_p);
   data_container_2 = data_container_p;
-  inherited::headFragment_->initialize (data_container_2,
-                                        inherited::headFragment_->sessionId (),
-                                        NULL);
+  message_p->initialize (data_container_2,
+                         inherited::headFragment_->sessionId (),
+                         NULL);
 
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
-  message_p =
-      static_cast<DataMessageType*> (inherited::headFragment_->cont ());
-  while (message_p)
-  {
-    data_container_p->increase ();
-    data_container_2 = data_container_p;
-    message_p->initialize (data_container_2,
-                           inherited::headFragment_->sessionId (),
-                           NULL);
-    message_p = static_cast<DataMessageType*> (message_p->cont ());
-  } // end WHILE
+  //message_p =
+  //  static_cast<DataMessageType*> (inherited::headFragment_->cont ());
+  //while (message_p)
+  //{
+  //  data_container_p->increase ();
+  //  data_container_2 = data_container_p;
+  //  message_p->initialize (data_container_2,
+  //                         inherited::headFragment_->sessionId (),
+  //                         NULL);
+  //  message_p = static_cast<DataMessageType*> (message_p->cont ());
+  //} // end WHILE
 
   // push message downstream
-  result = inherited::put_next (inherited::headFragment_);
+  result = inherited::put_next (message_p);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to put_next(): \"%m\", returning\n")));
     message_p->release (); message_p = NULL;
   } // end IF
-  inherited::headFragment_ = NULL;
-  inherited::fragment_ = NULL;
 }
 
 template <ACE_SYNCH_DECL,
@@ -181,18 +180,14 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("FTP_Module_Parser_Data_T::file"));
 
-  // sanity check(s)
-  ACE_ASSERT (record_);
-
-  ACE_ASSERT (false); // *TODO*
-  //struct Common_File_Entry file_entry_s =
-  //  Common_File_Tools::parseFileEntry (directoryEntry_in);
-  //record_->entries.push_back (file_entry_s);
+  struct Common_File_Entry file_entry_s =
+    Common_File_Tools::parseFileEntry (fileEntry_in);
+  record_.entries.push_back (file_entry_s);
 
   if (inherited::offset_ == inherited::headFragment_->total_length ())
   {
     push (FTP_Codes::FTP_RECORD_FILE);
-    record_->entries.clear ();
+    record_.entries.clear ();
   } // end IF
 }
 
@@ -249,7 +244,7 @@ FTP_Module_Parser_Data_T<ACE_SYNCH_USE,
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
   message_p =
-      static_cast<DataMessageType*> (inherited::headFragment_->cont ());
+    static_cast<DataMessageType*> (inherited::headFragment_->cont ());
   while (message_p)
   {
     data_container_p->increase ();

@@ -69,7 +69,7 @@ class FTP_Module_Parser_Data_T
 
  public:
   FTP_Module_Parser_Data_T (typename inherited::ISTREAM_T*); // stream handle
-  inline virtual ~FTP_Module_Parser_Data_T () { delete record_; }
+  inline virtual ~FTP_Module_Parser_Data_T () {}
 
   // implement (part of) FTP_IParserData
   virtual void directory (const std::string&);
@@ -85,7 +85,7 @@ class FTP_Module_Parser_Data_T
 
   void push (FTP_Codes::RecordType);
 
-  struct FTP_Record* record_;
+  struct FTP_Record record_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

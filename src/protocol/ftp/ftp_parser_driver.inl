@@ -567,9 +567,6 @@ FTP_ParserDriver_T<SessionMessageType>::scan_begin ()
   ACE_ASSERT (configuration_);
   ACE_ASSERT (fragment_);
 
-  // reset scanner state
-  FTP_Scanner_reset (scannerState_);
-
   // create/initialize a new buffer state
   if (configuration_->useYYScanBuffer)
   {

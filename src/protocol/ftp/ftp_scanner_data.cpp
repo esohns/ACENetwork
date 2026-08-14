@@ -1,4 +1,6 @@
+#if (!FTP_Scanner_Data_IN_HEADER)
 #undef YYTOKENTYPE
+#endif // !FTP_Scanner_Data_IN_HEADER
 #include "ftp_parser_data.h"
 
 /*
@@ -1489,7 +1491,7 @@ static const yy_state_type yy_NUL_trans[20] =
 
 static const flex_int32_t yy_rule_linenum[7] =
     {   0,
-      112,  154,  159,  164,  175,  185
+      114,  156,  161,  166,  177,  187
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -2121,7 +2123,7 @@ YY_RULE_SETUP
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (2);
                              BEGIN(INITIAL);
                              return yytokentype::LIST_DIRECTORY;
                              /* return yy::FTP_Parser_Data::token::LIST_DIRECTORY; */
@@ -2143,7 +2145,7 @@ YY_RULE_SETUP
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (1);
                              yylval->sval->append (yytext);
                              if (driver->offset () == driver->availableBytes ())
                              {
@@ -2158,7 +2160,7 @@ YY_RULE_SETUP
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-{ driver->offset (yyleng);
+{ driver->offset (1);
                              if (driver->offset () == driver->availableBytes ())
                              {
                                BEGIN(INITIAL);
@@ -2179,7 +2181,12 @@ case 6:
 YY_RULE_SETUP
 { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
-                             ACE_ASSERT (false);
+                             // ACE_ASSERT (false);
+                             if (driver->switchBuffer ())
+                             {
+                               yyless (0);
+                               YY_BREAK
+                             } // end IF
 
                              // debug info
                              std::string error_message =

@@ -1,5 +1,7 @@
 %top{
+#if (!FTP_Scanner_Data_IN_HEADER)
 #undef YYTOKENTYPE
+#endif // !FTP_Scanner_Data_IN_HEADER
 #include "ftp_parser_data.h"
 
 /*
@@ -150,17 +152,17 @@ CRLF           \x0D\x0A
                              yyless (0); }
 } // end <INITIAL>
 <list_directory>{
-{CRLF}                     { driver->offset (yyleng);
+{CRLF}                     { driver->offset (2);
                              BEGIN(INITIAL);
                              return yytokentype::LIST_DIRECTORY;
                              /* return yy::FTP_Parser_Data::token::LIST_DIRECTORY; */
                            }
-{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
+{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
                              yylval->sval->append (yytext);
                            }
 } // end <list_directory>
 <list_file>{
-{OCTET}{1}                 { driver->offset (yyleng);
+{OCTET}{1}                 { driver->offset (1);
                              yylval->sval->append (yytext);
                              if (driver->offset () == driver->availableBytes ())
                              {
@@ -171,7 +173,7 @@ CRLF           \x0D\x0A
                            }
 } // end <list_file>
 <data>{
-{OCTET}{1}                 { driver->offset (yyleng);
+{OCTET}{1}                 { driver->offset (1);
                              if (driver->offset () == driver->availableBytes ())
                              {
                                BEGIN(INITIAL);

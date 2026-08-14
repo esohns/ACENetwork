@@ -306,29 +306,24 @@ FTP_ParserDataDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
+  ACE_ASSERT (fragment_);
 
-  bool get_next_b = fragment_ != NULL;
-
-  if (!fragment_ ||
-      (get_next_b && !fragment_->cont ()))
+  if (!fragment_->cont ())
   {
     // sanity check(s)
     if (!configuration_->block)
       return false; // not enough data, cannot proceed
 
     waitBuffer (); // <-- wait for data
-    if (!fragment_ ||
-        (get_next_b && !fragment_->cont ()))
+    if (!fragment_->cont ())
     {
       // *NOTE*: most probable reason: received session end
 //      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("no data after HTTP_ParserDriver_T::waitBuffer(), aborting\n")));
+//                  ACE_TEXT ("no data after FTP_ParserDataDriver_T::waitBuffer(), aborting\n")));
       return false;
     } // end IF
   } // end IF
-  if (get_next_b)
-    fragment_ = fragment_->cont ();
-  //setP (fragment_);
+  fragment_ = fragment_->cont ();
 
   // switch to the next fragment
 
@@ -438,13 +433,8 @@ FTP_ParserDataDriver_T<SessionMessageType>::waitBuffer ()
   if (message_block_p)
   {
     if (fragment_)
-    { 
-      ACE_Message_Block* message_block_2 = fragment_;
-      for (;
-           message_block_2->cont ();
-           message_block_2 = message_block_2->cont ());
-      message_block_2->cont (message_block_p);
-    } // end IF
+      Stream_Tools::append (fragment_,
+                            message_block_p);
     else
       fragment_ = message_block_p;
   } // end IF
@@ -552,9 +542,6 @@ FTP_ParserDataDriver_T<SessionMessageType>::scan_begin ()
   ACE_ASSERT (bufferState_ == NULL);
   ACE_ASSERT (configuration_);
   ACE_ASSERT (fragment_);
-
-  // reset scanner state
-  FTP_Scanner_Data_reset (scannerState_);
 
   // create/initialize a new buffer state
   if (configuration_->useYYScanBuffer)

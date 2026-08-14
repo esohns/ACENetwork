@@ -1,5 +1,7 @@
 %top{
+#if (!FTP_Scanner_IN_HEADER)
 #undef YYTOKENTYPE
+#endif // !FTP_Scanner_IN_HEADER
 #include "ftp_parser.h"
 
 /*
@@ -139,6 +141,14 @@ CRLF           \x0D\x0A
                              BEGIN(text);
                            }
 } // end <text_begin>
+<multiline_text>{
+{CRLF}                     { driver->offset (2);
+                             BEGIN(multiline_text_begin);
+                             return yytokentype::REPLY_TEXT; }
+{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
+                             ACE_ASSERT (yylval->sval);
+                             yylval->sval->assign (yytext); }
+} // end <multiline_text>
 <multiline_text_begin>{
 {DIGIT}{3}/{MINUS}         { driver->offset (3);
                              converter.str (ACE_TEXT_ALWAYS_CHAR (""));
@@ -156,8 +166,6 @@ CRLF           \x0D\x0A
                              converter >> status_i;
                              ACE_ASSERT (status_i == driver->current ().code);
                              BEGIN(last_line_space); }
-{OCTET}{1}                 { yyless (0);
-                             BEGIN(multiline_text); }
 } // end <multiline_text_begin>
 <multi_line_minus>{
 {MINUS}                    { driver->offset (1);
@@ -166,14 +174,6 @@ CRLF           \x0D\x0A
                              ACE_ASSERT (yylval->sval);
                              BEGIN(multiline_text); }
 } // end <multi_line_minus>
-<multiline_text>{
-{CRLF}                     { driver->offset (2);
-                             BEGIN(multiline_text_begin); }
-{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
-                             ACE_ASSERT (yylval->sval);
-                             yylval->sval->assign (yytext);
-                             return yytokentype::REPLY_TEXT; }
-} // end <multiline_text>
 <last_line_space>{
 {SPACE}                    { driver->offset (1);
                              ACE_NEW_NORETURN (yylval->sval,
@@ -188,7 +188,7 @@ CRLF           \x0D\x0A
                              yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
-{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
+{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT; }
@@ -200,7 +200,7 @@ CRLF           \x0D\x0A
                              yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
-{OCTET_NO_CRLF}*/{CRLF}    { driver->offset (yyleng);
+{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT;

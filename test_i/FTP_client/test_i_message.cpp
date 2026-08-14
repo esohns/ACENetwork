@@ -87,14 +87,6 @@ Test_I_Message::Test_I_Message (Stream_SessionId_t sessionId_in,
 //  return DHCP_Tools::MessageType2Type ((*iterator).second);
 //}
 
-//std::string
-//Test_I_Message::Command2String (DHCP_MessageType_t type_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Test_I_Message::Command2String"));
-//
-//  return DHCP_Tools::MessageType2String (type_in);
-//}
-
 ACE_Message_Block*
 Test_I_Message::duplicate (void) const
 {
@@ -115,7 +107,7 @@ Test_I_Message::duplicate (void) const
     // *NOTE*: the argument to malloc doesn't matter, as this will be
     //         a shallow copy which just references the same data block
     ACE_NEW_MALLOC_NORETURN (message_p,
-                             static_cast<Test_I_Message*> (inherited::message_block_allocator_->calloc (inherited::capacity (),
+                             static_cast<Test_I_Message*> (inherited::message_block_allocator_->calloc (sizeof (Test_I_Message),
                                                                                                         '\0')),
                              Test_I_Message (*this));
   } // end ELSE
