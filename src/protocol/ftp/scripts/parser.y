@@ -161,7 +161,7 @@ message:                 "reply_code"                               { driver->cu
                                                                       YYACCEPT; }
 text_lines:              text_line text_lines                       { $$ = $1 + $2; }
                          | %empty                                   { $$ = 3; }
-text_line:               "text"                                     { $$ = 3 + 1 + $1->length () + 2;
+text_line:               "text"                                     { $$ = 3 + 1 + static_cast<ACE_UINT16> ($1->length ()) + 2;
                                                                       driver->current ().text.push_back (*$1); }
 %%
 

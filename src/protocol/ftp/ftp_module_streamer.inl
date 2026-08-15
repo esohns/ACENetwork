@@ -113,6 +113,15 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
         goto error;
       break;
     }
+    case FTP_Codes::FTP_COMMAND_CDUP:
+    {
+      text_string = ACE_TEXT_ALWAYS_CHAR ("CDUP");
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
+      result = message_inout->copy (text_string.c_str (), text_string.size ());
+      if (unlikely (result == -1))
+        goto error;
+      break;
+    }
     case FTP_Codes::FTP_COMMAND_PORT:
     { ACE_ASSERT (!data_r.request.parameters.empty ());
       text_string = ACE_TEXT_ALWAYS_CHAR ("PORT ");
@@ -152,6 +161,15 @@ FTP_Module_Streamer_T<ACE_SYNCH_USE,
       text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
       result = message_inout->copy (text_string.c_str (),
                                     text_string.size ());
+      if (unlikely (result == -1))
+        goto error;
+      break;
+    }
+    case FTP_Codes::FTP_COMMAND_PWD:
+    {
+      text_string = ACE_TEXT_ALWAYS_CHAR ("PWD");
+      text_string += ACE_TEXT_ALWAYS_CHAR ("\r\n");
+      result = message_inout->copy (text_string.c_str (), text_string.size ());
       if (unlikely (result == -1))
         goto error;
       break;

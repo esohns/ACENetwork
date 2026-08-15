@@ -33,7 +33,7 @@
 
 #include "stream_misc_messagehandler.h"
 
-//#include "stream_stat_statistic_report.h"
+#include "stream_stat_statistic_report.h"
 
 //#include "stream_net_io.h"
 
@@ -115,28 +115,26 @@ typedef FTP_Module_Parser_T<ACE_MT_SYNCH,
 //                                 Test_I_Message,
 //                                 Test_I_SessionMessage> FTP_Client_Module_Parser_Data;
 
-//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct FTP_Client_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_Message,
-//                                                      Test_I_SessionMessage,
-//                                                      HTTP_Codes::MethodType,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      struct FTP_Client_SessionData,
-//                                                      FTP_Client_SessionData_t> FTP_Client_Module_StatisticReport_ReaderTask_t;
-//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct FTP_Client_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_I_Message,
-//                                                      Test_I_SessionMessage,
-//                                                      HTTP_Codes::MethodType,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      struct FTP_Client_SessionData,
-//                                                      FTP_Client_SessionData_t> FTP_Client_Module_StatisticReport_WriterTask_t;
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct FTP_Client_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_Message,
+                                                      Test_I_SessionMessage,
+                                                      FTP_Codes::CommandType,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> FTP_Client_Module_StatisticReport_ReaderTask_t;
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct FTP_Client_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_I_Message,
+                                                      Test_I_SessionMessage,
+                                                      FTP_Codes::CommandType,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> FTP_Client_Module_StatisticReport_WriterTask_t;
 
 typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
@@ -178,14 +176,14 @@ DATASTREAM_MODULE_DUPLEX (struct FTP_Client_SessionData,                // sessi
 //                               Stream_INotify_t,                             // stream notification interface type
 //                               FTP_Client_Module_Parser_Data);               // reader type
 
-//DATASTREAM_MODULE_DUPLEX (struct FTP_Client_SessionData,                  // session data type
-//                          enum Stream_SessionMessageType,                 // session event type
-//                          struct FTP_Client_ModuleHandlerConfiguration,   // module handler configuration type
-//                          libacestream_default_stat_report_module_name_string,
-//                          Stream_INotify_t,                               // stream notification interface type
-//                          FTP_Client_Module_StatisticReport_ReaderTask_t, // reader type
-//                          FTP_Client_Module_StatisticReport_WriterTask_t, // writer type
-//                          FTP_Client_Module_StatisticReport);             // name
+DATASTREAM_MODULE_DUPLEX (struct FTP_Client_SessionData,                       // session data type
+                          enum Stream_SessionMessageType,                      // session event type
+                          struct FTP_Client_ModuleHandlerConfiguration,        // module handler configuration type
+                          libacestream_default_stat_report_module_name_string,
+                          Stream_INotify_t,                                    // stream notification interface type
+                          FTP_Client_Module_StatisticReport_ReaderTask_t,      // reader type
+                          FTP_Client_Module_StatisticReport_WriterTask_t,      // writer type
+                          FTP_Client_Module_StatisticReport);                  // name
 
 DATASTREAM_MODULE_INPUT_ONLY (struct FTP_Client_SessionData,                  // session data type
                               enum Stream_SessionMessageType,                 // session event type

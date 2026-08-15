@@ -78,7 +78,7 @@ FTP_Message_T<MessageData,
 
 template <typename MessageData,
           typename MessageType>
-FTP_Code_t
+FTP_Command_t
 FTP_Message_T<MessageData,
               MessageType>::command () const
 {
@@ -86,10 +86,10 @@ FTP_Message_T<MessageData,
 
   // sanity check(s)
   if (!inherited::isInitialized_)
-    return FTP_Codes::FTP_CODE_INVALID;
+    return FTP_Codes::FTP_COMMAND_INVALID;
   ACE_ASSERT (inherited::data_);
 
-  return inherited::data_->getR ().code;
+  return inherited::data_->getR ().request.command;
 }
 
 template <typename MessageData,

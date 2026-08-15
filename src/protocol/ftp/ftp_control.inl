@@ -469,7 +469,6 @@ FTP_Control_T<ControlAsynchConnectorType,
 
   // sanity check(s)
   ACE_ASSERT (connectionConfiguration_);
-  ACE_ASSERT (controlConnection_ != ACE_INVALID_HANDLE);
   ACE_ASSERT (!connection_out);
   ACE_ASSERT (!message_out);
 

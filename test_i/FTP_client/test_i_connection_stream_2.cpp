@@ -38,6 +38,7 @@
 #include "test_i_message.h"
 #include "test_i_session_message.h"
 #include "test_i_common.h"
+#include "test_i_common_modules.h"
 
 typedef Stream_Module_Net_InputWriter_T<ACE_MT_SYNCH,
                                         Stream_ControlMessage_t,
@@ -110,18 +111,20 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_inout,
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
                   FTP_Client_Module_Parser_Data_Module (this,
                                                         ACE_TEXT_ALWAYS_CHAR (FTP_DEFAULT_MODULE_PARSER_DATA_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                FTP_Client_Module_StatisticReport_Module (this,
-  //                                                          ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_inout->append (module_p, NULL, 0);
-  //module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  FTP_Client_Module_StatisticReport_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
 
   deleteModules_out = true;
 

@@ -727,6 +727,7 @@ do_work (//bool requestBroadcastReplies_in,
     &configuration_in.parserConfiguration;
 
   modulehandler_configuration_2 = modulehandler_configuration;
+  modulehandler_configuration_2.computeThroughput = true;
   modulehandler_configuration_2.subscriber = &ui_event_handler_2;
   ACE_SYNCH_RECURSIVE_MUTEX subscribers_lock_2;
   modulehandler_configuration_2.lock = &subscribers_lock_2; // prevent deadlocks
@@ -771,31 +772,16 @@ do_work (//bool requestBroadcastReplies_in,
   //                           &configuration_in.userData);
 
   // step0d: initialize regular (global) statistic reporting
-  //Common_Timer_Manager_t* timer_manager_p =
-  //  COMMON_TIMERMANAGER_SINGLETON::instance ();
-  //ACE_ASSERT (timer_manager_p);
-  //struct Common_TimerConfiguration timer_configuration;
-  //timer_manager_p->initialize (timer_configuration);
-  //timer_manager_p->start (NULL);
-  //FTP_StatisticReportingHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
-  //                                                   connection_manager_p,
-  //                                                   false);
-  //long timer_id = -1;
-  //if (statisticReportingInterval_in)
-  //{
-  //  ACE_Time_Value interval (statisticReportingInterval_in, 0);
-  //  timer_id =
-  //    timer_manager_p->schedule_timer (&statistic_handler,         // event handler handle
-  //                                     NULL,                       // asynchronous completion token
-  //                                     COMMON_TIME_NOW + interval, // first wakeup time
-  //                                     interval);                  // interval
-  //  if (timer_id == -1)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
-  //    return;
-  //  } // end IF
-  //} // end IF
+  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+  // useReactor_in ? COMMON_TIMER_DISPATCH_REACTOR :
+  // COMMON_TIMER_DISPATCH_PROACTOR;
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+#if defined(ACE_WIN32) || defined(ACE_WIN64)
+  Common_Timer_Tools::configuration_.taskType =
+    ACE_TEXT_ALWAYS_CHAR ("Playback");
+  Common_Timer_Tools::configuration_.taskPriority = AVRT_PRIORITY_HIGH;
+#endif // ACE_WIN32 || ACE_WIN64
+  Common_Timer_Tools::initialize ();
 
   // step0c: initialize signal handling
   configuration_in.signalHandlerConfiguration.dispatchState =
@@ -985,6 +971,7 @@ do_work (//bool requestBroadcastReplies_in,
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true,   // wait ?
                                                false); // release singletons ?
+  Common_Timer_Tools::finalize ();
 }
 
 void

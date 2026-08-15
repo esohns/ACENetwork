@@ -65,11 +65,11 @@ template <typename MessageData = FTP_MessageData_t,
 class FTP_Message_T
  : public Stream_DataMessageBase_2<MessageData,
                                    MessageType,
-                                   FTP_Code_t>
+                                   FTP_Command_t>
 {
   typedef Stream_DataMessageBase_2<MessageData,
                                    MessageType,
-                                   FTP_Code_t> inherited;
+                                   FTP_Command_t> inherited;
 
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -98,8 +98,8 @@ class FTP_Message_T
                  unsigned int);      // size
   inline virtual ~FTP_Message_T () {}
 
-  virtual FTP_Code_t command () const; // return value: message type
-  inline static std::string CommandToString (FTP_Code_t code_in) { return FTP_Tools::CodeToString (code_in); }
+  virtual FTP_Command_t command () const; // return value: message type
+  inline static std::string CommandTypeToString (FTP_Command_t command_in) { return FTP_Tools::CommandToString (command_in); }
 
   // implement Common_IDumpState
   virtual void dump_state () const;
