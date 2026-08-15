@@ -66,14 +66,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkListStore" id="liststore_files">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name size -->
-      <column type="guint64"/>
-    </columns>
-  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -757,6 +749,16 @@
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkListStore" id="liststore_files">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name is_link -->
+      <column type="gboolean"/>
+      <!-- column-name size -->
+      <column type="guint64"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="liststore_interface">
     <columns>
       <!-- column-name text -->
@@ -777,6 +779,7 @@
     <property name="page_increment">10</property>
     <property name="page_size">10</property>
   </object>
+  <object class="GtkTextBuffer" id="textbuffer"/>
   <object class="GtkToggleAction" id="toggleaction_listen">
     <property name="label">Listen</property>
     <property name="short_label">Listen</property>
@@ -784,7 +787,6 @@
     <property name="stock_id">gtk-connect</property>
     <signal name="toggled" handler="toggleaction_listen_toggled_cb" swapped="no"/>
   </object>
-  <object class="GtkTextBuffer" id="textbuffer"/>
   <object class="GtkTreeStore" id="treestore_directories">
     <columns>
       <!-- column-name text -->

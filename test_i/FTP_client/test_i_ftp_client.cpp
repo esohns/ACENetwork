@@ -869,21 +869,21 @@ do_work (//bool requestBroadcastReplies_in,
     FTP_Client_Connector_t connector;
     FTP_Client_AsynchConnector_t asynch_connector;
     if (useReactor_in)
-      handle = Net_Client_Common_Tools::connect<FTP_Client_Connector_t> (connector,
-                                                                         configuration_in.connectionConfiguration,
-                                                                         configuration_in.userData,
-                                                                         configuration_in.connectionConfiguration.socketConfiguration.address,
-                                                                         true,
-                                                                         true,
-                                                                         0);
+      handle = Net_Client_Common_Tools::connect (connector,
+                                                 configuration_in.connectionConfiguration,
+                                                 configuration_in.userData,
+                                                 configuration_in.connectionConfiguration.socketConfiguration.address,
+                                                 true,
+                                                 true,
+                                                 0);
     else
-      handle = Net_Client_Common_Tools::connect<FTP_Client_AsynchConnector_t> (asynch_connector,
-                                                                               configuration_in.connectionConfiguration,
-                                                                               configuration_in.userData,
-                                                                               configuration_in.connectionConfiguration.socketConfiguration.address,
-                                                                               true,
-                                                                               true,
-                                                                               0);
+      handle = Net_Client_Common_Tools::connect (asynch_connector,
+                                                 configuration_in.connectionConfiguration,
+                                                 configuration_in.userData,
+                                                 configuration_in.connectionConfiguration.socketConfiguration.address,
+                                                 true,
+                                                 true,
+                                                 0);
     if (unlikely (handle == ACE_INVALID_HANDLE))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -933,8 +933,7 @@ do_work (//bool requestBroadcastReplies_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
       connection_manager_p->abort (false);
-      connection_manager_p->wait (true);
-      return;
+      goto error;
     } // end IF
 #endif // GTK_USE
 
@@ -946,7 +945,8 @@ do_work (//bool requestBroadcastReplies_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
-        return;
+        connection_manager_p->abort (false);
+        goto error;
       } // end IF
       BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
       ACE_UNUSED_ARG (was_visible_b);
@@ -963,10 +963,12 @@ do_work (//bool requestBroadcastReplies_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 
+error:
   configuration_in.listener->stop (true,   // wait for completion ?
                                    false); // high priority ?
-  connection_manager_p->stop ();
-  connection_manager_p->wait ();
+  connection_manager_p->stop (true,
+                              false);
+  connection_manager_p->wait (true);
   if (!UIDefinitionFileName_in.empty ())
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true,   // wait ?

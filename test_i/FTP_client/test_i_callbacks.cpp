@@ -777,7 +777,7 @@ idle_list_received_cb (gpointer userData_in)
        iterator_3 != data_p->entries.end ();
        ++iterator_3)
   {
-    if (((*iterator_3).type != Common_File_Entry::FILE) ||
+    if (((*iterator_3).type != Common_File_Entry::FILE) &&
         ((*iterator_3).type != Common_File_Entry::LINK))
       continue;
 
@@ -787,7 +787,8 @@ idle_list_received_cb (gpointer userData_in)
     gtk_list_store_append (list_store_p, &iterator_2);
     gtk_list_store_set (list_store_p, &iterator_2,
                         0, string_p,
-                        1, (*iterator_3).size,
+                        1, ((*iterator_3).type == Common_File_Entry::LINK) ? TRUE : FALSE,
+                        2, (*iterator_3).size,
                         -1);
     g_free (string_p);
     string_p = NULL;
@@ -1632,7 +1633,7 @@ treeview_selection_directories_changed_cb (GtkTreeSelection* treeSelection_in,
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_PASV_NAME)));
   ACE_ASSERT (toggle_button_p);
-  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p) ? true : false;
+  bool pasv_mode_b = gtk_toggle_button_get_active (toggle_button_p);
 
   if (!gtk_tree_selection_get_selected (treeSelection_in,
                                         &tree_model_p,

@@ -35,8 +35,6 @@
 
 #include "stream_stat_statistic_report.h"
 
-//#include "stream_net_io.h"
-
 #include "net_connection_manager.h"
 
 #include "ftp_module_parser.h"
@@ -146,21 +144,6 @@ typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        struct Stream_UserData> FTP_Client_MessageHandler;
 
 // declare module(s)
-//DATASTREAM_MODULE_DUPLEX (struct FTP_Client_SessionData,                  // session data type
-//                          enum Stream_SessionMessageType,                 // session event type
-//                          struct FTP_Client_ModuleHandlerConfiguration,   // module handler configuration type
-//                          libacestream_default_net_io_module_name_string,
-//                          Stream_INotify_t,                               // stream notification interface type
-//                          FTP_Client_Module_Net_Reader_t,                 // reader type
-//                          FTP_Client_Module_Net_Writer_t,                 // writer type
-//                          FTP_Client_Module_Net_IO);                      // name
-
-//DATASTREAM_MODULE_OUTPUT_ONLY (struct FTP_Client_SessionData,                // session data type
-//                               enum Stream_SessionMessageType,               // session event type
-//                               struct FTP_Client_ModuleHandlerConfiguration, // module handler configuration type
-//                               libacenetwork_protocol_default_ftp_streamer_module_name_string,
-//                               Stream_INotify_t,                             // stream notification interface type
-//                               FTP_Client_Module_Streamer);                  // reader type
 DATASTREAM_MODULE_DUPLEX (struct FTP_Client_SessionData,                // session data type
                           enum Stream_SessionMessageType,               // session event type
                           struct FTP_Client_ModuleHandlerConfiguration, // module handler configuration type
