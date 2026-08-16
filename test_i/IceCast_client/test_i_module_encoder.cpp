@@ -106,12 +106,6 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Encoder::handleDataMessage"));
 
-  // sanity check(s)
-  //if (unlikely (!inherited::headerWritten_))
-  //  return; // --> not fully initialized (yet)
-  //if (unlikely (!inherited::formatContext_))
-  //  return; // --> disregard 'late' messages
-
   int result /*, result_2*/;
   ACE_Message_Block* message_block_p = message_inout;
   AVCodecContext* codec_context_p;

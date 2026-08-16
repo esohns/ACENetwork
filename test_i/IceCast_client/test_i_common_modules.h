@@ -34,6 +34,7 @@
 #include "stream_dec_libav_converter.h"
 #include "stream_dec_libav_decoder.h"
 #include "stream_dec_libav_filter.h"
+#include "stream_dec_libav_hw_decoder.h"
 #endif // FFMPEG_SUPPORT
 #if defined (MPG123_SUPPORT)
 #include "stream_dec_mp3_decoder.h"
@@ -275,6 +276,21 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               libacestream_default_dec_libav_decoder_module_name_string,
                               Stream_INotify_t,                                          // stream notification interface type
                               Test_I_LibAVDecoder);                                      // writer type
+
+typedef Stream_LibAV_HW_Decoder_T<ACE_MT_SYNCH,
+                                  Common_TimePolicy_t,
+                                  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                  Stream_ControlMessage_t,
+                                  Test_I_Message,
+                                  Test_I_SessionMessage_2,
+                                  Test_I_IceCastClient_SessionData_2_t,
+                                  struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_LibAV_HW_Decoder;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                    // session data type
+                              enum Stream_SessionMessageType,                               // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,     // module handler configuration type
+                              libacestream_default_dec_libav_hw_decoder_module_name_string,
+                              Stream_INotify_t,                                             // stream notification interface type
+                              Test_I_LibAV_HW_Decoder);                                     // writer type
 #endif // FFMPEG_SUPPORT
 
 #if defined (FFMPEG_SUPPORT)

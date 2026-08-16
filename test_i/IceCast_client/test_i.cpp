@@ -226,6 +226,10 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-z        : use hardware codecs [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
 }
 
 bool
@@ -247,6 +251,7 @@ do_process_arguments (int argc_in,
                       bool& traceInformation_out,
                       std::string& URL_out,
                       bool& printVersionAndExit_out,
+                      bool& useHardwareCodecs_out,
                       std::string& hostName_out,
                       ACE_INET_Addr& remoteHost_out,
                       bool& useSSL_out)
@@ -288,6 +293,7 @@ do_process_arguments (int argc_in,
   traceInformation_out = false;
   URL_out = ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_URL);
   printVersionAndExit_out = false;
+  useHardwareCodecs_out = false;
   hostName_out.clear ();
   int result =
     remoteHost_out.set (static_cast<u_short> (HTTP_DEFAULT_SERVER_PORT),
@@ -305,10 +311,10 @@ do_process_arguments (int argc_in,
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:lrs:tu:v"),
+                               ACE_TEXT ("cde:f:g:lrs:tu:vz"),
 #else
-                               ACE_TEXT ("de:f:g:lrs:tu:v"),
-#endif
+                               ACE_TEXT ("de:f:g:lrs:tu:vz"),
+#endif // ACE_WIN32 || ACE_WIN64
                                1,                         // skip command name
                                1,                         // report parsing errors
                                ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -326,7 +332,7 @@ do_process_arguments (int argc_in,
         showConsole_out = true;
         break;
       }
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       case 'd':
       {
         debugParser_out = true;
@@ -452,6 +458,11 @@ do_process_arguments (int argc_in,
         printVersionAndExit_out = true;
         break;
       }
+      case 'z':
+      {
+        useHardwareCodecs_out = true;
+        break;
+      }
       // error handling
       case ':':
       {
@@ -566,6 +577,7 @@ do_work (bool debugParser_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const std::string& URL_in,
          const ACE_INET_Addr& remoteHost_in,
+         bool useHardwareCodecs_in,
          struct Test_I_IceCastClient_Configuration& configuration_in,
          struct Test_I_IceCastClient_UI_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
@@ -722,9 +734,16 @@ do_work (bool debugParser_in,
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // encoder
   codec_configuration_s.codecId = AV_CODEC_ID_VP9;
 
+  if (useHardwareCodecs_in)
+  { // *TODO*: select most advanced device type(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  codec_configuration_2.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+    codec_configuration_s.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+    codec_configuration_2.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+#else
+    codec_configuration_s.deviceType = AV_HWDEVICE_TYPE_VAAPI;
+    codec_configuration_2.deviceType = AV_HWDEVICE_TYPE_VAAPI;
 #endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
   codec_configuration_2.profile = AV_PROFILE_H264_MAIN;
 #endif // FFMPEG_SUPPORT
@@ -1181,6 +1200,7 @@ ACE_TMAIN (int argc_in,
   bool trace_information;
   std::string url;
   bool print_version_and_exit;
+  bool use_hardware_codecs_b = false;
   ACE_INET_Addr address;
   bool use_ssl;
   struct Test_I_IceCastClient_Configuration configuration;
@@ -1206,9 +1226,9 @@ ACE_TMAIN (int argc_in,
   configuration.GTKConfiguration.argv = argv_in;
   configuration.GTKConfiguration.CBData = &ui_cb_data;
   configuration.GTKConfiguration.eventHooks.finiHook =
-      idle_finalize_UI_cb;
+    idle_finalize_UI_cb;
   configuration.GTKConfiguration.eventHooks.initHook =
-      idle_initialize_UI_cb;
+    idle_initialize_UI_cb;
   configuration.GTKConfiguration.definition = &gtk_ui_definition;
 #endif // GTK_USE
   ACE_High_Res_Timer timer;
@@ -1311,6 +1331,7 @@ ACE_TMAIN (int argc_in,
                              trace_information,
                              url,
                              print_version_and_exit,
+                             use_hardware_codecs_b,
                              hostname,
                              address,
                              use_ssl))
@@ -1466,6 +1487,7 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            url,
            address,
+           use_hardware_codecs_b,
            configuration,
            ui_cb_data,
            signal_set,

@@ -267,9 +267,6 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   media_type_s.rate = 44100;
   // media_type_s.subFormat = SND_PCM_SUBFORMAT_STD;
 #endif // ACE_WIN32 || ACE_WIN64
-  //HTTP_HeadersConstIterator_t iterator =
-  //  inherited::configuration_->configuration_->record.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING)));
-  //ACE_ASSERT (iterator != inherited::configuration_->configuration_->record.headers.end ());
 
   if (Common_String_Tools::endswith (inherited::configuration_->configuration_->URL,
                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGG_SUFFIX)))
@@ -362,10 +359,20 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
 
     // video
 #if defined (FFMPEG_SUPPORT)
-    ACE_NEW_RETURN (module_p,
-                    Test_I_LibAVDecoder_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
-                    false);
+    if ((*iterator).second.second->codecConfiguration->deviceType != AV_HWDEVICE_TYPE_NONE)
+    {
+      ACE_NEW_RETURN (module_p,
+                      Test_I_LibAV_HW_Decoder_Module (this,
+                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                      false);
+    } // end IF
+    else
+    {
+      ACE_NEW_RETURN (module_p,
+                      Test_I_LibAVDecoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                      false);
+    } // end ELSE
     layout_in->append (module_p, branch_p, index_i);
     module_p = NULL;
 #endif // FFMPEG_SUPPORT
