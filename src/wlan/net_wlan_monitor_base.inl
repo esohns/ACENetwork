@@ -2349,6 +2349,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_2.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
 }
+
 template <typename AddressType,
           typename ConfigurationType,
           ACE_SYNCH_DECL,
@@ -2547,6 +2548,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ;
 #endif // ACE_WIN32 || ACE_WIN64
 }
+
 template <typename AddressType,
           typename ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -2700,6 +2702,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
               (success_in ? ACE_TEXT ("yes") : ACE_TEXT ("no"))));
 #endif // ACE_WIN32 || ACE_WIN64
 }
+
 template <typename AddressType,
           typename ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

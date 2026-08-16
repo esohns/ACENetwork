@@ -135,23 +135,20 @@ idle_load_segment_cb (gpointer userData_in)
 
   // sanity check(s)
   struct Test_I_URLStreamLoad_UI_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
   Common_UI_GTK_BuildersConstIterator_t iterator =
     state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   // update configuration
   Test_I_URLStreamLoad_StreamConfiguration_2_t::ITERATOR_T iterator_3 =
-      data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
   ACE_INET_Addr host_address;
   std::string hostname_string, hostname_string_2, URI_string, URL_string;
@@ -229,12 +226,15 @@ idle_load_segment_cb (gpointer userData_in)
   static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
     static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
 
+  (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
+
+  struct Net_UserData user_data_s;
   Test_I_TCPConnector_2_t connector;
 #if defined (SSL_SUPPORT)
   Test_I_SSLConnector_2_t ssl_connector;
 #endif // SSL_SUPPORT
   Test_I_AsynchTCPConnector_2_t asynch_connector;
-  Test_I_IConnector_2_t* iconnector_p = NULL;
+  //Test_I_IConnector_2_t* iconnector_p = NULL;
   Test_I_ConnectionManager_2_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
   ACE_ASSERT (iconnection_manager_p);
@@ -245,10 +245,22 @@ idle_load_segment_cb (gpointer userData_in)
   {
 #if defined (SSL_SUPPORT)
     if (use_SSL)
-      iconnector_p = &ssl_connector;
+      data_p->handle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                         *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second),
+                                                         user_data_s,
+                                                         static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                         true,
+                                                         true,
+                                                         0);
     else
 #endif // SSL_SUPPORT
-      iconnector_p = &connector;
+      data_p->handle = Net_Client_Common_Tools::connect (connector,
+                                                         *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second),
+                                                         user_data_s,
+                                                         static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                         true,
+                                                         true,
+                                                         0);
   } // end IF
   else
   {
@@ -256,64 +268,14 @@ idle_load_segment_cb (gpointer userData_in)
     // *TODO*: add SSL support to the proactor framework
     ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
-    iconnector_p = &asynch_connector;
-  } // end ELSE
-  if (!iconnector_p->initialize (*static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
-    return G_SOURCE_REMOVE;
-  } // end IF
+    data_p->handle = Net_Client_Common_Tools::connect (asynch_connector,
+                                                       *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second),
+                                                       user_data_s,
+                                                       static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                       true,
+                                                       true,
+                                                       0);
 
-  // step3b: connect
-  data_p->handle =
-      iconnector_p->connect (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address);
-  // *TODO*: support one-thread operation by scheduling a signal and manually
-  //         running the dispatch loop for a limited time...
-  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
-  {
-    data_p->handle = ACE_INVALID_HANDLE;
-
-    ACE_Time_Value timeout (NET_CONNECTION_ASYNCH_DEFAULT_ESTABLISHMENT_TIMEOUT_S,
-                            0);
-    ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-    // *TODO*: avoid tight loop here
-    do
-    {
-      iconnection_p =
-          iconnection_manager_p->get (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                      true);
-      if (iconnection_p)
-      {
-        data_p->handle =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-            reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
-#else
-            static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
-        break;
-      } // end IF
-    } while (COMMON_TIME_NOW < deadline);
-    if (!iconnection_p)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s (timed out after: %#T), continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ()),
-                  &timeout));
-  } // end IF
-  else
-  {
-    iconnection_p =
-      iconnection_manager_p->get (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                  true);
-    if (iconnection_p)
-    {
-      data_p->handle =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-          reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
-#else
-          static_cast<ACE_HANDLE> (iconnection_p->id ());
-#endif
-    } // end IF
   } // end ELSE
   if (data_p->handle == ACE_INVALID_HANDLE)
   {
@@ -333,9 +295,6 @@ idle_load_segment_cb (gpointer userData_in)
 //                data_p->handle,
 //                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second)->address).c_str ())));
 //#endif
-
-  // clean up
-  iconnection_p->decrease (); iconnection_p = NULL;
 
   return G_SOURCE_REMOVE;
 }
@@ -1285,22 +1244,22 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     {
 #if defined (SSL_SUPPORT)
       if (use_SSL)
-        data_p->handle =
-          Net_Client_Common_Tools::connect (ssl_connector,
-                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
-                                            user_data_s,
-                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                            true,
-                                            true);
+        data_p->handle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                           *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                           user_data_s,
+                                                           static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                           true,
+                                                           true,
+                                                           0);
       else
 #endif // SSL_SUPPORT
-        data_p->handle =
-            Net_Client_Common_Tools::connect (connector,
-                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
-                                              user_data_s,
-                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                              true,
-                                              true);
+        data_p->handle = Net_Client_Common_Tools::connect (connector,
+                                                           *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                           user_data_s,
+                                                           static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                           true,
+                                                           true,
+                                                           0);
     } // end IF
     else
     {
@@ -1308,13 +1267,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
-      data_p->handle =
-          Net_Client_Common_Tools::connect (asynch_connector,
-                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
-                                            user_data_s,
-                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                            true,
-                                            true);
+      data_p->handle = Net_Client_Common_Tools::connect (asynch_connector,
+                                                         *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                         user_data_s,
+                                                         static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                         true,
+                                                         true,
+                                                         0);
     } // end ELSE
     if (data_p->handle == ACE_INVALID_HANDLE)
     {
