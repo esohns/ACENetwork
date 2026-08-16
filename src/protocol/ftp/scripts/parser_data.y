@@ -155,7 +155,7 @@ using namespace std;
 %start                   stream;
 
 stream:                  items                                     { $$ = $1; }
-items:                   item items                                { $$ = $1 + $2; }
+items:                   items item                                { $$ = $1 + $2; }
                          | /* empty */                             { $$ = 0; }
 item:                    "directory"                               { $$ = static_cast<ACE_UINT16> ($1->length ()) + 2;
                                                                      driver->directory (*$1); }

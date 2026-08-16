@@ -30,7 +30,6 @@
 
 //----------------------------------------
 
-#define TEST_I_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
 #define TEST_I_UI_GTK_ACTION_CONNECT_NAME                 "action_connect"
 //#define TEST_I_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"
 #define TEST_I_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
@@ -68,8 +67,7 @@
 #define TEST_I_UI_GTK_TREEVIEW_DIRECTORIES_NAME           "treeview_directories"
 #define TEST_I_UI_GTK_TREEVIEW_FILES_NAME                 "treeview_files"
 
-// GTK progress/status bar
-#define TEST_I_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL         27 // ms (?)
+// GTK status bar
 #define TEST_I_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION       "Stream::main"
 
 #endif

@@ -93,6 +93,7 @@ class Test_I_EventHandler_2
   struct FTP_Client_UI_CBData*   CBData_;
   ACE_FILE_IO                    stream_;
   struct FTP_Client_SessionData* sessionData_;
+  bool                           sessionIsFileStream_;
 };
 
 #endif

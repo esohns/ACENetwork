@@ -1207,7 +1207,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 6: /* text_line: "text"  */
-                                                                    { ((*yyvalp).ival) = 3 + 1 + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->length () + 2;
+                                                                    { ((*yyvalp).ival) = 3 + 1 + static_cast<ACE_UINT16> ((YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)->length ()) + 2;
                                                                       driver->current ().text.push_back (*(YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.sval)); }
     break;
 

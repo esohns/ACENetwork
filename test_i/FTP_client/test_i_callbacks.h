@@ -53,6 +53,7 @@ G_MODULE_EXPORT void action_connect_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void button_disconnect_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void button_cdup_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void button_pwd_clicked_cb (GtkButton*, gpointer);
+G_MODULE_EXPORT void button_list_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void spinbutton_server_port_value_changed_cb (GtkSpinButton*, gpointer);
 G_MODULE_EXPORT void toggleaction_listen_toggled_cb (GtkToggleAction*, gpointer);

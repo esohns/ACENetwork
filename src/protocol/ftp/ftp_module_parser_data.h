@@ -83,8 +83,15 @@ class FTP_Module_Parser_Data_T
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_Data_T (const FTP_Module_Parser_Data_T&))
   ACE_UNIMPLEMENTED_FUNC (FTP_Module_Parser_Data_T& operator= (const FTP_Module_Parser_Data_T&))
 
-  void push (FTP_Codes::RecordType);
+  // fire & forget 3rd argument
+  void push (FTP_Codes::RecordType, // dir/file/data ?
+             Stream_SessionId_t,    // (current-) session id
+             DataMessageType*&);    // in/out: message handle
 
+  // override some ACE_Task_T methods
+  virtual int svc (void);
+
+  bool              forwardImmediately_; // bypass parser ?
   struct FTP_Record record_;
 };
 

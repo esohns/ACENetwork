@@ -145,7 +145,7 @@ CRLF           \x0D\x0A
 {CRLF}                     { driver->offset (2);
                              BEGIN(multiline_text_begin);
                              return yytokentype::REPLY_TEXT; }
-{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
+{OCTET_NO_CRLF}+           { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext); }
 } // end <multiline_text>
@@ -188,7 +188,7 @@ CRLF           \x0D\x0A
                              yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
-{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
+{OCTET_NO_CRLF}+           { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT; }
@@ -200,7 +200,7 @@ CRLF           \x0D\x0A
                              yylval->sval->clear ();
                              return yytokentype::REPLY;
                              /* return yy::FTP_Parser::token::REPLY; */ }
-{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
+{OCTET_NO_CRLF}+           { driver->offset (yyleng);
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->assign (yytext);
                              return yytokentype::REPLY_TEXT;
@@ -229,11 +229,11 @@ FTP_Scanner_reset (yyscan_t yyscanner)
 {
   NETWORK_TRACE (ACE_TEXT ("::FTP_Scanner_reset"));
 
-  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  FTP_IParser* driver_p = FTP_Scanner_get_extra (yyscanner);
-  ACE_ASSERT (driver_p);
+//  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+//  FTP_IParser* driver_p = FTP_Scanner_get_extra (yyscanner);
+//  ACE_ASSERT (driver_p);
 
-  BEGIN(INITIAL);
+/*  BEGIN(INITIAL);*/
 
   return 0;
 }

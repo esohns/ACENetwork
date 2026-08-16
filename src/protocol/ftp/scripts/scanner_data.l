@@ -1,4 +1,7 @@
 %top{
+#undef YY_BUF_SIZE
+#define YY_BUF_SIZE 1024*1024
+
 #if (!FTP_Scanner_Data_IN_HEADER)
 #undef YYTOKENTYPE
 #endif // !FTP_Scanner_Data_IN_HEADER
@@ -53,10 +56,6 @@ int FTP_Scanner_Data_reset (yyscan_t);
            token_type. This %define solves that issue. */
 //#define yyterminate() return yy::FTP_Parser_Data::token::END
 #define yyterminate() return yytokentype::END
-
-/* *NOTE*: YY_DECL is defined elsewhere (needed so the scanner can support
-           extra arguments) */
-//#define YY_DECL
 %}
 
 %option prefix="FTP_Scanner_Data_"
@@ -157,19 +156,18 @@ CRLF           \x0D\x0A
                              return yytokentype::LIST_DIRECTORY;
                              /* return yy::FTP_Parser_Data::token::LIST_DIRECTORY; */
                            }
-{OCTET_NO_CRLF}+/{CRLF}    { driver->offset (yyleng);
+{OCTET_NO_CRLF}+           { driver->offset (yyleng);
                              yylval->sval->append (yytext);
                            }
 } // end <list_directory>
 <list_file>{
-{OCTET}{1}                 { driver->offset (1);
+{CRLF}                     { driver->offset (2);
+                             BEGIN(INITIAL);
+                             return yytokentype::LIST_FILE;
+                             /* return yy::FTP_Parser_Data::token::LIST_FILE; */
+                           }
+{OCTET_NO_CRLF}+           { driver->offset (yyleng);
                              yylval->sval->append (yytext);
-                             if (driver->offset () == driver->availableBytes ())
-                             {
-                               BEGIN(INITIAL);
-                               return yytokentype::LIST_FILE;
-                               /* return yy::FTP_Parser_Data::token::LIST_FILE; */
-                             } // end IF
                            }
 } // end <list_file>
 <data>{
@@ -186,6 +184,13 @@ CRLF           \x0D\x0A
 <*>{OCTET}{1}              { /* *NOTE*: should not be reached, unless something
                                         went terribly wrong */
                              ACE_ASSERT (false);
+                             *yy_cp = yyg->yy_hold_char;
+                             if (driver->switchBuffer ())
+                             {
+/*                               unput (*yytext);*/
+                               yyless (0);
+                               YY_BREAK
+                             } // end IF
 
                              // debug info
                              std::string error_message =
@@ -209,7 +214,7 @@ FTP_Scanner_Data_reset (yyscan_t yyscanner)
   FTP_IParserData* driver_p = FTP_Scanner_Data_get_extra (yyscanner);
   ACE_ASSERT (driver_p);
 
-  BEGIN(INITIAL);
+/*  BEGIN(INITIAL);*/
 
   return 0;
 }

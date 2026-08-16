@@ -259,6 +259,7 @@ Test_I_EventHandler_2::Test_I_EventHandler_2 (struct FTP_Client_UI_CBData* CBDat
  : CBData_ (CBData_in)
  , stream_ ()
  , sessionData_ (NULL)
+ , sessionIsFileStream_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::Test_I_EventHandler_2"));
 
@@ -323,14 +324,18 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 #endif // GTK_USE
 
 #if defined (GTK_USE)
+  guint event_source_id;
   state_r.eventStack.push (COMMON_UI_EVENT_STOPPED);
 #endif // GTK_USE
 
   sessionData_ = NULL;
 
+  if (sessionIsFileStream_)
+    goto continue_;
+
 #if defined (GTK_USE)
-  guint event_source_id = g_idle_add (idle_list_received_cb,
-                                      CBData_);
+  event_source_id = g_idle_add (idle_list_received_cb,
+                                CBData_);
   if (event_source_id == 0)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -340,6 +345,7 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
   state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
 
+continue_:
   if (stream_.get_handle () != ACE_INVALID_HANDLE)
   {
     int result = stream_.close ();
@@ -389,6 +395,8 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
   {
     case FTP_Codes::FTP_RECORD_DIRECTORY:
     {
+      sessionIsFileStream_ = false;
+
       //std::string buffer_string =
       //  Net_Common_Tools::bufferToString (&const_cast<Test_I_Message&> (message_in));
       //std::istringstream converter (buffer_string);
@@ -409,7 +417,8 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       //    continue;
       //  CBData_->entries.push_back (file_entry_s);
       //} while (!converter.fail ());
-      CBData_->entries = record_r.entries;
+      CBData_->entries.insert (CBData_->entries.end (),
+                               record_r.entries.begin (), record_r.entries.end ());
 
 //#if defined (GTK_USE)
 //      guint event_source_id = g_idle_add (idle_list_received_cb,
@@ -427,32 +436,38 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
     }
     case FTP_Codes::FTP_RECORD_FILE:
     {
-      std::string buffer_string =
-        Net_Common_Tools::bufferToString (&const_cast<Test_I_Message&> (message_in));
-      std::istringstream converter (buffer_string);
-      char buffer_a[BUFSIZ];
-      struct Common_File_Entry file_entry_s;
+      sessionIsFileStream_ = false;
 
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+      // std::string buffer_string =
+      //   Net_Common_Tools::bufferToString (&const_cast<Test_I_Message&> (message_in));
+      // std::istringstream converter (buffer_string);
+      // char buffer_a[BUFSIZ];
+      // struct Common_File_Entry file_entry_s;
 
-      do
-      {
-        converter.getline (buffer_a, sizeof (char[BUFSIZ]));
-        std::string buffer_string_2 = buffer_a;
-        buffer_string_2 = Common_String_Tools::strip (buffer_string_2);
-        if (unlikely (buffer_string_2.empty ()))
-          continue;
-        file_entry_s = Common_File_Tools::parseFileEntry (buffer_string_2);
-        if (unlikely (file_entry_s.type == Common_File_Entry::INVALID))
-          continue;
-        CBData_->entries.push_back (file_entry_s);
-      } while (!converter.fail ());
+      // ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+
+      // do
+      // {
+      //   converter.getline (buffer_a, sizeof (char[BUFSIZ]));
+      //   std::string buffer_string_2 = buffer_a;
+      //   buffer_string_2 = Common_String_Tools::strip (buffer_string_2);
+      //   if (unlikely (buffer_string_2.empty ()))
+      //     continue;
+      //   file_entry_s = Common_File_Tools::parseFileEntry (buffer_string_2);
+      //   if (unlikely (file_entry_s.type == Common_File_Entry::INVALID))
+      //     continue;
+      //   CBData_->entries.push_back (file_entry_s);
+      // } while (!converter.fail ());
+      CBData_->entries.insert (CBData_->entries.end (),
+                               record_r.entries.begin (), record_r.entries.end ());
 
       break;
     }
     case FTP_Codes::FTP_RECORD_DATA:
     {
-      int result = -1; 
+      sessionIsFileStream_ = true;
+
+      int result = -1;
       if (unlikely (stream_.get_handle () == ACE_INVALID_HANDLE))
       {
         std::string filename_string =
@@ -484,27 +499,30 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 
       ACE_Message_Block* message_block_p = &const_cast<Test_I_Message&> (message_in);
       ssize_t result_2 = -1;
-      while (message_block_p)
-      {
-        result_2 = stream_.send (message_block_p->rd_ptr (),
-                                 message_block_p->length ());
+      size_t bytes_transferred_i = 0;
+      // while (message_block_p)
+      // {
+        // result_2 = stream_.send (message_block_p->rd_ptr (),
+        //                          message_block_p->length ());
+        result_2 = stream_.send_n (message_block_p,
+                                   NULL,
+                                   &bytes_transferred_i);
         if (unlikely (result_2 == -1))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_FILE_IO::send(%B): \"%m\", returning\n"),
-                      message_block_p->length ()));
+                      message_block_p->total_length ()));
           return;
         } // end IF
         else
           ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("wrote %b byte(s)...\n"),
-                      message_block_p->length ()));
-        message_block_p = message_block_p->cont ();
-      } // end WHILE
+                      ACE_TEXT ("wrote %B byte(s)...\n"),
+                      bytes_transferred_i));
+                      // message_block_p->length ()));
+      //   message_block_p = message_block_p->cont ();
+      // } // end WHILE
 
-      { ACE_GUARD(ACE_SYNCH_MUTEX, aGuard, state_r.lock);
-        CBData_->progressData.transferred += message_in.total_length ();
-      } // end lock scope
+      CBData_->progressData.transferred += message_in.total_length ();
 
       break;
     }
@@ -556,7 +574,10 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       break;
     }
     case STREAM_SESSION_MESSAGE_STATISTIC:
-    { ACE_ASSERT (sessionData_);
+    { // sanity check(s)
+      if (unlikely (!sessionData_))
+        break;
+
       if (sessionData_->lock)
       {
         result = sessionData_->lock->acquire ();

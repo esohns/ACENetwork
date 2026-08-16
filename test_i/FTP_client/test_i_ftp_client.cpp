@@ -547,7 +547,7 @@ do_work (//bool requestBroadcastReplies_in,
   // configuration_in.parserConfiguration.debugParser = debugParser_in;
   // if (unlikely (debugParser_in))
   //   configuration_in.parserConfiguration.debugScanner = true;
-  configuration_in.parserConfiguration_2.debugParser = debugParser_in;
+  // configuration_in.parserConfiguration_2.debugParser = debugParser_in;
   if (unlikely (debugParser_in))
     configuration_in.parserConfiguration_2.debugScanner = true;
 #endif // _DEBUG
