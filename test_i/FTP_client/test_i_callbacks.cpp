@@ -403,7 +403,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TREEVIEW_FILES_NAME)));
   ACE_ASSERT (tree_view_p);
-  gtk_tree_view_set_headers_clickable (tree_view_p, TRUE);
+  //gtk_tree_view_set_headers_clickable (tree_view_p, TRUE);
 // #if GTK_CHECK_VERSION (3,0,0)
 // #else
 //   tree_selection_p = gtk_tree_view_get_selection (tree_view_p);
@@ -566,6 +566,12 @@ idle_initialize_UI_cb (gpointer userData_in)
                       ACE_TEXT_ALWAYS_CHAR ("destroy"),
                       G_CALLBACK (gtk_widget_destroyed),
                       NULL);
+  ACE_ASSERT (result_2);
+  result_2 =
+    g_signal_connect (dialog_p,
+                      ACE_TEXT_ALWAYS_CHAR ("delete-event"),
+                      G_CALLBACK (dialog_delete_event_cb),
+                      userData_in);
   ACE_ASSERT (result_2);
 
   // step6b: connect custom signals
@@ -1583,6 +1589,14 @@ button_list_clicked_cb (GtkButton* button_in,
   } // end ELSE
   data_p->control->request (request_s);
 } // button_list_clicked_cb
+
+gboolean
+dialog_delete_event_cb (GtkWidget* widget_in,
+                        GdkEvent* event_in,
+                        gpointer userData_in)
+{
+  return TRUE; // disable Escape-key to close the dialog
+}
 
 void
 combobox_interface_changed_cb (GtkComboBox* comboBox_in,
