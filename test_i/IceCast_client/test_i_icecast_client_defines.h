@@ -46,7 +46,6 @@
 // HTML stream URL scraping
 #define TEST_I_ICECAST_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING "xmlns"
 #define TEST_I_ICECAST_CLIENT_XPATH_QUERY_NAMESPACE_STRING      "http://www.w3.org/1999/xhtml"
-//#define TEST_I_ICECAST_CLIENT_XPATH_QUERY_URL_STRING            "/xmlns:root/xmlns:html/xmlns:body/xmlns:div/xmlns:div/xmlns:div/xmlns:ul/xmlns:li/xmlns:a"
 #define TEST_I_ICECAST_CLIENT_XPATH_QUERY_URL_STRING            "/html/body/div/div/div/ul/li[1]/a/@href"
 
 // HTTP headers
