@@ -39,6 +39,10 @@
 #if defined (MPG123_SUPPORT)
 #include "stream_dec_mp3_decoder.h"
 #endif // MPG123_SUPPORT
+#if defined (LIBXML2_SUPPORT)
+#include "stream_module_htmlparser.h"
+#include "stream_module_xpathquery.h"
+#endif // LIBXML2_SUPPORT
 #if defined (OPUS_SUPPORT)
 #include "stream_dec_opus_decoder.h"
 #endif // OPUS_SUPPORT
@@ -605,6 +609,21 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                            // stream notification interface type
                               Test_I_Event_Handler_2);                                     // writer type
 
+typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                       Common_TimePolicy_t,
+                                       struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                                       Stream_ControlMessage_t,
+                                       Test_I_Message_3,
+                                       Test_I_SessionMessage,
+                                       struct Test_I_IceCastClient_SessionData,
+                                       struct Stream_UserData> Test_I_Event_Handler_3;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,                     // session data type
+                              enum Stream_SessionMessageType,                              // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,    // module handler configuration type
+                              libacestream_default_misc_messagehandler_module_name_string,
+                              Stream_INotify_t,                                            // stream notification interface type
+                              Test_I_Event_Handler_3);                                     // writer type
+
 typedef Stream_Module_Tagger_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
@@ -662,5 +681,38 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               libacestream_default_misc_injector_module_name_string,
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_Video_Injector);                                   // writer type
+
+//////////////////////////////////////////
+
+typedef Stream_Module_HTMLParser_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                                   Stream_ControlMessage_t,
+                                   Test_I_Message_3,
+                                   Test_I_SessionMessage,
+                                   Test_I_IceCastClient_SessionData_t,
+                                   struct Test_I_IceCastClient_SessionData,
+                                   struct Test_I_SAXParserContext> Test_I_HTML_Parser;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,                  // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_3, // module handler configuration type
+                              libacestream_default_html_parser_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_HTML_Parser);                                      // writer type
+
+typedef Stream_Module_XPathQuery_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                                   Stream_ControlMessage_t,
+                                   Test_I_Message_3,
+                                   Test_I_SessionMessage,
+                                   Test_I_IceCastClient_SessionData_t,
+                                   struct Test_I_IceCastClient_SessionData> Test_I_XPath_Query;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,                  // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_3, // module handler configuration type
+                              libacestream_default_xpath_query_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_XPath_Query);                                      // writer type
 
 #endif

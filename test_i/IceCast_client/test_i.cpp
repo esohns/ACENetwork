@@ -36,6 +36,8 @@
 #include <regex>
 #include <string>
 
+#include "ace/Configuration.h"
+#include "ace/Configuration_Import_Export.h"
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
@@ -107,7 +109,9 @@
 #include "test_i_icecast_client_common.h"
 #include "test_i_icecast_client_defines.h"
 
-const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IceCastClientStream");
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("M3UParserStream");
+const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("AVStream");
+const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("HTMLParserStream");
 
 #if defined (PROJECTM_SUPPORT)
 void
@@ -162,8 +166,10 @@ do_print_usage (const std::string& programName_in)
   // enable verbatim boolean output
   std::cout.setf (std::ios::boolalpha);
 
-  std::string path =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -176,10 +182,6 @@ do_print_usage (const std::string& programName_in)
             << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
-  std::string configuration_path = path;
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
@@ -187,7 +189,7 @@ do_print_usage (const std::string& programName_in)
             << gtk_rc_file
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-  std::string output_file = path;
+  std::string output_file = Common_File_Tools::getTempDirectory ();
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE);
@@ -201,6 +203,13 @@ do_print_usage (const std::string& programName_in)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g[[PATH]]: UI definition file [\"")
             << UI_file
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
+            << std::endl;
+  std::string ini_file = configuration_path;
+  ini_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  ini_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_FILE);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [PATH] : configuration file [\"")
+            << ini_file
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l        : log to a file [")
             << false
@@ -244,6 +253,7 @@ do_process_arguments (int argc_in,
 #endif // GTK_USE
                       std::string& fileName_out,
                       std::string& UIDefinitonFileName_out,
+                      std::string& configurationFile_out,
                       bool& logToFile_out,
                       unsigned short& port_out,
                       bool& useReactor_out,
@@ -258,13 +268,12 @@ do_process_arguments (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
 
-  std::string working_directory =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
+
   std::string temp_directory = Common_File_Tools::getTempDirectory ();
-  std::string configuration_directory = working_directory;
-  configuration_directory += ACE_DIRECTORY_SEPARATOR_STR_A;
-  configuration_directory +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   // initialize results
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -272,7 +281,7 @@ do_process_arguments (int argc_in,
 #endif
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
 #if defined (GTK_USE)
-  GtkRcFileName_out = configuration_directory;
+  GtkRcFileName_out = configuration_path;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_USE
@@ -280,10 +289,14 @@ do_process_arguments (int argc_in,
   fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   fileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE);
-  UIDefinitonFileName_out = configuration_directory;
+  UIDefinitonFileName_out = configuration_path;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
+  configurationFile_out = configuration_path;
+  configurationFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configurationFile_out +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_FILE);
   logToFile_out = false;
   port_out = 0;
   useReactor_out = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -311,9 +324,9 @@ do_process_arguments (int argc_in,
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:lrs:tu:vz"),
+                               ACE_TEXT ("cde:f:g:i:lrs:tu:vz"),
 #else
-                               ACE_TEXT ("de:f:g:lrs:tu:vz"),
+                               ACE_TEXT ("de:f:g:i:lrs:tu:vz"),
 #endif // ACE_WIN32 || ACE_WIN64
                                1,                         // skip command name
                                1,                         // report parsing errors
@@ -353,6 +366,12 @@ do_process_arguments (int argc_in,
       case 'g':
       {
         UIDefinitonFileName_out =
+          ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
+        break;
+      }
+      case 'i':
+      {
+        configurationFile_out =
           ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
@@ -569,8 +588,142 @@ do_initialize_signals (bool allowUserRuntimeConnect_in,
 #endif // ACE_WIN32 || ACE_WIN64
 }
 
+bool
+do_parse_configuration_file (const std::string& fileName_in,
+                            Test_I_IceCastClient_ServerConfigurations_t& configuration_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("::do_parse_configuration_file"));
+
+  // initialize return value(s)
+  configuration_inout.clear ();
+
+  ACE_Configuration_Heap configuration_heap;
+  int result = configuration_heap.open ();
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("ACE_Configuration_Heap::open() failed: \"%m\", aborting\n")));
+    return false;
+  } // end IF
+
+  ACE_Ini_ImpExp ini_import_export (configuration_heap);
+  result = ini_import_export.import_config (fileName_in.c_str ());
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("ACE_Ini_ImpExp::import_config(\"%s\") failed, aborting\n"),
+                ACE_TEXT (fileName_in.c_str ())));
+    return false;
+  } // end IF
+
+  // find/open "channels" section...
+  ACE_Configuration_Section_Key root_section_key;
+  result =
+    configuration_heap.open_section (configuration_heap.root_section (),
+                                     ACE_TEXT (TEST_I_ICECAST_CLIENT_INI_SERVERS_SECTION_HEADER),
+                                     0, // MUST exist !
+                                     root_section_key);
+  if (unlikely (result == -1))
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(%s), returning\n"),
+                ACE_TEXT (TEST_I_ICECAST_CLIENT_INI_SERVERS_SECTION_HEADER)));
+    return false;
+  } // end IF
+
+  // import servers...
+  int index = 0;
+  ACE_TString section_name;
+  struct Test_I_IceCastClient_ServerConfiguration server_configuration_s;
+  unsigned int server_number = 0;
+  while (configuration_heap.enumerate_sections (root_section_key,
+                                                index,
+                                                section_name) == 0)
+  {
+    // open section
+    ACE_Configuration_Section_Key section_key;
+    result =
+      configuration_heap.open_section (root_section_key,
+                                       section_name.c_str (),
+                                       0, // MUST exist !
+                                       section_key);
+    ACE_ASSERT (result == 0);
+
+    int index_2 = 0;
+    ACE_TString item_name, item_value;
+    ACE_Configuration::VALUETYPE item_type;
+    u_int item_value_2;
+    while (configuration_heap.enumerate_values (section_key,
+                                                index_2,
+                                                item_name,
+                                                item_type) == 0)
+    {
+      switch (item_type)
+      {
+        case ACE_Configuration::INTEGER:
+        {
+          result =
+            configuration_heap.get_integer_value (section_key,
+                                                  ACE_TEXT (item_name.c_str ()),
+                                                  item_value_2);
+          if (unlikely (result == -1))
+          {
+            ACE_ERROR ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"): \"%m\", aborting\n"),
+                        ACE_TEXT (item_name.c_str ())));
+            return false;
+          } // end IF
+          if (!ACE_OS::strcmp (item_name.c_str (),
+                               ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_SERVER_NUMBER_KEY)))
+            server_number = item_value_2;
+          break;
+        }
+        case ACE_Configuration::STRING:
+        {
+          result =
+              configuration_heap.get_string_value (section_key,
+                                                   ACE_TEXT (item_name.c_str ()),
+                                                   item_value);
+          if (unlikely (result == -1))
+          {
+            ACE_ERROR ((LM_ERROR,
+                       ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"): \"%m\", aborting\n"),
+                       ACE_TEXT (item_name.c_str ())));
+            return false;
+          } // end IF
+          if (!ACE_OS::strcmp (item_name.c_str (),
+                               ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_SERVER_NAME_KEY)))
+            server_configuration_s.name = item_value.c_str ();
+          else if (!ACE_OS::strcmp (item_name.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_SERVER_URL_KEY)))
+            server_configuration_s.URL = item_value.c_str ();
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown item type (was: %d), continuing\n"),
+                      item_type));
+          break;
+        }
+      } // end SWITCH
+      ++index_2;
+    } // end WHILE
+    configuration_inout.insert (std::make_pair (server_number, server_configuration_s));
+    server_configuration_s.clear ();
+    ++index;
+  } // end WHILE
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("imported \"%s\": %u server(s)\n"),
+              ACE_TEXT (fileName_in.c_str ()),
+              configuration_inout.size ()));
+
+  return true;
+}
+
 void
 do_work (bool debugParser_in,
+         const std::string& configurationFile_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
          bool useReactor_in,
@@ -591,6 +744,17 @@ do_work (bool debugParser_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
+  Test_I_IceCastClient_ServerConfigurations_t servers_a;
+  if (unlikely (!do_parse_configuration_file (configurationFile_in,
+                                              servers_a)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("failed to do_parse_configuration_file(\"%s\"), returning\n"),
+               ACE_TEXT (configurationFile_in.c_str ())));
+    return;
+  } // end IF
+  CBData_in.servers = &servers_a;
+
 #if defined (SSL_SUPPORT)
   std::string filename_string =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
@@ -617,6 +781,9 @@ do_work (bool debugParser_in,
   Test_I_EventHandler_2 message_handler_2 (&CBData_in);
   Test_I_Event_Handler_2_Module event_handler_module_2 (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_EventHandler_3 message_handler_3 (&CBData_in);
+  Test_I_Event_Handler_3_Module event_handler_module_3 (NULL,
+                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   allocator_configuration.defaultBufferSize =
@@ -635,8 +802,12 @@ do_work (bool debugParser_in,
   Test_I_MessageAllocator_2_t message_allocator_2 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                    &heap_allocator,         // heap allocator handle
                                                    true);                   // block ?
-  Test_I_IceCastClient_MessageQueue_t encoder_video_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
-                                                           NULL);
+  Test_I_MessageAllocator_3_t message_allocator_3 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+                                                   &heap_allocator,         // heap allocator handle
+                                                   true);                   // block ?
+
+  Test_I_IceCastClient_MessageQueue_2_t encoder_video_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                             NULL);
 
   // *********************** socket configuration data ************************
   Test_I_IceCastClient_ConnectionConfiguration_t connection_configuration;
@@ -654,9 +825,9 @@ do_work (bool debugParser_in,
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
-  Net_ConnectionConfigurationsIterator_t iterator =
-    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
+  //Net_ConnectionConfigurationsIterator_t iterator =
+  //  configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  //ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
 
   Test_I_IceCastClient_ConnectionConfiguration_2_t connection_configuration_2;
   connection_configuration_2.allocatorConfiguration = &allocator_configuration;
@@ -668,9 +839,25 @@ do_work (bool debugParser_in,
     &configuration_in.streamConfiguration_2;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2"),
                                                                     &connection_configuration_2));
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
-    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
-  ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
+  //Net_ConnectionConfigurationsIterator_t iterator_2 =
+  //  configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
+  //ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
+
+  Test_I_IceCastClient_ConnectionConfiguration_3_t connection_configuration_3;
+  connection_configuration_3.socketConfiguration.address = remoteHost_in;
+  connection_configuration_3.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_3.socketConfiguration.useLoopBackDevice =
+    connection_configuration_3.socketConfiguration.address.is_loopback ();
+//  connection_configuration_3.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  connection_configuration_3.messageAllocator = &message_allocator_3;
+  //connection_configuration_3.PDUSize = bufferSize_in;
+  //connection_configuration_3.userData = &CBData_in.configuration->userData;
+  connection_configuration_3.streamConfiguration =
+    &configuration_in.streamConfiguration_3;
+
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("3"),
+                                                                    &connection_configuration_3));
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
@@ -689,6 +876,7 @@ do_work (bool debugParser_in,
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_4; // Resize (Video-)
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_5; // Encoder
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_6; // Convert (to NV12,...)
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_3 modulehandler_configuration_3;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration_2;
 
@@ -723,11 +911,6 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
-  //configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-  //                                                             std::make_pair (module_configuration,
-  //                                                                             modulehandler_configuration)));
-
-  //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
 
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_s; // decoder
@@ -760,8 +943,8 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   modulehandler_configuration_2.handleResize = false;
-  modulehandler_configuration_2.parserConfiguration =
-    &configuration_in.parserConfiguration;
+  //modulehandler_configuration_2.parserConfiguration =
+  //  &configuration_in.parserConfiguration;
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_2.queue = &encoder_video_queue;
@@ -839,6 +1022,35 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration_2.initialize (module_configuration,
                                                      modulehandler_configuration_2,
                                                      stream_configuration_2);
+
+  modulehandler_configuration_3.allocatorConfiguration =
+    &allocator_configuration;
+  modulehandler_configuration_3.closeAfterReception = true;
+  modulehandler_configuration_3.concurrency =
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+  modulehandler_configuration_3.connectionConfigurations =
+    &configuration_in.connectionConfigurations;
+  modulehandler_configuration_3.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration_3.messageAllocator = &message_allocator;
+  modulehandler_configuration_3.parserConfiguration =
+    &configuration_in.parserConfiguration_3;
+//  modulehandler_configuration.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  modulehandler_configuration_3.subscriber = &message_handler_3;
+  //modulehandler_configuration.targetFileName = fileName_in;
+  modulehandler_configuration_3.URL = URL_in;
+  modulehandler_configuration_3.waitForConnect = false;
+  // ******************** (sub-)stream configuration data *********************
+  //if (bufferSize_in)
+  //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
+  //    bufferSize_in;
+  struct Test_I_IceCastClient_StreamConfiguration_3 stream_configuration_3;
+  stream_configuration_3.messageAllocator = &message_allocator_3;
+  stream_configuration_3.module = &event_handler_module_3;
+  stream_configuration_3.printFinalReport = true;
+  configuration_in.streamConfiguration_3.initialize (module_configuration,
+                                                     modulehandler_configuration_3,
+                                                     stream_configuration_3);
 
 #if defined (PROJECTM_SUPPORT)
   struct Stream_Visualization_ProjectM_Configuration projectm_configuration;
@@ -939,19 +1151,17 @@ do_work (bool debugParser_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  // connection_manager_p->set (*static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator).second),
-  //                            NULL);
   Test_I_ConnectionManager_2_t* connection_manager_2 =
     TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
   ACE_ASSERT (connection_manager_2);
   connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  // connection_manager_2->set (*static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_2).second),
-  //                            NULL);
+  Test_I_ConnectionManager_3_t* connection_manager_3 =
+    TEST_I_CONNECTIONMANAGER_SINGLETON_3::instance ();
+  ACE_ASSERT (connection_manager_3);
+  connection_manager_3->initialize (std::numeric_limits<unsigned int>::max (),
+                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
 
-  // Common_Timer_Manager_t* timer_manager_p =
-  //   COMMON_TIMERMANAGER_SINGLETON::instance ();
-  // ACE_ASSERT (timer_manager_p);
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
@@ -1084,6 +1294,10 @@ do_work (bool debugParser_in,
                               true); // high priority ?
   connection_manager_2->abort (false);
   connection_manager_2->wait ();
+  connection_manager_3->stop (false, // wait ?
+                              true); // high priority ?
+  connection_manager_3->abort (false);
+  connection_manager_3->wait ();
 
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                              true,   // wait ?
@@ -1190,6 +1404,7 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
   bool debug_parser;
   std::string configuration_path;
+  std::string configuration_file;
   std::string output_file;
   std::string hostname;
   std::string ui_definition_file;
@@ -1281,18 +1496,17 @@ ACE_TMAIN (int argc_in,
   show_console = false;
 #endif // ACE_WIN32 || ACE_WIN64
   debug_parser = COMMON_PARSER_DEFAULT_YACC_TRACE;
-  path =
-    Common_File_Tools::getWorkingDirectory ();
-  configuration_path = path;
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+  configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
+
 #if defined (GTK_USE)
   gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_USE
-  output_file = path;
+  output_file = Common_File_Tools::getTempDirectory ();
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE);
@@ -1300,6 +1514,9 @@ ACE_TMAIN (int argc_in,
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   ui_definition_file +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
+  configuration_file = configuration_path;
+  configuration_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_FILE);
   log_to_file = false;
   port = HTTP_DEFAULT_SERVER_PORT;
   use_reactor = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -1324,6 +1541,7 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
                              output_file,
                              ui_definition_file,
+                             configuration_file,
                              log_to_file,
                              port,
                              use_reactor,
@@ -1481,6 +1699,7 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   // step2: do actual work
   do_work (debug_parser,
+           configuration_file,
            output_file,
            ui_definition_file,
            use_reactor,

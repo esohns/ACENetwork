@@ -63,6 +63,7 @@
 struct Test_I_ConnectionConfiguration;
 class Test_I_ConnectionStream;
 class Test_I_ConnectionStream_2;
+class Test_I_ConnectionStream_3;
 
 //extern const char stream_name_string_[];
 struct Test_I_IceCastClient_StreamConfiguration;
@@ -85,8 +86,17 @@ typedef Net_StreamConnectionConfiguration_T<Test_I_IceCastClient_StreamConfigura
 
 //////////////////////////////////////////
 
+struct Test_I_IceCastClient_StreamConfiguration_3;
+struct Test_I_IceCastClient_ModuleHandlerConfiguration_3;
+typedef Stream_Configuration_T<//stream_name_string_,
+                               struct Test_I_IceCastClient_StreamConfiguration_3,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_3> Test_I_IceCastClient_StreamConfiguration_3_t;
+typedef Net_StreamConnectionConfiguration_T<Test_I_IceCastClient_StreamConfiguration_3_t,
+                                            NET_TRANSPORTLAYER_TCP> Test_I_IceCastClient_ConnectionConfiguration_3_t;
+
+//////////////////////////////////////////
+
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          //Test_I_IceCastClient_ConnectionConfiguration_t,
                           struct HTTP_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
@@ -99,10 +109,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          //Test_I_IceCastClient_ConnectionConfiguration_2_t,
-                          struct HTTP_ConnectionState,
-                          HTTP_Statistic_t> Test_I_IConnection_2_t;
+typedef Test_I_IConnection_t Test_I_IConnection_2_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 Test_I_IceCastClient_ConnectionConfiguration_2_t,
                                 struct HTTP_ConnectionState,
@@ -226,5 +233,63 @@ typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_2_t,
                                     Net_TCPSocketConfiguration_t,
                                     Test_I_ConnectionStream_2,
                                     struct Net_UserData> Test_I_AsynchTCPConnector_2_t;
+
+//////////////////////////////////////////
+
+typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+                                Net_TCPSocketHandler_t,
+                                Test_I_IceCastClient_ConnectionConfiguration_3_t,
+                                struct HTTP_ConnectionState,
+                                HTTP_Statistic_t,
+                                Test_I_ConnectionStream_3,
+                                struct Net_UserData> Test_I_TCPConnection_3_t;
+#if defined (SSL_SUPPORT)
+typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+                                Net_SSLSocketHandler_t,
+                                Test_I_IceCastClient_ConnectionConfiguration_3_t,
+                                struct HTTP_ConnectionState,
+                                HTTP_Statistic_t,
+                                Test_I_ConnectionStream_3,
+                                struct Net_UserData> Test_I_SSLConnection_3_t;
+#endif // SSL_SUPPORT
+typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
+                                      Test_I_IceCastClient_ConnectionConfiguration_3_t,
+                                      struct HTTP_ConnectionState,
+                                      HTTP_Statistic_t,
+                                      Test_I_ConnectionStream_3,
+                                      struct Net_UserData> Test_I_AsynchTCPConnection_3_t;
+
+//////////////////////////////////////////
+
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         Test_I_IceCastClient_ConnectionConfiguration_3_t> Test_I_IConnector_3_t;
+
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_I_TCPConnection_t,
+                               Net_SOCK_Connector,
+                               ACE_INET_Addr,
+                               Test_I_IceCastClient_ConnectionConfiguration_3_t,
+                               struct HTTP_ConnectionState,
+                               HTTP_Statistic_t,
+                               Net_TCPSocketConfiguration_t,
+                               Test_I_ConnectionStream_3,
+                               struct Net_UserData> Test_I_TCPConnector_3_t;
+#if defined (SSL_SUPPORT)
+typedef Net_Client_SSL_Connector_T<Test_I_SSLConnection_t,
+                                   ACE_SSL_SOCK_Connector,
+                                   Test_I_IceCastClient_ConnectionConfiguration_3_t,
+                                   struct HTTP_ConnectionState,
+                                   HTTP_Statistic_t,
+                                   Test_I_ConnectionStream_3,
+                                   struct Net_UserData> Test_I_SSLConnector_3_t;
+#endif // SSL_SUPPORT
+typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_t,
+                                     ACE_INET_Addr,
+                                     Test_I_IceCastClient_ConnectionConfiguration_3_t,
+                                     struct HTTP_ConnectionState,
+                                     HTTP_Statistic_t,
+                                     Net_TCPSocketConfiguration_t,
+                                     Test_I_ConnectionStream_3,
+                                     struct Net_UserData> Test_I_AsynchTCPConnector_3_t;
 
 #endif

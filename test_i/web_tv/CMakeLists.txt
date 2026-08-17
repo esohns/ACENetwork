@@ -140,12 +140,15 @@ if (FFMPEG_SUPPORT)
       test_i_module_encoder.cpp
       test_i_module_encoder.h)
 endif (FFMPEG_SUPPORT)
+set (${EXECUTABLE}_EXE_CFG
+     etc/${EXECUTABLE}.ini)
 if (GTK_SUPPORT)
  set (${EXECUTABLE}_EXE_SRCS
       ${${EXECUTABLE}_EXE_SRCS}
       test_i_gtk_callbacks.cpp
       test_i_gtk_callbacks.h)
  set (${EXECUTABLE}_EXE_CFG
+      ${${EXECUTABLE}_EXE_CFG}
       etc/test_i.gtk2
       etc/test_i.gtk3)
 endif (GTK_SUPPORT)

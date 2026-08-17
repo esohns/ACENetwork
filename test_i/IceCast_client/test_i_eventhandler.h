@@ -97,4 +97,34 @@ class Test_I_EventHandler_2
   SESSION_DATA_MAP_2_T                   sessionDataMap_;
 };
 
+//////////////////////////////////////////
+
+class Test_I_EventHandler_3
+ : public Test_I_ISessionNotify_3_t
+{
+ public:
+  Test_I_EventHandler_3 (struct Test_I_IceCastClient_UI_CBData*); // UI state
+  inline virtual ~Test_I_EventHandler_3 () {}
+
+  // implement Stream_ISessionDataNotify_T
+  virtual void start (Stream_SessionId_t,                              // session id
+                      const struct Test_I_IceCastClient_SessionData&); // session data
+  virtual void notify (Stream_SessionId_t,
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,       // session id
+                       const Test_I_Message_3&); // message
+  virtual void notify (Stream_SessionId_t,            // session id
+                       const Test_I_SessionMessage&); // session message
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3 ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3 (const Test_I_EventHandler_3&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_3& operator= (const Test_I_EventHandler_3&))
+
+  struct Test_I_IceCastClient_UI_CBData*   CBData_;
+  struct Test_I_IceCastClient_SessionData* sessionData_;
+};
+
 #endif

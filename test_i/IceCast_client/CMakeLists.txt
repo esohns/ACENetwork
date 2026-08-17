@@ -11,6 +11,9 @@ include (glm)
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/math/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/math/scripts")
 include (fftw)
 
+set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
+include (libxml2)
+
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/dec/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec/scripts")
 include (mpg123)
 include (opus)
@@ -46,6 +49,9 @@ endif ()
 if (GLEW_SUPPORT)
  include_directories (${GLEW_INCLUDE_DIRS})
 endif (GLEW_SUPPORT)
+if (LIBXML2_SUPPORT)
+ include_directories (${LIBXML2_INCLUDE_DIRS})
+endif (LIBXML2_SUPPORT)
 if (MPG123_SUPPORT)
  include_directories (${MPG123_INCLUDE_DIRS})
 endif (MPG123_SUPPORT)
@@ -151,7 +157,8 @@ if (GTK_SUPPORT)
 endif (GTK_SUPPORT)
 set (${EXECUTABLE}_EXE_CFG
      etc/test_i.gtk2
-     etc/test_i.gtk3)
+     etc/test_i.gtk3
+     etc/${EXECUTABLE}.ini)
 
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -186,6 +193,9 @@ endif (GLEW_SUPPORT)
 if (FFTW_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${FFTW_LIBRARIES})
 endif (FFTW_SUPPORT)
+if (LIBXML2_SUPPORT)
+ target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
+endif (LIBXML2_SUPPORT)
 if (MPG123_SUPPORT)
  target_link_libraries (${EXECUTABLE} PUBLIC ${MPG123_LIBRARIES})
 endif (MPG123_SUPPORT)
@@ -228,7 +238,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_File)
-#target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
 if (WIN32)
  target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
 endif (WIN32)
@@ -327,6 +337,9 @@ elseif (WIN32)
  if (FFTW_SUPPORT)
   file (TO_CMAKE_PATH "${FFTW_LIB_DIR}" FFTW_PATH)
  endif (FFTW_SUPPORT)
+ if (LIBXML2_SUPPORT)
+  file (TO_CMAKE_PATH "${LIBXML2_LIB_DIR}" LIBXML_PATH)
+ endif (LIBXML2_SUPPORT)
  if (MPG123_SUPPORT)
   file (TO_CMAKE_PATH "${MPG123_LIB_DIR}" MPG123_PATH)
  endif (MPG123_SUPPORT)
@@ -352,6 +365,7 @@ elseif (WIN32)
                            ${VCPKG_LIB_PATH_2}
                            ${GLEW_PATH}
                            ${FFTW_PATH}
+                           ${LIBXML_PATH}
                            ${MPG123_PATH}
                            ${OPUS_PATH}
                            ${VORBIS_PATH}

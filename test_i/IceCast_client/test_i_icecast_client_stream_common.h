@@ -107,7 +107,6 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           struct HTTP_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 
-struct HTTP_Record;
 struct Test_I_IceCastClient_MessageData
  : HTTP_Record
 {
@@ -162,10 +161,10 @@ struct Test_I_IceCastClient_StreamState
 {
   Test_I_IceCastClient_StreamState ()
    : Test_I_StreamState ()
-   , sessionData (NULL)
+   //, sessionData (NULL)
   {}
 
-  struct Test_I_IceCastClient_SessionData* sessionData;
+  //struct Test_I_IceCastClient_SessionData* sessionData;
 };
 
 //////////////////////////////////////////
@@ -299,6 +298,96 @@ struct Test_I_IceCastClient_StreamState_2
 
 typedef Stream_MessageQueue_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,
-                              Test_I_SessionMessage_2> Test_I_IceCastClient_MessageQueue_t;
+                              Test_I_SessionMessage_2> Test_I_IceCastClient_MessageQueue_2_t;
+
+//////////////////////////////////////////
+
+typedef std::vector<std::string> Test_I_IceCastClient_ScrapedURLs_t;
+typedef Test_I_IceCastClient_ScrapedURLs_t::iterator Test_I_IceCastClient_ScrapedURLsIterator_t;
+
+struct Test_I_IceCastClient_MessageData_3
+ : HTTP_Record
+{
+  Test_I_IceCastClient_MessageData_3 ()
+   : HTTP_Record ()
+   , document (NULL)
+   , xPathObject (NULL)
+  {}
+  ~Test_I_IceCastClient_MessageData_3 ()
+  {
+    if (xPathObject)
+      xmlXPathFreeObject (xPathObject);
+    if (document)
+      xmlFreeDoc (document);
+  }
+
+  inline void operator= (const struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); }
+  inline void operator+= (struct Test_I_IceCastClient_MessageData_3 rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+
+  htmlDocPtr        document;
+  xmlXPathObjectPtr xPathObject;
+};
+
+typedef Stream_ISessionDataNotify_T<struct Test_I_IceCastClient_SessionData,
+                                    enum Stream_SessionMessageType,
+                                    Test_I_Message_3,
+                                    Test_I_SessionMessage> Test_I_ISessionNotify_3_t;
+typedef std::list<Test_I_ISessionNotify_3_t*> Test_I_Subscribers_3_t;
+typedef Test_I_Subscribers_3_t::const_iterator Test_I_SubscribersIterator_3_t;
+
+struct Test_I_SAXParserContext
+ : Stream_Module_HTMLParser_SAXParserContextBase
+{
+  Test_I_SAXParserContext ()
+   : Stream_Module_HTMLParser_SAXParserContextBase ()
+   , URL ()
+  {}
+
+  std::string URL;
+};
+
+struct Test_I_IceCastClient_ModuleHandlerConfiguration_3
+ : HTTP_ModuleHandlerConfiguration
+{
+  Test_I_IceCastClient_ModuleHandlerConfiguration_3 ()
+   : HTTP_ModuleHandlerConfiguration ()
+   , connectionConfigurations (NULL)
+   , mode (STREAM_MODULE_HTMLPARSER_MODE_DOM)
+   , subscriber (NULL)
+   , xPathNameSpaces ()
+   , xPathQueryString ()
+  {
+    concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
+  }
+
+  Net_ConnectionConfigurations_t*    connectionConfigurations;
+  enum Stream_Module_HTMLParser_Mode mode;
+  Test_I_ISessionNotify_3_t*         subscriber;
+  Stream_HTML_XPathNameSpaces_t      xPathNameSpaces;
+  std::string                        xPathQueryString;
+};
+
+struct Test_I_IceCastClient_StreamConfiguration_3
+ : HTTP_StreamConfiguration
+{
+  Test_I_IceCastClient_StreamConfiguration_3 ()
+   : HTTP_StreamConfiguration ()
+  {}
+};
+//extern const char stream_name_string_[];
+typedef Stream_Configuration_T<//stream_name_string_,
+                               struct Test_I_IceCastClient_StreamConfiguration_3,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_3> Test_I_IceCastClient_StreamConfiguration_3_t;
+
+struct Test_I_IceCastClient_StreamState_3
+ : Test_I_StreamState
+{
+  Test_I_IceCastClient_StreamState_3 ()
+   : Test_I_StreamState ()
+   //, sessionData (NULL)
+  {}
+
+  //struct Test_I_IceCastClient_SessionData* sessionData;
+};
 
 #endif

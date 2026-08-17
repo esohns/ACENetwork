@@ -75,6 +75,21 @@ struct Test_I_IceCastClient_SignalHandlerConfiguration
   HTTP_StatisticReportingHandler_t* statisticReportingHandler;
 };
 
+struct Test_I_IceCastClient_ServerConfiguration
+{
+  std::string name;
+  std::string URL; // web-server
+
+  void clear ()
+  {
+    name.clear ();
+    URL.clear ();
+  }
+};
+typedef std::map<unsigned int, struct Test_I_IceCastClient_ServerConfiguration> Test_I_IceCastClient_ServerConfigurations_t;
+typedef Test_I_IceCastClient_ServerConfigurations_t::iterator Test_I_IceCastClient_ServerConfigurationsIterator_t;
+typedef Test_I_IceCastClient_ServerConfigurations_t::const_iterator Test_I_IceCastClient_ServerConfigurationsConstIterator_t;
+
 struct Test_I_IceCastClient_Configuration
 #if defined (GTK_USE)
  : Test_I_GTK_Configuration
@@ -89,6 +104,7 @@ struct Test_I_IceCastClient_Configuration
    : Test_I_Configuration ()
 #endif // GTK_USE
    , parserConfiguration ()
+   , parserConfiguration_3 ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
@@ -97,13 +113,15 @@ struct Test_I_IceCastClient_Configuration
 
   // **************************** parser data **********************************
   struct HTTP_ParserConfiguration                        parserConfiguration;
+  struct HTTP_ParserConfiguration                        parserConfiguration_3;
   // **************************** signal data **********************************
   struct Test_I_IceCastClient_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t                         connectionConfigurations;
   // **************************** stream data **********************************
-  Test_I_IceCastClient_StreamConfiguration_t             streamConfiguration;
-  Test_I_IceCastClient_StreamConfiguration_2_t           streamConfiguration_2;
+  Test_I_IceCastClient_StreamConfiguration_t             streamConfiguration;   // m3u parsing
+  Test_I_IceCastClient_StreamConfiguration_2_t           streamConfiguration_2; // media stream
+  Test_I_IceCastClient_StreamConfiguration_3_t           streamConfiguration_3; // html scraping
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -116,8 +134,13 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           Stream_ControlMessage_t,
                                           Test_I_Message,
                                           Test_I_SessionMessage_2> Test_I_MessageAllocator_2_t;
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Common_AllocatorConfiguration,
+                                          Stream_ControlMessage_t,
+                                          Test_I_Message_3,
+                                          Test_I_SessionMessage> Test_I_MessageAllocator_3_t;
 
-typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
+//typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 
 //////////////////////////////////////////
 
@@ -162,6 +185,7 @@ struct Test_I_IceCastClient_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE || WXWIDGETS_USE
+   , servers (NULL)
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
 #if defined (PROJECTM_SUPPORT)
@@ -184,6 +208,7 @@ struct Test_I_IceCastClient_UI_CBData
   {}
 
   struct Test_I_IceCastClient_Configuration*          configuration;
+  Test_I_IceCastClient_ServerConfigurations_t*        servers;
 
   ACE_HANDLE                                          handle;
   struct Test_I_IceCastClient_UI_ProgressData         progressData;

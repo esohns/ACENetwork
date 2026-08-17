@@ -23,6 +23,14 @@
 
 #include "net_defines.h"
 
+// ini
+#define TEST_I_ICECAST_CLIENT_INI_SERVERS_SECTION_HEADER    "servers"
+#define TEST_I_ICECAST_CLIENT_INI_SERVER_NUMBER_KEY         "number"
+#define TEST_I_ICECAST_CLIENT_INI_SERVER_NAME_KEY           "name"
+#define TEST_I_ICECAST_CLIENT_INI_SERVER_URL_KEY            "URL"
+                                                            
+#define TEST_I_ICECAST_CLIENT_INI_FILE                      "IceCast_client.ini"
+
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_AV_FILE        "output.mp4"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE           "output.wav"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_MP3_URL               "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
@@ -81,14 +89,16 @@
 #define TEST_I_UI_GTK_CHECKBUTTON_DISPLAY_NAME              "checkbutton_display"
 #define TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME             "checkbutton_loopback"
 #define TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME                 "checkbutton_save"
+#define TEST_I_UI_GTK_COMBOBOX_SERVERS_NAME                 "combobox_servers"
 #define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                     "dialog_about"
 #define TEST_I_UI_GTK_DIALOG_MAIN_NAME                      "dialog_main"
 #define TEST_I_UI_GTK_DRAWINGAREA_NAME                      "drawingarea_analyzer"
 #define TEST_I_UI_GTK_DRAWINGAREA_PROJECTM_NAME             "drawingarea_projectm"
 #define TEST_I_UI_GTK_ENTRY_URL_NAME                        "entry_url"
-#define TEST_I_UI_GTK_SCALE_VOLUME_NAME                     "scale_volume"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME           "filechooserbutton_save"
+#define TEST_I_UI_GTK_LISTSTORE_SERVERS_NAME                "liststore_servers"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                      "progressbar"
+#define TEST_I_UI_GTK_SCALE_VOLUME_NAME                     "scale_volume"
 #define TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME            "spinbutton_buffersize"
 #define TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME           "spinbutton_connections"
 #define TEST_I_UI_GTK_SPINBUTTON_DATA_NAME                  "spinbutton_data"

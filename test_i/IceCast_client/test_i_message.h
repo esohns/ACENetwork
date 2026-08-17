@@ -41,6 +41,8 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
+//////////////////////////////////////////
+
 class Test_I_MessageDataContainer
  : public Stream_DataBase_T<struct Test_I_IceCastClient_MessageData>
  , public Common_ISetPR_T<struct HTTP_Record>
@@ -61,8 +63,6 @@ class Test_I_MessageDataContainer
   ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer (const Test_I_MessageDataContainer&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer& operator= (const Test_I_MessageDataContainer&))
 };
-
-//////////////////////////////////////////
 
 class Test_I_Message
  : public Stream_DataMessageBase_2<Test_I_MessageDataContainer,
@@ -123,6 +123,83 @@ class Test_I_Message
   ACE_UNIMPLEMENTED_FUNC (Test_I_Message& operator= (const Test_I_Message&))
 
   enum Stream_MediaType_Type mediaType_;
+};
+
+//////////////////////////////////////////
+
+class Test_I_MessageDataContainer_3
+ : public Stream_DataBase_T<struct Test_I_IceCastClient_MessageData_3>
+ , public Common_ISetPR_T<struct HTTP_Record>
+{
+  typedef Stream_DataBase_T<struct Test_I_IceCastClient_MessageData_3> inherited;
+
+ public:
+  Test_I_MessageDataContainer_3 ();
+  // *IMPORTANT NOTE*: fire-and-forget API
+  Test_I_MessageDataContainer_3 (struct Test_I_IceCastClient_MessageData_3*&, // data handle
+                                 bool = true);                                // delete in dtor ?
+  inline virtual ~Test_I_MessageDataContainer_3 () {}
+
+  // implement Common_ISetPP_T
+  virtual void setPR (struct HTTP_Record*&);
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer_3 (const Test_I_MessageDataContainer_3&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer_3& operator= (const Test_I_MessageDataContainer_3&))
+};
+
+class Test_I_Message_3
+ : public Stream_DataMessageBase_2<Test_I_MessageDataContainer_3,
+                                   enum Stream_MessageType,
+                                   HTTP_Method_t>
+{
+  typedef Stream_DataMessageBase_2<Test_I_MessageDataContainer_3,
+                                   enum Stream_MessageType,
+                                   HTTP_Method_t> inherited;
+
+  // grant access to specific private ctors
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_I_Message_3,
+                                                 Test_I_SessionMessage>;
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_I_Message_3,
+                                                 Test_I_SessionMessage_2>;
+
+ public:
+  Test_I_Message_3 (Stream_SessionId_t, // session id
+                    unsigned int);      // size
+  inline virtual ~Test_I_Message_3 () {}
+
+  // overrides from ACE_Message_Block
+  // *NOTE*: these use the allocator (if any)
+  // create a "deep" copy
+  virtual ACE_Message_Block* clone (ACE_Message_Block::Message_Flags = 0) const;
+  // create a "shallow" copy that references the current block(s) of data
+  virtual ACE_Message_Block* duplicate (void) const;
+
+  using inherited::initialize;
+  virtual void initialize (Test_I_MessageDataContainer_3&, // message data handle
+                           Stream_SessionId_t,             // session id
+                           ACE_Data_Block*);               // data block to use
+
+ protected:
+  // copy ctor to be used by duplicate() and child classes
+  // --> uses an (incremented refcount of) the same datablock ("shallow copy")
+  Test_I_Message_3 (const Test_I_Message_3&);
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Message_3 ())
+  // *NOTE*: to be used by message allocators
+  Test_I_Message_3 (Stream_SessionId_t, // session id
+                    ACE_Data_Block*,    // data block to use
+                    ACE_Allocator*,     // message block allocator
+                    bool = true);       // increment running message counter ?
+  //Test_I_Message_3 (ACE_Allocator*); // message allocator
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Message_3& operator= (const Test_I_Message_3&))
 };
 
 #endif

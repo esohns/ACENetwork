@@ -88,19 +88,19 @@ struct Test_I_Trending_MessageData
 {
   Test_I_Trending_MessageData ()
    : HTTP_Record ()
-   , HTMLDocument (NULL)
+   , document (NULL)
    , stockItem ()
   {}
-  virtual ~Test_I_Trending_MessageData ()
+  ~Test_I_Trending_MessageData ()
   {
-    if (HTMLDocument)
-      xmlFreeDoc (HTMLDocument);
+    if (document)
+      xmlFreeDoc (document);
   }
 
   inline void operator= (const struct HTTP_Record& rhs_in) { *((HTTP_Record*)this) = rhs_in; }
   inline void operator+= (const struct Test_I_Trending_MessageData& rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-  xmlDocPtr               HTMLDocument;
+  htmlDocPtr              document;
   struct Test_I_StockItem stockItem;
 };
 //typedef Stream_DataBase_T<struct Test_I_Trending_MessageData> Test_I_Trending_MessageData_t;

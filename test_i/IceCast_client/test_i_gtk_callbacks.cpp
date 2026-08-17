@@ -265,7 +265,7 @@ idle_load_segment_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                  ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-                 ACE_TEXT (data_p->URL.c_str ())));
+                 ACE_TEXT ((*iterator_3).second.second->URL.c_str ())));
       return G_SOURCE_REMOVE;
     } // end IF
     URL_string = ACE_TEXT_ALWAYS_CHAR ("http");
@@ -499,6 +499,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->servers);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -519,23 +520,6 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_ABOUT_NAME)));
   ACE_ASSERT (about_dialog_p);
-
-  GtkToggleButton* toggle_button_p =
-    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
-  ACE_ASSERT (toggle_button_p);
-  bool use_stock = gtk_button_get_use_stock (GTK_BUTTON (toggle_button_p));
-  ACE_ASSERT (use_stock);
-  //gtk_button_set_label (GTK_BUTTON (toggle_button_p),
-  //                      GTK_STOCK_CONNECT);
-  GtkButton* button_p =
-    GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_BUTTON_CUT_NAME)));
-  ACE_ASSERT (button_p);
-  use_stock = gtk_button_get_use_stock (button_p);
-  ACE_ASSERT (use_stock);
-  //gtk_button_set_label (button_p,
-  //                      GTK_STOCK_CUT);
 
   GtkSpinButton* spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -572,11 +556,24 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              (gdouble)std::numeric_limits<ACE_UINT32>::max ());
-//  size_t pdu_size_i =
-//    (*iterator_2).second->allocatorConfiguration->defaultBufferSize +
-//    (*iterator_2).second->allocatorConfiguration->paddingBytes;
   gtk_spin_button_set_value (spin_button_p,
                              static_cast<double> ((*iterator_2).second.second->allocatorConfiguration->defaultBufferSize));
+
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_SERVERS_NAME)));
+  ACE_ASSERT (list_store_p);
+  GtkTreeIter iterator_4;
+  for (Test_I_IceCastClient_ServerConfigurationsConstIterator_t iterator_3 = data_p->servers->begin ();
+       iterator_3 != data_p->servers->end ();
+       ++iterator_3)
+  {
+    gtk_list_store_append (list_store_p, &iterator_4);
+    gtk_list_store_set (list_store_p, &iterator_4,
+                       0, (*iterator_3).second.name.c_str (),
+                       1, (*iterator_3).first,
+                       -1);
+  } // end FOR
 
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
@@ -687,28 +684,6 @@ continue_2:
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
   ACE_ASSERT (file_chooser_button_p);
-  //struct _GValue property_s = G_VALUE_INIT;
-  //g_value_init (&property_s,
-  //              G_TYPE_POINTER);
-  //g_object_get_property (G_OBJECT (file_chooser_button_p),
-  //                       ACE_TEXT_ALWAYS_CHAR ("dialog"),
-  //                       &property_s);
-  //G_VALUE_HOLDS_POINTER (&property_s);
-  //GtkFileChooser* file_chooser_p = NULL;
-    //reinterpret_cast<GtkFileChooser*> (g_value_get_pointer (&property_s));
-  //g_object_get (G_OBJECT (file_chooser_button_p),
-  //              ACE_TEXT_ALWAYS_CHAR ("dialog"),
-  //              &file_chooser_p, NULL);
-  //ACE_ASSERT (file_chooser_p);
-  //ACE_ASSERT (GTK_IS_FILE_CHOOSER_DIALOG (file_chooser_p));
-  //GtkFileChooserDialog* file_chooser_dialog_p =
-  //  GTK_FILE_CHOOSER_DIALOG (file_chooser_p);
-  //ACE_ASSERT (file_chooser_dialog_p);
-  //GtkPlacesSidebar* places_sidebar_p = NULL;
-  //Common_UI_GTK_Tools::dump (GTK_WIDGET (file_chooser_dialog_p));
-  //[0].get_children ()[0].get_children ([0].get_children ()[0]
-  //  vbox.get_children ()[0].hide ()
-
   //GError* error_p = NULL;
   //GFile* file_p = NULL;
   struct _GString* string_p = NULL;
@@ -859,8 +834,6 @@ continue_2:
   } // end lock scope
 
   // step6: disable some functions ?
-  ACE_ASSERT (button_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
 
 #if defined (GTKGL_SUPPORT)
   GtkBox* box_p = NULL;
@@ -1901,33 +1874,213 @@ error:
   gtk_toggle_button_set_active (toggleButton_in, FALSE);
 } // toggle_button_connect_toggled_cb
 
-gint
-button_cut_clicked_cb (GtkWidget* widget_in,
+void
+button_cut_clicked_cb (GtkButton* button_in,
                        gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::button_cut_clicked_cb"));
 
-  ACE_UNUSED_ARG (widget_in);
+  ACE_UNUSED_ARG (button_in);
   ACE_UNUSED_ARG (userData_in);
 
-  int result = -1;
+  int result;
 
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) instead...
-  int signal = 0;
+  int signal_i;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  signal = SIGBREAK;
+  signal_i = SIGBREAK;
 #else
-  signal = SIGUSR1;
+  signal_i = SIGUSR1;
 #endif // ACE_WIN32 || ACE_WIN64
-  result = ACE_OS::raise (signal);
+  result = ACE_OS::raise (signal_i);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::raise(\"%S\" (%d)): \"%m\", continuing\n"),
-                signal, signal));
-
-  return FALSE;
+                signal_i, signal_i));
 } // button_cut_clicked_cb
+
+void
+button_scrape_clicked_cb (GtkButton* button_in,
+                          gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::button_scrape_clicked_cb"));
+
+  ACE_UNUSED_ARG (button_in);
+
+  // sanity check(s)
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    reinterpret_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->servers);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkComboBox* combo_box_p =
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_SERVERS_NAME)));
+  ACE_ASSERT (combo_box_p);
+  GtkTreeIter iterator_2;
+  if (!gtk_combo_box_get_active_iter (combo_box_p,
+                                      &iterator_2))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
+    return;
+  } // end IF
+  Test_I_IceCastClient_StreamConfiguration_3_t::ITERATOR_T iterator_4 =
+    data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_3.end ());
+
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_SERVERS_NAME)));
+  ACE_ASSERT (list_store_p);
+#if GTK_CHECK_VERSION (2,30,0)
+  struct _GValue value = G_VALUE_INIT;
+#else
+  struct _GValue value;
+  ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                            &iterator_2,
+                            1,
+                            &value);
+  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+  Test_I_IceCastClient_ServerConfigurationsConstIterator_t iterator_3 =
+    data_p->servers->find (g_value_get_uint (&value));
+  g_value_unset (&value);
+  ACE_ASSERT (iterator_3 != data_p->servers->end ());
+
+  ACE_INET_Addr host_address;
+  std::string hostname_string, hostname_string_2, URI_string, URL_string;
+  bool use_SSL = false;
+  if (!HTTP_Tools::parseURL ((*iterator_3).second.URL,
+                             host_address,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT ((*iterator_3).second.URL.c_str ())));
+    return;
+  } // end IF
+  if (URI_string.empty ())
+    URI_string = ACE_TEXT_ALWAYS_CHAR ("/index.html");
+  URL_string = (*iterator_3).second.URL;
+  URL_string += URI_string;
+  (*iterator_4).second.second->URL = URL_string;
+  (*iterator_4).second.second->parserConfiguration->messageQueue = NULL;
+
+  // select connector
+  Net_ConnectionConfigurationsIterator_t iterator_5 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("3"));
+  ACE_ASSERT (iterator_5 != data_p->configuration->connectionConfigurations.end ());
+  if (!HTTP_Tools::parseURL (URL_string,
+                             host_address,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT (data_p->URL.c_str ())));
+    return;
+  } // end IF
+  hostname_string_2 = hostname_string;
+  std::string::size_type position = hostname_string_2.find_last_of (':', std::string::npos);
+  if (position == std::string::npos)
+  {
+    hostname_string_2 += ':';
+    std::ostringstream converter;
+    converter << (use_SSL ? HTTPS_DEFAULT_SERVER_PORT
+                          : HTTP_DEFAULT_SERVER_PORT);
+    hostname_string_2 += converter.str ();
+  } // end IF
+  hostname_string =
+    Net_Common_Tools::URLToHostName (URL_string,
+                                     false,  // return hostname
+                                     false); // do not return port#
+  static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second)->socketConfiguration.hostname =
+    hostname_string;
+  int result =
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
+                                                                                                                            AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (hostname_string_2.c_str ())));
+    return;
+  } // end IF
+  static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second)->socketConfiguration.useLoopBackDevice =
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second)->socketConfiguration.address.is_loopback ();
+
+  Test_I_TCPConnector_3_t connector;
+#if defined (SSL_SUPPORT)
+  Test_I_SSLConnector_3_t ssl_connector;
+#endif // SSL_SUPPORT
+  Test_I_AsynchTCPConnector_3_t asynch_connector;
+  struct Net_UserData user_data_s;
+
+  // step3: connect to peer
+  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+  {
+#if defined (SSL_SUPPORT)
+    if (use_SSL)
+      data_p->handle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                         *static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second),
+                                                         user_data_s,
+                                                         static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second)->socketConfiguration.address,
+                                                         true,
+                                                         true,
+                                                         0);
+    else
+#endif // SSL_SUPPORT
+      data_p->handle = Net_Client_Common_Tools::connect (connector,
+                                                         *static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second),
+                                                         user_data_s,
+                                                         static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second)->socketConfiguration.address,
+                                                         true,
+                                                         true,
+                                                         0);
+  } // end IF
+  else
+  {
+#if defined (SSL_SUPPORT)
+    // *TODO*: add SSL support to the proactor framework
+    ACE_ASSERT (!use_SSL);
+#endif // SSL_SUPPORT
+    data_p->handle = Net_Client_Common_Tools::connect (asynch_connector,
+                                                       *static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second),
+                                                       user_data_s,
+                                                       static_cast<Test_I_IceCastClient_ConnectionConfiguration_3_t*> ((*iterator_5).second)->socketConfiguration.address,
+                                                       true,
+                                                       true,
+                                                       0);
+  } // end ELSE
+  if (data_p->handle == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to %s, returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->socketConfiguration.address).c_str ())));
+    return;
+  } // end IF
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
+//                data_p->handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->address).c_str ())));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: opened TCP socket to %s\n"),
+//                data_p->handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (dynamic_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->address).c_str ())));
+//#endif
+} // button_scrape_clicked_cb
 
 gboolean
 dialog_main_key_press_event_cb (GtkWidget* widget_in,

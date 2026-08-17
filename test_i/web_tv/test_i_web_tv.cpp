@@ -256,8 +256,6 @@ do_process_arguments (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
 
-  std::string working_directory =
-    Common_File_Tools::getWorkingDirectory ();
   std::string temp_directory = Common_File_Tools::getTempDirectory ();
   std::string configuration_directory =
       Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),

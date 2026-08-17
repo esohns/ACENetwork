@@ -30,11 +30,14 @@
 // forward declaration(s)
 class ACE_Allocator;
 class Test_I_Message;
+class Test_I_Message_3;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+
+//////////////////////////////////////////
 
 struct Test_I_IceCastClient_SessionData
  : Test_I_StreamSessionData
@@ -66,6 +69,8 @@ struct Test_I_IceCastClient_SessionData
 };
 typedef Stream_SessionData_T<struct Test_I_IceCastClient_SessionData> Test_I_IceCastClient_SessionData_t;
 
+//////////////////////////////////////////
+
 class Test_I_SessionMessage
  : public Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
@@ -82,6 +87,11 @@ class Test_I_SessionMessage
                                                  struct Common_AllocatorConfiguration,
                                                  Stream_ControlMessage_t,
                                                  Test_I_Message,
+                                                 Test_I_SessionMessage>;
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Common_AllocatorConfiguration,
+                                                 Stream_ControlMessage_t,
+                                                 Test_I_Message_3,
                                                  Test_I_SessionMessage>;
 
  public:
@@ -177,6 +187,8 @@ struct Test_I_IceCastClient_SessionData_2
   std::string                                  targetFileName; // file writer module
 };
 typedef Stream_SessionData_T<struct Test_I_IceCastClient_SessionData_2> Test_I_IceCastClient_SessionData_2_t;
+
+//////////////////////////////////////////
 
 class Test_I_SessionMessage_2
  : public Stream_SessionMessageBase_T<//struct Common_Parser_FlexAllocatorConfiguration,

@@ -12,6 +12,22 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkListStore" id="liststore_servers">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name key -->
+      <column type="guint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_streams">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name URL -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkAboutDialog" id="dialog_about">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -306,6 +322,111 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
+                      <object class="GtkFrame" id="frame_servers">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <child>
+                          <object class="GtkAlignment" id="alignment_servers">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkBox" id="box_servers">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkBox" id="box_servers_2">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <object class="GtkComboBox" id="combobox_servers">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_text" translatable="yes">servers</property>
+                                        <property name="model">liststore_servers</property>
+                                        <property name="has_frame">False</property>
+                                        <property name="focus_on_click">False</property>
+                                        <property name="id_column">0</property>
+                                        <child>
+                                          <object class="GtkCellRendererText" id="cellrenderertext_servers"/>
+                                          <attributes>
+                                            <attribute name="text">0</attribute>
+                                          </attributes>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_scrape">
+                                        <property name="label">gtk-sort-ascending</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_text" translatable="yes">scrape</property>
+                                        <property name="relief">half</property>
+                                        <property name="use_stock">True</property>
+                                        <property name="focus_on_click">False</property>
+                                        <signal name="clicked" handler="button_scrape_clicked_cb" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBox" id="combobox_streams">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text" translatable="yes">streams</property>
+                                    <property name="model">liststore_streams</property>
+                                    <property name="has_frame">False</property>
+                                    <property name="focus_on_click">False</property>
+                                    <property name="id_column">0</property>
+                                    <signal name="changed" handler="combobox_streams_changed_cb" swapped="no"/>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="cellrenderertext_streams"/>
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkFrame" id="frame_url">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -343,7 +464,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">0</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -356,16 +477,48 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkScale" id="scale_volume">
+                              <object class="GtkBox" id="box_volume">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">volume</property>
-                                <property name="adjustment">adjustment_volume</property>
-                                <property name="restrict_to_fill_level">False</property>
-                                <property name="fill_level">0</property>
-                                <property name="round_digits">1</property>
-                                <property name="has_origin">False</property>
-                                <signal name="value-changed" handler="scale_volume_value_changed_cb" swapped="no"/>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkScale" id="scale_volume">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text" translatable="yes">volume</property>
+                                    <property name="adjustment">adjustment_volume</property>
+                                    <property name="restrict_to_fill_level">False</property>
+                                    <property name="fill_level">0</property>
+                                    <property name="round_digits">1</property>
+                                    <property name="has_origin">False</property>
+                                    <signal name="value-changed" handler="scale_volume_value_changed_cb" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkScale" id="scale_beat_sensitivity">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text" translatable="yes">beat sensitivity</property>
+                                    <property name="adjustment">adjustment_beat_sensitivity</property>
+                                    <property name="restrict_to_fill_level">False</property>
+                                    <property name="fill_level">0</property>
+                                    <property name="round_digits">2</property>
+                                    <property name="digits">2</property>
+                                    <signal name="value-changed" handler="scale_beat_sensitivity_value_changed_cb" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -377,40 +530,6 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkFrame" id="frame_beat_sensitivity">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label_xalign">0</property>
-                        <child>
-                          <object class="GtkAlignment" id="alignment_beat_sensitivity">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkScale" id="scale_beat_sensitivity">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">beat sensitivity</property>
-                                <property name="adjustment">adjustment_beat_sensitivity</property>
-                                <property name="restrict_to_fill_level">False</property>
-                                <property name="fill_level">0</property>
-                                <property name="round_digits">2</property>
-                                <property name="digits">2</property>
-                                <signal name="value-changed" handler="scale_beat_sensitivity_value_changed_cb" swapped="no"/>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child type="label_item">
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
@@ -677,7 +796,6 @@
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">activity</property>
-                <property name="show_text">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
