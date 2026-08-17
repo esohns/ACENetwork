@@ -265,7 +265,7 @@ typedef Net_IConnector_T<ACE_INET_Addr,
                          Test_I_IceCastClient_ConnectionConfiguration_3_t> Test_I_IConnector_3_t;
 
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               Test_I_TCPConnection_t,
+                               Test_I_TCPConnection_3_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                Test_I_IceCastClient_ConnectionConfiguration_3_t,
@@ -275,7 +275,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                Test_I_ConnectionStream_3,
                                struct Net_UserData> Test_I_TCPConnector_3_t;
 #if defined (SSL_SUPPORT)
-typedef Net_Client_SSL_Connector_T<Test_I_SSLConnection_t,
+typedef Net_Client_SSL_Connector_T<Test_I_SSLConnection_3_t,
                                    ACE_SSL_SOCK_Connector,
                                    Test_I_IceCastClient_ConnectionConfiguration_3_t,
                                    struct HTTP_ConnectionState,
@@ -283,7 +283,7 @@ typedef Net_Client_SSL_Connector_T<Test_I_SSLConnection_t,
                                    Test_I_ConnectionStream_3,
                                    struct Net_UserData> Test_I_SSLConnector_3_t;
 #endif // SSL_SUPPORT
-typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_t,
+typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_3_t,
                                      ACE_INET_Addr,
                                      Test_I_IceCastClient_ConnectionConfiguration_3_t,
                                      struct HTTP_ConnectionState,

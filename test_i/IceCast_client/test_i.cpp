@@ -691,8 +691,12 @@ do_parse_configuration_file (const std::string& fileName_in,
                        ACE_TEXT (item_name.c_str ())));
             return false;
           } // end IF
+          // *TODO*: this should be an integer ! (see above)
           if (!ACE_OS::strcmp (item_name.c_str (),
-                               ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_SERVER_NAME_KEY)))
+                               ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_SERVER_NUMBER_KEY)))
+            server_number = ACE_OS::atoi (item_value.c_str ());
+          else if (!ACE_OS::strcmp (item_name.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_SERVER_NAME_KEY)))
             server_configuration_s.name = item_value.c_str ();
           else if (!ACE_OS::strcmp (item_name.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_INI_SERVER_URL_KEY)))
@@ -825,9 +829,6 @@ do_work (bool debugParser_in,
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
-  //Net_ConnectionConfigurationsIterator_t iterator =
-  //  configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  //ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
 
   Test_I_IceCastClient_ConnectionConfiguration_2_t connection_configuration_2;
   connection_configuration_2.allocatorConfiguration = &allocator_configuration;
@@ -839,9 +840,6 @@ do_work (bool debugParser_in,
     &configuration_in.streamConfiguration_2;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2"),
                                                                     &connection_configuration_2));
-  //Net_ConnectionConfigurationsIterator_t iterator_2 =
-  //  configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
-  //ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
 
   Test_I_IceCastClient_ConnectionConfiguration_3_t connection_configuration_3;
   connection_configuration_3.socketConfiguration.address = remoteHost_in;
@@ -861,8 +859,10 @@ do_work (bool debugParser_in,
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
-  configuration_in.parserConfiguration.notifyProgress = false;
-#if defined (_DEBUG)
+  //configuration_in.parserConfiguration.notifyProgress = false;
+  //configuration_in.parserConfiguration_2.notifyProgress = false;
+  configuration_in.parserConfiguration_3.notifyProgress = true;
+#if defined(_DEBUG)
   configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
@@ -943,8 +943,8 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   modulehandler_configuration_2.handleResize = false;
-  //modulehandler_configuration_2.parserConfiguration =
-  //  &configuration_in.parserConfiguration;
+  modulehandler_configuration_2.parserConfiguration =
+    &configuration_in.parserConfiguration;
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_2.queue = &encoder_video_queue;
@@ -1037,8 +1037,12 @@ do_work (bool debugParser_in,
 //  modulehandler_configuration.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_3.subscriber = &message_handler_3;
+  //modulehandler_configuration_3.xPathNameSpaces.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING),
+  //                                                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_XPATH_QUERY_NAMESPACE_STRING)));
+  modulehandler_configuration_3.xPathQueryString =
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_XPATH_QUERY_URL_STRING);
   //modulehandler_configuration.targetFileName = fileName_in;
-  modulehandler_configuration_3.URL = URL_in;
+  //modulehandler_configuration_3.URL = URL_in;
   modulehandler_configuration_3.waitForConnect = false;
   // ******************** (sub-)stream configuration data *********************
   //if (bufferSize_in)

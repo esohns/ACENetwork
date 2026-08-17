@@ -42,6 +42,12 @@ typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Stream_ControlMessage_t,
                                Test_I_Message,
                                Test_I_SessionMessage> Test_I_HTTPStreamer;
+typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                               Stream_ControlMessage_t,
+                               Test_I_Message_3,
+                               Test_I_SessionMessage> Test_I_HTTPStreamer_3;
 
 typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,
@@ -68,9 +74,9 @@ class Test_I_HTTPParser
   Test_I_HTTPParser (ISTREAM_T*); // stream handle
   inline virtual ~Test_I_HTTPParser () {}
 
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (Test_I_Message*&, // data message handle
-                                  bool&);           // return value: pass message downstream ?
+  //// implement (part of) Stream_ITaskBase
+  //virtual void handleDataMessage (Test_I_Message*&, // data message handle
+  //                                bool&);           // return value: pass message downstream ?
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPParser ())
@@ -141,5 +147,48 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_IceCastClient_SessionData_2,            
                           Test_I_HTTPStreamer_2,                                         // reader type
                           Test_I_HTTPParser_2,                                           // writer type
                           Test_I_HTTPMarshal_2);                                         // name
+
+//////////////////////////////////////////
+
+class Test_I_HTTPParser_3
+ : public HTTP_Module_Parser_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                               Stream_ControlMessage_t,
+                               Test_I_Message_3,
+                               Test_I_SessionMessage,
+                               HTTP_ParserDriver_t>
+{
+  typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                               Stream_ControlMessage_t,
+                               Test_I_Message_3,
+                               Test_I_SessionMessage,
+                               HTTP_ParserDriver_t> inherited;
+
+ public:
+  Test_I_HTTPParser_3 (ISTREAM_T*); // stream handle
+  inline virtual ~Test_I_HTTPParser_3 () {}
+
+  //// implement (part of) Stream_ITaskBase
+  //virtual void handleDataMessage (Test_I_Message_3*&, // data message handle
+  //                                bool&);             // return value: pass message downstream ?
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPParser_3 ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPParser_3 (const Test_I_HTTPParser_3&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPParser_3& operator= (const Test_I_HTTPParser_3&))
+};
+
+// declare module
+DATASTREAM_MODULE_DUPLEX (struct Test_I_IceCastClient_SessionData,                       // session data type
+                          enum Stream_SessionMessageType,                                // session event type
+                          struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,      // module handler configuration type
+                          libacenetwork_protocol_default_http_parser_module_name_string,
+                          Stream_INotify_t,                                              // stream notification interface type
+                          Test_I_HTTPStreamer_3,                                         // reader type
+                          Test_I_HTTPParser_3,                                           // writer type
+                          Test_I_HTTPMarshal_3);                                         // name
 
 #endif

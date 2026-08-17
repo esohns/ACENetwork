@@ -769,8 +769,8 @@ Test_I_ConnectionStream_3::load (Stream_ILayout* layout_in,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPMarshal_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
+                  Test_I_HTTPMarshal_3_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
@@ -783,15 +783,15 @@ Test_I_ConnectionStream_3::load (Stream_ILayout* layout_in,
   //module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
-                  Test_I_Defragment_Module (this,
-                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  Test_I_Defragment_3_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
-                 Test_I_HTTPGet_Module (this,
-                                        ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                 Test_I_HTTPGet_3_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
                  false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;

@@ -35,6 +35,7 @@ std::string channelIdToURL (ACE_UINT8);
 // idle routines
 gboolean idle_end_session_cb (gpointer);
 gboolean idle_load_segment_cb (gpointer);
+gboolean idle_stream_uris_received_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
 gboolean idle_reset_UI_cb (gpointer);
@@ -50,10 +51,11 @@ extern "C"
 {
 #endif /* __cplusplus */
 // callbacks
+G_MODULE_EXPORT gboolean dialog_main_key_press_event_cb (GtkWidget*, GdkEventKey*, gpointer);
 G_MODULE_EXPORT void togglebutton_connect_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void button_cut_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void button_scrape_clicked_cb (GtkButton*, gpointer);
-G_MODULE_EXPORT gboolean dialog_main_key_press_event_cb (GtkWidget*, GdkEventKey*, gpointer);
+G_MODULE_EXPORT void combobox_streams_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
 G_MODULE_EXPORT void scale_volume_value_changed_cb (GtkRange*, gpointer);
 G_MODULE_EXPORT void scale_beat_sensitivity_value_changed_cb (GtkRange*, gpointer);

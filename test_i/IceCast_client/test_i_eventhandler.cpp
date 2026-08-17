@@ -39,6 +39,8 @@
 
 #include "net_macros.h"
 
+#include "test_i_icecast_client_defines.h"
+
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
@@ -710,6 +712,49 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
 
+  Test_I_MessageDataContainer_3& data_container_r =
+    const_cast<Test_I_MessageDataContainer_3&> (message_in.getR ());
+  struct Test_I_IceCastClient_MessageData_3& data_r =
+    const_cast<struct Test_I_IceCastClient_MessageData_3&> (data_container_r.getR ());
+  ACE_ASSERT (data_r.document);
+  ACE_ASSERT (data_r.xPathObject);
+  std::string href_string;
+  if (!data_r.xPathObject->nodesetval ||
+      !data_r.xPathObject->nodesetval->nodeNr)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("no xpath data, continuing\n")));
+    goto continue_;
+  } // end IF
+
+  CBData_->URIs.clear ();
+
+  for (int i = 0;
+        i < data_r.xPathObject->nodesetval->nodeNr;
+        ++i)
+  {
+    href_string =
+      (char*)data_r.xPathObject->nodesetval->nodeTab[i]->children->content;
+    if (!Common_String_Tools::endswith (href_string.c_str (),
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_HREF_M3U_SUFFIX)))
+      continue;
+
+    CBData_->URIs.push_back (href_string);
+  } // end FOR
+
+#if defined (GTK_USE)
+  guint event_source_id = g_idle_add (idle_stream_uris_received_cb,
+                                      CBData_);
+  if (event_source_id == 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_stream_uris_received_cb): \"%m\", returning\n")));
+    return;
+  } // end IF
+  state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+
+continue_:
   CBData_->progressData.transferred += message_in.total_length ();
   CBData_->progressData.statistic.bytes += message_in.total_length ();
 

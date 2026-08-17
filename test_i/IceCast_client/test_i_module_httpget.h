@@ -116,4 +116,45 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_HTTPGet_2);                                        // writer type
 
+//////////////////////////////////////////
+
+class Test_I_HTTPGet_3
+ : public Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
+                                              Common_TimePolicy_t,
+                                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                                              Stream_ControlMessage_t,
+                                              Test_I_Message_3,
+                                              Test_I_SessionMessage>
+{
+  typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
+                                              Common_TimePolicy_t,
+                                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                                              Stream_ControlMessage_t,
+                                              Test_I_Message_3,
+                                              Test_I_SessionMessage> inherited;
+
+ public:
+  Test_I_HTTPGet_3 (ISTREAM_T*); // stream handle
+  inline virtual ~Test_I_HTTPGet_3 () {}
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (Test_I_Message_3*&, // data message handle
+                                  bool&);             // return value: pass message downstream ?
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_3 ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_3 (const Test_I_HTTPGet_3&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_3& operator= (const Test_I_HTTPGet_3&))
+
+  bool handleBody_;
+};
+
+// declare module
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,                  // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_3, // module handler configuration type
+                              libacestream_default_net_http_get_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_HTTPGet_3);                                        // writer type
+
 #endif

@@ -163,11 +163,6 @@ class Test_I_Message_3
                                                  Stream_ControlMessage_t,
                                                  Test_I_Message_3,
                                                  Test_I_SessionMessage>;
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_AllocatorConfiguration,
-                                                 Stream_ControlMessage_t,
-                                                 Test_I_Message_3,
-                                                 Test_I_SessionMessage_2>;
 
  public:
   Test_I_Message_3 (Stream_SessionId_t, // session id

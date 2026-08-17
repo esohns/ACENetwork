@@ -460,6 +460,45 @@ idle_load_segment_cb (gpointer userData_in)
 }
 
 gboolean
+idle_stream_uris_received_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_stream_uris_received_cb"));
+
+  // sanity check(s)
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_STREAMS_NAME)));
+  ACE_ASSERT (list_store_p);
+
+  gtk_list_store_clear (list_store_p);
+
+  GtkTreeIter iterator_2;
+  std::string descriptor_string;
+  for (Test_I_IceCastClient_StreamURIsIterator_t iterator_3 = data_p->URIs.begin ();
+       iterator_3 != data_p->URIs.end ();
+       ++iterator_3)
+  {
+    descriptor_string = Common_File_Tools::basename (*iterator_3, true);
+    descriptor_string.erase (0, 1); // remove leading '/'
+
+    gtk_list_store_append (list_store_p, &iterator_2);
+    gtk_list_store_set (list_store_p, &iterator_2,
+                       0, descriptor_string.c_str (),
+                       1, (*iterator_3).c_str (),
+                       -1);
+  } // end FOR
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
 idle_finalize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
@@ -1968,8 +2007,8 @@ button_scrape_clicked_cb (GtkButton* button_in,
                 ACE_TEXT ((*iterator_3).second.URL.c_str ())));
     return;
   } // end IF
-  if (URI_string.empty ())
-    URI_string = ACE_TEXT_ALWAYS_CHAR ("/index.html");
+  //if (URI_string.empty () || URI_string == ACE_TEXT_ALWAYS_CHAR ("/"))
+  //  URI_string = ACE_TEXT_ALWAYS_CHAR ("/index.html");
   URL_string = (*iterator_3).second.URL;
   URL_string += URI_string;
   (*iterator_4).second.second->URL = URL_string;
@@ -2082,12 +2121,277 @@ button_scrape_clicked_cb (GtkButton* button_in,
 //#endif
 } // button_scrape_clicked_cb
 
+void
+combobox_streams_changed_cb (GtkComboBox* comboBox_in,
+                             gpointer userData_in)
+{
+  // sanity check(s)
+  ACE_ASSERT (comboBox_in);
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    reinterpret_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  GtkTreeIter iterator_2;
+  if (!gtk_combo_box_get_active_iter (comboBox_in,
+                                      &iterator_2))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
+    return;
+  } // end IF
+
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_STREAMS_NAME)));
+  ACE_ASSERT (list_store_p);
+#if GTK_CHECK_VERSION (2,30,0)
+  struct _GValue value = G_VALUE_INIT;
+#else
+  struct _GValue value;
+  ACE_OS::memset (&value, 0, sizeof (struct _GValue));
+#endif // GTK_CHECK_VERSION (2,30,0)
+  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                            &iterator_2,
+                            1,
+                            &value);
+  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+  std::string URI_string = g_value_get_string (&value);
+  g_value_unset (&value);
+
+  // got URI; retrieve active server URL
+  GtkComboBox* combo_box_p =
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_SERVERS_NAME)));
+  ACE_ASSERT (combo_box_p);
+  if (!gtk_combo_box_get_active_iter (combo_box_p,
+                                      &iterator_2))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
+    return;
+  } // end IF
+  list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_SERVERS_NAME)));
+  ACE_ASSERT (list_store_p);
+  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                            &iterator_2,
+                            1,
+                            &value);
+  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+  Test_I_IceCastClient_ServerConfigurationsConstIterator_t iterator_3 =
+    data_p->servers->find (g_value_get_uint (&value));
+  g_value_unset (&value);
+  ACE_ASSERT (iterator_3 != data_p->servers->end ());
+  std::string URL_string = (*iterator_3).second.URL;
+  URL_string += URI_string;
+
+  ACE_INET_Addr host_address;
+  std::string hostname_string, hostname_string_2, directory_string;
+  bool use_SSL = false;
+  if (!HTTP_Tools::parseURL (URL_string,
+                             host_address,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT (URL_string.c_str ())));
+    return;
+  } // end IF
+  hostname_string_2 = hostname_string; // save with (potential) port#
+  // remove (potential) port#
+  hostname_string =
+    Net_Common_Tools::URLToHostName (URL_string,
+                                     false,  // return hostname
+                                     false); // do not return port#
+
+  Net_ConnectionConfigurationsIterator_t iterator_4 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4 != data_p->configuration->connectionConfigurations.end ());
+  Test_I_IceCastClient_StreamConfiguration_t::ITERATOR_T iterator_5 =
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_5 != data_p->configuration->streamConfiguration.end ());
+  Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T iterator_6 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_6 != data_p->configuration->streamConfiguration_2.end ());
+  (*iterator_5).second.second->URL = URL_string;
+  (*iterator_6).second.second->parserConfiguration->messageQueue = NULL;
+  (*iterator_6).second.second->delayConfiguration->mode =
+    STREAM_MISCELLANEOUS_DELAY_MODE_INVALID;
+
+  // try to connect
+  Test_I_TCPConnector_t connector;
+#if defined (SSL_SUPPORT)
+  Test_I_SSLConnector_t ssl_connector;
+#endif // SSL_SUPPORT
+  Test_I_AsynchTCPConnector_t asynch_connector;
+  GtkSpinner* spinner_p = NULL;
+  GtkProgressBar* progress_bar_p = NULL;
+  struct Net_UserData user_data_s;
+
+  static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.hostname =
+    hostname_string;
+
+  std::string::size_type position =
+    hostname_string_2.find_last_of (':', std::string::npos);
+  if (position == std::string::npos)
+  {
+    hostname_string_2 += ':';
+    std::ostringstream converter;
+    converter << (use_SSL ? HTTPS_DEFAULT_SERVER_PORT
+                          : HTTP_DEFAULT_SERVER_PORT);
+    hostname_string_2 += converter.str ();
+  } // end IF
+  int result =
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
+                                                                                                                          AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT (hostname_string_2.c_str ())));
+    return;
+  } // end IF
+  static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.useLoopBackDevice =
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.address.is_loopback ();
+
+  GtkCheckButton* check_button_p =
+    GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
+  ACE_ASSERT (check_button_p);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
+                                static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.address.is_loopback ());
+
+  // save to file ?
+  check_button_p =
+    GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME)));
+  ACE_ASSERT (check_button_p);
+  if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p)))
+  {
+    (*iterator_5).second.second->targetFileName.clear ();
+    goto continue_2;
+  } // end IF
+  // retrieve output filename
+  GtkFileChooserButton* file_chooser_button_p =
+    GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
+  ACE_ASSERT (file_chooser_button_p);
+  gchar* directory_p =
+    gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
+  if (!directory_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gtk_file_chooser_get_current_folder(), returning\n")));
+    return;
+  } // end IF
+  directory_string =
+    Common_File_Tools::directory (Common_UI_GTK_Tools::UTF8ToLocale (directory_p, -1));
+  g_free (directory_p); directory_p = NULL;
+  ACE_ASSERT (Common_File_Tools::isDirectory (directory_string));
+  (*iterator_5).second.second->targetFileName = directory_string;
+  (*iterator_5).second.second->targetFileName += ACE_DIRECTORY_SEPARATOR_STR_A;
+  (*iterator_5).second.second->targetFileName +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_FILE);
+
+continue_2:
+  // step3: connect to peer
+  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+  {
+#if defined (SSL_SUPPORT)
+    if (use_SSL)
+      data_p->handle =
+        Net_Client_Common_Tools::connect (ssl_connector,
+                                          *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second),
+                                          user_data_s,
+                                          static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.address,
+                                          true,
+                                          true,
+                                          0);
+    else
+#endif // SSL_SUPPORT
+      data_p->handle =
+          Net_Client_Common_Tools::connect (connector,
+                                            *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second),
+                                            user_data_s,
+                                            static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.address,
+                                            true,
+                                            true,
+                                            0);
+  } // end IF
+  else
+  {
+#if defined (SSL_SUPPORT)
+    // *TODO*: add SSL support to the proactor framework
+    ACE_ASSERT (!use_SSL);
+#endif // SSL_SUPPORT
+    data_p->handle =
+        Net_Client_Common_Tools::connect (asynch_connector,
+                                          *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second),
+                                          user_data_s,
+                                          static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.address,
+                                          true,
+                                          true,
+                                          0);
+  } // end ELSE
+  if (data_p->handle == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to %s, returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.address).c_str ())));
+    return;
+  } // end IF
+
+  // step3: start progress reporting
+  spinner_p =
+    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
+  ACE_ASSERT (spinner_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), TRUE);
+  gtk_spinner_start (spinner_p);
+  progress_bar_p =
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
+  ACE_ASSERT (progress_bar_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
+  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
+
+  //ACE_ASSERT (!data_p->progressData.eventSourceId);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+    data_p->progressData.eventSourceId =
+      //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
+      //                 idle_update_progress_cb,
+      //                 &data_p->progressData,
+      //                 NULL);
+      g_timeout_add (//G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
+                      COMMON_UI_REFRESH_DEFAULT_PROGRESS_MS, // ms (?)
+                      idle_update_progress_cb,
+                      &data_p->progressData);//,
+//                       NULL);
+    if (data_p->progressData.eventSourceId > 0)
+      data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
+  } // end lock scope
+} // combobox_streams_changed_cb
+
 gboolean
 dialog_main_key_press_event_cb (GtkWidget* widget_in,
                                 GdkEventKey* eventKey_in,
                                 gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::key_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::dialog_main_key_press_event_cb"));
 
   ACE_UNUSED_ARG (widget_in);
 

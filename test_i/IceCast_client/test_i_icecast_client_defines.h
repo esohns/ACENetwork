@@ -43,6 +43,12 @@
 // *TODO*: need to deduce this from the metadata
 #define TEST_I_ICECAST_CLIENT_DEFAULT_INPUT_FRAMERATE       60
 
+// HTML stream URL scraping
+#define TEST_I_ICECAST_CLIENT_XPATH_QUERY_NAMESPACE_DESC_STRING "xmlns"
+#define TEST_I_ICECAST_CLIENT_XPATH_QUERY_NAMESPACE_STRING      "http://www.w3.org/1999/xhtml"
+//#define TEST_I_ICECAST_CLIENT_XPATH_QUERY_URL_STRING            "/xmlns:root/xmlns:html/xmlns:body/xmlns:div/xmlns:div/xmlns:div/xmlns:ul/xmlns:li/xmlns:a"
+#define TEST_I_ICECAST_CLIENT_XPATH_QUERY_URL_STRING            "/html/body/div/div/div/ul/li[1]/a/@href"
+
 // HTTP headers
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_SERVER_PREFIX       "Icecast"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_AUDIO_INFO          "ice-audio-info"
@@ -52,6 +58,7 @@
 #define TEST_I_ICECAST_CLIENT_DEFAULT_USER_AGENT_SPOOF            "VLC/3.0.16"
 
 // stream URL
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_HREF_M3U_SUFFIX    ".m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGG_SUFFIX  ".ogg"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OPUS_SUFFIX ".opus"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_WEBM_SUFFIX ".webm"
@@ -97,6 +104,7 @@
 #define TEST_I_UI_GTK_ENTRY_URL_NAME                        "entry_url"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME           "filechooserbutton_save"
 #define TEST_I_UI_GTK_LISTSTORE_SERVERS_NAME                "liststore_servers"
+#define TEST_I_UI_GTK_LISTSTORE_STREAMS_NAME                "liststore_streams"
 #define TEST_I_UI_GTK_PROGRESSBAR_NAME                      "progressbar"
 #define TEST_I_UI_GTK_SCALE_VOLUME_NAME                     "scale_volume"
 #define TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME            "spinbutton_buffersize"

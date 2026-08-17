@@ -741,3 +741,185 @@ error:
       break;
   } // end SWITCH
 }
+
+//////////////////////////////////////////
+
+Test_I_HTTPGet_3::Test_I_HTTPGet_3 (ISTREAM_T* stream_in)
+ : inherited (stream_in)
+ , handleBody_ (false)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_HTTPGet_3::Test_I_HTTPGet_3"));
+
+}
+
+void
+Test_I_HTTPGet_3::handleDataMessage (Test_I_Message_3*& message_inout,
+                                     bool& passMessageDownstream_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_HTTPGet_3::handleDataMessage"));
+
+  if (handleBody_)
+    return;
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::sessionData_);
+
+  HTTP_HeadersIterator_t iterator;
+  ACE_INET_Addr host_address;
+  std::string uri_string, host_name_string;
+  bool close_connection_b = true;
+  std::string host_name_string_2;
+  std::string uri_string_2;
+  bool use_SSL = false, use_SSL_2 = false;
+  struct Test_I_IceCastClient_SessionData& session_data_r =
+    const_cast<struct Test_I_IceCastClient_SessionData&> (inherited::sessionData_->getR ());
+
+  if (unlikely (!message_inout->isInitialized ()))
+    return; // assume it's part of the body
+  const Test_I_MessageDataContainer_3& data_container_r =
+    message_inout->getR ();
+  struct Test_I_IceCastClient_MessageData_3& data_r =
+    const_cast<struct Test_I_IceCastClient_MessageData_3&> (data_container_r.getR ());
+
+  switch (data_r.status)
+  {
+    case HTTP_Codes::HTTP_STATUS_OK:
+    { handleBody_ = true;
+
+      inherited::receivedBytes_ += message_inout->total_length ();
+
+      // got all data ? --> close connection ?
+      iterator =
+        data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+      if (iterator != data_r.headers.end ())
+      {
+        std::istringstream converter ((*iterator).second);
+        size_t content_length_i = 0;
+        converter >> content_length_i;
+        ACE_ASSERT (session_data_r.lock);
+        { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
+          if (inherited::configuration_->closeAfterReception  &&
+              (content_length_i <= inherited::receivedBytes_) &&
+              session_data_r.connection                       &&
+              close_connection_b)
+          {
+            ACE_DEBUG ((LM_DEBUG,
+                       ACE_TEXT ("%s: received all content (was: %B byte(s)), aborting connection\n"),
+                       inherited::mod_->name (),
+                       content_length_i));
+            ACE_ASSERT (session_data_r.connection);
+            session_data_r.connection->abort ();
+          } // end IF
+        } // end lock scope
+      } // end IF
+      else
+        ACE_DEBUG ((LM_WARNING,
+                   ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+
+      break; // done
+    }
+    case HTTP_Codes::HTTP_STATUS_MULTIPLECHOICES:
+    case HTTP_Codes::HTTP_STATUS_MOVEDPERMANENTLY:
+    case HTTP_Codes::HTTP_STATUS_MOVEDTEMPORARILY:
+    case HTTP_Codes::HTTP_STATUS_NOTMODIFIED:
+    case HTTP_Codes::HTTP_STATUS_USEPROXY:
+    case HTTP_Codes::HTTP_STATUS_SWITCHPROXY:
+    case HTTP_Codes::HTTP_STATUS_TEMPORARYREDIRECT:
+    case HTTP_Codes::HTTP_STATUS_PERMANENTREDIRECT:
+    {
+      // step1: redirected --> extract location
+      iterator =
+        data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_LOCATION_STRING));
+      if (iterator == data_r.headers.end ())
+      {
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("%s: missing \"%s\" HTTP header, aborting\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT (HTTP_PRT_HEADER_LOCATION_STRING)));
+        goto error;
+      } // end IF
+      ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("%s: \"%s\" has been redirected to \"%s\" (status was: %d)\n"),
+                 inherited::mod_->name (),
+                 ACE_TEXT (inherited::configuration_->URL.c_str ()),
+                 ACE_TEXT ((*iterator).second.c_str ()),
+                 data_r.status));
+
+      // step2: send request ?
+      // *IMPORTANT NOTE*: only auto-effectuate same-server/protocol redirects
+      if (!HTTP_Tools::parseURL ((*iterator).second,
+                                 host_address,
+                                 host_name_string,
+                                 uri_string,
+                                 use_SSL))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT ((*iterator).second.c_str ())));
+        goto error;
+      } // end IF
+      if (!HTTP_Tools::parseURL (inherited::configuration_->URL,
+                                 host_address,
+                                 host_name_string_2,
+                                 uri_string_2,
+                                 use_SSL_2))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("%s: failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT ((*iterator).second.c_str ())));
+        goto error;
+      } // end IF
+      if (likely ((host_name_string != host_name_string_2) ||
+                  (use_SSL != use_SSL_2)))
+      { // *TODO*
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("%s: URL (was: \"%s\") redirects to a different host, and/or requires a HTTP(S) connection, cannot proceed\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT (inherited::configuration_->URL.c_str ())));
+
+        passMessageDownstream_out = false;
+
+        goto error;
+      } // end IF
+
+      if (!inherited::send ((*iterator).second,
+                            HTTP_Codes::HTTP_METHOD_GET,
+                            inherited::configuration_->HTTPHeaders,
+                            inherited::configuration_->HTTPForm))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                   ACE_TEXT ("%s: failed to send HTTP request \"%s\", aborting\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT ((*iterator).second.c_str ())));
+        goto error;
+      } // end IF
+
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("%s: invalid HTTP response (status was: %d): \"%s\", aborting\n"),
+                 inherited::mod_->name (),
+                 data_r.status,
+                 ACE_TEXT (data_r.reason.c_str ())));
+      goto error;
+    }
+  } // end SWITCH
+
+  goto continue_3;
+
+error:
+  this->notify (STREAM_SESSION_MESSAGE_ABORT);
+
+continue_3:
+  if (!passMessageDownstream_out)
+  {
+    message_inout->release (); message_inout = NULL;
+  } // end IF
+}

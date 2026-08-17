@@ -146,6 +146,19 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,          
                               Stream_INotify_t,                                        // stream notification interface type
                               Test_I_Defragment);                                      // writer type
 
+typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_IceCastClient_ModuleHandlerConfiguration_3,
+                                   Stream_ControlMessage_t,
+                                   Test_I_Message_3,
+                                   Test_I_SessionMessage> Test_I_Defragment_3;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData,                  // session data type
+                              enum Stream_SessionMessageType,                           // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_3, // module handler configuration type
+                              libacestream_default_misc_defragment_module_name_string,
+                              Stream_INotify_t,                                         // stream notification interface type
+                              Test_I_Defragment_3);                                     // writer type
+
 //////////////////////////////////////////
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,

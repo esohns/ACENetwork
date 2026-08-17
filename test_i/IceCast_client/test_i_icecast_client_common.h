@@ -104,6 +104,7 @@ struct Test_I_IceCastClient_Configuration
    : Test_I_Configuration ()
 #endif // GTK_USE
    , parserConfiguration ()
+   , parserConfiguration_2 ()
    , parserConfiguration_3 ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
@@ -113,6 +114,7 @@ struct Test_I_IceCastClient_Configuration
 
   // **************************** parser data **********************************
   struct HTTP_ParserConfiguration                        parserConfiguration;
+  struct HTTP_ParserConfiguration                        parserConfiguration_2;
   struct HTTP_ParserConfiguration                        parserConfiguration_3;
   // **************************** signal data **********************************
   struct Test_I_IceCastClient_SignalHandlerConfiguration signalHandlerConfiguration;
@@ -168,6 +170,9 @@ struct Test_I_IceCastClient_UI_ProgressData
   unsigned int transferred; // byte(s)
 };
 
+typedef std::vector<std::string> Test_I_IceCastClient_StreamURIs_t;
+typedef Test_I_IceCastClient_StreamURIs_t::iterator Test_I_IceCastClient_StreamURIsIterator_t;
+
 struct Test_I_IceCastClient_UI_CBData
 #if defined (GTK_USE)
  : Test_I_GTK_CBData
@@ -186,6 +191,7 @@ struct Test_I_IceCastClient_UI_CBData
    : configuration (NULL)
 #endif // GTK_USE || WXWIDGETS_USE
    , servers (NULL)
+   , URIs ()
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
 #if defined (PROJECTM_SUPPORT)
@@ -209,6 +215,7 @@ struct Test_I_IceCastClient_UI_CBData
 
   struct Test_I_IceCastClient_Configuration*          configuration;
   Test_I_IceCastClient_ServerConfigurations_t*        servers;
+  Test_I_IceCastClient_StreamURIs_t                   URIs;
 
   ACE_HANDLE                                          handle;
   struct Test_I_IceCastClient_UI_ProgressData         progressData;
