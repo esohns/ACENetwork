@@ -60,6 +60,7 @@ Test_I_Encoder::Test_I_Encoder (typename inherited::ISTREAM_T* stream_in)
  , deviceContext_ (NULL)
  , framesContext_ (NULL)
  , hwFrame_ (NULL)
+ , inSession_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Encoder::Test_I_Encoder"));
 
@@ -94,6 +95,7 @@ Test_I_Encoder::initialize (const struct Test_I_IceCastClient_ModuleHandlerConfi
     if (hwFrame_)
       av_frame_free (&hwFrame_);
     ACE_ASSERT (!hwFrame_);
+    inSession_ = false;
   } // end IF
 
   return inherited::initialize (configuration_in,
@@ -105,6 +107,10 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
                                    bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Encoder::handleDataMessage"));
+
+  // sanity check(s)
+  if (unlikely (!inSession_))
+    return;
 
   int result /*, result_2*/;
   ACE_Message_Block* message_block_p = message_inout;
@@ -824,12 +830,16 @@ continue_2:
       } // end IF
       inherited::headerWritten_ = true;
 
+      inSession_ = true;
+
 continue_3:
       break;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      int result = -1;
+      inSession_ = false;
+
+      int result;
 
       //// *IMPORTANT NOTE*: finalize the format context (and everything else) only once
       //if (!inherited::isLast_)

@@ -80,6 +80,7 @@ class Test_I_Encoder
   AVBufferRef* deviceContext_; // hardware-
   AVBufferRef* framesContext_; // hardware-
   AVFrame*     hwFrame_;       // hardware-
+  bool         inSession_;
 };
 
 //////////////////////////////////////////

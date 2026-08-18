@@ -283,6 +283,10 @@ idle_load_segment_cb (gpointer userData_in)
     URL_string = data_p->URL;
   (*iterator_3).second.second->URL = URL_string;
   (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  (*iterator_3).second.second->direct3DConfiguration->focusWindow = NULL;
+  (*iterator_3).second.second->direct3DConfiguration->presentationParameters.hDeviceWindow = NULL;
+#endif // ACE_WIN32 || ACE_WIN64
 
   // select connector
   size_t position;
