@@ -710,6 +710,7 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  guint event_source_id;
 #endif // GTK_USE
 
   Test_I_MessageDataContainer_3& data_container_r =
@@ -743,8 +744,8 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
   } // end FOR
 
 #if defined (GTK_USE)
-  guint event_source_id = g_idle_add (idle_stream_uris_received_cb,
-                                      CBData_);
+  event_source_id = g_idle_add (idle_stream_uris_received_cb,
+                               CBData_);
   if (event_source_id == 0)
   {
     ACE_DEBUG ((LM_ERROR,

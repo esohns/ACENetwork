@@ -490,8 +490,9 @@ idle_stream_uris_received_cb (gpointer userData_in)
        ++iterator_3)
   {
     descriptor_string = Common_File_Tools::basename (*iterator_3, true);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     descriptor_string.erase (0, 1); // remove leading '/'
-
+#endif // ACE_WIN32 || ACE_WIN64
     gtk_list_store_append (list_store_p, &iterator_2);
     gtk_list_store_set (list_store_p, &iterator_2,
                        0, descriptor_string.c_str (),
@@ -2378,6 +2379,8 @@ combobox_streams_changed_cb (GtkComboBox* comboBox_in,
   GtkSpinner* spinner_p = NULL;
   GtkProgressBar* progress_bar_p = NULL;
   struct Net_UserData user_data_s;
+  gchar* directory_p = NULL;
+  GtkFileChooserButton* file_chooser_button_p = NULL;
 
   static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_4).second)->socketConfiguration.hostname =
     hostname_string;
@@ -2423,11 +2426,11 @@ combobox_streams_changed_cb (GtkComboBox* comboBox_in,
     goto continue_2;
   } // end IF
   // retrieve output filename
-  GtkFileChooserButton* file_chooser_button_p =
+  file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
   ACE_ASSERT (file_chooser_button_p);
-  gchar* directory_p =
+  directory_p =
     gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
   if (!directory_p)
   {
