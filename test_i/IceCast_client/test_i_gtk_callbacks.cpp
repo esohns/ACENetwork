@@ -664,7 +664,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   data_p->volumeControl =
     //Stream_MediaFramework_DirectSound_Tools::getMasterVolumeControl (GUID_s);
     Stream_MediaFramework_DirectSound_Tools::getSessionVolumeControl (GUID_s,
-                                                                      CLSID_ACEStream_MediaFramework_WASAPI_AudioSession); // session GUID
+                                                                      CLSID_ACEStream_MediaFramework_WASAPI_AudioSession_Render); // session GUID
   float volume_level_f = 0.0f;
   HRESULT result_3;
   if (!data_p->volumeControl)
