@@ -230,7 +230,8 @@ struct Test_I_IceCastClient_UI_CBData
   Test_I_Subscribers_t                                subscribers;
   std::string                                         URL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  IAudioEndpointVolume*                               volumeControl;
+  //IAudioEndpointVolume*                               volumeControl;
+  ISimpleAudioVolume*                                 volumeControl;
 #else
   snd_mixer_t*                                        mixerHandle;
   snd_mixer_elem_t*                                   volumeControl;

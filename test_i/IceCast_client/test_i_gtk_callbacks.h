@@ -57,6 +57,7 @@ G_MODULE_EXPORT void button_cut_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void button_scrape_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void combobox_streams_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
+G_MODULE_EXPORT void entry_url_icon_press_cb (GtkEntry*, GtkEntryIconPosition, GdkEvent*, gpointer);
 G_MODULE_EXPORT void scale_volume_value_changed_cb (GtkRange*, gpointer);
 G_MODULE_EXPORT void scale_beat_sensitivity_value_changed_cb (GtkRange*, gpointer);
   //G_MODULE_EXPORT void filechooserbutton_output_file_set_cb (GtkWidget*, gpointer);

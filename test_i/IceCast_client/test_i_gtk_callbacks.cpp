@@ -662,18 +662,22 @@ idle_initialize_UI_cb (gpointer userData_in)
                 ACE_TEXT (Stream_MediaFramework_DirectSound_Tools::directSoundGUIDToString (GUID_s).c_str ())));
   } // end IF
   data_p->volumeControl =
-    Stream_MediaFramework_DirectSound_Tools::getMasterVolumeControl (GUID_s);
+    //Stream_MediaFramework_DirectSound_Tools::getMasterVolumeControl (GUID_s);
+    Stream_MediaFramework_DirectSound_Tools::getSessionVolumeControl (GUID_s,
+                                                                      CLSID_ACEStream_MediaFramework_WASAPI_AudioSession); // session GUID
   float volume_level_f = 0.0f;
   HRESULT result_3;
   if (!data_p->volumeControl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_MediaFramework_DirectSound_Tools::getMasterVolumeControl(\"%s\"), continuing\n"),
+                ACE_TEXT ("failed to Stream_MediaFramework_DirectSound_Tools::getSessionVolumeControl(\"%s\"), continuing\n"),
+                //ACE_TEXT ("failed to Stream_MediaFramework_DirectSound_Tools::getMasterVolumeControl(\"%s\"), continuing\n"),
                 ACE_TEXT (Stream_MediaFramework_DirectSound_Tools::directSoundGUIDToString (GUID_s).c_str ())));
     goto continue_2;
   } // end IF
   result_3 =
-    data_p->volumeControl->GetMasterVolumeLevelScalar (&volume_level_f);
+    //data_p->volumeControl->GetMasterVolumeLevelScalar (&volume_level_f);
+    data_p->volumeControl->GetMasterVolume (&volume_level_f);
   ACE_ASSERT (SUCCEEDED (result_3));
   gtk_range_set_value (GTK_RANGE (scale_p),
                        static_cast<gdouble> (volume_level_f) * 100.0);
@@ -2538,23 +2542,34 @@ entry_url_activate_cb (GtkEntry* entry_in,
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
-
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   GtkToggleButton* toggle_button_p =
       GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
   ACE_ASSERT (toggle_button_p);
-  gtk_toggle_button_toggled (toggle_button_p);
+
+  //gtk_toggle_button_toggled (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
+                                TRUE);
 } // entry_url_activate_cb
+
+void
+entry_url_icon_press_cb (GtkEntry* entry_in,
+                         GtkEntryIconPosition position_in,
+                         GdkEvent* event_in,
+                         gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::entry_url_icon_press_cb"));
+
+  ACE_UNUSED_ARG (position_in);
+  ACE_UNUSED_ARG (event_in);
+
+  entry_url_activate_cb (entry_in,
+                         userData_in);
+} // entry_url_icon_press_cb
 
 void
 scale_volume_value_changed_cb (GtkRange* range_in,
@@ -2572,8 +2587,10 @@ scale_volume_value_changed_cb (GtkRange* range_in,
   if (!data_p->volumeControl)
     return;
   HRESULT result =
-    data_p->volumeControl->SetMasterVolumeLevelScalar (static_cast<float> (value_d / 100.0),
-                                                       NULL);
+    data_p->volumeControl->SetMasterVolume (static_cast<float> (value_d / 100.0),
+                                            NULL);
+    //data_p->volumeControl->SetMasterVolumeLevelScalar (static_cast<float> (value_d / 100.0),
+    //                                                   NULL);
   ACE_ASSERT (SUCCEEDED (result));
 #else
   if (!data_p->mixerHandle || !data_p->volumeControl)
