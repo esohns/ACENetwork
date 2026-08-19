@@ -257,6 +257,21 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Test_I)
 target_precompile_headers (${EXECUTABLE}
                            PUBLIC stdafx.h)
 
+set (configuration_file "etc/${EXECUTABLE}.ini")
+set (ui_definition_file "")
+set (ui_rc_file "resources.rc")
+if (GTK_SUPPORT)
+ if (GTK2_USE)
+  set (ui_definition_file "test_i.gtk2")
+ elseif (GTK3_USE)
+  set (ui_definition_file "test_i.gtk3")
+ endif ()
+endif (GTK_SUPPORT)
+if (NOT ${ui_definition_file} STREQUAL "")
+ set (ui_definition_file "etc/${ui_definition_file}")
+endif (NOT ${ui_definition_file} STREQUAL "")
+set (ui_rc_file "etc/${ui_rc_file}")
+
 install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT test_i)
@@ -265,42 +280,82 @@ if (WIN32)
  set (ACE_DLL_FILE ACE${LIB_FILE_SUFFIX}.dll)
  set (ACE_DLL_FQPATH ${ACE_LIB_PATH}/${ACE_DLL_FILE})
  install (FILES ${ACE_DLL_FQPATH}
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libatk-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/freetype6.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/intl.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libcairo-2.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libfontconfig-1.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgio-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libglib-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgmodule-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgobject-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgthread-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgdk_pixbuf-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgdk-win32-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libgtk-win32-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpango-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangocairo-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangoft2-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpangowin32-1.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/libpng14-14.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/bin/zlib1.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../libglade/bin/libglade-2.0-0.dll
-                ${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.1/.libs/libxml2-2.dll
-                H:/software/Development/dll/libgcc_s_dw2-1.dll
-                H:/software/Development/dll/libexpat-1.dll
-                H:/software/Development/dll/libiconv-2.dll
-                ${Common_DIR}/src/Debug/Common.dll
-                ${Common_DIR}/src/ui/Debug/CommonUI.dll
-                ${ACEStream_DIR}/src/Debug/ACEStream.dll
-                ${ACENetwork_DIR}/src/Debug/ACENetwork.dll
-                ${ACENetwork_DIR}/src/protocol/http/Debug/ACENetwork_Protocol_HTTP.dll
+                ${ACE_SSL_DLL_FQPATH}
+                ${LIB_ROOT}/gtk3/bin/libatk-1.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libfreetype-6.dll
+                ${LIB_ROOT}/gtk3/bin/libintl-8.dll
+                ${LIB_ROOT}/gtk3/bin/libcairo-2.dll
+                ${LIB_ROOT}/gtk3/bin/libfontconfig-1.dll
+                ${LIB_ROOT}/gtk3/bin/libgio-2.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libglib-2.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libgmodule-2.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libgobject-2.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libgthread-2.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libgdk_pixbuf-2.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libgdk-3-0.dll
+                ${LIB_ROOT}/gtk3/bin/libgtk-3-0.dll
+                ${LIB_ROOT}/gtk3/bin/libpango-1.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libpangocairo-1.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libpangoft2-1.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libpangowin32-1.0-0.dll
+                ${LIB_ROOT}/gtk3/bin/libiconv-2.dll
+                ${LIB_ROOT}/gtk3/bin/libpng15-15.dll
+                ${LIB_ROOT}/gtk3/bin/liblzma-5.dll
+                ${LIB_ROOT}/gtk3/bin/zlib1.dll
+                ${LIB_ROOT}/gtk3/bin/libxml2-2.dll
+                ${LIB_ROOT}/gtk3/bin/libffi-6.dll
+                ${LIB_ROOT}/gtk3/bin/libcairo-gobject-2.dll
+                ${LIB_ROOT}/gtk3/bin/libpixman-1-0.dll
+                ${LIB_ROOT}/gtk3/bin/libwinpthread-1.dll
+                ${LIB_ROOT}/assimp/cmake/bin/Release/assimp-vc143-mt.dll
+                ${LIB_ROOT}/libpng/build/Release/libpng16.dll
+                ${LIB_ROOT}/ffmpeg/libswresample/swresample-5.dll
+                ${LIB_ROOT}/ffmpeg/libswscale/swscale-8.dll
+                ${LIB_ROOT}/ffmpeg/libavformat/avformat-61.dll
+                ${LIB_ROOT}/ffmpeg/libavcodec/avcodec-61.dll
+                ${LIB_ROOT}/ffmpeg/libavutil/avutil-59.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_MagickCore_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_MagickWand_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_bzlib_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_freetype_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_fribidi_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_glib_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_harfbuzz_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_lcms_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_libxml_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_lqr_.dll
+                ${LIB_ROOT}/ImageMagick/CORE_RL_zlib_.dll
+                ${LIB_ROOT}/libepoxy/bin/epoxy-0.dll
+                ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/bz2.dll
+                ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/iconv-2.dll
+                ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/liblzma.dll
+                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316_core_vc_x64_custom.dll
+                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316_html_vc_x64_custom.dll
+                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxmsw316_xrc_vc_x64_custom.dll
+                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316_vc_x64_custom.dll
+                ${LIB_ROOT}/wxWidgets/lib/vc_x64_dll/wxbase316_xml_vc_x64_custom.dll
+                ${LIB_ROOT}/openssl/libcrypto-3-x64.dll
+                ${LIB_ROOT}/openssl/libssl-3-x64.dll
+                ${LIB_ROOT}/zlib/build/Release/zlib.dll
+                ${LIB_ROOT}/mpg123/releases/mpg123-1.29.4-x86-64/libmpg123-0.dll
+                ${LIB_ROOT}/vcpkg/installed/x64-windows/bin/ogg.dll
+                ${LIB_ROOT}/vorbis/build/msvc/lib/Release/vorbis.dll
+                ${LIB_ROOT}/opus/build/msvc/Release/opus.dll
+                ${LIB_ROOT}/lib/libiconv/output/x64/Release/libiconv.dll
+                ${LIB_ROOT}/libxml2/build/msvc/Release/libxml2.dll
+                ${LIB_ROOT}/ffmpeg/libavfilter/avfilter-10.dll
+                ${LIB_ROOT}/glew/bin/Release/glew32.dll
+                ${LIB_ROOT}/projectm/build/msvc/src/libprojectM/Release/projectM-4.dll
+                ${LIB_ROOT}/projectm/build/msvc/src/playlist/Release/projectM-4-playlist.dll
           DESTINATION bin COMPONENT bin)
- install (FILES
-          DESTINATION $ENV{APPDATA}/${PROJECT_NAME}/${EXECUTABLE} COMPONENT config)
+ install (FILES ${configuration_file}
+                ${ui_definition_file}
+                ${ui_rc_file}
+          DESTINATION "etc/${EXECUTABLE}" COMPONENT config)
 elseif (UNIX)
-  install (FILES
-           ${${EXECUTABLE}_EXE_CFG}
-           DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
+ install (FILES
+          ${${EXECUTABLE}_EXE_CFG}
+          DESTINATION "etc/${PROJECT_NAME}/${EXECUTABLE}" COMPONENT config)
 endif ()
 
 ##########################################

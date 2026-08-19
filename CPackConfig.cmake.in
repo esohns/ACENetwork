@@ -208,8 +208,9 @@ set (CPACK_NSIS_DISPLAY_NAME "@PROJECT_NAME@")
 set (CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
 #set (CPACK_NSIS_EXECUTABLES_DIRECTORY $INSTDIR)
 list (APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "SetOutPath '$INSTDIR'")
-list (APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk' '$INSTDIR\\\\bin\\\\web_tv.exe' '-l -r -z' '$INSTDIR\\\\include\\\\ACENetwork_icon.ico' 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F1 'web TV'")
-list (APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\bittorrent_client_gui.lnk' '$INSTDIR\\\\bin\\\\bittorrent_client_gui.exe' '-l -r' '$INSTDIR\\\\include\\\\ACENetwork_icon.ico' 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F2 'bittorrent client GUI'")
+list (APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\bittorrent_client_gui.lnk' '$INSTDIR\\\\bin\\\\bittorrent_client_gui.exe' '-l -r' '$INSTDIR\\\\include\\\\ACENetwork_icon.ico' 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F1 'bittorrent client GUI'")
+list (APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\IceCast_client.lnk' '$INSTDIR\\\\bin\\\\IceCast_client.exe' '-l -r' '$INSTDIR\\\\include\\\\ACENetwork_icon.ico' 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F2 'IceCast client'")
+list (APPEND CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\web_tv.lnk' '$INSTDIR\\\\bin\\\\web_tv.exe' '-l -r -z' '$INSTDIR\\\\include\\\\ACENetwork_icon.ico' 0 SW_SHOWNORMAL ALT|CONTROL|SHIFT|F3 'web TV'")
 # List of strings is delimited by ; so we need to replace them with newlines
 string (REPLACE ";" "\n" CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}")
 

@@ -127,6 +127,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (configuration_);
 
+#if defined (_DEBUG)
   if (unlikely (configuration_->debugParser))
   {
     std::vector<std::string> rules = parser_.getRuleInvocationStack (context_in);
@@ -145,6 +146,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
                 ACE_TEXT ("entering rule: \"%s\"...\n"),
                 ACE_TEXT (info_string.c_str ())));
   } // end IF
+#endif // _DEBUG
 }
 
 template <ACE_SYNCH_DECL,
@@ -323,8 +325,10 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   messageQueue_ = configuration_->messageQueue;
   ACE_ASSERT (messageQueue_);
 
+#if defined (_DEBUG)
   if (configuration_->debugParser)
     parser_.setTrace (true);
+#endif // _DEBUG
 
   isInitialized_ = true;
 
@@ -368,6 +372,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   begin (fragment_->rd_ptr (),
          fragment_->length ());
 
+#if defined (_DEBUG)
   if (unlikely (configuration_->debugParser))
   {
 #if (USE_UNBUFFERED)
@@ -388,6 +393,7 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
     } // end FOR
 #endif // USE_UNBUFFERED
   } // end IF
+#endif // _DEBUG
 
   // parse data fragment
   try {
@@ -418,8 +424,10 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
       parser_.setInputStream (NULL);
       parser_.reset ();
       parser_.setInputStream (&tokens_);
+#if defined (_DEBUG)
       if (configuration_->debugParser)
         parser_.setTrace (true);
+#endif // _DEBUG
       lexer_.reset_3 ();
       tokens_.reset ();
       break; // done
