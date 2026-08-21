@@ -1153,7 +1153,7 @@ continue_2:
   result =
     g_signal_connect (G_OBJECT ((*opengl_contexts_iterator).first),
                       ACE_TEXT_ALWAYS_CHAR ("button-press-event"),
-                      G_CALLBACK (glarea_clicked_cb),
+                      G_CALLBACK (glarea_button_press_cb),
                       userData_in);
   ACE_ASSERT (result);
   result =
@@ -2982,7 +2982,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
 gboolean
 glarea_key_press_cb (GtkWidget* widget_in,
-                     GdkEventKey event_in,
+                     GdkEventKey* event_in,
                      gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::glarea_key_press_cb"));
@@ -2997,7 +2997,7 @@ glarea_key_press_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->projectMConfiguration->playlist);
 #endif // PROJECTM_SUPPORT
 
-  switch (event_in.keyval)
+  switch (event_in->keyval)
   {
 #if GTK_CHECK_VERSION (3,0,0)
     case GDK_KEY_l:
@@ -3050,14 +3050,14 @@ glarea_key_press_cb (GtkWidget* widget_in,
   } // end SWITCH
 
   return TRUE; // do not propagate
-}
+} // glarea_key_press_cb
 
 gboolean
-glarea_clicked_cb (GtkWidget* widget_in,
-                   GdkEventButton event_in,
-                   gpointer userData_in)
+glarea_button_press_cb (GtkWidget* widget_in,
+                        GdkEventButton* event_in,
+                        gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::glarea_clicked_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::glarea_button_press_cb"));
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -3077,7 +3077,7 @@ glarea_clicked_cb (GtkWidget* widget_in,
   gtk_widget_grab_focus (widget_in);
 
   return TRUE; // do not propagate
-}
+} // glarea_button_press_cb
 
 void
 glarea_realize_cb (GtkWidget* widget_in,

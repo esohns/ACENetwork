@@ -77,8 +77,8 @@ G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);
 
 // OpenGL
-G_MODULE_EXPORT gboolean glarea_key_press_cb (GtkWidget*, GdkEventKey, gpointer);
-G_MODULE_EXPORT gboolean glarea_clicked_cb (GtkWidget*, GdkEventButton, gpointer);
+G_MODULE_EXPORT gboolean glarea_key_press_cb (GtkWidget*, GdkEventKey*, gpointer);
+G_MODULE_EXPORT gboolean glarea_button_press_cb (GtkWidget*, GdkEventButton*, gpointer);
 G_MODULE_EXPORT void glarea_realize_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void glarea_unrealize_cb (GtkWidget*, gpointer);
 #if GTK_CHECK_VERSION (3,0,0)

@@ -100,6 +100,13 @@ extern "C"
 
 #include "stream_dev_defines.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (LIBPIPEWIRE_SUPPORT)
+#include "stream_lib_pipewire_common.h"
+#endif // LIBPIPEWIRE_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "stream_misc_defines.h"
 
 #include "stream_file_sink.h"
@@ -1021,6 +1028,9 @@ do_work (const std::string& configurationFile_in,
 #else
   struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
   ALSA_configuration.asynch = false;
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct Stream_MediaFramework_Pipewire_Configuration pipewire_configuration_s;
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   struct Test_I_WebTV_ModuleHandlerConfiguration_3 modulehandler_configuration_4a;
@@ -1037,6 +1047,10 @@ do_work (const std::string& configurationFile_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   modulehandler_configuration_4b.ALSAConfiguration = &ALSA_configuration;
+#if defined (LIBPIPEWIRE_SUPPORT)
+  modulehandler_configuration_4b.pipewireConfiguration =
+    &pipewire_configuration_s;
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_4b.allocatorConfiguration =
     &allocator_configuration_2;

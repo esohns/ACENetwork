@@ -56,6 +56,12 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (LIBPIPEWIRE_SUPPORT)
+#include "stream_lib_pipewire_common.h"
+#endif // LIBPIPEWIRE_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (FFMPEG_SUPPORT)
 #include "stream_lib_ffmpeg_common.h"
 #endif // FFMPEG_SUPPORT
@@ -184,6 +190,9 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
    , outputFormat ()
 #endif // FFMPEG_SUPPORT
+#if defined (LIBPIPEWIRE_SUPPORT)
+   , pipewireConfiguration (NULL)
+#endif // LIBPIPEWIRE_SUPPORT
    , window ()
   {}
 
@@ -204,6 +213,9 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
 #endif // FFMPEG_SUPPORT
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct Stream_MediaFramework_Pipewire_Configuration* pipewireConfiguration;
+#endif // LIBPIPEWIRE_SUPPORT
   struct Common_UI_Window                          window;
 };
 
