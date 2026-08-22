@@ -59,6 +59,11 @@
 #include "stream_dev_target_wasapi.h"
 #else
 #include "stream_dev_target_alsa.h"
+#if defined (LIBPIPEWIRE_SUPPORT)
+#include "stream_dev_target_pipewire.h"
+
+#include "stream_lib_pipewire_common.h"
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_file_sink.h"
@@ -477,6 +482,20 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               libacestream_default_dev_target_alsa_module_name_string,
                               Stream_INotify_t,                                         // stream notification interface type
                               Test_I_ALSA);                                             // writer type
+#if defined (LIBPIPEWIRE_SUPPORT)
+typedef Stream_Dev_Target_Pipewire_T<ACE_MT_SYNCH,
+                                     Common_TimePolicy_t,
+                                     struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                     Stream_ControlMessage_t,
+                                     Test_I_Message,
+                                     Test_I_SessionMessage_2> Test_I_Pipewire;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                   // session data type
+                              enum Stream_SessionMessageType,                              // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,    // module handler configuration type
+                              libacestream_default_dev_target_pipewire_module_name_string,
+                              Stream_INotify_t,                                            // stream notification interface type
+                              Test_I_Pipewire);                                            // writer type
+#endif // LIBPIPEWIRE_SUPPORT
 
 typedef Stream_Module_Delay_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,

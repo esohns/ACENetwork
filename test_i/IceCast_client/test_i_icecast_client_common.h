@@ -193,6 +193,9 @@ struct Test_I_IceCastClient_UI_CBData
    , servers (NULL)
    , URIs ()
    , handle (ACE_INVALID_HANDLE)
+#if defined (LIBPIPEWIRE_SUPPORT)
+   , pipewireConfiguration (NULL)
+#endif // LIBPIPEWIRE_SUPPORT
    , progressData ()
 #if defined (PROJECTM_SUPPORT)
    , projectMConfiguration (NULL)
@@ -209,34 +212,39 @@ struct Test_I_IceCastClient_UI_CBData
 #else
    , mixerHandle (NULL)
    , volumeControl (NULL)
+   , maxVolumeLevel (0)
 #endif // ACE_WIN32 || ACE_WIN64
    , nextChannelSet (false)
   {}
 
-  struct Test_I_IceCastClient_Configuration*          configuration;
-  Test_I_IceCastClient_ServerConfigurations_t*        servers;
-  Test_I_IceCastClient_StreamURIs_t                   URIs;
+  struct Test_I_IceCastClient_Configuration*           configuration;
+  Test_I_IceCastClient_ServerConfigurations_t*         servers;
+  Test_I_IceCastClient_StreamURIs_t                    URIs;
 
-  ACE_HANDLE                                          handle;
-  struct Test_I_IceCastClient_UI_ProgressData         progressData;
+  ACE_HANDLE                                           handle;
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct Stream_MediaFramework_Pipewire_Configuration* pipewireConfiguration;
+#endif // LIBPIPEWIRE_SUPPORT
+  struct Test_I_IceCastClient_UI_ProgressData          progressData;
 #if defined (PROJECTM_SUPPORT)
-  struct Stream_Visualization_ProjectM_Configuration* projectMConfiguration;
+  struct Stream_Visualization_ProjectM_Configuration*  projectMConfiguration;
 #endif // PROJECTM_SUPPORT
 #if defined (GTK_SUPPORT)
-  guint                                               eventSourceId; // display-
-  Common_Math_FFT_t*                                  fft;
-  struct acestream_visualization_gtk_cairo_cbdata     spectrumAnalyzerCBData;
+  guint                                                eventSourceId; // display-
+  Common_Math_FFT_t*                                   fft;
+  struct acestream_visualization_gtk_cairo_cbdata      spectrumAnalyzerCBData;
 #endif // GTK_SUPPORT
-  Test_I_Subscribers_t                                subscribers;
-  std::string                                         URL;
+  Test_I_Subscribers_t                                 subscribers;
+  std::string                                          URL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   //IAudioEndpointVolume*                               volumeControl;
-  ISimpleAudioVolume*                                 volumeControl;
+  ISimpleAudioVolume*                                  volumeControl;
 #else
-  snd_mixer_t*                                        mixerHandle;
-  snd_mixer_elem_t*                                   volumeControl;
+  snd_mixer_t*                                         mixerHandle;
+  snd_mixer_elem_t*                                    volumeControl;
+  long                                                 maxVolumeLevel;
 #endif // ACE_WIN32 || ACE_WIN64
-  bool                                                nextChannelSet;
+  bool                                                 nextChannelSet;
 };
 
 //struct Test_I_IceCastClient_ThreadData

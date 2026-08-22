@@ -585,9 +585,9 @@ do_parse_configuration_file (const std::string& fileName_in,
         case ACE_Configuration::STRING:
         {
           result =
-              configuration_heap.get_string_value (section_key,
-                                                   ACE_TEXT (item_name.c_str ()),
-                                                   item_value);
+            configuration_heap.get_string_value (section_key,
+                                                 ACE_TEXT (item_name.c_str ()),
+                                                 item_value);
           if (unlikely (result == -1))
           {
             ACE_ERROR ((LM_ERROR,

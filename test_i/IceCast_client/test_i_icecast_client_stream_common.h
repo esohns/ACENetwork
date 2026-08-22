@@ -197,6 +197,9 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
    , subscriber (NULL)
    , targetFileName ()
    , outputFormat ()
+#if defined (LIBPIPEWIRE_SUPPORT)
+   , pipewireConfiguration (NULL)
+#endif // LIBPIPEWIRE_SUPPORT
 #if defined (PROJECTM_SUPPORT)
    , projectMConfiguration (NULL)
 #endif // PROJECTM_SUPPORT
@@ -242,6 +245,9 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
   struct Stream_MediaFramework_ALSA_MediaType                           outputFormat;
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct Stream_MediaFramework_Pipewire_Configuration*                  pipewireConfiguration;
+#endif // LIBPIPEWIRE_SUPPORT
 #if defined (PROJECTM_SUPPORT)
   struct Stream_Visualization_ProjectM_Configuration*                   projectMConfiguration;
 #endif // PROJECTM_SUPPORT
@@ -263,21 +269,13 @@ struct Test_I_IceCastClient_StreamConfiguration_2
   Test_I_IceCastClient_StreamConfiguration_2 ()
    : HTTP_StreamConfiguration ()
    , displayVideo (true)
-   //, format ()
+   , renderer (STREAM_DEVICE_RENDERER_INVALID)
    , URL ()
-  {
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    ACE_OS::memset (&format, 0, sizeof (struct _AMMediaType));
-//#endif // ACE_WIN32 || ACE_WIN64
-  }
+  {}
 
-  bool                                        displayVideo;
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  struct _AMMediaType                         format;
-//#else
-//  struct Stream_MediaFramework_ALSA_MediaType format;
-//#endif // ACE_WIN32 || ACE_WIN64
-  std::string                                 URL;
+  bool                        displayVideo;
+  enum Stream_Device_Renderer renderer;
+  std::string                 URL;
 };
 
 //extern const char stream_name_string_[];

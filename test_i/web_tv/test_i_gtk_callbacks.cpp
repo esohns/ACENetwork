@@ -591,7 +591,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   // sanity check(s)
   struct Test_I_WebTV_UI_CBData* data_p =
-      static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_WebTV_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->UIState);
@@ -655,8 +655,8 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
   GtkListStore* list_store_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME)));
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_CHANNEL_NAME)));
   ACE_ASSERT (list_store_p);
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
                                         1, GTK_SORT_ASCENDING);
@@ -664,8 +664,8 @@ idle_initialize_UI_cb (gpointer userData_in)
                  *data_p->channels);
 
   combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_AUDIOCHANNEL_NAME)));
   ACE_ASSERT (combo_box_p);
   cell_renderer_p = gtk_cell_renderer_text_new ();
   if (!cell_renderer_p)
@@ -686,14 +686,14 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
   list_store_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_AUDIOCHANNEL_NAME)));
   ACE_ASSERT (list_store_p);
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
                                         1, GTK_SORT_ASCENDING);
 
   combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_RESOLUTION_NAME)));
   ACE_ASSERT (combo_box_p);
   cell_renderer_p = gtk_cell_renderer_text_new ();
@@ -715,8 +715,8 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
   list_store_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_LISTSTORE_RESOLUTION_NAME)));
   ACE_ASSERT (list_store_p);
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
                                         1, GTK_SORT_ASCENDING);
@@ -792,7 +792,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   NULL);
 
   toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_DISPLAY_NAME)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
@@ -805,7 +805,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   load_adapters (list_store_p);
 
   combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_ADAPTER_NAME)));
   ACE_ASSERT (combo_box_p);
   cell_renderer_p = gtk_cell_renderer_text_new ();
@@ -834,7 +834,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   load_displays (list_store_p);
 
   combo_box_p =
-      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_DISPLAY_NAME)));
   ACE_ASSERT (combo_box_p);
   cell_renderer_p = gtk_cell_renderer_text_new ();
@@ -866,7 +866,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                    1.0 / static_cast<double> (width));
 
   GtkStatusbar* statusbar_p =
-      GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+    GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_NAME)));
   ACE_ASSERT (statusbar_p);
   guint context_id =

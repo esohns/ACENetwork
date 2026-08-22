@@ -69,6 +69,10 @@
 #include "common_ui_gtk_manager_common.h"
 #include "common_ui_gtk_tools.h"
 
+#if defined (LIBPIPEWIRE_SUPPORT)
+#include "stream_lib_pipewire_tools.h"
+#endif // LIBPIPEWIRE_SUPPORT
+
 #include "net_macros.h"
 
 #include "net_client_common_tools.h"
@@ -522,6 +526,23 @@ idle_finalize_UI_cb (gpointer userData_in)
     data_p->volumeControl->Release (); data_p->volumeControl = NULL;
   } // end IF
 #else
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct pw_thread_loop* dummy_p = NULL;
+  if (data_p->pipewireConfiguration->loop)
+    pw_thread_loop_lock (data_p->pipewireConfiguration->loop);
+  Stream_MediaFramework_Pipewire_Tools::freeVolumeControl (dummy_p,
+                                                           data_p->pipewireConfiguration->context,
+                                                           data_p->pipewireConfiguration->core,
+                                                           data_p->pipewireConfiguration->stream);
+  if (data_p->pipewireConfiguration->loop)
+  {
+    pw_thread_loop_unlock (data_p->pipewireConfiguration->loop);
+    pw_thread_loop_stop (data_p->pipewireConfiguration->loop);
+    pw_thread_loop_destroy (data_p->pipewireConfiguration->loop); data_p->pipewireConfiguration->loop = NULL;
+  } // end IF
+  ACE_ASSERT (!data_p->pipewireConfiguration->loop && !data_p->pipewireConfiguration->context && !data_p->pipewireConfiguration->core && !data_p->pipewireConfiguration->stream);
+#endif // LIBPIPEWIRE_SUPPORT
+
   Stream_MediaFramework_ALSA_Tools::freeMixerHandle (data_p->mixerHandle);
   data_p->mixerHandle = NULL;
   data_p->volumeControl = NULL;
@@ -697,12 +718,36 @@ continue_2:
                 ACE_TEXT ((*iterator_2).second.second->deviceIdentifier.identifier.c_str ())));
   } // end IF
 
-  long min_level_i, max_level_i, current_level_i;
+#if defined (LIBPIPEWIRE_SUPPORT)
+  ACE_ASSERT (!data_p->pipewireConfiguration->loop);
+  data_p->pipewireConfiguration->loop =
+    pw_thread_loop_new (ACE_TEXT_ALWAYS_CHAR ("icecastclient-thread-loop"),
+                        NULL);
+  ACE_ASSERT (data_p->pipewireConfiguration->loop);
+  int result_3 = pw_thread_loop_start (data_p->pipewireConfiguration->loop);
+  ACE_ASSERT (result_3 >= 0);
+  pw_thread_loop_lock (data_p->pipewireConfiguration->loop);
+  struct Stream_MediaFramework_ALSA_MediaType media_type_s;
+  media_type_s.format = SND_PCM_FORMAT_FLOAT;
+  if (!Stream_MediaFramework_Pipewire_Tools::getVolumeControl (media_type_s,
+                                                               data_p->pipewireConfiguration->loop,
+                                                               data_p->pipewireConfiguration->context,
+                                                               data_p->pipewireConfiguration->core,
+                                                               data_p->pipewireConfiguration->stream))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_MediaFramework_Pipewire_Tools::getVolumeControl(), continuing\n")));
+  } // end IF
+  pw_thread_loop_unlock (data_p->pipewireConfiguration->loop);
+  ACE_ASSERT (data_p->pipewireConfiguration->loop && data_p->pipewireConfiguration->context && data_p->pipewireConfiguration->core && data_p->pipewireConfiguration->stream);
+#endif // LIBPIPEWIRE_SUPPORT
+
+  long min_level_i, current_level_i;
   if (!Stream_MediaFramework_ALSA_Tools::getVolumeControl ((*iterator_2).second.second->deviceIdentifier.identifier,
                                                            ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME),
                                                            false, // playback
                                                            min_level_i,
-                                                           max_level_i,
+                                                           data_p->maxVolumeLevel,
                                                            current_level_i,
                                                            data_p->mixerHandle,
                                                            data_p->volumeControl))
@@ -719,7 +764,7 @@ continue_2:
                         0);
   gtk_range_set_range (GTK_RANGE (scale_p),
                        static_cast<gdouble> (min_level_i),
-                       static_cast<gdouble> (max_level_i));
+                       static_cast<gdouble> (data_p->maxVolumeLevel));
   gtk_range_set_increments (GTK_RANGE (scale_p),
                             static_cast<gdouble> (1),
                             static_cast<gdouble> (1));
@@ -2600,11 +2645,32 @@ scale_volume_value_changed_cb (GtkRange* range_in,
     //                                                   NULL);
   ACE_ASSERT (SUCCEEDED (result));
 #else
-  if (!data_p->mixerHandle || !data_p->volumeControl)
-    return;
-  // snd_mixer_handle_events (data_p->mixerHandle);
-  snd_mixer_selem_set_playback_volume_all (data_p->volumeControl,
-                                           static_cast<long> (value_d));
+  bool use_pipewire_b =
+    data_p->configuration->streamConfiguration_2.configuration_->renderer == STREAM_DEVICE_RENDERER_PIPEWIRE;
+  if (use_pipewire_b)
+  {
+#if defined (LIBPIPEWIRE_SUPPORT)
+    ACE_ASSERT (data_p->pipewireConfiguration->loop);
+    // pw_thread_loop_lock (data_p->pipewireConfiguration->loop);
+    if (!Stream_MediaFramework_Pipewire_Tools::setVolumeLevel (//data_p->pipewireConfiguration->loop,
+                                                               data_p->pipewireConfiguration->stream,
+                                                               2,
+                                                               value_d / data_p->maxVolumeLevel))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Stream_MediaFramework_Pipewire_Tools::setVolumeLevel(), continuing\n")));
+    } // end IF
+    // pw_thread_loop_unlock (data_p->pipewireConfiguration->loop);
+#endif // LIBPIPEWIRE_SUPPORT
+  } // end IF
+  else
+  {
+    if (!data_p->mixerHandle || !data_p->volumeControl)
+      return;
+    // snd_mixer_handle_events (data_p->mixerHandle);
+    snd_mixer_selem_set_playback_volume_all (data_p->volumeControl,
+                                             static_cast<long> (value_d));
+  } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64
 } // scale_volume_value_changed_cb
 
