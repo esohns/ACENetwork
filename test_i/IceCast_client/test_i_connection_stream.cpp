@@ -579,8 +579,8 @@ continue_:
                       false);
 #endif // LIBPIPEWIRE_SUPPORT
       break;
-#endif // ACE_WIN32 || ACE_WIN64
     }
+#endif // ACE_WIN32 || ACE_WIN64
     default:
     {
       ACE_DEBUG ((LM_ERROR,
