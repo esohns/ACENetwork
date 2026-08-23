@@ -36,6 +36,7 @@
 #define TEST_I_ICECAST_CLIENT_DEFAULT_MP3_URL               "http://streaming.fueralle.org:8000/bermudafunk_high.m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_VORBIS_URL            "http://streaming.fueralle.org:8000/bermudafunk.ogg.m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OPUS_URL              "http://xfer.hirschmilch.de:8000/chillout.opus.m3u"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_THEORA_URL            "https://woolyss.com/f/theora-vorbis-caminandes-2.ogv"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_URL                   "https://rdst.win:59000/dos.webm.m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_WINDOW_TITLE          "IceCast client"
 
@@ -59,6 +60,7 @@
 // stream URL
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_HREF_M3U_SUFFIX    ".m3u"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGG_SUFFIX  ".ogg"
+#define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGV_SUFFIX  ".ogv"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OPUS_SUFFIX ".opus"
 #define TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_WEBM_SUFFIX ".webm"
 

@@ -1851,11 +1851,22 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T iterator_4 =
       data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_2.end ());
+    Net_ConnectionConfigurationsIterator_t iterator_5 =
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
+    ACE_ASSERT (iterator_5 != data_p->configuration->connectionConfigurations.end ());
+
+    bool direct_connect_b = false;
     Test_I_TCPConnector_t connector;
 #if defined (SSL_SUPPORT)
     Test_I_SSLConnector_t ssl_connector;
 #endif // SSL_SUPPORT
     Test_I_AsynchTCPConnector_t asynch_connector;
+    Test_I_TCPConnector_2_t connector_2;
+#if defined (SSL_SUPPORT)
+    Test_I_SSLConnector_2_t ssl_connector_2;
+#endif // SSL_SUPPORT
+    Test_I_AsynchTCPConnector_2_t asynch_connector_2;
+    ACE_INET_Addr target_address;
     GtkSpinner* spinner_p = NULL;
     GtkProgressBar* progress_bar_p = NULL;
     struct Net_UserData user_data_s;
@@ -1866,6 +1877,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
     ACE_ASSERT (spin_button_p);
     static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.bufferSize =
+      static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_5).second)->socketConfiguration.bufferSize =
       static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
 
     (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
@@ -1898,8 +1911,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       Net_Common_Tools::URLToHostName ((*iterator_3).second.second->URL,
                                        false,  // return hostname
                                        false); // do not return port#
-    static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
-      hostname_string;
+    
+    direct_connect_b =
+      Common_String_Tools::endswith ((*iterator_3).second.second->URL,
+                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGV_SUFFIX));
+    if (direct_connect_b)
+    {
+      (*iterator_4).second.second->URL = (*iterator_3).second.second->URL;
+      data_p->configuration->streamConfiguration_2.configuration_->URL =
+        (*iterator_3).second.second->URL;
+      static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->socketConfiguration.hostname = hostname_string;
+    } // end IF
+    else
+      static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname = hostname_string;
 
     position =
       hostname_string_2.find_last_of (':', std::string::npos);
@@ -1911,9 +1935,12 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                             : HTTP_DEFAULT_SERVER_PORT);
       hostname_string_2 += converter.str ();
     } // end IF
-    result =
-      static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
-                                                                                                                            AF_INET);
+    if (direct_connect_b)
+      result = static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
+                                                                                                                                       AF_INET);
+    else
+      result = static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_2.c_str (),
+                                                                                                                                     AF_INET);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1921,15 +1948,21 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (hostname_string_2.c_str ())));
       goto error;
     } // end IF
+    target_address =
+      (direct_connect_b ? static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->socketConfiguration.address
+                        : static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address);
+
+    static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->socketConfiguration.useLoopBackDevice =
+      static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->socketConfiguration.address.is_loopback ();
     static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
       static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
-
     check_button_p =
       GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
     ACE_ASSERT (check_button_p);
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                  static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ());
+                                  (direct_connect_b ? static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second)->socketConfiguration.address.is_loopback ()
+                                                    : static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ()));
 
     // save to file ?
     check_button_p =
@@ -1967,26 +2000,48 @@ continue_2:
     // step3: connect to peer
     if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     {
+      if (direct_connect_b)
+      {
 #if defined (SSL_SUPPORT)
-      if (use_SSL)
-        data_p->handle =
-          Net_Client_Common_Tools::connect (ssl_connector,
-                                            *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second),
-                                            user_data_s,
-                                            static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                            true,
-                                            true,
-                                            0);
-      else
+        if (use_SSL)
+          data_p->handle = Net_Client_Common_Tools::connect (ssl_connector_2,
+                                                             *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second),
+                                                             user_data_s,
+                                                             target_address,
+                                                             true,
+                                                             true,
+                                                             0);
+        else
 #endif // SSL_SUPPORT
-        data_p->handle =
-            Net_Client_Common_Tools::connect (connector,
-                                              *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second),
-                                              user_data_s,
-                                              static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                              true,
-                                              true,
-                                              0);
+          data_p->handle = Net_Client_Common_Tools::connect (connector_2,
+                                                             *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second),
+                                                             user_data_s,
+                                                             target_address,
+                                                             true,
+                                                             true,
+                                                             0);
+      } // end IF
+      else
+      {
+#if defined (SSL_SUPPORT)
+        if (use_SSL)
+          data_p->handle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                             *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                             user_data_s,
+                                                             target_address,
+                                                             true,
+                                                             true,
+                                                             0);
+        else
+#endif // SSL_SUPPORT
+          data_p->handle = Net_Client_Common_Tools::connect (connector,
+                                                             *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                             user_data_s,
+                                                             target_address,
+                                                             true,
+                                                             true,
+                                                             0);
+      } // end ELSE
     } // end IF
     else
     {
@@ -1994,20 +2049,28 @@ continue_2:
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
-      data_p->handle =
-          Net_Client_Common_Tools::connect (asynch_connector,
-                                            *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second),
-                                            user_data_s,
-                                            static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
-                                            true,
-                                            true,
-                                            0);
+      if (direct_connect_b)
+        data_p->handle = Net_Client_Common_Tools::connect (asynch_connector_2,
+                                                           *static_cast<Test_I_IceCastClient_ConnectionConfiguration_2_t*> ((*iterator_5).second),
+                                                           user_data_s,
+                                                           target_address,
+                                                           true,
+                                                           true,
+                                                           0);
+      else
+        data_p->handle = Net_Client_Common_Tools::connect (asynch_connector,
+                                                           *static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                           user_data_s,
+                                                           target_address,
+                                                           true,
+                                                           true,
+                                                           0);
     } // end ELSE
     if (data_p->handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_IceCastClient_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (target_address, false, false).c_str ())));
       goto error;
     } // end IF
 

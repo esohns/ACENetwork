@@ -46,6 +46,9 @@
 #if defined (OPUS_SUPPORT)
 #include "stream_dec_opus_decoder.h"
 #endif // OPUS_SUPPORT
+#if defined (THEORA_SUPPORT)
+#include "stream_dec_theora_vorbis_decoder.h"
+#endif // THEORA_SUPPORT
 #if defined (VORBIS_SUPPORT)
 #include "stream_dec_vorbis_decoder.h"
 #endif // VORBIS_SUPPORT
@@ -281,6 +284,23 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,        
                               libacestream_default_misc_media_splitter_module_name_string,
                               Stream_INotify_t,                                            // stream notification interface type
                               Test_I_MediaSplitter);                                       // writer type
+
+// a/v
+#if defined (THEORA_SUPPORT)
+typedef Stream_Decoder_TheoraVorbisDecoder_T<ACE_MT_SYNCH,
+                                             Common_TimePolicy_t,
+                                             struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,
+                                             Stream_ControlMessage_t,
+                                             Test_I_Message,
+                                             Test_I_SessionMessage_2,
+                                             struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_TheoraVorbisDecoder;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_IceCastClient_SessionData_2,                         // session data type
+                              enum Stream_SessionMessageType,                                    // session event type
+                              struct Test_I_IceCastClient_ModuleHandlerConfiguration_2,          // module handler configuration type
+                              libacestream_default_dec_theora_vorbis_decoder_module_name_string,
+                              Stream_INotify_t,                                                  // stream notification interface type
+                              Test_I_TheoraVorbisDecoder);                                       // writer type
+#endif // THEORA_SUPPORT
 
 // video
 #if defined (FFMPEG_SUPPORT)

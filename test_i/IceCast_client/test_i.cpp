@@ -906,7 +906,8 @@ do_work (bool debugParser_in,
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_3; // Delay_2 (Video-)
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_4; // Resize (Video-)
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_5; // Encoder
-  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_6; // Convert (to NV12,...)
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_6; // Convert (to NV12)
+  struct Test_I_IceCastClient_ModuleHandlerConfiguration_2 modulehandler_configuration_2_7; // Convert (to RGB32)
   struct Test_I_IceCastClient_ModuleHandlerConfiguration_3 modulehandler_configuration_3;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration_2;
@@ -1193,6 +1194,12 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_2_6)));
+
+  modulehandler_configuration_2_7 = modulehandler_configuration_2;
+  modulehandler_configuration_2_7.outputFormat.video.format = AV_PIX_FMT_BGRA;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("LibAV_Converter_2"),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2_7)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =

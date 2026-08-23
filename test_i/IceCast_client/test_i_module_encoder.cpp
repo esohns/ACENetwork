@@ -435,6 +435,13 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
       inherited::getMediaType (session_data_r.formats.back (),
                                STREAM_MEDIATYPE_VIDEO,
                                video_media_type_s);
+      // *TODO*: for theora/vorbis case, there is a bug here: the input format
+      //         YUV420P gets converted to NV12 by the LibAVConverter and this
+      //         conversion is applied to the session data after the encoder has
+      //         already been initialized, so the input is processed as YUV420P
+      //         instead of NV12 which it in fact is
+      if (inherited::configuration_->inputFormat != AV_PIX_FMT_NONE)
+        video_media_type_s.format = inherited::configuration_->inputFormat;
 
       output_format_p =
         av_guess_format (NULL,

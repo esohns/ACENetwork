@@ -220,6 +220,9 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
+  inherited::CONFIGURATION_T::ITERATOR_T iterator_2 =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_ENCODER_DEFAULT_NAME_STRING));
+  ACE_ASSERT (iterator_2 != inherited::configuration_->end ());
 
   Test_I_SessionManager_2* session_manager_p =
     Test_I_SessionManager_2::SINGLETON_T::instance ();
@@ -227,6 +230,9 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   struct Test_I_IceCastClient_SessionData_2& session_data_r =
     const_cast<struct Test_I_IceCastClient_SessionData_2&> (session_manager_p->getR (inherited::id_));
   bool may_have_video_b = false;
+#if defined (FFMPEG_SUPPORT)
+  enum AVPixelFormat input_format_e = AV_PIX_FMT_NV12;
+#endif // FFMPEG_SUPPORT
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -329,10 +335,6 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
     branch_p = module_p;
     branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
     branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
-  //  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
-  //#if defined (PROJECTM_SUPPORT)
-  //  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DECODE_NAME));
-  //#endif // PROJECTM_SUPPORT
     idistributor_p =
       dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
     ACE_ASSERT (idistributor_p);
@@ -396,12 +398,14 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
     module_p = NULL;
 
     // save
+#if defined (FFMPEG_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_LibAVConvert_Module (this,
                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
                     false);
     layout_in->append (module_p, branch_3, index_3);
     module_p = NULL;
+#endif // FFMPEG_SUPPORT
 
     ACE_NEW_RETURN (module_p,
                     Test_I_VideoTagger_Module (this,
@@ -463,11 +467,146 @@ continue_:
     //media_type_s.rate = 48000;
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
+  else if (Common_String_Tools::endswith (inherited::configuration_->configuration_->URL,
+                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_STREAM_OGV_SUFFIX)))
+  { may_have_video_b = true;
+#if defined (THEORA_SUPPORT)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_TheoraVorbisDecoder_Module (this,
+                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_THEORA_VORBIS_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+#endif // THEORA_SUPPORT
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_MediaSplitter_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MEDIASPLITTER_DEFAULT_NAME_STRING)),
+                    false);
+    branch_p = module_p;
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    idistributor_p =
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+    ACE_ASSERT (idistributor_p);
+    idistributor_p->initialize (branches_a);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+
+    // audio
+    ACE_NEW_RETURN (module_p,
+                    Test_I_AudioTagger_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+
+    ++index_i;
+
+    // video
+    // YUV420P --> NV12
+#if defined (FFMPEG_SUPPORT)
+    input_format_e = AV_PIX_FMT_YUV420P;
+    (*iterator_2).second.second->inputFormat = AV_PIX_FMT_NV12;
+    ACE_NEW_RETURN (module_p,
+                    Test_I_LibAVConvert_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoTagger_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Distributor_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
+                    false);
+    ACE_ASSERT (module_p);
+    branch_3 = module_p;
+    branches_a.clear ();
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_SAVE_NAME));
+    branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+    idistributor_3 =
+      dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+    ACE_ASSERT (idistributor_3);
+    idistributor_3->initialize (branches_a);
+    layout_in->append (module_p, branch_p, index_i); // 1: video branch
+    module_p = NULL;
+
+    // save
+    ACE_NEW_RETURN (module_p,
+                    Test_I_QueueTarget_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_3, index_3);
+    module_p = NULL;
+
+    ++index_3;
+
+    // display
+    if (unlikely (!inherited::configuration_->configuration_->displayVideo))
+      goto continue_2;
+
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Delay_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR ("Delay_2")),
+                    false);
+    layout_in->append (module_p, branch_3, index_3);
+    module_p = NULL;
+
+//#if defined (FFMPEG_SUPPORT)
+//    ACE_NEW_RETURN (module_p,
+//                    Test_I_LibAVConvert_Module (this,
+//                                                ACE_TEXT_ALWAYS_CHAR ("LibAV_Converter_2")),
+//                    false);
+//    layout_in->append (module_p, branch_3, index_3);
+//    module_p = NULL;
+//#endif // FFMPEG_SUPPORT
+
+#if defined (FFMPEG_SUPPORT)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_LibAVResize_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_3, index_3);
+    module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Direct3d_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_DIRECT3D_DEFAULT_NAME_STRING)),
+                    false);
+#else
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Wayland_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_WAYLAND_WINDOW_DEFAULT_NAME_STRING)),
+                    false);
+#endif // ACE_WIN32 || ACE_WIN64
+    layout_in->append (module_p, branch_3, index_3);
+    module_p = NULL;
+
+continue_2:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    waveformatex_s.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+    waveformatex_s.wBitsPerSample = 32;
+    waveformatex_s.nSamplesPerSec = 48000;
+#else
+    media_type_s.format = SND_PCM_FORMAT_FLOAT;
+    media_type_s.rate = 48000;
+#endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
   else
   { // --> assume mp3 stream
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: \"%s\" apparently not an OGG/Vorbis stream; assuming MP3....\n"),
-                ACE_TEXT (stream_name_string_),
+                ACE_TEXT (stream_name_string_2),
                 ACE_TEXT (inherited::configuration_->configuration_->URL.c_str ())));
 
 #if defined (MPG123_SUPPORT)
@@ -512,7 +651,7 @@ continue_:
   // *TODO*: this needs to be NV12 because the encoder sets the input format
   //         during session initialization (!); not upon arrival of the first
   //         data, when the decoder sends a resize notification
-  media_type_final_s.video.format = AV_PIX_FMT_NV12;
+  media_type_final_s.video.format = input_format_e;
   media_type_final_s.video.frameRate =
     { TEST_I_ICECAST_CLIENT_DEFAULT_INPUT_FRAMERATE, 1 };
   media_type_final_s.video.resolution = { 1920, 1080 };
@@ -523,7 +662,7 @@ continue_:
 
   ACE_NEW_RETURN (module_p,
                   Test_I_Distributor_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
+                                             ACE_TEXT_ALWAYS_CHAR ("Distributor_2")),
                   false);
   ACE_ASSERT (module_p);
   branch_2 = module_p;

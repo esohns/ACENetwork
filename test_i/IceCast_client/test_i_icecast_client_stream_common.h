@@ -194,6 +194,9 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
    , direct3DConfiguration (NULL)
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (FFMPEG_SUPPORT)
+   , inputFormat (AV_PIX_FMT_NONE)
+#endif // FFMPEG_SUPPORT
    , subscriber (NULL)
    , targetFileName ()
    , outputFormat ()
@@ -234,6 +237,11 @@ struct Test_I_IceCastClient_ModuleHandlerConfiguration_2
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct Stream_MediaFramework_Direct3D_Configuration*                  direct3DConfiguration;
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (FFMPEG_SUPPORT)
+  // *TODO*: hack to work around the fact that the encoder does not know the
+  //         output format of the converter in advance (theora decoding case)
+  enum AVPixelFormat                                                    inputFormat;
+#endif // FFMPEG_SUPPORT
   Test_I_ISessionNotify_2_t*                                            subscriber;
   std::string                                                           targetFileName; // dump module
 #if defined (FFMPEG_SUPPORT)
