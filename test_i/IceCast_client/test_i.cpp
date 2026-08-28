@@ -671,7 +671,7 @@ do_parse_configuration_file (const std::string& fileName_in,
     ACE_Configuration_Section_Key section_key;
     result =
       configuration_heap.open_section (root_section_key,
-                                       section_name.c_str (),
+                                       ACE_TEXT (section_name.c_str ()),
                                        0, // MUST exist !
                                        section_key);
     ACE_ASSERT (result == 0);
@@ -745,7 +745,7 @@ do_parse_configuration_file (const std::string& fileName_in,
     ++index;
   } // end WHILE
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("imported \"%s\": %u server(s)\n"),
+              ACE_TEXT ("imported \"%s\": %B server(s)\n"),
               ACE_TEXT (fileName_in.c_str ()),
               configuration_inout.size ()));
 

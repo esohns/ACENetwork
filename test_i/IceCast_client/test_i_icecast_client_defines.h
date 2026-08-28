@@ -28,7 +28,7 @@
 #define TEST_I_ICECAST_CLIENT_INI_SERVER_NUMBER_KEY         "number"
 #define TEST_I_ICECAST_CLIENT_INI_SERVER_NAME_KEY           "name"
 #define TEST_I_ICECAST_CLIENT_INI_SERVER_URL_KEY            "URL"
-                                                            
+
 #define TEST_I_ICECAST_CLIENT_INI_FILE                      "IceCast_client.ini"
 
 #define TEST_I_ICECAST_CLIENT_DEFAULT_OUTPUT_AV_FILE        "output.mp4"
