@@ -916,14 +916,24 @@ continue_2:
 
     // schedule asynchronous updates of the display views
     data_p->eventSourceId =
-      g_timeout_add (std::min (COMMON_UI_GTK_REFRESH_DEFAULT_CAIRO_MS, COMMON_UI_GTK_REFRESH_DEFAULT_OPENGL_MS),
-                     idle_update_display_cb,
+      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_CAIRO_MS,
+                     idle_update_display_1_cb,
                      userData_in);
     if (data_p->eventSourceId > 0)
       data_p->UIState->eventSourceIds.insert (data_p->eventSourceId);
     else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_timeout_add(idle_update_display_cb): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to g_timeout_add(idle_update_display_1_cb): \"%m\", continuing\n")));
+
+    data_p->eventSourceId =
+      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_OPENGL_MS,
+                     idle_update_display_2_cb,
+                     userData_in);
+    if (data_p->eventSourceId > 0)
+      data_p->UIState->eventSourceIds.insert (data_p->eventSourceId);
+    else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add(idle_update_display_2_cb): \"%m\", continuing\n")));
   } // end lock scope
 
   // step6: disable some functions ?
@@ -1587,35 +1597,57 @@ idle_update_info_display_cb (gpointer userData_in)
 }
 
 gboolean
-idle_update_display_cb (gpointer userData_in)
+idle_update_display_1_cb (gpointer userData_in)
 {
-  // NETWORK_TRACE (ACE_TEXT ("::idle_update_display_cb"));
+  // NETWORK_TRACE (ACE_TEXT ("::idle_update_display_1_cb"));
 
   // sanity check(s)
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
-  // trigger refresh of the 2D area ?
-  GtkDrawingArea* drawing_area_p = NULL;
-  GdkWindow* window_p = NULL;
-  drawing_area_p =
-    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
-  ACE_ASSERT (drawing_area_p);
-  window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+  static GdkWindow* window_p = NULL;
   if (unlikely (!window_p))
-    goto continue_2; // <-- not realized yet
+  {
+    Common_UI_GTK_BuildersConstIterator_t iterator =
+      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+    GtkDrawingArea* drawing_area_p = NULL;
+    drawing_area_p =
+      GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+    ACE_ASSERT (drawing_area_p);
+    window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+
+    data_p->spectrumAnalyzerCBData.window = window_p;
+  } // end IF
+  if (unlikely (!window_p))
+    return G_SOURCE_CONTINUE; // <-- not realized yet
 
   gdk_window_invalidate_rect (window_p,
                               NULL,   // whole window
                               FALSE); // invalidate children ?
 
-continue_2:
+  return G_SOURCE_CONTINUE;
+}
+
+gboolean
+idle_update_display_2_cb (gpointer userData_in)
+{
+  // NETWORK_TRACE (ACE_TEXT ("::idle_update_display_2_cb"));
+
+  // sanity check(s)
+  struct Test_I_IceCastClient_UI_CBData* data_p =
+    static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  //Common_UI_GTK_BuildersConstIterator_t iterator =
+  //  data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  //ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  GdkWindow* window_p = NULL;
 #if defined (GTKGL_SUPPORT)
   ACE_ASSERT (!data_p->UIState->OpenGLContexts.empty ());
   Common_UI_GTK_GLContextsIterator_t iterator_2 =
@@ -1629,14 +1661,13 @@ continue_2:
 #else
   window_p = gtk_widget_get_window (GTK_WIDGET (&(*iterator_2).first->darea));
 #endif // GTK_CHECK_VERSION
+#endif /* GTKGL_SUPPORT */
   if (unlikely (!window_p))
-    goto continue_3; // <-- not realized yet
+    return G_SOURCE_CONTINUE; // <-- not realized yet
 
   gdk_window_invalidate_rect (window_p,
                               NULL,
                               FALSE);
-continue_3:
-#endif /* GTKGL_SUPPORT */
 
   return G_SOURCE_CONTINUE;
 }
@@ -2758,22 +2789,26 @@ scale_beat_sensitivity_value_changed_cb (GtkRange* range_in,
 
 gboolean
 drawingarea_query_tooltip_cb (GtkWidget*  widget_in,
-                              gint        x_in, gint y_in,
+                              gint        x_in,
+                              gint        y_in,
                               gboolean    keyboardMode_in,
                               GtkTooltip* tooltip_in,
                               gpointer    userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::drawingarea_query_tooltip_cb"));
 
+  ACE_UNUSED_ARG (x_in);
+  ACE_UNUSED_ARG (y_in);
   ACE_UNUSED_ARG (keyboardMode_in);
 
   // sanity check(s)
+  ACE_ASSERT (widget_in);
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   if (!data_p->fft)
-    return FALSE;
+    return FALSE; // <-- stream not running
   Test_I_IceCastClient_StreamConfiguration_2_t::ITERATOR_T modulehandler_configuration_iterator =
     data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (modulehandler_configuration_iterator != data_p->configuration->streamConfiguration_2.end ());
@@ -2899,12 +2934,11 @@ drawingarea_size_allocate_cb (GtkWidget* widget_in,
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-  if (!data_p->spectrumAnalyzerCBData.resizeNotification)
-    return;
-
   GdkWindow* window_p = gtk_widget_get_window (widget_in);
-  if (!window_p)
+  if (unlikely (!window_p))
     return; // <-- not realized yet
+  if (!data_p->spectrumAnalyzerCBData.resizeNotification)
+    return; // <-- stream not running
 
   try {
     data_p->spectrumAnalyzerCBData.resizeNotification->setP (window_p);
@@ -2942,19 +2976,16 @@ drawingarea_draw_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
 
+  ACE_UNUSED_ARG (widget_in);
+
   // sanity check(s)
-  ACE_ASSERT (widget_in);
   ACE_ASSERT (context_in);
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   // sanity check(s)
-  data_p->spectrumAnalyzerCBData.window =
-    gtk_widget_get_window (widget_in);
-  if (!data_p->spectrumAnalyzerCBData.window)
-    return FALSE; // not realized (yet)
-  if (!data_p->spectrumAnalyzerCBData.dispatch)
+  if (unlikely (!data_p->spectrumAnalyzerCBData.dispatch))
     return FALSE; // stream not running (yet)
   data_p->spectrumAnalyzerCBData.context = context_in;
 
@@ -2975,23 +3006,19 @@ drawingarea_expose_event_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::drawingarea_expose_event_cb"));
 
+  ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
 
   // sanity check(s)
-  ACE_ASSERT (widget_in);
-  ACE_ASSERT (context_in);
   struct Test_I_IceCastClient_UI_CBData* data_p =
     static_cast<struct Test_I_IceCastClient_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
 
   // sanity check(s)
-  data_p->spectrumAnalyzerCBData.window = gtk_widget_get_window (widget_in);
-  if (!data_p->spectrumAnalyzerCBData.window)
-    return FALSE; // not realized (yet)
-  if (!data_p->spectrumAnalyzerCBData.dispatch)
+  if (unlikely (!data_p->spectrumAnalyzerCBData.dispatch))
     return FALSE; // stream not running (yet)
-  if (!data_p->spectrumAnalyzerCBData.context)
-  {
+  if (unlikely (!data_p->spectrumAnalyzerCBData.context))
+  { ACE_ASSERT (data_p->spectrumAnalyzerCBData.window);
     data_p->spectrumAnalyzerCBData.context =
       gdk_cairo_create (GDK_DRAWABLE (data_p->spectrumAnalyzerCBData.window));
     if (unlikely (!data_p->spectrumAnalyzerCBData.context))

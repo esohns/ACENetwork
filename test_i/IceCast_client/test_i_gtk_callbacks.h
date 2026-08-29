@@ -42,7 +42,8 @@ gboolean idle_reset_UI_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
-gboolean idle_update_display_cb (gpointer);
+gboolean idle_update_display_1_cb (gpointer);
+gboolean idle_update_display_2_cb (gpointer);
 
 //------------------------------------------------------------------------------
 
