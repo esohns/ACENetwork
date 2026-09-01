@@ -33,17 +33,19 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_html_defines.h"
+
 #include "stream_misc_defines.h"
 
 #include "stream_net_http_defines.h"
 
 #include "net_macros.h"
 
+#include "test_i_common_modules.h"
 #include "test_i_message.h"
 #include "test_i_session_message.h"
-#include "test_i_m3u_module_parser.h"
-#include "test_i_common_modules.h"
-#include "test_i_module_httpget.h"
+//#include "test_i_m3u_module_parser.h"
+//#include "test_i_module_httpget.h"
 
 Test_I_ConnectionStream::Test_I_ConnectionStream ()
  : inherited ()
@@ -68,36 +70,51 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
                                              ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  module_p = NULL;
+
   //ACE_NEW_RETURN (module_p,
   //                Test_I_StatisticReport_Module (this,
   //                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
   //                false);
   //layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Defragment_Module (this,
-                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_M3U_Module_Parser_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                 Test_I_Module_HTTPGet_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
-                 false);
-  layout_in->append (module_p, NULL, 0);
   //module_p = NULL;
+
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_Defragment_Module (this,
+  //                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_M3U_Module_Parser_Module (this,
+  //                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+
+#if defined (LIBXML2_SUPPORT)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_HTMLParser_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (MODULE_HTML_PARSER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+#endif // LIBXML2_SUPPORT
+
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_HTTPGet_Module (this,
+  //                                       ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+
   //ACE_NEW_RETURN (module_p,
   //                Test_I_Module_Dump_Module (this,
   //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
   //                false);
   //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
 
   deleteModules_out = true;
 
@@ -181,6 +198,157 @@ failed:
 
 //////////////////////////////////////////
 
+Test_I_ConnectionStream_1b::Test_I_ConnectionStream_1b ()
+ : inherited ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::Test_I_ConnectionStream_1b"));
+
+}
+
+bool
+Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
+                                  bool& deleteModules_out)
+{
+  STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::load"));
+
+  bool result = inherited::load (layout_in,
+                                 deleteModules_out);
+  ACE_ASSERT (result);
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_HTTPMarshal_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_StatisticReport_Module (this,
+  //                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_Defragment_Module (this,
+  //                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_M3U_Module_Parser_Module (this,
+  //                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+
+//#if defined (LIBXML2_SUPPORT)
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_HTMLParser_Module (this,
+//                                            ACE_TEXT_ALWAYS_CHAR (MODULE_HTML_PARSER_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//#endif // LIBXML2_SUPPORT
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_HTTPGet_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  //ACE_NEW_RETURN (module_p,
+  //                Test_I_Module_Dump_Module (this,
+  //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
+  //                false);
+  //layout_in->append (module_p, NULL, 0);
+  //module_p = NULL;
+
+  deleteModules_out = true;
+
+  return true;
+}
+
+bool
+Test_I_ConnectionStream_1b::initialize (const inherited::CONFIGURATION_T& configuration_in,
+                                        ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::initialize"));
+
+  // sanity check(s)
+  ACE_ASSERT (!inherited::isRunning ());
+
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
+  bool reset_setup_pipeline = false;
+  struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
+
+  // allocate a new session state, reset stream
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
+                ACE_TEXT (stream_name_string_1b)));
+    goto failed;
+  } // end IF
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
+
+  session_data_p =
+    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
+  // *TODO*: remove type inferences
+  //session_data_p->sessionID = configuration_in.sessionID;
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+
+  // ---------------------------------------------------------------------------
+
+  if (configuration_in.configuration_->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                  ACE_TEXT (stream_name_string_1b)));
+      goto failed;
+    } // end IF
+
+  // -------------------------------------------------------------
+
+  // set (session) message allocator
+  //inherited::allocator_ = configuration_in.messageAllocator;
+
+  inherited::isInitialized_ = true;
+
+  return true;
+
+failed:
+  if (reset_setup_pipeline)
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+      setup_pipeline;
+  if (!inherited::STREAM_BASE_T::reset ())
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
+                ACE_TEXT (stream_name_string_1b)));
+
+  return false;
+}
+
+//////////////////////////////////////////
+
 Test_I_ConnectionStream_2::Test_I_ConnectionStream_2 ()
  : inherited ()
 {
@@ -204,19 +372,22 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
                                              ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_StatisticReport_Module (this,
-  //                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
   module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPGet_2_Module (this,
-                                           ACE_TEXT_ALWAYS_CHAR ("HTTPGet")),
+                  Test_I_StatisticReport_2_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_HTTPGet_2_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
   //ACE_NEW_RETURN (module_p,
   //                Test_I_MPEGTSDecoder_Module (this,
   //                                            ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
@@ -237,7 +408,7 @@ Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_FileSink_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR ("FileSink")),
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
 
@@ -304,7 +475,7 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_name_string_)));
+                ACE_TEXT (stream_name_string_2)));
     goto failed;
   } // end IF
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -336,7 +507,7 @@ Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configu
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_name_string_)));
+                  ACE_TEXT (stream_name_string_2)));
       goto failed;
     } // end IF
 
@@ -356,7 +527,7 @@ failed:
   if (!inherited::STREAM_BASE_T::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
-                ACE_TEXT (stream_name_string_)));
+                ACE_TEXT (stream_name_string_2)));
 
   return false;
 }

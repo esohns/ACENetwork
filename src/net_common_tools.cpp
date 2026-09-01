@@ -4796,24 +4796,6 @@ Net_Common_Tools::URLToProtocol (const std::string& URL_in)
 }
 
 std::string
-Net_Common_Tools::bufferToString (ACE_Message_Block* messageBlock_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::bufferToString"));
-
-  std::string result;
-
-  for (ACE_Message_Block* message_block_p = messageBlock_in;
-       message_block_p;
-       message_block_p = message_block_p->cont ())
-  {
-    result.append (message_block_p->rd_ptr (),
-                   message_block_p->length ());
-  } // end FOR
-
-  return result;
-}
-
-std::string
 Net_Common_Tools::makeUUID ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::makeUUID"));

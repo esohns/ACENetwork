@@ -72,20 +72,26 @@ struct Test_I_URLStreamLoad_Configuration
    : Test_I_Configuration ()
 #endif // GTK_USE
    , parserConfiguration ()
+   , parserConfiguration_1b ()
+   , parserConfiguration_2 ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
+   , streamConfiguration_1b ()
    , streamConfiguration_2 ()
   {}
 
   // **************************** parser data **********************************
   struct HTTP_ParserConfiguration                        parserConfiguration;
+  struct HTTP_ParserConfiguration                        parserConfiguration_1b;
+  struct HTTP_ParserConfiguration                        parserConfiguration_2;
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t                         connectionConfigurations;
   // **************************** stream data **********************************
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration;
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1b;
   Test_I_URLStreamLoad_StreamConfiguration_2_t           streamConfiguration_2;
 };
 

@@ -731,13 +731,13 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
   CBData_->URIs.clear ();
 
   for (int i = 0;
-        i < data_r.xPathObject->nodesetval->nodeNr;
-        ++i)
+       i < data_r.xPathObject->nodesetval->nodeNr;
+       ++i)
   {
     href_string =
       (char*)data_r.xPathObject->nodesetval->nodeTab[i]->children->content;
     if (!Common_String_Tools::endswith (href_string.c_str (),
-                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_HREF_M3U_SUFFIX)))
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_ICECAST_CLIENT_DEFAULT_ICECAST_HREF_M3U_SUFFIX)))
       continue;
 
     CBData_->URIs.push_back (href_string);

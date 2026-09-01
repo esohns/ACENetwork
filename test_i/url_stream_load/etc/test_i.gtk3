@@ -371,32 +371,66 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkFrame" id="frame_url">
+                      <object class="GtkFrame" id="frame_configuration">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label_xalign">0</property>
                         <child>
-                          <object class="GtkAlignment" id="alignment_url">
+                          <object class="GtkAlignment" id="alignment_configuration">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkEntry" id="entry_url">
+                              <object class="GtkBox" id="box_configuration">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="has_tooltip">True</property>
-                                <property name="tooltip_text" translatable="yes">URL</property>
-                                <property name="has_frame">False</property>
-                                <property name="invisible_char">●</property>
-                                <property name="activates_default">True</property>
-                                <property name="text" translatable="yes">https://www.youtube.com/watch?v=fvq5uhqGCWM&amp;list=RDGMEMYH9CUrFO7CfLJpaD7UR85wVMfvq5uhqGCWM</property>
-                                <property name="xalign">1</property>
-                                <property name="shadow_type">etched-in</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="primary_icon_stock">gtk-network</property>
-                                <property name="primary_icon_activatable">False</property>
-                                <property name="primary_icon_sensitive">False</property>
-                                <property name="primary_icon_tooltip_text" translatable="yes">URL</property>
-                                <signal name="activate" handler="entry_url_activate_cb" swapped="no"/>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkEntry" id="entry_url">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text" translatable="yes">URL</property>
+                                    <property name="has_frame">False</property>
+                                    <property name="invisible_char">●</property>
+                                    <property name="activates_default">True</property>
+                                    <property name="text" translatable="yes">https://www.youtube.com/watch?v=fvq5uhqGCWM&amp;list=RDGMEMYH9CUrFO7CfLJpaD7UR85wVMfvq5uhqGCWM</property>
+                                    <property name="shadow_type">etched-in</property>
+                                    <property name="caps_lock_warning">False</property>
+                                    <property name="primary_icon_stock">gtk-network</property>
+                                    <property name="primary_icon_activatable">False</property>
+                                    <property name="primary_icon_sensitive">False</property>
+                                    <property name="primary_icon_tooltip_text" translatable="yes">URL</property>
+                                    <signal name="activate" handler="entry_url_activate_cb" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBox" id="combobox_format">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="has_tooltip">True</property>
+                                    <property name="tooltip_text" translatable="yes">format</property>
+                                    <property name="model">liststore_format</property>
+                                    <property name="has_frame">False</property>
+                                    <property name="focus_on_click">False</property>
+                                    <signal name="changed" handler="combobox_format_changed_cb" swapped="no"/>
+                                    <child>
+                                      <object class="GtkCellRendererText" id="cellrenderertext_format"/>
+                                      <attributes>
+                                        <attribute name="text">0</attribute>
+                                      </attributes>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -598,9 +632,13 @@
               <object class="GtkDrawingArea" id="drawingarea">
                 <property name="width_request">320</property>
                 <property name="visible">True</property>
+                <property name="app_paintable">True</property>
                 <property name="can_focus">False</property>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_text" translatable="yes">video</property>
+                <property name="double_buffered">False</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -713,6 +751,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -722,5 +761,13 @@
       <action-widget response="0">button_about</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkListStore" id="liststore_format">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name URI -->
+      <column type="gchararray"/>
+    </columns>
   </object>
 </interface>

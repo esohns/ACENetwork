@@ -26,6 +26,10 @@
 #include <set>
 #include <string>
 
+#if defined (LIBXML2_SUPPORT)
+#include "libxml/HTMLParser.h"
+#endif // LIBXML2_SUPPORT
+
 #if defined (FFMPEG_SUPPORT)
 #ifdef __cplusplus
 extern "C"
@@ -107,17 +111,20 @@ struct Test_I_URLStreamLoad_MessageData
 {
   Test_I_URLStreamLoad_MessageData ()
    : HTTP_Record ()
-   , M3UPlaylist (NULL)
-  {};
+#if defined (LIBXML2_SUPPORT)
+   , document (NULL)
+#endif // LIBXML2_SUPPORT
+ //, M3UPlaylist ()
+  {}
   ~Test_I_URLStreamLoad_MessageData ()
-  {
-    //if (M3UPlaylist)
-    //  delete M3UPlaylist;
-  };
+  {}
   inline void operator= (const struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); }
   inline void operator+= (Test_I_URLStreamLoad_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
-  struct M3U_Playlist* M3UPlaylist;
+#if defined (LIBXML2_SUPPORT)
+  htmlDocPtr document;
+#endif // LIBXML2_SUPPORT
+  //struct M3U_Playlist M3UPlaylist;
 };
 
 typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData,
@@ -133,8 +140,8 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
+   , mode (STREAM_MODULE_HTMLPARSER_MODE_DOM)
    , subscriber (NULL)
-   , subscribers (NULL)
    , targetFileName ()
 #if defined (GTK_USE)
    , window (NULL)
@@ -143,12 +150,12 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   }
 
-  Net_ConnectionConfigurations_t* connectionConfigurations;
-  Test_I_ISessionNotify_t*        subscriber;
-  Test_I_Subscribers_t*           subscribers;
-  std::string                     targetFileName; // dump module
+  Net_ConnectionConfigurations_t*    connectionConfigurations;
+  enum Stream_Module_HTMLParser_Mode mode;
+  Test_I_ISessionNotify_t*           subscriber;
+  std::string                        targetFileName; // dump module
 #if defined (GTK_USE)
-  GdkWindow*                      window;
+  GdkWindow*                         window;
 #endif // GTK_USE
 };
 

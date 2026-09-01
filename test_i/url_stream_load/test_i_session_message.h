@@ -29,9 +29,11 @@
 
 // #include "test_i_url_stream_load_common.h"
 
+#include "test_i_message.h"
+
 // forward declaration(s)
 class ACE_Allocator;
-class Test_I_Message;
+//class Test_I_Message;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,

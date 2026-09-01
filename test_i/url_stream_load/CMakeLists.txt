@@ -93,12 +93,10 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_eventhandler.h
      test_i_message.cpp
      test_i_message.h
-     test_i_module_eventhandler.cpp
-     test_i_module_eventhandler.h
-     test_i_module_httpget.cpp
-     test_i_module_httpget.h
-     test_i_m3u_module_parser.cpp
-     test_i_m3u_module_parser.h
+#     test_i_module_httpget.cpp
+#     test_i_module_httpget.h
+#     test_i_m3u_module_parser.cpp
+#     test_i_m3u_module_parser.h
      test_i_session_message.cpp
      test_i_session_message.h
      test_i_signalhandler.cpp
@@ -111,8 +109,8 @@ set (${EXECUTABLE}_EXE_SRCS
 if (GTK_SUPPORT)
  set (${EXECUTABLE}_EXE_SRCS
       ${${EXECUTABLE}_EXE_SRCS}
-      test_i_callbacks.cpp
-      test_i_callbacks.h)
+      test_i_gtk_callbacks.cpp
+      test_i_gtk_callbacks.h)
 endif (GTK_SUPPORT)
 set (${EXECUTABLE}_EXE_CFG
      etc/test_i.gtk2
@@ -156,8 +154,6 @@ target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 if (UNIX)
 # target_link_libraries (${EXECUTABLE} PUBLIC X11)
 elseif (WIN32)
-# set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
-
  target_link_libraries (${EXECUTABLE} PUBLIC mfplat.lib)
 endif ()
 
@@ -172,6 +168,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Device)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_File)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
 if (WIN32)
  target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
@@ -240,7 +237,7 @@ endif ()
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -r -t -u https://www.youtube.com/watch?v=fvq5uhqGCWM&list=RDfvq5uhqGCWM"
+                         ARGS "-l -r -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../Common/cmake/src/Debug

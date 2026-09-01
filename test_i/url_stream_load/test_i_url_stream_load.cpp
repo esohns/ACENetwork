@@ -90,24 +90,26 @@
 
 #include "http_defines.h"
 
-#if defined (GTK_SUPPORT)
-#include "test_i_callbacks.h"
-#endif // GTK_SUPPORT
 #include "test_i_common.h"
+#include "test_i_common_modules.h"
 #include "test_i_connection_common.h"
 #include "test_i_connection_manager_common.h"
 #include "test_i_connection_stream.h"
 #include "test_i_defines.h"
 #include "test_i_eventhandler.h"
 #include "test_i_message.h"
-#include "test_i_module_eventhandler.h"
 #include "test_i_session_message.h"
 #include "test_i_signalhandler.h"
+#if defined (GTK_SUPPORT)
+#include "test_i_gtk_callbacks.h"
+#endif // GTK_SUPPORT
 
 #include "test_i_url_stream_load_common.h"
 #include "test_i_url_stream_load_defines.h"
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream");
+const char stream_name_string_1b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream_1b");
+const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream_2");
 
 void
 do_print_usage (const std::string& programName_in)
@@ -555,10 +557,14 @@ do_work (bool debugParser_in,
 #endif // SSL_SUPPORT
 
   Test_I_EventHandler message_handler (&CBData_in);
-  Test_I_Module_EventHandler_Module event_handler_module (NULL,
-                                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
-  Test_I_Module_EventHandler_2_Module event_handler_module_2 (NULL,
-                                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_EventHandler_1b message_handler_1b (&CBData_in);
+  Test_I_EventHandler_2 message_handler_2 (&CBData_in);
+  Test_I_MessageHandler_Module event_handler_module (NULL,
+                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_Module event_handler_module_1b (NULL,
+                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_2_Module event_handler_module_2 (NULL,
+                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   allocator_configuration.defaultBufferSize = 16384;
@@ -593,9 +599,21 @@ do_work (bool debugParser_in,
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
-  Net_ConnectionConfigurationsIterator_t iterator =
-    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
+
+  Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1b;
+  connection_configuration_1b.socketConfiguration.address = remoteHost_in;
+  connection_configuration_1b.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_1b.socketConfiguration.useLoopBackDevice =
+    connection_configuration_1b.socketConfiguration.address.is_loopback ();
+//  connection_configuration_1b.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  connection_configuration_1b.messageAllocator = &message_allocator;
+  //connection_configuration_1b.PDUSize = bufferSize_in;
+  //connection_configuration_1b.userData = &CBData_in.configuration->userData;
+  connection_configuration_1b.streamConfiguration =
+    &configuration_in.streamConfiguration_1b;
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("1b"),
+                                                                    &connection_configuration_1b));
 
   Test_I_URLStreamLoad_ConnectionConfiguration_2_t connection_configuration_2;
   connection_configuration_2.allocatorConfiguration = &allocator_configuration;
@@ -607,9 +625,6 @@ do_work (bool debugParser_in,
     &configuration_in.streamConfiguration_2;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2"),
                                                                     &connection_configuration_2));
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
-    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("2"));
-  ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
@@ -621,12 +636,15 @@ do_work (bool debugParser_in,
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1b;
+
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
-      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
   modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
@@ -652,11 +670,16 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
-  //configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-  //                                                             std::make_pair (module_configuration,
-  //                                                                             modulehandler_configuration)));
 
-  //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
+  modulehandler_configuration_1b = modulehandler_configuration;
+  modulehandler_configuration_1b.parserConfiguration =
+    &configuration_in.parserConfiguration_1b;
+  modulehandler_configuration_1b.subscriber = &message_handler_1b;
+  stream_configuration_1b = stream_configuration;
+  stream_configuration_1b.module = &event_handler_module_1b;
+  configuration_in.streamConfiguration_1b.initialize (module_configuration,
+                                                      modulehandler_configuration_1b,
+                                                      stream_configuration_1b);
 
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
   modulehandler_configuration_2.allocatorConfiguration =
@@ -666,7 +689,7 @@ do_work (bool debugParser_in,
   modulehandler_configuration_2.codecId = AV_CODEC_ID_H263;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_2.concurrency =
-      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration_2.connectionConfigurations =
     &configuration_in.connectionConfigurations;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -677,10 +700,10 @@ do_work (bool debugParser_in,
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration_2.parserConfiguration =
-    &configuration_in.parserConfiguration;
+    &configuration_in.parserConfiguration_2;
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
-  modulehandler_configuration_2.subscriber = &message_handler;
+  modulehandler_configuration_2.subscriber = &message_handler_2;
   modulehandler_configuration_2.targetFileName = fileName_in;
   modulehandler_configuration_2.URL = URL_in;
   modulehandler_configuration_2.waitForConnect = false;

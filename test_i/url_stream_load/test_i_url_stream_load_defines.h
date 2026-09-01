@@ -21,12 +21,19 @@
 #ifndef TEST_I_URLSTREAMLOAD_DEFINES_H
 #define TEST_I_URLSTREAMLOAD_DEFINES_H
 
-#define TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE          "output.ts"
-#define TEST_I_URLSTREAMLOAD_DEFAULT_URL                  "https://daserste-live.ard-mcdn.de/daserste/live/hls/de/master.m3u8"
+#include "net_defines.h"
 
-#define TEST_I_URLSTREAMLOAD_DEFAULT_BUFFER_SIZE          HTTP_BUFFER_SIZE
+//----------------------------------------
 
-//---------------------------------------
+
+#define TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE          "output.mp4"
+#define TEST_I_URLSTREAMLOAD_DEFAULT_URL                  "https://www.youtube.com/watch?v=QTtQ8Mie5Zk"
+
+#define TEST_I_URLSTREAMLOAD_DEFAULT_BUFFER_SIZE          NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE
+
+#define TEST_I_URLSTREAMLOAD_XPATH_QUERY_STRING           "/html/body/script[@name='player/base']/@src"
+
+//----------------------------------------
 
 #define TEST_I_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
 #define TEST_I_UI_GTK_BUTTON_CUT_NAME                     "button_cut"

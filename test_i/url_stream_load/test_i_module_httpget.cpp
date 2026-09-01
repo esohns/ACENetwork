@@ -50,13 +50,13 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
   std::string uri_string_2;
   bool use_SSL = false, use_SSL_2 = false;
   struct Test_I_URLStreamLoad_SessionData& session_data_r =
-      const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
+    const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
 
   ACE_ASSERT (message_inout->isInitialized ());
   const Test_I_MessageDataContainer& data_container_r =
-      message_inout->getR ();
+    message_inout->getR ();
   struct Test_I_URLStreamLoad_MessageData& data_r =
-      const_cast<struct Test_I_URLStreamLoad_MessageData&> (data_container_r.getR ());
+    const_cast<struct Test_I_URLStreamLoad_MessageData&> (data_container_r.getR ());
 
   switch (data_r.status)
   {
@@ -64,11 +64,10 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
     {
       inherited::receivedBytes_ += message_inout->total_length ();
 
-      if (data_r.M3UPlaylist &&
-          !data_r.M3UPlaylist->stream_inf_elements.empty ())
+      if (!data_r.M3UPlaylist.stream_inf_elements.empty ())
       {
         const struct M3U_StreamInf_Element& element_r =
-            data_r.M3UPlaylist->stream_inf_elements.front ();
+          data_r.M3UPlaylist.stream_inf_elements.front ();
         bool is_basename_b = Common_File_Tools::isBasename (element_r.URL);
         std::string URL_string = element_r.URL;
 

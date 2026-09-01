@@ -256,9 +256,6 @@ class Net_Common_Tools
                                     bool = true);       // return port (if any) ?
   static std::string URLToProtocol (const std::string&); // URL
 
-  // buffer
-  static std::string bufferToString (ACE_Message_Block*); // buffer (chain)
-
   // --- socket API ---
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
