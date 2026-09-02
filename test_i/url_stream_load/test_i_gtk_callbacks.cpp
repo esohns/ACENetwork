@@ -64,9 +64,9 @@ static bool un_toggling_connect = false;
 /////////////////////////////////////////
 
 gboolean
-idle_load_ciphers_cb (gpointer userData_in)
+idle_load_player_base_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_load_ciphers_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_load_player_base_cb"));
 
   // sanity check(s)
   struct Test_I_URLStreamLoad_UI_CBData* data_p =
@@ -231,33 +231,36 @@ idle_load_ciphers_cb (gpointer userData_in)
 //#endif
 
   return G_SOURCE_REMOVE;
-} // idle_load_ciphers_cb
+} // idle_load_player_base_cb
 
-gboolean
-idle_load_formats_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_load_formats_cb"));
-
-  // sanity check(s)
-  struct Test_I_URLStreamLoad_UI_CBData* data_p =
-    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-
-  return G_SOURCE_REMOVE;
-} // idle_load_formats_cb
-
-gboolean
-idle_received_formats_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_received_formats_cb"));
-
-  // sanity check(s)
-  struct Test_I_URLStreamLoad_UI_CBData* data_p =
-    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-
-  return G_SOURCE_REMOVE;
-} // idle_received_formats_cb
+//gboolean
+//idle_load_formats_cb (gpointer userData_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::idle_load_formats_cb"));
+//
+//  // sanity check(s)
+//  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+//    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
+//
+//
+//
+//
+//  return G_SOURCE_REMOVE;
+//} // idle_load_formats_cb
+//
+//gboolean
+//idle_received_formats_cb (gpointer userData_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::idle_received_formats_cb"));
+//
+//  // sanity check(s)
+//  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+//    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+//  ACE_ASSERT (data_p);
+//
+//  return G_SOURCE_REMOVE;
+//} // idle_received_formats_cb
 
 gboolean
 idle_connect_to_peer_cb (gpointer userData_in)

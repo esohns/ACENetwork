@@ -153,7 +153,11 @@ struct Test_I_URLStreamLoad_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
-   , subscribers ()
+   //, subscribers ()
+   , baseFormatURL ()
+   , encryptedSignature ()
+   , signatureParameter ()
+   , encryptedNParameter ()
    , URL ()
   {}
 
@@ -161,7 +165,11 @@ struct Test_I_URLStreamLoad_UI_CBData
 
   ACE_HANDLE                                  handle;
   struct Test_I_URLStreamLoad_UI_ProgressData progressData;
-  Test_I_Subscribers_t                        subscribers;
+  //Test_I_Subscribers_t                        subscribers;
+  std::string                                 baseFormatURL;
+  std::string                                 encryptedSignature;
+  std::string                                 signatureParameter;
+  std::string                                 encryptedNParameter;
   std::string                                 URL;
 };
 

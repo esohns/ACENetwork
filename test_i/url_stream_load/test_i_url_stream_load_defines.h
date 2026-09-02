@@ -32,6 +32,7 @@
 #define TEST_I_URLSTREAMLOAD_DEFAULT_BUFFER_SIZE          NET_STREAM_DEFAULT_MESSAGE_DATA_BUFFER_SIZE
 
 #define TEST_I_URLSTREAMLOAD_XPATH_QUERY_STRING           "/html/body/script[@name='player/base']/@src"
+#define TEST_I_URLSTREAMLOAD_BASE_JS_FILENAME_STRING      "base.js"
 
 //----------------------------------------
 

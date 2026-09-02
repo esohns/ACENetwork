@@ -22,6 +22,7 @@
 #define TEST_I_EVENTHANDLER_H
 
 #include <map>
+#include <string>
 
 #include "ace/Global_Macros.h"
 
@@ -31,6 +32,15 @@
 
 #include "test_i_message.h"
 #include "test_i_session_message.h"
+
+//////////////////////////////////////////
+
+std::string
+executeEjsChallenge (const std::string&,  // challenge
+                     const std::string&,  // encrypted string
+                     const std::string&); // base.js file path
+
+//////////////////////////////////////////
 
 class Test_I_EventHandler
  : public Test_I_ISessionNotify_t

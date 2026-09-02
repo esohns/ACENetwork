@@ -655,6 +655,49 @@ HTTP_Tools::URLEncode (const std::string& string_in,
 }
 
 std::string
+HTTP_Tools::URLDecode (const std::string& string_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLDecode"));
+
+  std::string result;
+  result.reserve (string_in.size ());
+
+  for (size_t i = 0; i < string_in.size (); ++i)
+  {
+    if (string_in[i] == '%')
+    {
+      if (i + 2 < string_in.size ())
+      {
+        char high = string_in[i + 1];
+        char low = string_in[i + 2];
+
+        if (std::isxdigit (static_cast<int> (high)) && 
+            std::isxdigit (static_cast<int> (low)))
+        {
+          int highValue =
+            std::isdigit (static_cast<int> (high)) ? (high - '0') : (std::toupper (static_cast<int> (high)) - 'A' + 10);
+          int lowValue  =
+            std::isdigit (static_cast<int> (low))  ? (low  - '0') : (std::toupper (static_cast<int> (low))  - 'A' + 10);
+          char decodedChar = static_cast<char> ((highValue << 4) | lowValue);
+          result.push_back (decodedChar);
+          i += 2;
+          continue;
+        } // end IF
+      } // end IF
+    } // end IF
+    else if (string_in[i] == '+')
+    {
+      result.push_back (' ');
+      continue;
+    } // end ELSE IF
+
+    result.push_back (string_in[i]);
+  } // end FOR
+
+  return result;
+}
+
+std::string
 HTTP_Tools::stripURI (const std::string& URI_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::stripURI"));

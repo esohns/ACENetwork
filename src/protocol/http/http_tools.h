@@ -69,6 +69,8 @@ class HTTP_Tools
   static std::string URLEncode (const std::string&, // input string
                                 bool = false,       // '%xx' everything ?
                                 bool = true);       // upper-case all hex digits ?
+  static std::string URLDecode (const std::string&); // input string
+
   // *NOTE*: removes any parameters (i.e. ?name=value&name=value...)
   static std::string stripURI (const std::string&);
 

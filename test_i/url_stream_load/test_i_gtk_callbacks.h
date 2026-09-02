@@ -24,9 +24,9 @@
 #include "gtk/gtk.h"
 
 // idle routines
-gboolean idle_load_ciphers_cb (gpointer);
-gboolean idle_load_formats_cb (gpointer);
-gboolean idle_received_formats_cb (gpointer);
+gboolean idle_load_player_base_cb (gpointer);
+//gboolean idle_load_formats_cb (gpointer);
+//gboolean idle_received_formats_cb (gpointer);
 gboolean idle_connect_to_peer_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
