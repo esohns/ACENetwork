@@ -135,14 +135,16 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
 
         if (record_r.form.empty ())
           break;
-
         for (HTTP_FormIterator_t iterator_2 = record_r.form.begin ();
              iterator_2 != record_r.form.end ();
              ++iterator_2)
         {
           content_buffer += (*iterator_2).first;
-          content_buffer += ACE_TEXT_ALWAYS_CHAR ("=");
-          content_buffer += (*iterator_2).second;
+          if (!(*iterator_2).second.empty ())
+          {
+            content_buffer += ACE_TEXT_ALWAYS_CHAR ("=");
+            content_buffer += (*iterator_2).second;
+          } // end IF
           content_buffer += ACE_TEXT_ALWAYS_CHAR ("&");
         } // end FOR
         content_buffer.erase (--content_buffer.end ());
@@ -155,17 +157,21 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
           record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
                                                    converter.str ()));
         else
-        { ACE_ASSERT ((*iterator).second.empty ()); // *TODO*: allow '0' ?
-          (*iterator).second = converter.str ();
+        {
+          if ((*iterator).second.empty ()); // *TODO*: allow '0' ?
+            (*iterator).second = converter.str ();
         } // end ELSE
+
+        // add content-type header ?
         iterator =
           record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING));
         if (iterator == record_r.headers.end ())
           record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING),
                                                    ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING)));
         else
-        { ACE_ASSERT ((*iterator).second.empty ());
-          (*iterator).second = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING);
+        {
+          if ((*iterator).second.empty ())
+            (*iterator).second = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING);
         } // end ELSE
 
         break;

@@ -74,7 +74,7 @@ Test_I_MessageDataContainer::setPR (struct HTTP_Record*& record_inout)
 //////////////////////////////////////////
 
 Test_I_Message::Test_I_Message (Stream_SessionId_t sessionId_in,
-                                unsigned int size_in)
+                                size_t size_in)
  : inherited (sessionId_in,
               size_in)
  , mediaType_ (STREAM_MEDIATYPE_INVALID)
@@ -208,7 +208,7 @@ Test_I_Message::clone (ACE_Message_Block::Message_Flags flags_in) const
   if (!result_p)
   {
     Stream_IAllocator* allocator_p =
-        dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
+      dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
     ACE_ASSERT (allocator_p);
     if (allocator_p->block ())
       ACE_DEBUG ((LM_CRITICAL,

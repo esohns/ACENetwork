@@ -36,7 +36,6 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -82,15 +81,10 @@ class Test_I_Message
                                                  Stream_ControlMessage_t,
                                                  Test_I_Message,
                                                  Test_I_SessionMessage>;
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Common_AllocatorConfiguration,
-                                                 Stream_ControlMessage_t,
-                                                 Test_I_Message,
-                                                 Test_I_SessionMessage_2>;
 
  public:
   Test_I_Message (Stream_SessionId_t, // session id
-                  unsigned int);      // size
+                  size_t);            // size
   inline virtual ~Test_I_Message () {}
 
   // overrides from ACE_Message_Block

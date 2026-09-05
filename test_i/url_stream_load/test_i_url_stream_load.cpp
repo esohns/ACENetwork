@@ -31,9 +31,8 @@
 #include "linux/capability.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include <cstdio>
 #include <iostream>
-#include <limits>
-#include <regex>
 #include <string>
 
 #include "ace/Get_Opt.h"
@@ -92,6 +91,7 @@
 
 #include "test_i_common.h"
 #include "test_i_common_modules.h"
+#define EOF (-1)
 #include "test_i_connection_common.h"
 #include "test_i_connection_manager_common.h"
 #include "test_i_connection_stream.h"
@@ -100,6 +100,7 @@
 #include "test_i_message.h"
 #include "test_i_session_message.h"
 #include "test_i_signalhandler.h"
+#include "test_i_stream.h"
 #if defined (GTK_SUPPORT)
 #include "test_i_gtk_callbacks.h"
 #endif // GTK_SUPPORT
@@ -109,7 +110,6 @@
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream");
 const char stream_name_string_1b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream_1b");
-const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream_2");
 
 void
 do_print_usage (const std::string& programName_in)
@@ -563,8 +563,8 @@ do_work (bool debugParser_in,
                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_1b (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
-  Test_I_MessageHandler_2_Module event_handler_module_2 (NULL,
-                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_Module event_handler_module_2 (NULL,
+                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
   allocator_configuration.defaultBufferSize = 16384;
@@ -579,9 +579,12 @@ do_work (bool debugParser_in,
   Test_I_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                &heap_allocator,         // heap allocator handle
                                                true);                   // block ?
-  Test_I_MessageAllocator_2_t message_allocator_2 (NET_STREAM_MAX_MESSAGES, // maximum #buffers
-                                                   &heap_allocator,         // heap allocator handle
-                                                   true);                   // block ?
+  Test_I_URLStreamLoad_MessageQueue_t av_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                      NULL);
+  Test_I_URLStreamLoad_MessageQueue_t audio_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                         NULL);
+  Test_I_AVStream av_input_stream;
+  CBData_in.AVStream = &av_input_stream;
 
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
@@ -615,17 +618,6 @@ do_work (bool debugParser_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("1b"),
                                                                     &connection_configuration_1b));
 
-  Test_I_URLStreamLoad_ConnectionConfiguration_2_t connection_configuration_2;
-  connection_configuration_2.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_2.socketConfiguration.useLoopBackDevice = false;
-//  connection_configuration_2.statisticReportingInterval =
-//    statisticReportingInterval_in;
-  connection_configuration_2.messageAllocator = &message_allocator_2;
-  connection_configuration_2.streamConfiguration =
-    &configuration_in.streamConfiguration_2;
-  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("2"),
-                                                                    &connection_configuration_2));
-
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
 #if defined (_DEBUG)
@@ -634,14 +626,35 @@ do_work (bool debugParser_in,
     configuration_in.parserConfiguration.debugScanner = true;
 #endif // _DEBUG
   // ********************** module configuration data **************************
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration; // audio
+  codec_configuration.codecId = AV_CODEC_ID_OPUS;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video
+  codec_configuration_1b.codecId = AV_CODEC_ID_VP9;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V
+  codec_configuration_2.codecId = AV_CODEC_ID_H264;
+#endif // FFMPEG_SUPPORT
+
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_queuetarget_2;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b; // save video converter
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1b;
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_2;
 
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration.codecConfiguration = &codec_configuration;
+#endif // FFMPEG_SUPPORT
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration.outputFormat.audio.channels = 2;
+  modulehandler_configuration.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;
+  modulehandler_configuration.outputFormat.audio.sampleRate = 48000;
+#endif // FFMPEG_SUPPORT
   modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
@@ -656,6 +669,7 @@ do_work (bool debugParser_in,
     &configuration_in.parserConfiguration;
 //  modulehandler_configuration.statisticReportingInterval =
 //    statisticReportingInterval_in;
+  modulehandler_configuration.queue = &av_input_queue;
   modulehandler_configuration.subscriber = &message_handler;
   modulehandler_configuration.targetFileName = fileName_in;
   modulehandler_configuration.URL = URL_in;
@@ -664,6 +678,9 @@ do_work (bool debugParser_in,
   //if (bufferSize_in)
   //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
   //    bufferSize_in;
+#if defined (FFMPEG_SUPPORT)
+  stream_configuration.mediaType.audio.codecId = AV_CODEC_ID_OPUS;
+#endif // FFMPEG_SUPPORT
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module = &event_handler_module;
   stream_configuration.printFinalReport = true;
@@ -671,49 +688,77 @@ do_work (bool debugParser_in,
                                                    modulehandler_configuration,
                                                    stream_configuration);
 
+  modulehandler_configuration_queuetarget_2 = modulehandler_configuration;
+  modulehandler_configuration_queuetarget_2.queue = &audio_input_queue;
+  configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2"),
+                                                               std::make_pair (&module_configuration,
+                                                                               &modulehandler_configuration_queuetarget_2)));
+
   modulehandler_configuration_1b = modulehandler_configuration;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_1b.codecConfiguration = &codec_configuration_1b;
+#endif // FFMPEG_SUPPORT
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_RGB24;
+#endif // FFMPEG_SUPPORT
   modulehandler_configuration_1b.parserConfiguration =
     &configuration_in.parserConfiguration_1b;
   modulehandler_configuration_1b.subscriber = &message_handler_1b;
   stream_configuration_1b = stream_configuration;
+#if defined (FFMPEG_SUPPORT)
+  stream_configuration_1b.mediaType.video.codecId = AV_CODEC_ID_VP9;
+#endif // FFMPEG_SUPPORT
   stream_configuration_1b.module = &event_handler_module_1b;
   configuration_in.streamConfiguration_1b.initialize (module_configuration,
                                                       modulehandler_configuration_1b,
                                                       stream_configuration_1b);
 
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 modulehandler_configuration_2;
+  modulehandler_configuration_2 = modulehandler_configuration;
   modulehandler_configuration_2.allocatorConfiguration =
     &allocator_configuration;
   modulehandler_configuration_2.closeAfterReception = true;
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_2.codecId = AV_CODEC_ID_H263;
+  modulehandler_configuration_2.codecConfiguration = &codec_configuration_2;
 #endif // FFMPEG_SUPPORT
+  modulehandler_configuration_2.computeThroughput = true;
   modulehandler_configuration_2.concurrency =
-    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_2.connectionConfigurations =
     &configuration_in.connectionConfigurations;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_2.outputFormat.subtype = MEDIASUBTYPE_RGB24;
-#else
-#if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_2.outputFormat.format = AV_PIX_FMT_RGB24;
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-  modulehandler_configuration_2.parserConfiguration =
-    &configuration_in.parserConfiguration_2;
+  struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
+  delay_configuration.averageTokensPerInterval = 1; // frames per second
+  delay_configuration.isMultimediaTask = true;
+  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
+  modulehandler_configuration_2.delayConfiguration = &delay_configuration;
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_2.subscriber = &message_handler_2;
   modulehandler_configuration_2.targetFileName = fileName_in;
   modulehandler_configuration_2.URL = URL_in;
   modulehandler_configuration_2.waitForConnect = false;
-  struct Test_I_URLStreamLoad_StreamConfiguration_2 stream_configuration_2;
-  stream_configuration_2.messageAllocator = &message_allocator_2;
+  stream_configuration_2 = stream_configuration;
+#if defined (FFMPEG_SUPPORT)
+  stream_configuration_2.mediaType.audio.channels = 2;
+  stream_configuration_2.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
+  stream_configuration_2.mediaType.audio.sampleRate = 48000;
+  stream_configuration_2.mediaType.video.format = AV_PIX_FMT_RGB24;
+  stream_configuration_2.mediaType.video.resolution = {640, 360};
+  stream_configuration_2.mediaType.video.frameRate = {30, 1};
+#endif // FFMPEG_SUPPORT
+  stream_configuration_2.messageAllocator = &message_allocator;
   stream_configuration_2.module = &event_handler_module_2;
   stream_configuration_2.printFinalReport = true;
   configuration_in.streamConfiguration_2.initialize (module_configuration,
                                                      modulehandler_configuration_2,
                                                      stream_configuration_2);
+
+  modulehandler_configuration_2b = modulehandler_configuration_2;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_2b.outputFormat.video.format = AV_PIX_FMT_NV12;
+#endif // FFMPEG_SUPPORT
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2b)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -721,20 +766,7 @@ do_work (bool debugParser_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max (),
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  // connection_manager_p->set (*static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator).second),
-  //                            NULL);
-  Test_I_ConnectionManager_2_t* connection_manager_2 =
-    TEST_I_CONNECTIONMANAGER_SINGLETON_2::instance ();
-  ACE_ASSERT (connection_manager_2);
-  connection_manager_2->initialize (std::numeric_limits<unsigned int>::max (),
-                                    ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
-  // connection_manager_2->set (*static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_2_t*> ((*iterator_2).second),
-  //                            NULL);
 
-  Common_Timer_Manager_t* timer_manager_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (timer_manager_p);
-  struct Common_TimerConfiguration timer_configuration;
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #endif // GTK_USE
@@ -756,44 +788,9 @@ do_work (bool debugParser_in,
     goto clean;
   } // end IF
 
-  //// step0d: initialize regular (global) statistic reporting
-  //Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
-  //                                                     connection_manager_p,
-  //                                                     false);
-  ////Stream_StatisticHandler_Proactor_t statistic_handler_proactor (ACTION_REPORT,
-  ////                                                               connection_manager_p,
-  ////                                                               false);
-  //long timer_id = -1;
-  //if (statisticReportingInterval_in)
-  //{
-  //  ACE_Event_Handler* handler_p = &statistic_handler;
-  //  ACE_Time_Value interval (statisticReportingInterval_in, 0);
-  //  timer_id =
-  //    timer_manager_p->schedule_timer (handler_p,                  // event handler
-  //                                     NULL,                       // ACT
-  //                                     COMMON_TIME_NOW + interval, // first wakeup time
-  //                                     interval);                  // interval
-  //  if (timer_id == -1)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
-
-  //    // clean up
-  //    timer_manager_p->stop ();
-  //    delete stream_p;
-
-  //    return;
-  //  } // end IF
-  //} // end IF
-
   // step0c: initialize signal handling
-  //CBData_in.configuration->signalHandlerConfiguration.hasUI =
-  //  !interfaceDefinitionFile_in.empty ();
   configuration_in.signalHandlerConfiguration.dispatchState =
     &event_dispatch_state_s;
-  //configuration.signalHandlerConfiguration.statisticReportingHandler =
-  //  connection_manager_p;
-  //configuration.signalHandlerConfiguration.statisticReportingTimerID = timer_id;
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -812,8 +809,15 @@ do_work (bool debugParser_in,
   } // end IF
 
   // intialize timers
-  timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start (NULL);
+  Common_Timer_Tools::configuration_.dispatch = COMMON_TIMER_DISPATCH_QUEUE;
+    //(configuration_in.dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR ? COMMON_TIMER_DISPATCH_REACTOR
+    //                                                                                  : COMMON_TIMER_DISPATCH_PROACTOR);
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Timer_Tools::configuration_.taskType = ACE_TEXT_ALWAYS_CHAR ("Playback");
+  Common_Timer_Tools::configuration_.taskPriority = AVRT_PRIORITY_HIGH;
+#endif // ACE_WIN32 || ACE_WIN64
+  Common_Timer_Tools::initialize ();
 
   // step1a: start GTK event loop ?
   if (!UIDefinitionFileName_in.empty ())
@@ -889,43 +893,11 @@ do_work (bool debugParser_in,
                               true); // high priority ?
   connection_manager_p->abort (false);
   connection_manager_p->wait ();
-  connection_manager_2->stop (false, // wait ?
-                              true); // high priority ?
-  connection_manager_2->abort ();
-  connection_manager_2->wait ();
 
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                              true); // wait ?
 
-  timer_manager_p->stop ();
-
-  //		{ // synch access
-  //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //					 iterator != CBData_in.event_source_ids.end();
-  //					 iterator++)
-  //				g_source_remove(*iterator);
-  //		} // end lock scope
-  //timer_manager_p->stop ();
-
-  //  { // synch access
-  //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
-
-  //		for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-  //				 iterator != CBData_in.event_source_ids.end();
-  //				 iterator++)
-  //			g_source_remove(*iterator);
-  //	} // end lock scope
-
-  //if (!interfaceDefinitionFile_in.empty ())
-  //{
-  //  int result = event_handler_module.close (ACE_Module_Base::M_DELETE_NONE);
-  //  if (result == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
-  //                event_handler_module.name ()));
-  //} // end IF
+  Common_Timer_Tools::finalize ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -935,7 +907,7 @@ do_work (bool debugParser_in,
 clean:
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                              true); // wait ?
-  timer_manager_p->stop ();
+  Common_Timer_Tools::finalize ();
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true,  // wait ?
@@ -1070,6 +1042,7 @@ ACE_TMAIN (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Common_Tools::initialize (false,  // COM ?
                             false); // RNG ?
+  Stream_MediaFramework_DirectSound_Tools::initialize ();
 #else
   Common_Tools::initialize (false); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64

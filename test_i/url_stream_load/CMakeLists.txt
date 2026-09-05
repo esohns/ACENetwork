@@ -1,7 +1,12 @@
 include (rapidjson)
 
-set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
-include (PreXMLImplementation)
+#set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
+#include (PreXMLImplementation)
+
+#set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/scripts")
+#set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../scripts")
+#include (PreScannerParserImplementation)
+#include (SetScannerParserImplementation)
 
 include (ffmpeg)
 include (ImageMagick)
@@ -99,14 +104,14 @@ set (${EXECUTABLE}_EXE_SRCS
      test_i_eventhandler.h
      test_i_message.cpp
      test_i_message.h
-#     test_i_module_httpget.cpp
-#     test_i_module_httpget.h
-#     test_i_m3u_module_parser.cpp
-#     test_i_m3u_module_parser.h
+     test_i_module_encoder.cpp
+     test_i_module_encoder.h
      test_i_session_message.cpp
      test_i_session_message.h
      test_i_signalhandler.cpp
      test_i_signalhandler.h
+     test_i_stream.cpp
+     test_i_stream.h
      test_i_url_stream_load.cpp
      test_i_url_stream_load_common.h
      test_i_url_stream_load_defines.h
@@ -139,6 +144,7 @@ add_dependencies (${EXECUTABLE} CommonTimer)
 
 add_dependencies (${EXECUTABLE} ACEStream)
 add_dependencies (${EXECUTABLE} ACEStream_Network_Protocol_HTTPGet)
+add_dependencies (${EXECUTABLE} ACEStream_Visualization)
 
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
@@ -183,6 +189,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network_Protocol_HTTPGet)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Visualization)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
@@ -267,6 +274,9 @@ elseif (WIN32)
  # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
  file (TO_CMAKE_PATH "${VCPKG_BIN_DIR}" VCPKG_LIB_PATH)
  file (TO_CMAKE_PATH "${VCPKG_RELEASE_BIN_DIR}" VCPKG_LIB_PATH_2)
+ if (LIBXML2_SUPPORT)
+  file (TO_CMAKE_PATH "${LIBXML2_LIB_DIR}" LIBXML2_PATH)
+ endif (LIBXML2_SUPPORT)
  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIBRARY_PATH)

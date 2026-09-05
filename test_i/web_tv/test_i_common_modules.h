@@ -87,7 +87,7 @@
 #include "http_antlr_parser_driver.h"
 #else
 #include "http_parser_driver.h"
-#endif // REFLEX_USE
+#endif // REFLEX_USE || ANTLR_USE
 
 #include "test_i_message.h"
 #include "test_i_module_converter.h"
@@ -133,7 +133,7 @@ typedef HTTP_ANTLRParserDriver_T<ACE_MT_SYNCH,
 typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
                             Common_TimePolicy_t,
                             Test_I_SessionMessage> HTTP_ParserDriver_t;
-#endif // REFLEX_USE
+#endif // REFLEX_USE || ANTLR_USE
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct Test_I_WebTV_ModuleHandlerConfiguration,
@@ -466,6 +466,7 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                       
                               Test_I_WASAPIOut);                                         // writer type
 #endif // ACE_WIN32 || ACE_WIN64
 
+#if defined (GTK_SUPPORT)
 typedef Stream_Module_Vis_GTK_Cairo_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       struct Test_I_WebTV_ModuleHandlerConfiguration_3,
@@ -481,6 +482,7 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                       
                               libacestream_default_vis_gtk_cairo_module_name_string,
                               Stream_INotify_t,                                      // stream notification interface type
                               Test_I_GTKCairo);                                      // writer type
+#endif // GTK_SUPPORT
 
 typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,

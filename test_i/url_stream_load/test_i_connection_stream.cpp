@@ -60,6 +60,11 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream::load"));
 
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+  bool save_to_file_b = !(*iterator).second.second->targetFileName.empty ();
+
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
   ACE_ASSERT (result);
@@ -72,49 +77,45 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_StatisticReport_Module (this,
-  //                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+//ACE_NEW_RETURN (module_p,
+//                Test_I_StatisticReport_Module (this,
+//                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+//                false);
+//layout_in->append (module_p, NULL, 0);
+//module_p = NULL;
 
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Defragment_Module (this,
-  //                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_M3U_Module_Parser_Module (this,
-  //                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-
-#if defined (LIBXML2_SUPPORT)
+#if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
-                  Test_I_HTMLParser_Module (this,
-                                            ACE_TEXT_ALWAYS_CHAR (MODULE_HTML_PARSER_DEFAULT_NAME_STRING)),
+                  Test_I_AudioDecoder_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
-#endif // LIBXML2_SUPPORT
+#endif // FFMPEG_SUPPORT
 
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_HTTPGet_Module (this,
-  //                                       ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Audio_Tagger_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Module_Dump_Module (this,
-  //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  if (save_to_file_b)
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_QueueTarget_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2")),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+  } // end IF
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueTarget_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
   deleteModules_out = true;
 
@@ -161,7 +162,8 @@ Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configura
   session_data_p =
     &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
-  //session_data_p->sessionID = configuration_in.sessionID;
+  ACE_ASSERT (session_data_p->formats.empty ());
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
@@ -230,42 +232,37 @@ Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
   //layout_in->append (module_p, NULL, 0);
   //module_p = NULL;
 
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Defragment_Module (this,
-  //                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_M3U_Module_Parser_Module (this,
-  //                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-
-//#if defined (LIBXML2_SUPPORT)
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_HTMLParser_Module (this,
-//                                            ACE_TEXT_ALWAYS_CHAR (MODULE_HTML_PARSER_DEFAULT_NAME_STRING)),
-//                  false);
-//  layout_in->append (module_p, NULL, 0);
-//  module_p = NULL;
-//#endif // LIBXML2_SUPPORT
+#if defined (FFMPEG_SUPPORT)
+  if (inherited::configuration_->configuration_->useHardwareDecoder)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoHWDecoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+  else
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoDecoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+#else
+#error "no supported video decoder, aborting"
+#endif // FFMPEG_SUPPORT
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPGet_Module (this,
-                                         ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                  Test_I_Video_Tagger_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Module_Dump_Module (this,
-  //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueTarget_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
   deleteModules_out = true;
 
@@ -312,7 +309,8 @@ Test_I_ConnectionStream_1b::initialize (const inherited::CONFIGURATION_T& config
   session_data_p =
     &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
   // *TODO*: remove type inferences
-  //session_data_p->sessionID = configuration_in.sessionID;
+  ACE_ASSERT (session_data_p->formats.empty ());
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
   session_data_p->targetFileName = (*iterator).second.second->targetFileName;
 
   // ---------------------------------------------------------------------------
@@ -343,191 +341,6 @@ failed:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
                 ACE_TEXT (stream_name_string_1b)));
-
-  return false;
-}
-
-//////////////////////////////////////////
-
-Test_I_ConnectionStream_2::Test_I_ConnectionStream_2 ()
- : inherited ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::Test_I_ConnectionStream_2"));
-
-}
-
-bool
-Test_I_ConnectionStream_2::load (Stream_ILayout* layout_in,
-                                 bool& deleteModules_out)
-{
-  STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::load"));
-
-  bool result = inherited::load (layout_in,
-                                 deleteModules_out);
-  ACE_ASSERT (result);
-
-  Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPMarshal_2_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("Marshal")),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_StatisticReport_2_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPGet_2_Module (this,
-                                           ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_MPEGTSDecoder_Module (this,
-  //                                            ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-//  module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_MPEG2Decoder_Module (this,
-//                                              ACE_TEXT_ALWAYS_CHAR ("MPEG2Decoder")),
-//                  false);
-//  layout_in->append (module_p, NULL, 0);
-//  module_p = NULL;
-//  ACE_NEW_RETURN (module_p,
-//                  Test_I_Display_Module (this,
-//                                         ACE_TEXT_ALWAYS_CHAR ("Display")),
-//                  false);
-//  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_FileSink_Module (this,
-                                          ACE_TEXT_ALWAYS_CHAR (STREAM_FILE_SINK_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-
-  deleteModules_out = true;
-
-  return true;
-}
-
-bool
-Test_I_ConnectionStream_2::initialize (const inherited::CONFIGURATION_T& configuration_in,
-                                       ACE_HANDLE handle_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_2::initialize"));
-
-  // sanity check(s)
-  ACE_ASSERT (!inherited::isRunning ());
-
-//  bool result = false;
-  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
-  bool reset_setup_pipeline = false;
-  struct Test_I_URLStreamLoad_SessionData_2* session_data_p = NULL;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  Test_I_SessionManager_2* session_manager_p =
-    Test_I_SessionManager_2::SINGLETON_T::instance ();
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType media_type_s;
-  ACE_OS::memset (&media_type_s, 0, sizeof (struct _AMMediaType));
-  media_type_s.majortype = MEDIATYPE_Video;
-  media_type_s.subtype = MEDIASUBTYPE_RGB24;
-  media_type_s.bFixedSizeSamples = TRUE;
-  media_type_s.bTemporalCompression = FALSE;
-  media_type_s.formattype = FORMAT_VideoInfo;
-  media_type_s.cbFormat = sizeof (struct tagVIDEOINFOHEADER);
-  media_type_s.pbFormat =
-    reinterpret_cast<BYTE*> (CoTaskMemAlloc (sizeof (struct tagVIDEOINFOHEADER)));
-  ACE_ASSERT (media_type_s.pbFormat);
-  ACE_OS::memset (media_type_s.pbFormat, 0, sizeof (struct tagVIDEOINFOHEADER));
-  struct tagVIDEOINFOHEADER* video_info_header_p =
-    reinterpret_cast<struct tagVIDEOINFOHEADER*> (media_type_s.pbFormat);
-  SetRectEmpty (&video_info_header_p->rcSource);
-  SetRectEmpty (&video_info_header_p->rcTarget);
-  video_info_header_p->bmiHeader.biSize = sizeof (struct tagBITMAPINFOHEADER);
-  video_info_header_p->bmiHeader.biPlanes = 1;
-  video_info_header_p->bmiHeader.biBitCount = 24;
-  video_info_header_p->bmiHeader.biCompression = BI_RGB;
-#else
-#if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_FFMPEG_VideoMediaType media_type_s;
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-
-  // sanity check(s)
-  ACE_ASSERT (iterator != configuration_in.end ());
-  ACE_ASSERT (session_manager_p);
-
-  // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-    false;
-  reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in,
-                              handle_in))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_name_string_2)));
-    goto failed;
-  } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-    setup_pipeline;
-  reset_setup_pipeline = false;
-
-  session_data_p =
-    &const_cast<struct Test_I_URLStreamLoad_SessionData_2&> (session_manager_p->getR (inherited::id_));
-  // *TODO*: remove type inferences
-  //session_data_p->sessionID = configuration_in.sessionID;
-  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Common_Image_Resolution_t resolution_s;
-  resolution_s.cx = 320;
-  resolution_s.cy = 240;
-  Stream_MediaFramework_DirectShow_Tools::setResolution (resolution_s,
-                                                         media_type_s);
-#else
-  media_type_s.resolution.width = 320;
-  media_type_s.resolution.height = 240;
-#endif // ACE_WIN32 || ACE_WIN64
-  ACE_ASSERT (session_data_p->formats.empty ());
-  session_data_p->formats.push_front (media_type_s);
-
-  // ---------------------------------------------------------------------------
-
-  if (configuration_in.configuration_->setupPipeline)
-    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_name_string_2)));
-      goto failed;
-    } // end IF
-
-  // -------------------------------------------------------------
-
-  // set (session) message allocator
-  //inherited::allocator_ = configuration_in.messageAllocator;
-
-  inherited::isInitialized_ = true;
-
-  return true;
-
-failed:
-  if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-      setup_pipeline;
-  if (!inherited::STREAM_BASE_T::reset ())
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
-                ACE_TEXT (stream_name_string_2)));
 
   return false;
 }

@@ -23,11 +23,16 @@
 
 #include "gtk/gtk.h"
 
+#include <string>
+
+// helper routines
+std::string executeYtdl (const std::string&); // URL
+
 // idle routines
-gboolean idle_load_player_base_cb (gpointer);
+//gboolean idle_load_player_base_cb (gpointer);
 //gboolean idle_load_formats_cb (gpointer);
 //gboolean idle_received_formats_cb (gpointer);
-gboolean idle_connect_to_peer_cb (gpointer);
+//gboolean idle_connect_to_peer_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
 gboolean idle_reset_UI_cb (gpointer);
@@ -44,9 +49,10 @@ extern "C"
 {
 #endif /* __cplusplus */
 // callbacks
+G_MODULE_EXPORT gint button_load_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void togglebutton_connect_toggled_cb (GtkToggleButton*, gpointer);
-G_MODULE_EXPORT gint button_cut_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
+G_MODULE_EXPORT void combobox_format_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void filechooserbutton_output_file_set_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void spinbutton_buffer_value_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void checkbutton_save_toggled_cb (GtkCheckButton*, gpointer);

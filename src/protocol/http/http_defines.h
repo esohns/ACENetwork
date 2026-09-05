@@ -76,6 +76,7 @@
 
 #define HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING "chunked"
 
+#define HTTP_PRT_MIMETYPE_APPLICATION_JSON_STRING "application/json"
 #define HTTP_PRT_MIMETYPE_APPLICATION_OGG_STRING  "application/ogg"
 #define HTTP_PRT_MIMETYPE_APPLICATION_WWW_URLENCODED_STRING "application/x-www-form-urlencoded"
 #define HTTP_PRT_MIMETYPE_AUDIO_MPEG_STRING       "audio/mpeg"

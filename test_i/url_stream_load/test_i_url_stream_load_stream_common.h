@@ -54,6 +54,8 @@ extern "C"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
+#include "common_ui_window.h"
+
 #include "common_parser_m3u_iparser.h"
 
 #if defined (GTK_SUPPORT)
@@ -68,6 +70,8 @@ extern "C"
 #include "stream_inotify.h"
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
+
+#include "stream_dev_common.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -112,7 +116,7 @@ struct Test_I_URLStreamLoad_MessageData
   Test_I_URLStreamLoad_MessageData ()
    : HTTP_Record ()
 #if defined (LIBXML2_SUPPORT)
-   , document (NULL)
+   //, document (NULL)
 #endif // LIBXML2_SUPPORT
  //, M3UPlaylist ()
   {}
@@ -122,7 +126,7 @@ struct Test_I_URLStreamLoad_MessageData
   inline void operator+= (Test_I_URLStreamLoad_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
 #if defined (LIBXML2_SUPPORT)
-  htmlDocPtr document;
+  //htmlDocPtr document;
 #endif // LIBXML2_SUPPORT
   //struct M3U_Playlist M3UPlaylist;
 };
@@ -131,32 +135,44 @@ typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_I_Message,
                                     Test_I_SessionMessage> Test_I_ISessionNotify_t;
-typedef std::list<Test_I_ISessionNotify_t*> Test_I_Subscribers_t;
-typedef Test_I_Subscribers_t::const_iterator Test_I_SubscribersIterator_t;
+//typedef std::list<Test_I_ISessionNotify_t*> Test_I_Subscribers_t;
+//typedef Test_I_Subscribers_t::const_iterator Test_I_SubscribersIterator_t;
 
 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {
   Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
+#if defined (FFMPEG_SUPPORT)
+   , codecConfiguration (NULL)
+#endif // FFMPEG_SUPPORT
    , connectionConfigurations (NULL)
-   , mode (STREAM_MODULE_HTMLPARSER_MODE_DOM)
+   , delayConfiguration (NULL)
+   , deviceIdentifier ()
+#if defined (FFMPEG_SUPPORT)
+   , outputFormat ()
+#endif // FFMPEG_SUPPORT
+   , queue (NULL)
    , subscriber (NULL)
    , targetFileName ()
-#if defined (GTK_USE)
-   , window (NULL)
-#endif // GTK_USE
+   , window ()
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   }
 
-  Net_ConnectionConfigurations_t*    connectionConfigurations;
-  enum Stream_Module_HTMLParser_Mode mode;
-  Test_I_ISessionNotify_t*           subscriber;
-  std::string                        targetFileName; // dump module
-#if defined (GTK_USE)
-  GdkWindow*                         window;
-#endif // GTK_USE
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration* codecConfiguration;
+#endif // FFMPEG_SUPPORT
+  Net_ConnectionConfigurations_t*                         connectionConfigurations;
+  struct Stream_Miscellaneous_DelayConfiguration*         delayConfiguration;
+  struct Stream_Device_Identifier                         deviceIdentifier;
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_MediaType           outputFormat;
+#endif // FFMPEG_SUPPORT
+  ACE_Message_Queue_Base*                                 queue;
+  Test_I_ISessionNotify_t*                                subscriber;
+  std::string                                             targetFileName; // dump module
+  Common_UI_Window                                        window;
 };
 
 struct Test_I_URLStreamLoad_StreamConfiguration
@@ -164,7 +180,24 @@ struct Test_I_URLStreamLoad_StreamConfiguration
 {
   Test_I_URLStreamLoad_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
-  {}
+#if defined (FFMPEG_SUPPORT)
+   , mediaType ()
+#endif // FFMPEG_SUPPORT
+   , renderer (STREAM_DEVICE_RENDERER_INVALID)
+   , useHardwareDecoder (false)
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    renderer = STREAM_DEVICE_RENDERER_WASAPI;
+#else
+    renderer = STREAM_DEVICE_RENDERER_ALSA;
+#endif // ACE_WIN32 || ACE_WIN64
+  }
+
+#if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_MediaType mediaType; // input-
+#endif // FFMPEG_SUPPORT
+  enum Stream_Device_Renderer                   renderer;
+  bool                                          useHardwareDecoder;
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
@@ -176,87 +209,11 @@ struct Test_I_URLStreamLoad_StreamState
 {
   Test_I_URLStreamLoad_StreamState ()
    : Test_I_StreamState ()
-   , sessionData (NULL)
-  {}
-
-  struct Test_I_URLStreamLoad_SessionData* sessionData;
-};
-
-//////////////////////////////////////////
-
-typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData_2,
-                                    enum Stream_SessionMessageType,
-                                    Test_I_Message,
-                                    Test_I_SessionMessage_2> Test_I_ISessionNotify_2_t;
-typedef std::list<Test_I_ISessionNotify_2_t*> Test_I_Subscribers_2_t;
-typedef Test_I_Subscribers_2_t::const_iterator Test_I_SubscribersIterator_2_t;
-
-struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2
- : HTTP_ModuleHandlerConfiguration
-{
-  Test_I_URLStreamLoad_ModuleHandlerConfiguration_2 ()
-   : HTTP_ModuleHandlerConfiguration ()
-#if defined (FFMPEG_SUPPORT)
-   , codecId (AV_CODEC_ID_NONE)
-#endif // FFMPEG_SUPPORT
-   , connectionConfigurations (NULL)
-   , program (1)
-   , audioStreamType (15) // AAC
-   , videoStreamType (27) // H264
-   , subscriber (NULL)
-   , subscribers (NULL)
-   , targetFileName ()
-   , outputFormat ()
-#if defined (GTK_USE)
-   , window (NULL)
-#endif // GTK_USE
-  {
-    concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
-  }
-
-#if defined (FFMPEG_SUPPORT)
-  enum AVCodecID                  codecId;
-#endif // FFMPEG_SUPPORT
-  Net_ConnectionConfigurations_t* connectionConfigurations;
-  unsigned int                    program;                  // MPEG TS decoder module
-  unsigned int                    audioStreamType;          // MPEG TS decoder module
-  unsigned int                    videoStreamType;          // MPEG TS decoder module
-  Test_I_ISessionNotify_2_t*      subscriber;
-  Test_I_Subscribers_2_t*         subscribers;
-  std::string                     targetFileName; // dump module
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _AMMediaType             outputFormat;
-#else
-#if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_FFMPEG_VideoMediaType outputFormat;
-#endif // FFMPEG_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-#if defined (GTK_USE)
-  GdkWindow*                      window;
-#endif // GTK_USE
-};
-
-struct Test_I_URLStreamLoad_StreamConfiguration_2
- : HTTP_StreamConfiguration
-{
-  Test_I_URLStreamLoad_StreamConfiguration_2 ()
-   : HTTP_StreamConfiguration ()
   {}
 };
-//extern const char stream_name_string_[];
-typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Test_I_URLStreamLoad_StreamConfiguration_2,
-                               struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2> Test_I_URLStreamLoad_StreamConfiguration_2_t;
 
-struct Test_I_URLStreamLoad_StreamState_2
- : Test_I_StreamState
-{
-  Test_I_URLStreamLoad_StreamState_2 ()
-   : Test_I_StreamState ()
-   , sessionData (NULL)
-  {}
-
-  struct Test_I_URLStreamLoad_SessionData_2* sessionData;
-};
+typedef Stream_MessageQueue_T<ACE_MT_SYNCH,
+                              Common_TimePolicy_t,
+                              Test_I_SessionMessage> Test_I_URLStreamLoad_MessageQueue_t;
 
 #endif

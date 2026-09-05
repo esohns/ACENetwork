@@ -35,13 +35,6 @@
 
 //////////////////////////////////////////
 
-std::string
-executeEjsChallenge (const std::string&,  // challenge
-                     const std::string&,  // encrypted string
-                     const std::string&); // base.js file path
-
-//////////////////////////////////////////
-
 class Test_I_EventHandler
  : public Test_I_ISessionNotify_t
 {
@@ -109,30 +102,30 @@ class Test_I_EventHandler_1b
 //////////////////////////////////////////
 
 class Test_I_EventHandler_2
- : public Test_I_ISessionNotify_2_t
+ : public Test_I_ISessionNotify_t
 {
  public:
   Test_I_EventHandler_2 (struct Test_I_URLStreamLoad_UI_CBData*); // UI state
   inline virtual ~Test_I_EventHandler_2 () {}
 
   // implement Stream_ISessionDataNotify_T
-  virtual void start (Stream_SessionId_t,                                // session id
-                      const struct Test_I_URLStreamLoad_SessionData_2&); // session data
+  virtual void start (Stream_SessionId_t,                              // session id
+                      const struct Test_I_URLStreamLoad_SessionData&); // session data
   virtual void notify (Stream_SessionId_t,
                        const enum Stream_SessionMessageType&,
                        bool = false);
-  virtual void end (Stream_SessionId_t);                // session id
-  virtual void notify (Stream_SessionId_t,              // session id
-                       const Test_I_Message&);          // data message
-  virtual void notify (Stream_SessionId_t,              // session id
-                       const Test_I_SessionMessage_2&); // session message
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,     // session id
+                       const Test_I_Message&); // data message
+  virtual void notify (Stream_SessionId_t,            // session id
+                       const Test_I_SessionMessage&); // session message
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2 ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2 (const Test_I_EventHandler_2&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2& operator= (const Test_I_EventHandler_2&))
 
-  typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData_2*> SESSION_DATA_MAP_T;
+  typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
   struct Test_I_URLStreamLoad_UI_CBData* CBData_;

@@ -603,12 +603,10 @@ do_parse_configuration_file (const std::string& fileName_in,
             channel_configuration_s.name = item_value.c_str ();
           else if (!ACE_OS::strcmp (item_name.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_INDEX_POSITIONS_KEY)))
-            channel_configuration_s.indexPositions =
-                ACE_OS::atoi (item_value.c_str ());
+            channel_configuration_s.indexPositions = ACE_OS::atoi (item_value.c_str ());
           else if (!ACE_OS::strcmp (item_name.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_MAX_INDEX_KEY)))
-            channel_configuration_s.maxIndex =
-                ACE_OS::atoi (item_value.c_str ());
+            channel_configuration_s.maxIndex = ACE_OS::atoi (item_value.c_str ());
           else if (!ACE_OS::strcmp (item_name.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_WEBTV_CNF_CHANNEL_URL_KEY)))
             channel_configuration_s.mainURL = item_value.c_str ();

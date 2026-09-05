@@ -21,6 +21,10 @@
 #ifndef TEST_I_URLSTREAMLOAD_COMMON_H
 #define TEST_I_URLSTREAMLOAD_COMMON_H
 
+#if defined (RAPIDJSON_SUPPORT)
+#include "document.h"
+#endif // RAPIDJSON_SUPPORT
+
 #include "common_isubscribe.h"
 
 #include "stream_common.h"
@@ -42,10 +46,7 @@
 // forward declarations
 class Test_I_Message;
 class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
-
-//typedef HTTP_Statistic_t Test_I_URLStreamLoad_Statistic_t;
-//typedef Common_IStatistic_T<Test_I_URLStreamLoad_Statistic_t> Test_I_URLStreamLoad_StatisticReportingHandler_t;
+class Test_I_AVStream;
 
 struct Test_I_URLStreamLoad_SignalHandlerConfiguration
  : Test_I_SignalHandlerConfiguration
@@ -73,26 +74,27 @@ struct Test_I_URLStreamLoad_Configuration
 #endif // GTK_USE
    , parserConfiguration ()
    , parserConfiguration_1b ()
-   , parserConfiguration_2 ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
    , streamConfiguration_1b ()
    , streamConfiguration_2 ()
-  {}
+  {
+    parserConfiguration.notifyProgress = true;
+    parserConfiguration_1b.notifyProgress = true;
+  }
 
   // **************************** parser data **********************************
-  struct HTTP_ParserConfiguration                        parserConfiguration;
-  struct HTTP_ParserConfiguration                        parserConfiguration_1b;
-  struct HTTP_ParserConfiguration                        parserConfiguration_2;
+  struct HTTP_ParserConfiguration                        parserConfiguration;    // audio connection-
+  struct HTTP_ParserConfiguration                        parserConfiguration_1b; // video connection-
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t                         connectionConfigurations;
   // **************************** stream data **********************************
-  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration;
-  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1b;
-  Test_I_URLStreamLoad_StreamConfiguration_2_t           streamConfiguration_2;
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration; // audio connection-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1b; // video connection-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_2; // A/V
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -100,11 +102,6 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           Stream_ControlMessage_t,
                                           Test_I_Message,
                                           Test_I_SessionMessage> Test_I_MessageAllocator_t;
-typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Common_AllocatorConfiguration,
-                                          Stream_ControlMessage_t,
-                                          Test_I_Message,
-                                          Test_I_SessionMessage_2> Test_I_MessageAllocator_2_t;
 
 typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 
@@ -144,6 +141,7 @@ struct Test_I_URLStreamLoad_UI_CBData
   Test_I_URLStreamLoad_UI_CBData ()
 #if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+   , AVStream (NULL)
    , configuration (NULL)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_CBData ()
@@ -151,26 +149,23 @@ struct Test_I_URLStreamLoad_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE || WXWIDGETS_USE
-   , handle (ACE_INVALID_HANDLE)
+   , audioHandle (ACE_INVALID_HANDLE)
+   , videoHandle (ACE_INVALID_HANDLE)
    , progressData ()
-   //, subscribers ()
-   , baseFormatURL ()
-   , encryptedSignature ()
-   , signatureParameter ()
-   , encryptedNParameter ()
-   , URL ()
+#if defined (RAPIDJSON_SUPPORT)
+   , formats ()
+#endif // RAPIDJSON_SUPPORT
   {}
 
+  Test_I_AVStream*                            AVStream;
   struct Test_I_URLStreamLoad_Configuration*  configuration;
-
-  ACE_HANDLE                                  handle;
+  ACE_HANDLE                                  audioHandle;
+  ACE_HANDLE                                  videoHandle;
   struct Test_I_URLStreamLoad_UI_ProgressData progressData;
-  //Test_I_Subscribers_t                        subscribers;
-  std::string                                 baseFormatURL;
-  std::string                                 encryptedSignature;
-  std::string                                 signatureParameter;
-  std::string                                 encryptedNParameter;
-  std::string                                 URL;
+
+#if defined (RAPIDJSON_SUPPORT)
+  rapidjson::Document                         formats;
+#endif // RAPIDJSON_SUPPORT
 };
 
 //struct Test_I_URLStreamLoad_ThreadData

@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Test_I_Stream_H
-#define Test_I_Stream_H
+#ifndef TEST_I_STREAM_H
+#define TEST_I_STREAM_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -35,7 +35,6 @@
 // forward declarations
 class Test_I_Message;
 class Test_I_SessionMessage_3;
-
 typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  enum Stream_SessionMessageType,
                                  struct Stream_SessionManager_Configuration,

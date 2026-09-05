@@ -91,11 +91,11 @@ struct Net_SocketConfigurationBase
 
   int          bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interfaceIdentifier; // NIC-
 #else
   std::string  interfaceIdentifier; // NIC-
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
   std::string  interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64

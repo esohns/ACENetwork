@@ -43,7 +43,6 @@
 // forward declarations
 class Stream_IAllocator;
 class Test_I_SessionMessage;
-class Test_I_SessionMessage_2;
 
 typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  enum Stream_SessionMessageType,
@@ -51,18 +50,11 @@ typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  struct Test_I_URLStreamLoad_SessionData,
                                  struct Stream_Statistic,
                                  struct Stream_UserData> Test_I_SessionManager_t;
-typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
-                                 enum Stream_SessionMessageType,
-                                 struct Stream_SessionManager_Configuration,
-                                 struct Test_I_URLStreamLoad_SessionData_2,
-                                 struct Stream_Statistic,
-                                 struct Stream_UserData> Test_I_SessionManager_2;
 
 //////////////////////////////////////////
 
 extern const char stream_name_string_[];
 extern const char stream_name_string_1b[];
-extern const char stream_name_string_2[];
 
 class Test_I_ConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -182,67 +174,6 @@ class Test_I_ConnectionStream_1b
 
   // *TODO*: re-consider this API
   //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-};
-
-//////////////////////////////////////////
-
-class Test_I_ConnectionStream_2
- : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
-                                        Common_TimePolicy_t,
-                                        stream_name_string_2,
-                                        enum Stream_ControlType,
-                                        enum Stream_SessionMessageType,
-                                        enum Stream_StateMachine_ControlState,
-                                        struct Test_I_URLStreamLoad_StreamState_2,
-                                        struct Test_I_URLStreamLoad_StreamConfiguration_2,
-                                        struct Stream_Statistic,
-                                        Common_Timer_Manager_t,
-                                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
-                                        Test_I_SessionManager_2,
-                                        Stream_ControlMessage_t,
-                                        Test_I_Message,
-                                        Test_I_SessionMessage_2,
-                                        ACE_INET_Addr,
-                                        Test_I_ConnectionManager_2_t,
-                                        struct Stream_UserData>
-{
-  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
-                                        Common_TimePolicy_t,
-                                        stream_name_string_2,
-                                        enum Stream_ControlType,
-                                        enum Stream_SessionMessageType,
-                                        enum Stream_StateMachine_ControlState,
-                                        struct Test_I_URLStreamLoad_StreamState_2,
-                                        struct Test_I_URLStreamLoad_StreamConfiguration_2,
-                                        struct Stream_Statistic,
-                                        Common_Timer_Manager_t,
-                                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration_2,
-                                        Test_I_SessionManager_2,
-                                        Stream_ControlMessage_t,
-                                        Test_I_Message,
-                                        Test_I_SessionMessage_2,
-                                        ACE_INET_Addr,
-                                        Test_I_ConnectionManager_2_t,
-                                        struct Stream_UserData> inherited;
-
- public:
-  Test_I_ConnectionStream_2 ();
-  inline virtual ~Test_I_ConnectionStream_2 () { inherited::shutdown (); }
-
-  // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ILayout*, // i/o value: layout
-                     bool&);          // return value: delete modules ?
-
-  // implement Common_IInitialize_T
-  virtual bool initialize (const inherited::CONFIGURATION_T&,
-                           ACE_HANDLE);
-
- private:
-  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_2 (const Test_I_ConnectionStream_2&))
-  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_2& operator= (const Test_I_ConnectionStream_2&))
-
-  // *TODO*: re-consider this API
-  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 #endif
