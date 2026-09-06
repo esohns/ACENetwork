@@ -358,6 +358,7 @@ class HTTP_ANTLRParserDriver_T
   inline virtual void finished () { finished_ = true; }
   virtual bool hasFinished ();
   inline virtual bool headerOnly () { ACE_ASSERT (configuration_); return configuration_->headerOnly; } // returns: parse HTTP header only ?
+  //inline virtual bool isMultiBody () { ACE_ASSERT (configuration_); return configuration_->multiBody; } // returns: pass body pieces downstream directly ?
   inline virtual const struct HTTP_Record& current () { return parser_.record_; }
   virtual void chunk_2 (ACE_UINT64, ACE_UINT32); // chunk offset, chunk size
 

@@ -50,12 +50,13 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::sessionData_);
+  if (!message_inout->isInitialized ())
+    return; // probably body content
 
   HTTP_HeadersIterator_t iterator;
   struct Test_I_URLStreamLoad_SessionData& session_data_r =
     const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
 
-  ACE_ASSERT (message_inout->isInitialized ());
   const Test_I_MessageDataContainer& data_container_r =
     message_inout->getR ();
   struct Test_I_URLStreamLoad_MessageData& data_r =

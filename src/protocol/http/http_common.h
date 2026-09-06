@@ -137,9 +137,11 @@ struct HTTP_ParserConfiguration
   HTTP_ParserConfiguration ()
    : Common_FlexBisonParserConfiguration ()
    , headerOnly (false)
+   , multiBody (false)
   {}
 
   bool headerOnly; // parse only message headers ?
+  bool multiBody;
 };
 
 //                            offset      size

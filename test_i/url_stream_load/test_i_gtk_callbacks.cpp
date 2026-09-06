@@ -1699,146 +1699,6 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.address).c_str ())));
       goto error;
     } // end IF
-    //iconnection_2 = iconnection_manager_p->get (data_p->videoHandle);
-    //ACE_ASSERT (iconnection_p && iconnection_2);
-
-//    // step4: send HTTP requests
-//    istream_connection_p =
-//      dynamic_cast<Test_I_IStreamConnection_t*> (iconnection_p);
-//    ACE_ASSERT (istream_connection_p);
-//
-//    ACE_NEW_NORETURN (HTTP_record_p,
-//                      struct HTTP_Record ());
-//    if (!HTTP_record_p)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//      iconnection_p->decrease (); iconnection_2->decrease ();
-//      goto error;
-//    } // end IF
-//    HTTP_record_p->form = HTTP_form;
-//    HTTP_record_p->headers = HTTP_headers;
-//    HTTP_record_p->method =
-//      (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
-//                          : HTTP_Codes::HTTP_METHOD_POST);
-//    HTTP_record_p->URI = URI_string;
-//    HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
-//
-//    ACE_NEW_NORETURN (message_data_p,
-//                      Test_I_Message::DATA_T ());
-//    if (!message_data_p)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//      delete HTTP_record_p; HTTP_record_p = NULL;
-//      iconnection_p->decrease ();
-//      goto error;
-//    } // end IF
-//    // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
-//    message_data_p->setPR (HTTP_record_p);
-//
-//    ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
-//    ACE_ASSERT (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator);
-//allocate:
-//    message_p =
-//      static_cast<Test_I_Message*> (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->malloc ((*iterator_2).second->allocatorConfiguration->defaultBufferSize));
-//    // keep retrying ?
-//    if (!message_p &&
-//        !static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->messageAllocator->block ())
-//      goto allocate;
-//    if (!message_p)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
-//      delete message_data_p; message_data_p = NULL;
-//      iconnection_p->decrease ();
-//      goto error;
-//    } // end IF
-//
-//    Test_I_ConnectionStream& stream_r =
-//      const_cast<Test_I_ConnectionStream&> (istream_connection_p->stream ());
-//    const struct Test_I_URLStreamLoad_SessionData& session_data_r =
-//      stream_r.getR_2 ();
-//
-//    // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-//    message_p->initialize (message_data_p,
-//                           session_data_r.sessionId,
-//                           NULL);
-//
-//    message_block_p = message_p;
-//    istream_connection_p->send (message_block_p);
-//
-//    // clean up
-//    iconnection_p->decrease (); iconnection_p = NULL;
-//
-//    istream_connection_2 =
-//      dynamic_cast<Test_I_IStreamConnection_1b_t*> (iconnection_2);
-//    ACE_ASSERT (istream_connection_2);
-//
-//    ACE_NEW_NORETURN (HTTP_record_p,
-//                      struct HTTP_Record ());
-//    if (!HTTP_record_p)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//      iconnection_2->decrease ();
-//      goto error;
-//    } // end IF
-//    //HTTP_form.clear ();
-//    HTTP_record_p->form = HTTP_form;
-//    HTTP_record_p->headers = HTTP_headers;
-//    HTTP_record_p->method =
-//      (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
-//                          : HTTP_Codes::HTTP_METHOD_POST);
-//    HTTP_record_p->URI = URI_string_2;
-//    HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
-//
-//    ACE_NEW_NORETURN (message_data_p,
-//                      Test_I_Message::DATA_T ());
-//    if (!message_data_p)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//      delete HTTP_record_p; HTTP_record_p = NULL;
-//      iconnection_2->decrease ();
-//      goto error;
-//    } // end IF
-//    // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
-//    message_data_p->setPR (HTTP_record_p);
-//
-//    ACE_ASSERT ((*iterator_3).second->allocatorConfiguration);
-//    ACE_ASSERT (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->messageAllocator);
-//allocate_2:
-//    message_p =
-//      static_cast<Test_I_Message*> (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->messageAllocator->malloc ((*iterator_3).second->allocatorConfiguration->defaultBufferSize));
-//    // keep retrying ?
-//    if (!message_p &&
-//        !static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->messageAllocator->block ())
-//      goto allocate_2;
-//    if (!message_p)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate Test_I_Message: \"%m\", aborting\n")));
-//      delete message_data_p; message_data_p = NULL;
-//      iconnection_2->decrease ();
-//      goto error;
-//    } // end IF
-//
-//    Test_I_ConnectionStream_1b& stream_2 =
-//      const_cast<Test_I_ConnectionStream_1b&> (istream_connection_2->stream ());
-//    const struct Test_I_URLStreamLoad_SessionData& session_data_2 =
-//      stream_2.getR_2 ();
-//
-//    // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
-//    message_p->initialize (message_data_p,
-//                           session_data_2.sessionId,
-//                           NULL);
-//
-//    message_block_p = message_p;
-//    istream_connection_2->send (message_block_p);
-//
-//    // clean up
-//    iconnection_2->decrease (); iconnection_2 = NULL;
 
     success = true;
 
@@ -2055,10 +1915,16 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_quit_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
+
+  // sanity check(s)
   struct Test_I_URLStreamLoad_UI_CBData* data_p =
     static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
-  // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->AVStream);
+
+  data_p->AVStream->stop (true,
+                          false,
+                          true);
 
   // step1: remove event sources
   { ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);

@@ -39,15 +39,21 @@ initial:            document EOF;
 document:           head CRLF {
                       HTTP_HeadersConstIterator_t iterator =
                         record_.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-                      if (iterator != record_.headers.end ())
+                      if (likely (iterator != record_.headers.end ()))
                       {
                         std::istringstream converter;
                         converter.str ((*iterator).second);
                         ACE_UINT64 content_length;
                         converter >> content_length;
-                        if (!content_length)
+                        if (unlikely (!content_length))
                           parser_->finished ();
                       } // end IF
+                      if (unlikely (parser_->isMultiBody ()))
+                      {
+                        struct HTTP_Record* record_p = &record_;
+                        parser_->record (record_p);
+                        return _localctx;
+                      }
                     } body;
 head:               METHOD {
                       record_.method = HTTP_Tools::MethodToType ($METHOD->getText ());

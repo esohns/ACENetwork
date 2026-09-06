@@ -325,6 +325,7 @@ CRLF_HEADERS                   : CRLF {
                                      std::istringstream converter;
                                      converter.str ((*iterator).second);
                                      converter >> content_length;
+                                     parser->contentLengthOrChunkSize (content_length);
                                      missing_body_or_chunk_bytes = content_length;
                                      setMode (content_length ? REGULAR_BODY : DEFAULT_MODE);
                                      break;
@@ -377,6 +378,7 @@ BODY                           : OCTET {
                                    ++scanned_content_length;
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    --missing_body_or_chunk_bytes;
+                                   parser->bodyOrChunkBytesSkipped (1);
                                    if (unlikely (!missing_body_or_chunk_bytes))
                                    {
                                      std::ostringstream converter;

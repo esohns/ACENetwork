@@ -81,7 +81,9 @@ struct Test_I_URLStreamLoad_Configuration
    , streamConfiguration_2 ()
   {
     parserConfiguration.notifyProgress = true;
+    parserConfiguration.multiBody = true;
     parserConfiguration_1b.notifyProgress = true;
+    parserConfiguration_1b.multiBody = true;
   }
 
   // **************************** parser data **********************************

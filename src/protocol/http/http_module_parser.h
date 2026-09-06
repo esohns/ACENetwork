@@ -132,6 +132,7 @@ class HTTP_Module_Parser_T
   ACE_UINT64                          bodyOrChunkBytesToSkip_;
   HTTP_Chunks_t                       chunks_;
   ACE_UINT64                          contentLengthOrChunkSize_;
+  bool                                isFirstFragment_;
   typename inherited::MESSAGE_QUEUE_T queue_; // parser-
 };
 
@@ -260,6 +261,7 @@ class HTTP_Module_ParserH_T
   ACE_UINT64       bodyOrChunkBytesToSkip_;
   HTTP_Chunks_t    chunks_;
   ACE_UINT64       contentLengthOrChunkSize_;
+  bool             isFirstFragment_;
 };
 
 // include template definition

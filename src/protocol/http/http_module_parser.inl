@@ -52,6 +52,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
  , bodyOrChunkBytesToSkip_ (0)
  , chunks_ ()
  , contentLengthOrChunkSize_ (0)
+ , isFirstFragment_ (true)
  , queue_ (0,    // max # slots --> unlimited
            NULL) // notification handle
 {
@@ -106,21 +107,23 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    ACE_ASSERT (inherited::msg_queue_);
-    result = inherited::msg_queue_->activate ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Queue_Base::activate(): \"%m\", continuing\n")));
-
     if (headFragment_)
     {
       headFragment_->release (); headFragment_ = NULL;
     } // end IF
+    multiBody_ = false;
+
+    bodyOrChunkBytesToSkip_ = 0;
     chunks_.clear ();
+    contentLengthOrChunkSize_ = 0;
+    isFirstFragment_ = true;
+    queue_.activate ();
+    queue_.flush (true); // flush any messages
   } // end IF
 
   ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
-  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue = &queue_;
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+    &queue_;
   if (!inherited2::initialize (*configuration_in.parserConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -132,6 +135,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
     NULL;
+
+  if (unlikely (configuration_in.parserConfiguration->multiBody))
+    multiBody_ = true;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -738,11 +744,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->parserConfiguration);
-  if (unlikely (multiBody_))
+  if (unlikely (!isFirstFragment_ && multiBody_))
   {
     message_block_p = message_in;
     goto continue_;
   } // end IF
+  isFirstFragment_ = false;
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT ((message_in->capacity () - message_in->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
@@ -814,32 +821,6 @@ parse:
   ACE_ASSERT (message_block_p);
   headFragment_ = static_cast<DataMessageType*> (message_block_2);
 
-  //if (headFragment_)
-  //{ // *TODO*: remove this ASAP
-  //  bool bytes_repaired_b = false;
-  //  // repair broken data; flex may (!) have clobbered the first few bytes
-  //  if ((headFragment_->length () >= 1) && (*headFragment_->rd_ptr () != 'H'))
-  //  { bytes_repaired_b = true;
-  //    *headFragment_->rd_ptr () = 'H';
-  //  } // end IF
-  //  if ((headFragment_->length () >= 2) && ((*headFragment_->rd_ptr () + 1) != 'T'))
-  //  { bytes_repaired_b = true;
-  //    *(headFragment_->rd_ptr () + 1) = 'T';
-  //  } // end IF
-  //  if ((headFragment_->length () >= 3) && ((*headFragment_->rd_ptr () + 2) != 'T'))
-  //  { bytes_repaired_b = true;
-  //    *(headFragment_->rd_ptr () + 2) = 'T';
-  //  } // end IF
-  //  if ((headFragment_->length () >= 4) && ((*headFragment_->rd_ptr () + 3) != 'P'))
-  //  { bytes_repaired_b = true;
-  //    *(headFragment_->rd_ptr () + 3) = 'P';
-  //  } // end IF
-  //  if (unlikely (bytes_repaired_b))
-  //    ACE_DEBUG ((LM_WARNING,
-  //                ACE_TEXT ("%s: repaired HTTP header...\n"),
-  //                inherited::mod_->name ()));
-  //} // end IF
-
 continue_:
   ACE_ASSERT (message_block_p);
   chunks_.clear ();
@@ -906,6 +887,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (headFragment_);
+  if (unlikely (!headFragment_->isInitialized ()))
+    return 0;
 
   size_t result = 0;
 
@@ -986,6 +969,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
  , bodyOrChunkBytesToSkip_ (0)
  , chunks_ ()
  , contentLengthOrChunkSize_ (0)
+ , isFirstFragment_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
 
@@ -1068,7 +1052,12 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     {
       headFragment_->release (); headFragment_ = NULL;
     } // end IF
+    multiBody_ = false;
+
+    bodyOrChunkBytesToSkip_ = 0;
     chunks_.clear ();
+    contentLengthOrChunkSize_ = 0;
+    isFirstFragment_ = true;
   } // end IF
 
   ACE_ASSERT (!configuration_in.parserConfiguration->messageQueue);
@@ -1079,8 +1068,15 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to initialize parser driver: \"%m\", aborting\n"),
                 inherited::mod_->name ()));
+    const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      NULL;
     return false;
   } // end IF
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+    NULL;
+
+  if (unlikely (configuration_in.parserConfiguration->multiBody))
+    multiBody_ = true;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -1127,6 +1123,16 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   // initialize return value(s)
   passMessageDownstream_out = false;
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->parserConfiguration);
+  if (unlikely (!isFirstFragment_ && multiBody_))
+  {
+    message_block_p = message_inout;
+    goto continue_2;
+  } // end IF
+  isFirstFragment_ = false;
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT ((message_inout->capacity () - message_inout->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
@@ -1177,24 +1183,19 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   // *NOTE*: the message has been parsed successfully
   //         --> pass the data (chain) downstream
-  {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-    //// *NOTE*: new data fragments may have arrived by now
-    ////         --> set the next head fragment ?
-    //message_2 = dynamic_cast<DataMessageType*> (message_block_p->cont ());
-    //if (message_2)
-    //  message_block_p->cont (NULL);
+  message_block_p = headFragment_;
+  headFragment_ = NULL;
 
-    result = inherited::put_next (headFragment_, NULL);
-    if (unlikely (result == -1))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
-                  inherited::mod_->name ()));
-      headFragment_->release (); headFragment_ = NULL;
-      goto error;
-    } // end IF
-    headFragment_ = NULL;
-  } // end lock scope
+continue_2:
+  result = inherited::put_next (message_block_p, NULL);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
+                inherited::mod_->name ()));
+    message_block_p->release (); message_block_p = NULL;
+    goto error;
+  } // end IF
 
   // *IMPORTANT NOTE*: send 'step' session message so downstream modules know
   //                   that the complete document data has arrived

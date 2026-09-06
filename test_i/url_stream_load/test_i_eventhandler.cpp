@@ -420,7 +420,7 @@ Test_I_EventHandler_1b::notify (Stream_SessionId_t sessionId_in,
   // sanity check(s)
   ACE_ASSERT (CBData_);
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  ACE_ASSERT (iterator != sessionDataMap_.end ());
+  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =

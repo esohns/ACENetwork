@@ -274,7 +274,13 @@ http_antlr_parser::DocumentContext* http_antlr_parser::document() {
                             if (!content_length)
                               parser_->finished ();
                           } // end IF
-                        
+                          if (unlikely (parser_->isMultiBody ()))
+                          {
+                            struct HTTP_Record* record_p = &record_;
+                            parser_->record (record_p);
+                            return _localctx;
+                          }
+
     setState(26);
     body();
    

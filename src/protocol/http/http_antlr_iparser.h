@@ -45,6 +45,11 @@ class HTTP_ANTLR_IParser
   virtual void finished () = 0;
   virtual bool hasFinished () = 0;
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
+  virtual bool isMultiBody () = 0; // returns: pass body pieces downstream directly ?
+  
+  inline virtual void contentLengthOrChunkSize (ACE_UINT64) = 0;
+  inline virtual void bodyOrChunkBytesSkipped (ACE_UINT64) = 0;
+
   virtual const struct HTTP_Record& current () = 0; // current record
   virtual void chunk_2 (ACE_UINT64, ACE_UINT32) = 0; // chunk offset, chunk size
 
