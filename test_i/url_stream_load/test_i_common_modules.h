@@ -34,6 +34,7 @@
 #if defined (FFMPEG_SUPPORT)
 #include "stream_dec_libav_audio_decoder.h"
 #include "stream_dec_libav_decoder.h"
+#include "stream_dec_libav_demuxer.h"
 #include "stream_dec_libav_hw_decoder.h"
 #endif // FFMPEG_SUPPORT
 
@@ -331,6 +332,20 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           Test_I_Distributor);                                      // module name prefix
 
 #if defined (FFMPEG_SUPPORT)
+typedef Stream_Decoder_LibAV_Demuxer_T<ACE_MT_SYNCH,
+                                       Common_TimePolicy_t,
+                                       struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                       Stream_ControlMessage_t,
+                                       Test_I_Message,
+                                       Test_I_SessionMessage,
+                                       struct Stream_MediaFramework_FFMPEG_MediaType> Test_I_Demuxer;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,                   // session data type
+                              enum Stream_SessionMessageType,                            // session event type
+                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,    // module handler configuration type
+                              libacestream_default_dec_libav_demuxer_module_name_string,
+                              Stream_INotify_t,                                          // stream notification interface type
+                              Test_I_Demuxer);                                           // writer type
+
 typedef Stream_Decoder_LibAVAudioDecoder_T<ACE_MT_SYNCH,
                                            Common_TimePolicy_t,
                                            struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,

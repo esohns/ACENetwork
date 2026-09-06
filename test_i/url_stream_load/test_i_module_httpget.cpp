@@ -230,10 +230,13 @@ Test_I_Module_HTTPGet::handleSessionMessage (Test_I_SessionMessage*& message_ino
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
-  struct Test_I_URLStreamLoad_SessionData& session_data_r =
-    const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
-  if (session_data_r.connection)
-    handle_ = static_cast<ACE_HANDLE> (session_data_r.connection->id ());
+  if (likely (inherited::sessionData_))
+  {
+    struct Test_I_URLStreamLoad_SessionData& session_data_r =
+      const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
+    if (session_data_r.connection)
+      handle_ = static_cast<ACE_HANDLE> (session_data_r.connection->id ());
+  } // end IF
 
   switch (message_inout->type ())
   {

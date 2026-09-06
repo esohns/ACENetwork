@@ -660,10 +660,8 @@ do_work (bool debugParser_in,
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
-  modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
-  //modulehandler_configuration.connectionManager = connection_manager_p;
-//  configuration_in.parserConfiguration.debugParser = true;
-//  configuration_in.parserConfiguration.debugScanner = true;
+  //modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration.inputFormat = ACE_TEXT_ALWAYS_CHAR ("webm");
   modulehandler_configuration.messageAllocator = &message_allocator;
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
@@ -698,6 +696,7 @@ do_work (bool debugParser_in,
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_1b.codecConfiguration = &codec_configuration_1b;
 #endif // FFMPEG_SUPPORT
+  modulehandler_configuration_1b.inputFormat = ACE_TEXT_ALWAYS_CHAR ("mp4");
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_RGB24;
 #endif // FFMPEG_SUPPORT

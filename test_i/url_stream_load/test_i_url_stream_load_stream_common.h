@@ -149,6 +149,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
    , connectionConfigurations (NULL)
    , delayConfiguration (NULL)
    , deviceIdentifier ()
+   , inputFormat ()
 #if defined (FFMPEG_SUPPORT)
    , outputFormat ()
 #endif // FFMPEG_SUPPORT
@@ -167,6 +168,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Net_ConnectionConfigurations_t*                         connectionConfigurations;
   struct Stream_Miscellaneous_DelayConfiguration*         delayConfiguration;
   struct Stream_Device_Identifier                         deviceIdentifier;
+  std::string                                             inputFormat; // demuxer module
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType           outputFormat;
 #endif // FFMPEG_SUPPORT

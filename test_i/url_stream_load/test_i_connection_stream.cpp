@@ -85,6 +85,13 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
 
 #if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
+                  Test_I_Demuxer_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
                   Test_I_AudioDecoder_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
                   false);
@@ -232,6 +239,13 @@ Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
   module_p = NULL;
 
 #if defined (FFMPEG_SUPPORT)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Demuxer_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
   if (inherited::configuration_->configuration_->useHardwareDecoder)
     ACE_NEW_RETURN (module_p,
                     Test_I_VideoHWDecoder_Module (this,
