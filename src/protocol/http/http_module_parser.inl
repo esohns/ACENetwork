@@ -389,9 +389,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       converter >> bytes_to_skip;
       if (unlikely (bytes_to_skip == 0))
       {
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("%s: content length was 0, continuing\n"),
-                    inherited::mod_->name ()));
+        //ACE_DEBUG ((LM_WARNING,
+        //            ACE_TEXT ("%s: content length was 0, continuing\n"),
+        //            inherited::mod_->name ()));
         bytes_to_skip = headFragment_->total_length ();
       } // end IF
     } // end IF
@@ -740,7 +740,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::configuration_->parserConfiguration);
   if (unlikely (multiBody_))
   {
-    message_block_p = message_in; 
+    message_block_p = message_in;
     goto continue_;
   } // end IF
 
@@ -924,9 +924,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       converter >> result;
       if (result == 0)
       {
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("%s: content length was 0, continuing\n"),
-                    inherited::mod_->name ()));
+        //ACE_DEBUG ((LM_WARNING,
+        //            ACE_TEXT ("%s: content length was 0, continuing\n"),
+        //            inherited::mod_->name ()));
         result = headFragment_->total_length ();
       } // end IF
     } // end IF

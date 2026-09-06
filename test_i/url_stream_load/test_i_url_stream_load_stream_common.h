@@ -135,14 +135,14 @@ typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_I_Message,
                                     Test_I_SessionMessage> Test_I_ISessionNotify_t;
-//typedef std::list<Test_I_ISessionNotify_t*> Test_I_Subscribers_t;
-//typedef Test_I_Subscribers_t::const_iterator Test_I_SubscribersIterator_t;
 
+struct Test_I_URLStreamLoad_UI_CBData;
 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {
   Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
+   , CBData (NULL)
 #if defined (FFMPEG_SUPPORT)
    , codecConfiguration (NULL)
 #endif // FFMPEG_SUPPORT
@@ -160,6 +160,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   }
 
+  struct Test_I_URLStreamLoad_UI_CBData*                  CBData; // HTTP Get module
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration* codecConfiguration;
 #endif // FFMPEG_SUPPORT

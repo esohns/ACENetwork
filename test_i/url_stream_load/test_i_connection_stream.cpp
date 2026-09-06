@@ -43,9 +43,8 @@
 
 #include "test_i_common_modules.h"
 #include "test_i_message.h"
+#include "test_i_module_httpget.h"
 #include "test_i_session_message.h"
-//#include "test_i_m3u_module_parser.h"
-//#include "test_i_module_httpget.h"
 
 Test_I_ConnectionStream::Test_I_ConnectionStream ()
  : inherited ()
@@ -77,12 +76,12 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-//ACE_NEW_RETURN (module_p,
-//                Test_I_StatisticReport_Module (this,
-//                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-//                false);
-//layout_in->append (module_p, NULL, 0);
-//module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Module_HTTPGet_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
 #if defined (FFMPEG_SUPPORT)
   ACE_NEW_RETURN (module_p,
@@ -225,12 +224,12 @@ Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_StatisticReport_Module (this,
-  //                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Module_HTTPGet_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
 
 #if defined (FFMPEG_SUPPORT)
   if (inherited::configuration_->configuration_->useHardwareDecoder)

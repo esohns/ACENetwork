@@ -42,6 +42,7 @@ class HTTP_ANTLR_IParser
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer () = 0;
    
+  virtual void finished () = 0;
   virtual bool hasFinished () = 0;
   virtual bool headerOnly () = 0; // returns: parse HTTP header only ?
   virtual const struct HTTP_Record& current () = 0; // current record

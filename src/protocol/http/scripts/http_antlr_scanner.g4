@@ -208,7 +208,8 @@ fragment FIELD_NAME     : TOKEN;
 fragment FIELD_VCHAR    : (VCHAR|OBS_TEXT);
 fragment FIELD_CONTENT  : FIELD_VCHAR ((SP|HT)+ FIELD_VCHAR)?;
 /* fragment FIELD_VALUE    : (FIELD_CONTENT|OBS_FOLD)*; */
-fragment FIELD_VALUE    : (FIELD_CONTENT)+;
+fragment TO_END_OF_LINE : ~[\u000D];
+fragment FIELD_VALUE    : (TO_END_OF_LINE)+;
 fragment HEADER         : FIELD_NAME ':' SP FIELD_VALUE;
 
 /* General Headers */
@@ -349,12 +350,7 @@ CRLF_HEADERS                   : CRLF {
                                      } // end ELSE
                                    } // end IF
                                    else
-                                   {
-                                     ACE_DEBUG ((LM_ERROR,
-                                                 ACE_TEXT ("invalid/unknown transfer encoding (was: \"%s\"), continuing\n"),
-                                                 ACE_TEXT ((*iterator).second.c_str ())));
                                      setMode (DEFAULT_MODE);
-                                   } // end ELSE
                                  }
                                  } -> type(CRLF);
 

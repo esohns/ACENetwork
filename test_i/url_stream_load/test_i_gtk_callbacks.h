@@ -28,11 +28,22 @@
 // helper routines
 std::string executeYtdl (const std::string&); // URL
 
+// helper structures
+struct Test_I_URLStreamLoad_Redirect_CBData
+{
+  Test_I_URLStreamLoad_Redirect_CBData ()
+    : CBData (NULL)
+    , handle (ACE_INVALID_HANDLE)
+    , URL ()
+   {}
+
+  struct Test_I_URLStreamLoad_UI_CBData* CBData;
+  ACE_HANDLE                             handle; // corresponding connection-
+  std::string                            URL; // redirection-
+};
+
 // idle routines
-//gboolean idle_load_player_base_cb (gpointer);
-//gboolean idle_load_formats_cb (gpointer);
-//gboolean idle_received_formats_cb (gpointer);
-//gboolean idle_connect_to_peer_cb (gpointer);
+gboolean idle_handle_redirect_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
 gboolean idle_reset_UI_cb (gpointer);

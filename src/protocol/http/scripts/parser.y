@@ -242,6 +242,21 @@ message :           head "delimiter"                 { if (unlikely (iparser_p->
                                                          }
                                                          YYACCEPT;
                                                        } // end IF
+
+                                                       if (unlikely (iparser_p->isMultiBody ()))
+                                                       {
+                                                         struct HTTP_Record& record_r =
+                                                           iparser_p->current ();
+                                                         struct HTTP_Record* record_p =
+                                                           &record_r;
+                                                         try {
+                                                           iparser_p->record (record_p);
+                                                         } catch (...) {
+                                                           ACE_DEBUG ((LM_ERROR,
+                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                         }
+                                                         YYACCEPT;
+                                                       }
                                                      }
                     body                             { $$ = $1 + $2 + $4; };
 head:               "method" head_rest1              { $$ = static_cast<int> ($1->size ()) + $2 + 1;
@@ -322,7 +337,7 @@ status_line_rest1:  "status" status_line_rest2       { $$ = static_cast<int> ($1
                                                        int status = -1;
                                                        converter >> status;
                                                        record_r.status =
-                                                           static_cast<HTTP_Status_t> (status);
+                                                         static_cast<HTTP_Status_t> (status);
                                                      };
 status_line_rest2:  "reason"                         { $$ = static_cast<int> ($1->size ()) + 2;
                                                        struct HTTP_Record& record_r =

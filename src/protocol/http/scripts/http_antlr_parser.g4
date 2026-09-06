@@ -36,7 +36,19 @@ options {
 }
 
 initial:            document EOF;
-document:           head CRLF body;
+document:           head CRLF {
+                      HTTP_HeadersConstIterator_t iterator =
+                        record_.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+                      if (iterator != record_.headers.end ())
+                      {
+                        std::istringstream converter;
+                        converter.str ((*iterator).second);
+                        ACE_UINT64 content_length;
+                        converter >> content_length;
+                        if (!content_length)
+                          parser_->finished ();
+                      } // end IF
+                    } body;
 head:               METHOD {
                       record_.method = HTTP_Tools::MethodToType ($METHOD->getText ());
                     } head_request_rest
@@ -127,7 +139,8 @@ body:               BODY {
                       converter >> chunk_size_i;
                       //content_length_ += chunk_size_i;
                     }
-                    } chunked_body;
+                    } chunked_body
+                    |;
 chunked_body:       chunks headers CRLF;
 chunks:             chunks CHUNK {
                     {

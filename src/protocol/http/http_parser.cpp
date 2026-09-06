@@ -1339,6 +1339,21 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
                                                          }
                                                          YYACCEPT;
                                                        } // end IF
+
+                                                       if (unlikely (iparser_p->isMultiBody ()))
+                                                       {
+                                                         struct HTTP_Record& record_r =
+                                                           iparser_p->current ();
+                                                         struct HTTP_Record* record_p =
+                                                           &record_r;
+                                                         try {
+                                                           iparser_p->record (record_p);
+                                                         } catch (...) {
+                                                           ACE_DEBUG ((LM_ERROR,
+                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
+                                                         }
+                                                         YYACCEPT;
+                                                       }
                                                      }
     break;
 

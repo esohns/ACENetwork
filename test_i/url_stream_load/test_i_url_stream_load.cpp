@@ -119,8 +119,10 @@ do_print_usage (const std::string& programName_in)
   // enable verbatim boolean output
   std::cout.setf (std::ios::boolalpha);
 
-  std::string path =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -133,10 +135,6 @@ do_print_usage (const std::string& programName_in)
             << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
-  std::string configuration_path = path;
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
@@ -144,7 +142,7 @@ do_print_usage (const std::string& programName_in)
             << gtk_rc_file
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-  std::string output_file = path;
+  std::string output_file = Common_File_Tools::getTempDirectory ();
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE);
@@ -190,7 +188,7 @@ do_process_arguments (int argc_in,
                       ACE_TCHAR** argv_in, // cannot be const...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                       bool& showConsole_out,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                       bool& debugParser_out,
 #if defined (GTK_USE)
                       std::string& GtkRcFileName_out,
@@ -210,21 +208,19 @@ do_process_arguments (int argc_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
 
-  std::string working_directory =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
   std::string temp_directory = Common_File_Tools::getTempDirectory ();
-  std::string configuration_directory = working_directory;
-  configuration_directory += ACE_DIRECTORY_SEPARATOR_STR_A;
-  configuration_directory +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   // initialize results
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
 #if defined (GTK_USE)
-  GtkRcFileName_out = configuration_directory;
+  GtkRcFileName_out = configuration_path;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_USE
@@ -232,7 +228,7 @@ do_process_arguments (int argc_in,
   fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   fileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE);
-  UIDefinitonFileName_out = configuration_directory;
+  UIDefinitonFileName_out = configuration_path;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_GLADE_FILE);
@@ -265,7 +261,7 @@ do_process_arguments (int argc_in,
                                ACE_TEXT ("cde:f:g:lrs:tu:v"),
 #else
                                ACE_TEXT ("de:f:g:lrs:tu:v"),
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                1,                         // skip command name
                                1,                         // report parsing errors
                                ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -283,7 +279,7 @@ do_process_arguments (int argc_in,
         showConsole_out = true;
         break;
       }
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       case 'd':
       {
         debugParser_out = true;
@@ -567,7 +563,7 @@ do_work (bool debugParser_in,
                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
-  allocator_configuration.defaultBufferSize = 16384;
+  allocator_configuration.defaultBufferSize = 16384 * 10;
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (allocator_configuration))
@@ -624,14 +620,17 @@ do_work (bool debugParser_in,
   configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
+  //configuration_in.parserConfiguration_1b.debugParser = debugParser_in;
+  //if (debugParser_in)
+  //  configuration_in.parserConfiguration_1b.debugScanner = true;
 #endif // _DEBUG
   // ********************** module configuration data **************************
 #if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration; // audio
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration; // audio (decoder)
   codec_configuration.codecId = AV_CODEC_ID_OPUS;
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video
-  codec_configuration_1b.codecId = AV_CODEC_ID_VP9;
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video (decoder)
+  codec_configuration_1b.codecId = AV_CODEC_ID_AV1;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
 #endif // FFMPEG_SUPPORT
 
@@ -647,6 +646,7 @@ do_work (bool debugParser_in,
 
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
+  modulehandler_configuration.CBData = &CBData_in;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration.codecConfiguration = &codec_configuration;
 #endif // FFMPEG_SUPPORT
@@ -673,7 +673,7 @@ do_work (bool debugParser_in,
   modulehandler_configuration.subscriber = &message_handler;
   modulehandler_configuration.targetFileName = fileName_in;
   modulehandler_configuration.URL = URL_in;
-  modulehandler_configuration.waitForConnect = false;
+  modulehandler_configuration.waitForConnect = true;
   // ******************** (sub-)stream configuration data *********************
   //if (bufferSize_in)
   //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
@@ -706,7 +706,9 @@ do_work (bool debugParser_in,
   modulehandler_configuration_1b.subscriber = &message_handler_1b;
   stream_configuration_1b = stream_configuration;
 #if defined (FFMPEG_SUPPORT)
-  stream_configuration_1b.mediaType.video.codecId = AV_CODEC_ID_VP9;
+  stream_configuration_1b.mediaType.video.codecId = AV_CODEC_ID_AV1;
+  stream_configuration_1b.mediaType.video.frameRate = { 25, 1 };
+  stream_configuration_1b.mediaType.video.resolution = { 640, 360 };
 #endif // FFMPEG_SUPPORT
   stream_configuration_1b.module = &event_handler_module_1b;
   configuration_in.streamConfiguration_1b.initialize (module_configuration,
@@ -742,8 +744,8 @@ do_work (bool debugParser_in,
   stream_configuration_2.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
   stream_configuration_2.mediaType.audio.sampleRate = 48000;
   stream_configuration_2.mediaType.video.format = AV_PIX_FMT_RGB24;
-  stream_configuration_2.mediaType.video.resolution = {640, 360};
-  stream_configuration_2.mediaType.video.frameRate = {30, 1};
+  stream_configuration_2.mediaType.video.frameRate = { 25, 1 };
+  stream_configuration_2.mediaType.video.resolution = { 640, 360 };
 #endif // FFMPEG_SUPPORT
   stream_configuration_2.messageAllocator = &message_allocator;
   stream_configuration_2.module = &event_handler_module_2;
@@ -973,7 +975,6 @@ ACE_TMAIN (int argc_in,
 
   int result = -1;
   ACE_Profile_Timer process_profile;
-  std::string path;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool show_console;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1064,18 +1065,17 @@ ACE_TMAIN (int argc_in,
   show_console = false;
 #endif // ACE_WIN32 || ACE_WIN64
   debug_parser = COMMON_PARSER_DEFAULT_YACC_TRACE;
-  path =
-    Common_File_Tools::getWorkingDirectory ();
-  configuration_path = path;
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+  
+  configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 #if defined (GTK_USE)
   gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
 #endif // GTK_USE
-  output_file = path;
+  output_file = Common_File_Tools::getTempDirectory ();
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file +=
     ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE);

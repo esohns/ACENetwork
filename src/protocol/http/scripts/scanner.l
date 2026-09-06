@@ -280,7 +280,9 @@ REQUEST_URI     ({ABSOLUTE_URI}|{ABSOLUTE_PATH})
 REQUEST         {METHOD}{SP}{REQUEST_URI}{SP}{VERSION}
 
 /* Response Headers */
-LOCATION_HEADER        Location:{SP}{ABSOLUTE_URI}
+/*LOCATION_HEADER        Location:{SP}{ABSOLUTE_URI}*/
+TO_END_OF_LINE         [^\x0D]
+LOCATION_HEADER        Location:{SP}{TO_END_OF_LINE}+
 SERVER_HEADER          Server:{SP}({PRODUCT}|{COMMENT})
 AUTH_SCHEME            {TOKEN}+
 REALM_VALUE            {QUOTED_STRING}
@@ -527,7 +529,14 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                converter >> content_length_or_chunk_size;
                                iparser_p->contentLengthOrChunkSize (content_length_or_chunk_size);
                                if (!content_length_or_chunk_size)
-                                 BEGIN (INITIAL); // no data
+                               {
+                                 ACE_Message_Block* message_block_p = iparser_p->head ();
+                                 ACE_ASSERT (message_block_p);
+                                 ACE_UINT64 content_length_i = message_block_p->total_length () - iparser_p->offset ();
+                                 iparser_p->contentLengthOrChunkSize (content_length_i);
+                                 iparser_p->multiBody ();
+                                 BEGIN (INITIAL); // unknown length
+                               }
                                else
                                  BEGIN (body);
                              } // end IF
