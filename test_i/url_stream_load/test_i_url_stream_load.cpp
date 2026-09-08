@@ -636,9 +636,10 @@ do_work (bool debugParser_in,
 
   struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_queuetarget_2;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1_queuetarget_2;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2_audio_injector;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b; // save video converter
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1b;
@@ -686,11 +687,11 @@ do_work (bool debugParser_in,
                                                    modulehandler_configuration,
                                                    stream_configuration);
 
-  modulehandler_configuration_queuetarget_2 = modulehandler_configuration;
-  modulehandler_configuration_queuetarget_2.queue = &audio_input_queue;
+  modulehandler_configuration_1_queuetarget_2 = modulehandler_configuration;
+  modulehandler_configuration_1_queuetarget_2.queue = &audio_input_queue;
   configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2"),
                                                                std::make_pair (&module_configuration,
-                                                                               &modulehandler_configuration_queuetarget_2)));
+                                                                               &modulehandler_configuration_1_queuetarget_2)));
 
   modulehandler_configuration_1b = modulehandler_configuration;
 #if defined (FFMPEG_SUPPORT)
@@ -760,6 +761,12 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_CONVERTER_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_2b)));
+
+  modulehandler_configuration_2_audio_injector = modulehandler_configuration_2;
+  modulehandler_configuration_2_audio_injector.queue = &audio_input_queue;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_INJECTOR_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2_audio_injector)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =

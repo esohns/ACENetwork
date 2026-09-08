@@ -144,13 +144,6 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   if (save_to_file_b)
   {
     ACE_NEW_RETURN (module_p,
-                    Test_I_Video_Tagger_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
-                    false);
-    layout_in->append (module_p, branch_p, index_i);
-    module_p = NULL;
-
-    ACE_NEW_RETURN (module_p,
                     Test_I_Distributor_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DISTRIBUTOR_DEFAULT_NAME_STRING)),
                     false);

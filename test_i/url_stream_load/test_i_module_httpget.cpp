@@ -156,11 +156,11 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
       if (likely ((host_name_string != host_name_string_2) ||
                   (use_SSL != use_SSL_2)))
       {
-        //ACE_DEBUG ((LM_WARNING,
-        //           ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),
-        //           inherited::mod_->name (),
-        //           ACE_TEXT (inherited::configuration_->URL.c_str ()),
-        //           ACE_TEXT ((*iterator).second.c_str ())));
+        ACE_DEBUG ((LM_WARNING,
+                   ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT (inherited::configuration_->URL.c_str ()),
+                   ACE_TEXT ((*iterator).second.c_str ())));
 
 #if defined (GTK_USE)
         struct Test_I_URLStreamLoad_Redirect_CBData* cb_data_p = NULL;
