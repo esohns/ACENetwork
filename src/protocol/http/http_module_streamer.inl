@@ -158,7 +158,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                                                    converter.str ()));
         else
         {
-          if ((*iterator).second.empty ()); // *TODO*: allow '0' ?
+          if ((*iterator).second.empty ()) // *TODO*: allow '0' ?
             (*iterator).second = converter.str ();
         } // end ELSE
 

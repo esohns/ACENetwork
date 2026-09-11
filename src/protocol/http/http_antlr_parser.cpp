@@ -278,6 +278,7 @@ http_antlr_parser::DocumentContext* http_antlr_parser::document() {
                           {
                             struct HTTP_Record* record_p = &record_;
                             parser_->record (record_p);
+                            setState (26);
                             return _localctx;
                           }
 

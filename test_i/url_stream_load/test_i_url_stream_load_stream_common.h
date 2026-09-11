@@ -80,7 +80,7 @@ extern "C"
 #endif // FFMPEG_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include "stream_module_htmlparser.h"
+//#include "stream_module_htmlparser.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -142,6 +142,10 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
 {
   Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+   , ALSAConfiguration (NULL)
+#endif // ACE_WIN32 || ACE_WIN64
    , CBData (NULL)
 #if defined (FFMPEG_SUPPORT)
    , codecConfiguration (NULL)
@@ -161,6 +165,10 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   }
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  struct Stream_MediaFramework_ALSA_Configuration*        ALSAConfiguration;
+#endif // ACE_WIN32 || ACE_WIN64
   struct Test_I_URLStreamLoad_UI_CBData*                  CBData; // HTTP Get module
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration* codecConfiguration;

@@ -625,6 +625,11 @@ do_work (bool debugParser_in,
   //  configuration_in.parserConfiguration_1b.debugScanner = true;
 #endif // _DEBUG
   // ********************** module configuration data **************************
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
+#endif // ACE_WIN32 || ACE_WIN64
+
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration; // audio (decoder)
   codec_configuration.codecId = AV_CODEC_ID_OPUS;
@@ -647,6 +652,10 @@ do_work (bool debugParser_in,
 
   modulehandler_configuration.allocatorConfiguration =
     &allocator_configuration;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  modulehandler_configuration.ALSAConfiguration = &ALSA_configuration;
+#endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration.CBData = &CBData_in;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration.codecConfiguration = &codec_configuration;

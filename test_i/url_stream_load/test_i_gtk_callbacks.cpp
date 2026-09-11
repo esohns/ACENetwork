@@ -86,7 +86,9 @@ executeYtdl (const std::string& URL_in)
   yt_dlp_executable += ACE_TEXT_ALWAYS_CHAR ("yt-dlp");
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   yt_dlp_executable += ACE_TEXT_ALWAYS_CHAR (".exe");
-#endif // ACE_WIN32 || ACE_WIN64
+#elif defined (ACE_LINUX)
+  yt_dlp_executable += ACE_TEXT_ALWAYS_CHAR ("_linux");
+#endif // ACE_WIN32 || ACE_WIN64 || ACE_LINUX
   ACE_ASSERT (Common_File_Tools::isExecutable (yt_dlp_executable));
 
   std::string command_string = yt_dlp_executable +
@@ -488,32 +490,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
   ACE_ASSERT (file_chooser_button_p);
-  //struct _GValue property_s = G_VALUE_INIT;
-  //g_value_init (&property_s,
-  //              G_TYPE_POINTER);
-  //g_object_get_property (G_OBJECT (file_chooser_button_p),
-  //                       ACE_TEXT_ALWAYS_CHAR ("dialog"),
-  //                       &property_s);
-  //G_VALUE_HOLDS_POINTER (&property_s);
-  //GtkFileChooser* file_chooser_p = NULL;
-    //reinterpret_cast<GtkFileChooser*> (g_value_get_pointer (&property_s));
-  //g_object_get (G_OBJECT (file_chooser_button_p),
-  //              ACE_TEXT_ALWAYS_CHAR ("dialog"),
-  //              &file_chooser_p, NULL);
-  //ACE_ASSERT (file_chooser_p);
-  //ACE_ASSERT (GTK_IS_FILE_CHOOSER_DIALOG (file_chooser_p));
-  //GtkFileChooserDialog* file_chooser_dialog_p =
-  //  GTK_FILE_CHOOSER_DIALOG (file_chooser_p);
-  //ACE_ASSERT (file_chooser_dialog_p);
-  //GtkPlacesSidebar* places_sidebar_p = NULL;
-  //Common_UI_GTK_Tools::dump (GTK_WIDGET (file_chooser_dialog_p));
-  //[0].get_children ()[0].get_children ([0].get_children ()[0]
-  //  vbox.get_children ()[0].hide ()
-
-  //GError* error_p = NULL;
-  //GFile* file_p = NULL;
   struct _GString* string_p = NULL;
-  gchar* filename_p = NULL;
   if (!(*iterator_3).second.second->targetFileName.empty ())
   {
     // *NOTE*: gtk does not complain if the file doesn't exist, but the button
@@ -526,89 +503,34 @@ idle_initialize_UI_cb (gpointer userData_in)
                     ACE_TEXT ((*iterator_3).second.second->targetFileName.c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
-    //file_p =
-    //  g_file_new_for_path (data_p->configuration->moduleHandlerConfiguration.targetFileName.c_str ());
-    //ACE_ASSERT (file_p);
-    //ACE_ASSERT (g_file_query_exists (file_p, NULL));
-
-    //std::string file_uri =
-    //  ACE_TEXT_ALWAYS_CHAR ("file://") +
-    //  data_p->configuration->moduleHandlerConfiguration.targetFileName;
-    //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
-    //                                              file_uri.c_str ()))
-    string_p = g_string_new ((*iterator_3).second.second->targetFileName.c_str ());
-    filename_p = string_p->str;
-      //Common_UI_GTK_Tools::Locale2UTF8 (data_p->configuration->moduleHandlerConfiguration.targetFileName);
-    if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                        filename_p))
+ 
+    string_p =
+      g_string_new (Common_File_Tools::directory ((*iterator_3).second.second->targetFileName).c_str ());
+    if (!gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p),
+                                              string_p->str))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT ((*iterator_3).second.second->targetFileName.c_str ())));
-
-      // clean up
-      g_string_free (string_p, FALSE);
-      g_free (filename_p);
-
+                  ACE_TEXT ("failed to gtk_file_chooser_set_current_folder(\"%s\"), aborting\n"),
+                  ACE_TEXT (string_p->str)));
+      g_string_free (string_p, TRUE);
       return G_SOURCE_REMOVE;
     } // end IF
-    g_string_free (string_p, FALSE);
-    g_free (filename_p);
-
-    //if (!gtk_file_chooser_select_file (GTK_FILE_CHOOSER (file_chooser_dialog_p),
-    //                                   file_p,
-    //                                   &error_p))
-    //{
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to gtk_file_chooser_select_file(\"%s\"): \"%s\", aborting\n"),
-    //              ACE_TEXT (data_p->configuration->moduleHandlerConfiguration.targetFileName.c_str ()),
-    //              ACE_TEXT (error_p->message)));
-
-    //  // clean up
-    //  g_error_free (error_p);
-    //  g_object_unref (file_p);
-
-    //  return G_SOURCE_REMOVE;
-    //} // end IF
-    //g_object_unref (file_p);
+    g_string_free (string_p, TRUE);
   } // end IF
   else
   {
-    //file_p =
-    //  g_file_new_for_path (Common_File_Tools::getTempDirectory ().c_str ());
-    //ACE_ASSERT (file_p);
-
     string_p = g_string_new (Common_File_Tools::getTempDirectory ().c_str ());
-    filename_p = string_p->str;
-      //Common_UI_GTK_Tools::Locale2UTF8 (Common_File_Tools::getTempDirectory ());
-    if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                        filename_p))
+    if (!gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p),
+                                              string_p->str))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT (Common_File_Tools::getTempDirectory ().c_str ())));
-
-      // clean up
-      g_string_free (string_p, FALSE);
-      g_free (filename_p);
-
+                  ACE_TEXT ("failed to gtk_file_chooser_set_current_folder(\"%s\"), aborting\n"),
+                  ACE_TEXT (string_p->str)));
+      g_string_free (string_p, TRUE);
       return G_SOURCE_REMOVE;
     } // end IF
-    g_string_free (string_p, FALSE);
-    g_free (filename_p);
-    //g_object_unref (file_p);
+    g_string_free (string_p, TRUE);
   } // end ELSE
-
-  std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
-  default_folder_uri += (*iterator_3).second.second->targetFileName;
-  if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                                default_folder_uri.c_str ()))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gtk_file_chooser_set_current_folder_uri(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (default_folder_uri.c_str ())));
-    return G_SOURCE_REMOVE;
-  } // end IF
 
   GtkCheckButton* check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -644,7 +566,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                    1.0 / static_cast<double> (width));
 
   GtkStatusbar* statusbar_p =
-      GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+    GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_NAME)));
   ACE_ASSERT (statusbar_p);
   guint context_id =
@@ -733,10 +655,11 @@ idle_initialize_UI_cb (gpointer userData_in)
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
   (*iterator_3).second.second->window = window_p;
-  (*iterator_3).second.second->outputFormat.video.resolution.cx =
-    gtk_widget_get_allocated_width (GTK_WIDGET (drawing_area_p));
-  (*iterator_3).second.second->outputFormat.video.resolution.cy =
-    gtk_widget_get_allocated_height (GTK_WIDGET (drawing_area_p));
+  GtkAllocation allocation_s;
+  gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
+                             &allocation_s);
+  (*iterator_3).second.second->outputFormat.video.resolution =
+    { static_cast<unsigned int> (allocation_s.width), static_cast<unsigned int> (allocation_s.height) };
 
   return G_SOURCE_REMOVE;
 }
@@ -1375,21 +1298,21 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_SSLConnector_t ssl_connector;
 #endif // SSL_SUPPORT
     Test_I_AsynchTCPConnector_t asynch_connector;
-    Test_I_IStreamConnection_t* istream_connection_p = NULL;
+    // Test_I_IStreamConnection_t* istream_connection_p = NULL;
 
     Test_I_TCPConnector_1b_t connector_2;
 #if defined (SSL_SUPPORT)
     Test_I_SSLConnector_1b_t ssl_connector_2;
 #endif // SSL_SUPPORT
     Test_I_AsynchTCPConnector_1b_t asynch_connector_2;
-    Test_I_IStreamConnection_1b_t* istream_connection_2 = NULL;
+    // Test_I_IStreamConnection_1b_t* istream_connection_2 = NULL;
 
     HTTP_Form_t HTTP_form;
     HTTP_Headers_t HTTP_headers;
-    struct HTTP_Record* HTTP_record_p = NULL;
-    Test_I_Message::DATA_T* message_data_p = NULL;
-    Test_I_Message* message_p = NULL;
-    ACE_Message_Block* message_block_p = NULL;
+    // struct HTTP_Record* HTTP_record_p = NULL;
+    // Test_I_Message::DATA_T* message_data_p = NULL;
+    // Test_I_Message* message_p = NULL;
+    // ACE_Message_Block* message_block_p = NULL;
     struct Net_UserData user_data_s;
 
     // retrieve buffer size
@@ -1554,16 +1477,14 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME)));
     ACE_ASSERT (file_chooser_button_p);
     directory_p =
-      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (file_chooser_button_p));
+      gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (file_chooser_button_p));
     if (!directory_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to gtk_file_chooser_get_filename(), aborting\n")));
-      goto error;
+                  ACE_TEXT ("failed to gtk_file_chooser_get_current_folder(), returning\n")));
+      return;
     } // end IF
-    directory_string =
-      ACE_TEXT_ALWAYS_CHAR (ACE::dirname (directory_p,
-                                          ACE_DIRECTORY_SEPARATOR_CHAR));
+    directory_string = directory_p;
     g_free (directory_p); directory_p = NULL;
     ACE_ASSERT (Common_File_Tools::isDirectory (directory_string));
     (*iterator_4).second.second->targetFileName = directory_string;
@@ -1575,6 +1496,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     (*iterator_6).second.second->targetFileName =
       (*iterator_4).second.second->targetFileName;
 
+continue_:
     //HTTP_headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Host"), hostname_string));
     ACE_ASSERT (format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("http_headers")));
     const rapidjson::Value& headers_value_r = format_value_r[ACE_TEXT_ALWAYS_CHAR ("http_headers")];
@@ -1607,8 +1529,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     if (!data_p->AVStream->initialize (data_p->configuration->streamConfiguration_2))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize AVStream, aborting\n")));
-      goto error;
+                  ACE_TEXT ("failed to initialize AVStream, returning\n")));
+      return;
     } // end IF
     data_p->AVStream->start ();
 
@@ -1651,9 +1573,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     if (data_p->audioHandle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, aborting\n"),
+                  ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
-      goto error;
+      return;
     } // end IF
     //iconnection_p = iconnection_manager_p->get (data_p->audioHandle);
 
@@ -1695,14 +1617,12 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     if (data_p->videoHandle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s, aborting\n"),
+                  ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.address).c_str ())));
-      goto error;
+      return;
     } // end IF
 
     success = true;
-
-continue_:
     if (!success)
       goto error;
 
@@ -1714,8 +1634,8 @@ continue_:
     gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), TRUE);
     gtk_spinner_start (spinner_p);
     progress_bar_p =
-        GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                  ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
+      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
     ACE_ASSERT (progress_bar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
     gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
@@ -1747,7 +1667,6 @@ continue_:
 
   // --> disconnect
 
-  ACE_ASSERT (data_p->audioHandle != ACE_INVALID_HANDLE);
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->audioHandle));
@@ -1761,7 +1680,6 @@ continue_:
   } // end IF
   data_p->audioHandle = ACE_INVALID_HANDLE;
 
-  ACE_ASSERT (data_p->videoHandle != ACE_INVALID_HANDLE);
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->videoHandle));

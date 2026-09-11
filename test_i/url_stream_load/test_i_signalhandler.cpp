@@ -49,9 +49,10 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
   {
     case SIGINT:
 // *PORTABILITY*: on Windows SIGQUIT is not defined
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGQUIT:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     {
 //       // *PORTABILITY*: tracing in a signal handler context is not portable
 //       // *TODO*
@@ -64,21 +65,22 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) and SIGTERM (15) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR1:
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     case SIGBREAK:
-#endif
+#else
+    case SIGUSR1:
+#endif // ACE_WIN32 || ACE_WIN64
     {
       // print statistic
       statistic = true;
 
       break;
     }
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGHUP:
     case SIGUSR2:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     case SIGTERM:
     {
       // print statistic
@@ -86,16 +88,18 @@ Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 
       break;
     }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    case SIGCHLD:
+      break;
+#endif // ACE_WIN32 || ACE_WIN64
     default:
     {
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal (was: %d --> \"%S\"), returning\n"),
-                  signal_in, signal_in));
-
-      ACE_OS::last_error (EINVAL);
-
+                  signal_in.signal, signal_in.signal));
       return;
     }
   } // end SWITCH

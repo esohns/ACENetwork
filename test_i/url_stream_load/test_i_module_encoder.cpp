@@ -88,11 +88,11 @@ Test_I_Encoder::handleDataMessage (Test_I_Message*& message_inout,
     {
       codec_context_p = inherited::audioCodecContext_;
       frame_p = inherited::audioFrame_;
-      ACE_ASSERT (message_block_p->length () % inherited::audioFrameSize_ == 0);
       frame_p->nb_samples =
         static_cast<int> (message_block_p->length ()) / static_cast<int> (inherited::audioFrameSize_);
       if (unlikely (!frame_p->nb_samples))
         return;
+      ACE_ASSERT (message_block_p->length () % inherited::audioFrameSize_ == 0);
       frame_p->duration = frame_p->nb_samples;
       frame_p->pts = inherited::audioSamples_;
         //av_rescale_q (inherited::audioSamples_,
