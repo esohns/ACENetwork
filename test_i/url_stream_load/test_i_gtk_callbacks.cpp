@@ -659,7 +659,11 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation_s);
   (*iterator_3).second.second->outputFormat.video.resolution =
+#if defined (ACE_WIN32) || defined (ACE_WIN32)
+    { static_cast<LONG> (allocation_s.width), static_cast<LONG> (allocation_s.height) };
+#else
     { static_cast<unsigned int> (allocation_s.width), static_cast<unsigned int> (allocation_s.height) };
+#endif // ACE_WIN32 || ACE_WIN64
 
   return G_SOURCE_REMOVE;
 }
