@@ -1447,13 +1447,13 @@ continue_2:
   data_p->dispatch =
     dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
   ACE_ASSERT (data_p->dispatch);
-  Common_ISetP_T<GdkWindow>* isetp_p =
-    dynamic_cast<Common_ISetP_T<GdkWindow>*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-  ACE_ASSERT (isetp_p);
-  GtkDrawingArea* drawing_area_p =
-    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
-  ACE_ASSERT (drawing_area_p);
+  // Common_ISetP_T<GdkWindow>* isetp_p =
+  //   dynamic_cast<Common_ISetP_T<GdkWindow>*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  // ACE_ASSERT (isetp_p);
+  // GtkDrawingArea* drawing_area_p =
+  //   GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+  //                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+  // ACE_ASSERT (drawing_area_p);
   //isetp_p->setP (gtk_widget_get_window (GTK_WIDGET (drawing_area_p)));
 
   if (!data_p->progressData.eventSourceId)
@@ -1802,7 +1802,7 @@ drawingarea_draw_cb (GtkWidget* widget_in,
                      cairo_t* context_in,
                      gpointer userData_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
 
   // sanity check(s)
   ACE_ASSERT (context_in);
@@ -1827,7 +1827,7 @@ drawingarea_expose_event_cb (GtkWidget* widget_in,
                              GdkEvent* event_in,
                              gpointer userData_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::drawingarea_expose_event_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_expose_event_cb"));
 
   ACE_UNUSED_ARG (event_in);
 

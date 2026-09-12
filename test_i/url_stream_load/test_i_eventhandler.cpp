@@ -700,6 +700,9 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       event_e = COMMON_UI_EVENT_STATISTIC;
       break;
     }
+    case STREAM_SESSION_MESSAGE_RESIZE:
+      event_e = COMMON_UI_EVENT_RESIZE;
+      break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,

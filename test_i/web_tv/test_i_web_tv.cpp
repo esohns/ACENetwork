@@ -752,8 +752,13 @@ do_work (const std::string& configurationFile_in,
   // video_codec_configuration.format = AV_PIX_FMT_VDPAU;
 #endif // ACE_WIN32 || ACE_WIN64
   video_codec_configuration_2 = video_codec_configuration;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  video_codec_configuration_2.codecName = ACE_TEXT_ALWAYS_CHAR ("h264_mf");
+#endif // ACE_WIN32 || ACE_WIN64
+  video_codec_configuration_2.deviceType = AV_HWDEVICE_TYPE_NONE;
   // video_codec_configuration_2.profile = AV_PROFILE_H264_HIGH;
   video_codec_configuration_2.profile = AV_PROFILE_H264_BASELINE;
+  video_codec_configuration_2.format.videoFormat = AV_PIX_FMT_BGR24;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration audio_codec_configuration; // decoder
   audio_codec_configuration.codecId = AV_CODEC_ID_AAC;
   audio_codec_configuration.format.audioFormat = AV_SAMPLE_FMT_FLT;

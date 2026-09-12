@@ -35,7 +35,7 @@ options {
   // inline std::string getTxt (antlr4::Token* tok) { return tok ? tok->getText () : ACE_TEXT_ALWAYS_CHAR (""); }
 }
 
-initial:            document EOF;
+initial:            document;
 document:           head CRLF {
                       HTTP_HeadersConstIterator_t iterator =
                         record_.headers.find (Common_String_Tools::tolower (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
@@ -45,7 +45,7 @@ document:           head CRLF {
                         converter.str ((*iterator).second);
                         ACE_UINT64 content_length;
                         converter >> content_length;
-                        if (unlikely (!content_length))
+                        if (unlikely (!content_length || parser_->isMultiBody ()))
                           parser_->finished ();
                       } // end IF
                       if (unlikely (parser_->isMultiBody ()))

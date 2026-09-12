@@ -143,7 +143,6 @@ struct Test_I_URLStreamLoad_UI_CBData
   Test_I_URLStreamLoad_UI_CBData ()
 #if defined (GTK_USE)
    : Test_I_GTK_CBData ()
-   , AVStream (NULL)
    , configuration (NULL)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_CBData ()
@@ -151,18 +150,27 @@ struct Test_I_URLStreamLoad_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE || WXWIDGETS_USE
+   , AVStream (NULL)
+   , dispatch (NULL)
    , audioHandle (ACE_INVALID_HANDLE)
    , videoHandle (ACE_INVALID_HANDLE)
+#if defined (GTK_USE)
+   , videoUpdateEventSourceId (0)
+#endif // GTK_USE
    , progressData ()
 #if defined (RAPIDJSON_SUPPORT)
    , formats ()
 #endif // RAPIDJSON_SUPPORT
   {}
 
-  Test_I_AVStream*                            AVStream;
   struct Test_I_URLStreamLoad_Configuration*  configuration;
+  Test_I_AVStream*                            AVStream;
+  Common_IDispatch*                           dispatch; // display module
   ACE_HANDLE                                  audioHandle;
   ACE_HANDLE                                  videoHandle;
+#if defined (GTK_USE)
+  guint                                       videoUpdateEventSourceId;
+#endif // GTK_USE
   struct Test_I_URLStreamLoad_UI_ProgressData progressData;
 
 #if defined (RAPIDJSON_SUPPORT)

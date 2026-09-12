@@ -663,7 +663,9 @@
                 <property name="double_buffered">False</property>
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-              </object>
+                <signal name="draw" handler="drawingarea_draw_cb" swapped="no"/>
+                <signal name="size-allocate" handler="drawingarea_size_allocate_cb" swapped="no"/>
+               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>

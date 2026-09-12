@@ -75,7 +75,7 @@
 
 #include "stream_misc_defines.h"
 
-#include "stream_file_sink.h"
+#include "stream_vis_defines.h"
 
 #if defined (HAVE_CONFIG_H)
 #include "ACENetwork_config.h"
@@ -181,6 +181,10 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-z        : use hardware decoder [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
 }
 
 bool
@@ -202,6 +206,7 @@ do_process_arguments (int argc_in,
                       bool& traceInformation_out,
                       std::string& URL_out,
                       bool& printVersionAndExit_out,
+                      bool& useHardwareDecoder_out,
                       std::string& hostName_out,
                       ACE_INET_Addr& remoteHost_out,
                       bool& useSSL_out)
@@ -241,6 +246,8 @@ do_process_arguments (int argc_in,
   traceInformation_out = false;
   URL_out = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   printVersionAndExit_out = false;
+  useHardwareDecoder_out = false;
+
   hostName_out.clear ();
   int result =
     remoteHost_out.set (static_cast<u_short> (HTTP_DEFAULT_SERVER_PORT),
@@ -258,9 +265,9 @@ do_process_arguments (int argc_in,
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:lrs:tu:v"),
+                               ACE_TEXT ("cde:f:g:lrs:tu:vz"),
 #else
-                               ACE_TEXT ("de:f:g:lrs:tu:v"),
+                               ACE_TEXT ("de:f:g:lrs:tu:vz"),
 #endif // ACE_WIN32 || ACE_WIN64
                                1,                         // skip command name
                                1,                         // report parsing errors
@@ -405,6 +412,11 @@ do_process_arguments (int argc_in,
         printVersionAndExit_out = true;
         break;
       }
+      case 'z':
+      {
+        useHardwareDecoder_out = true;
+        break;
+      }
       // error handling
       case ':':
       {
@@ -519,6 +531,7 @@ do_work (bool debugParser_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const std::string& URL_in,
          const ACE_INET_Addr& remoteHost_in,
+         bool useHardwareDecoder_in,
          struct Test_I_URLStreamLoad_Configuration& configuration_in,
          struct Test_I_URLStreamLoad_UI_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
@@ -635,6 +648,8 @@ do_work (bool debugParser_in,
   codec_configuration.codecId = AV_CODEC_ID_OPUS;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video (decoder)
   codec_configuration_1b.codecId = AV_CODEC_ID_AV1;
+  codec_configuration_1b.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+  codec_configuration_1b.format.videoFormat = AV_PIX_FMT_YUV420P;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
 #endif // FFMPEG_SUPPORT
@@ -644,8 +659,9 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1_queuetarget_2;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2;
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2_audio_injector;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2a_video_resize;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b; // save video converter
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b_audio_injector;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1b;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_2;
@@ -692,6 +708,7 @@ do_work (bool debugParser_in,
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module = &event_handler_module;
   stream_configuration.printFinalReport = true;
+  stream_configuration.useHardwareDecoder = useHardwareDecoder_in;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
@@ -708,7 +725,7 @@ do_work (bool debugParser_in,
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_1b.inputFormat = ACE_TEXT_ALWAYS_CHAR ("mp4");
 #if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_RGB24;
+  modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_BGRA;
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_1b.parserConfiguration =
     &configuration_in.parserConfiguration_1b;
@@ -738,11 +755,13 @@ do_work (bool debugParser_in,
     &configuration_in.connectionConfigurations;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   delay_configuration.averageTokensPerInterval = 1; // frames per second
+  delay_configuration.catchUp = true;
   delay_configuration.isMultimediaTask = true;
   delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
   modulehandler_configuration_2.delayConfiguration = &delay_configuration;
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
+  modulehandler_configuration_2.handleResize = false;
   modulehandler_configuration_2.subscriber = &message_handler_2;
   modulehandler_configuration_2.targetFileName = fileName_in;
   modulehandler_configuration_2.URL = URL_in;
@@ -752,7 +771,7 @@ do_work (bool debugParser_in,
   stream_configuration_2.mediaType.audio.channels = 2;
   stream_configuration_2.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
   stream_configuration_2.mediaType.audio.sampleRate = 48000;
-  stream_configuration_2.mediaType.video.format = AV_PIX_FMT_RGB24;
+  stream_configuration_2.mediaType.video.format = AV_PIX_FMT_BGRA;
   stream_configuration_2.mediaType.video.frameRate = { 25, 1 };
   stream_configuration_2.mediaType.video.resolution = { 640, 360 };
 #endif // FFMPEG_SUPPORT
@@ -763,6 +782,12 @@ do_work (bool debugParser_in,
                                                      modulehandler_configuration_2,
                                                      stream_configuration_2);
 
+  modulehandler_configuration_2a_video_resize = modulehandler_configuration_2;
+  modulehandler_configuration_2a_video_resize.handleResize = true;
+  configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_2a_video_resize)));
+
   modulehandler_configuration_2b = modulehandler_configuration_2;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_2b.outputFormat.video.format = AV_PIX_FMT_NV12;
@@ -771,11 +796,11 @@ do_work (bool debugParser_in,
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_2b)));
 
-  modulehandler_configuration_2_audio_injector = modulehandler_configuration_2;
-  modulehandler_configuration_2_audio_injector.queue = &audio_input_queue;
+  modulehandler_configuration_2b_audio_injector = modulehandler_configuration_2;
+  modulehandler_configuration_2b_audio_injector.queue = &audio_input_queue;
   configuration_in.streamConfiguration_2.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_INJECTOR_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
-                                                                                 &modulehandler_configuration_2_audio_injector)));
+                                                                                 &modulehandler_configuration_2b_audio_injector)));
 
   // step0c: initialize connection manager
   Test_I_ConnectionManager_t* connection_manager_p =
@@ -1005,6 +1030,7 @@ ACE_TMAIN (int argc_in,
   bool trace_information;
   std::string url;
   bool print_version_and_exit;
+  bool use_hardware_decoder_b;
   ACE_INET_Addr address;
   bool use_ssl;
   struct Test_I_URLStreamLoad_Configuration configuration;
@@ -1107,6 +1133,7 @@ ACE_TMAIN (int argc_in,
   trace_information = false;
   url = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   print_version_and_exit = false;
+  use_hardware_decoder_b = false;
   use_ssl = false;
   ACE_OS::memset (&elapsed_rusage, 0, sizeof (elapsed_rusage));
 
@@ -1129,6 +1156,7 @@ ACE_TMAIN (int argc_in,
                              trace_information,
                              url,
                              print_version_and_exit,
+                             use_hardware_decoder_b,
                              hostname,
                              address,
                              use_ssl))
@@ -1284,6 +1312,7 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            url,
            address,
+           use_hardware_decoder_b,
            configuration,
            ui_cb_data,
            signal_set,

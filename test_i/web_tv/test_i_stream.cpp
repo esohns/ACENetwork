@@ -312,7 +312,8 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
       case STREAM_AVCONTAINERTYPE_AVI:
       {
         (*iterator_2).second.second->flipImage = true;
-        (*iterator_2).second.second->outputFormat.video.format = AV_PIX_FMT_BGR24;
+        (*iterator_2).second.second->outputFormat.video.format =
+          AV_PIX_FMT_BGR24;
         
         ACE_NEW_RETURN (module_p,
                         Test_I_AVIEncoder_Module (this,
@@ -336,7 +337,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
         (*iterator_2).second.second->flipImage = false;
         (*iterator_2).second.second->outputFormat.video.format =
           AV_PIX_FMT_NV12;
-        
+
 #if defined (FFMPEG_SUPPORT)
         ACE_NEW_RETURN (module_p,
                         Test_I_Encoder_Module (this,

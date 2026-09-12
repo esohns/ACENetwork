@@ -47,6 +47,9 @@
 #include "common_ui_gtk_manager_common.h"
 #include "common_ui_gtk_tools.h"
 
+#include "stream_vis_defines.h"
+#include "stream_vis_iresize.h"
+
 #include "net_macros.h"
 
 #include "net_client_common_tools.h"
@@ -655,10 +658,14 @@ idle_initialize_UI_cb (gpointer userData_in)
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
   (*iterator_3).second.second->window = window_p;
+
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_4 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
+  ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_2.end ());
   GtkAllocation allocation_s;
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation_s);
-  (*iterator_3).second.second->outputFormat.video.resolution =
+  (*iterator_4).second.second->outputFormat.video.resolution =
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
     { static_cast<LONG> (allocation_s.width), static_cast<LONG> (allocation_s.height) };
 #else
@@ -781,21 +788,21 @@ idle_end_session_cb (gpointer userData_in)
   gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
   //ACE_ASSERT (data_p->progressData.eventSourceId);
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
-    if (!g_source_remove (data_p->progressData.eventSourceId))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                  data_p->progressData.eventSourceId));
-    data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
-    data_p->progressData.eventSourceId = 0;
-  } // end lock scope
-  GtkProgressBar* progress_bar_p =
-    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
-  ACE_ASSERT (progress_bar_p);
-  // *NOTE*: this disables "activity mode" (in Gtk2)
-  gtk_progress_bar_set_fraction (progress_bar_p, 0.0);
-  gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
+  //{ ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+  //  if (!g_source_remove (data_p->progressData.eventSourceId))
+  //    ACE_DEBUG ((LM_ERROR,
+  //                ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
+  //                data_p->progressData.eventSourceId));
+  //  data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
+  //  data_p->progressData.eventSourceId = 0;
+  //} // end lock scope
+  //GtkProgressBar* progress_bar_p =
+  //  GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+  //                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
+  //ACE_ASSERT (progress_bar_p);
+  //// *NOTE*: this disables "activity mode" (in Gtk2)
+  //gtk_progress_bar_set_fraction (progress_bar_p, 0.0);
+  //gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
   //gtk_progress_bar_set_show_text (progress_bar_p, FALSE);
 
   un_toggling_connect = true;
@@ -813,29 +820,21 @@ idle_update_progress_cb (gpointer userData_in)
   struct Test_I_URLStreamLoad_UI_ProgressData* data_p =
     static_cast<struct Test_I_URLStreamLoad_UI_ProgressData*> (userData_in);
   ACE_ASSERT (data_p);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
+  ACE_ASSERT (data_p->state);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
-  ACE_TCHAR buffer_a[BUFSIZ];
-  ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+  char buffer_a[BUFSIZ];
+  ACE_OS::memset (buffer_a, 0, sizeof (char[BUFSIZ]));
   int result = -1;
   float speed = 0.0F;
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_CONTINUE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
     speed = data_p->statistic.bytesPerSecond;
   } // end lock scope
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
@@ -851,7 +850,7 @@ idle_update_progress_cb (gpointer userData_in)
       speed /= 1024.0F;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
+    result = ACE_OS::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%.2f %s"),
                               speed, magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
@@ -859,8 +858,7 @@ idle_update_progress_cb (gpointer userData_in)
   } // end IF
   gtk_progress_bar_pulse (progress_bar_p);
   gtk_progress_bar_set_text (progress_bar_p,
-                             ACE_TEXT_ALWAYS_CHAR (buffer_a));
-  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
+                             buffer_a);
 
   // --> reschedule
   return G_SOURCE_CONTINUE;
@@ -1012,92 +1010,47 @@ idle_update_info_display_cb (gpointer userData_in)
   return G_SOURCE_CONTINUE;
 }
 
-//gboolean
-//idle_update_log_display_cb (gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
-//
-//  struct Test_I_URLStreamLoad_UI_CBData* data_p =
-//      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
-//
-//  // sanity check(s)
-//  ACE_ASSERT (data_p);
-//
-//  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-//
-//  Common_UI_GTK_BuildersConstIterator_t iterator =
-//      data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-//  // sanity check(s)
-//  ACE_ASSERT (iterator != data_p->builders.end ());
-//
-//  GtkTextView* view_p =
-//    GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
-//                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TEXTVIEW_NAME)));
-//  ACE_ASSERT (view_p);
-//  GtkTextBuffer* buffer_p = gtk_text_view_get_buffer (view_p);
-//  ACE_ASSERT (buffer_p);
-//
-//  GtkTextIter text_iterator;
-//  gtk_text_buffer_get_end_iter (buffer_p,
-//                                &text_iterator);
-//
-//  gchar* string_p = NULL;
-//  // sanity check
-//  if (data_p->logStack.empty ())
-//    return G_SOURCE_CONTINUE;
-//
-//  // step1: convert text
-//  for (Common_MessageStackConstIterator_t iterator_2 = data_p->logStack.begin ();
-//       iterator_2 != data_p->logStack.end ();
-//       iterator_2++)
-//  {
-//    string_p = Common_UI_GTK_Tools::Locale2UTF8 (*iterator_2);
-//    if (!string_p)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
-//                  ACE_TEXT ((*iterator_2).c_str ())));
-//      return G_SOURCE_REMOVE;
-//    } // end IF
-//
-//    // step2: display text
-//    gtk_text_buffer_insert (buffer_p,
-//                            &text_iterator,
-//                            string_p,
-//                            -1);
-//
-//    // clean up
-//    g_free (string_p);
-//  } // end FOR
-//
-//  data_p->logStack.clear ();
-//
-//  // step3: scroll the view accordingly
-////  // move the iterator to the beginning of line, so it doesn't scroll
-////  // in horizontal direction
-////  gtk_text_iter_set_line_offset (&text_iterator, 0);
-//
-////  // ...and place the mark at iter. The mark will stay there after insertion
-////  // because it has "right" gravity
-////  GtkTextMark* text_mark_p =
-////      gtk_text_buffer_get_mark (buffer_p,
-////                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SCROLLMARK_NAME));
-//////  gtk_text_buffer_move_mark (buffer_p,
-//////                             text_mark_p,
-//////                             &text_iterator);
-//
-////  // scroll the mark onscreen
-////  gtk_text_view_scroll_mark_onscreen (view_p,
-////                                      text_mark_p);
-//  //GtkAdjustment* adjustment_p =
-//  //    GTK_ADJUSTMENT (gtk_builder_get_object ((*iterator).second.second,
-//  //                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ADJUSTMENT_NAME)));
-//  //ACE_ASSERT (adjustment_p);
-//  //gtk_adjustment_set_value (adjustment_p,
-//  //                          adjustment_p->upper - adjustment_p->page_size));
-//
-//  return G_SOURCE_CONTINUE;
-//}
+gboolean
+idle_update_video_display_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_update_video_display_cb"));
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkDrawingArea* drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+  ACE_ASSERT (drawing_area_p);
+  // GtkDrawingArea* drawing_area_2 =
+  //   GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+  //                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  // ACE_ASSERT (drawing_area_2);
+  // GtkToggleButton* toggle_button_p =
+  //   GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+  //                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+  // ACE_ASSERT (toggle_button_p);
+
+  // drawing_area_p =
+  //   (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
+  //                                                   : drawing_area_p);
+  GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+  ACE_ASSERT (window_p);
+  //if (unlikely (!window_p))
+  //  goto continue_;
+
+  gdk_window_invalidate_rect (window_p,
+                              NULL,
+                              FALSE);
+
+  //continue_:
+  return G_SOURCE_CONTINUE;
+}
 
 /////////////////////////////////////////
 
@@ -1537,6 +1490,24 @@ continue_:
       return;
     } // end IF
     data_p->AVStream->start ();
+    const Stream_Module_t* module_p =
+      data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+    ACE_ASSERT (module_p);
+    data_p->dispatch =
+      dynamic_cast<Common_IDispatch*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+    ACE_ASSERT (data_p->dispatch);
+
+    if (!data_p->videoUpdateEventSourceId) // *TODO*: why is this called several times ?
+    {
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+        data_p->videoUpdateEventSourceId =
+          g_timeout_add (COMMON_UI_REFRESH_DEFAULT_VIDEO_MS, // ms
+                         idle_update_video_display_cb,
+                         userData_in);
+        ACE_ASSERT (data_p->videoUpdateEventSourceId > 0);
+        data_p->UIState->eventSourceIds.insert (data_p->videoUpdateEventSourceId);
+      } // end lock scope
+    } // end IF
 
     // step3: connect to peers
     if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
@@ -1643,8 +1614,9 @@ continue_:
     ACE_ASSERT (progress_bar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
     gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
+    gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
 
-    ACE_ASSERT (!data_p->progressData.eventSourceId);
+    if (!data_p->progressData.eventSourceId)
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
       data_p->progressData.eventSourceId =
         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -1664,7 +1636,7 @@ continue_:
                     ACE_TEXT ("failed to g_timeout_add_full(idle_update_progress_cb): \"%m\", aborting\n")));
         goto error;
       } // end IF
-    } // end lock scope
+    } // end IF
 
     return;
   } // end IF
@@ -1696,6 +1668,12 @@ continue_:
     iconnection_p->decrease (); iconnection_p = NULL;
   } // end IF
   data_p->videoHandle = ACE_INVALID_HANDLE;
+
+  if (data_p->videoUpdateEventSourceId)
+  {
+    g_source_remove (data_p->videoUpdateEventSourceId);
+    data_p->videoUpdateEventSourceId = 0;
+  } // end IF
 
   data_p->AVStream->stop (false,
                           false,
@@ -1780,6 +1758,222 @@ combobox_format_changed_cb (GtkWidget* combobox_in,
   gtk_widget_set_sensitive (GTK_WIDGET (toggle_button_p),
                             TRUE);
 } // combobox_format_changed_cb
+
+#if GTK_CHECK_VERSION (3,0,0)
+gboolean
+drawingarea_draw_cb (GtkWidget* widget_in,
+                     cairo_t* context_in,
+                     gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (context_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  if (!data_p->dispatch)
+    return FALSE; // propagate further
+
+  try {
+    data_p->dispatch->dispatch (context_in);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
+  }
+
+  return TRUE; // do not propagate further
+}
+#else
+gboolean
+drawingarea_expose_event_cb (GtkWidget* widget_in,
+                             GdkEvent* event_in,
+                             gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_expose_event_cb"));
+
+  ACE_UNUSED_ARG (event_in);
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  if (!data_p->dispatch)
+    return FALSE; // propagate further
+
+  // sanity check(s)
+  cairo_t* context_p =
+    gdk_cairo_create (GDK_DRAWABLE (gtk_widget_get_window (widget_in)));
+  if (unlikely (!context_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to gdk_cairo_create(), aborting\n")));
+    return FALSE; // propagate further
+  } // end IF
+
+  try {
+    data_p->dispatch->dispatch (context_p);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IDispatch::dispatch(), continuing\n")));
+  }
+
+  cairo_destroy (context_p); context_p = NULL;
+
+  return TRUE; // do not propagate further
+} // drawingarea_expose_event_cb
+#endif // GTK_CHECK_VERSION (3,0,0)
+
+gboolean
+drawing_area_resize_end (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawing_area_resize_end"));
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  // GtkToggleButton* toggle_button_p =
+  //   GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+  //                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
+  // ACE_ASSERT (toggle_button_p);
+  bool is_active_b = false;
+    // gtk_toggle_button_get_active (toggle_button_p);
+  GtkDrawingArea* drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              (is_active_b ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)
+                                                           : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME))));
+  ACE_ASSERT (drawing_area_p);
+
+  GtkAllocation allocation_s;
+  gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
+                             &allocation_s);
+
+         //ACE_DEBUG ((LM_DEBUG,
+         //           ACE_TEXT ("window resized to %dx%d\n"),
+         //           allocation_s.width, allocation_s.height));
+
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_2 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_2.end ());
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  (*iterator_2).second.second->outputFormat.video.resolution.cy =
+    allocation_s.height;
+  (*iterator_2).second.second->outputFormat.video.resolution.cx =
+    allocation_s.width;
+#else
+  (*iterator_2).second.second->outputFormat.video.resolution.height =
+    allocation_s.height;
+  (*iterator_2).second.second->outputFormat.video.resolution.width =
+    allocation_s.width;
+#endif // ACE_WIN32 || ACE_WIN64
+
+  ACE_ASSERT (data_p->AVStream);
+  if (!data_p->AVStream->isRunning ())
+    return G_SOURCE_REMOVE;
+
+  // *NOTE*: two things need doing (see below):
+  //         [- drop inbound frames until the 'resize' session message is through]
+  //         - enqueue a 'resize' session message
+
+  //// step1:
+  //const Stream_Module_t* module_p =
+  //  data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+  //ACE_ASSERT (module_p);
+  //Stream_Visualization_IResize* iresize_p =
+  //  dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  //ACE_ASSERT (iresize_p);
+  //try {
+  //  iresize_p->resizing ();
+  //} catch (...) {
+  //  ACE_DEBUG ((LM_ERROR,
+  //             ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), aborting\n")));
+  //  return G_SOURCE_REMOVE;
+  //}
+
+  // step2
+  data_p->AVStream->notify (STREAM_SESSION_MESSAGE_RESIZE,
+                            false,  // recurse upstream ?
+                            false); // expedite ?
+
+  return G_SOURCE_REMOVE;
+} // drawing_area_resize_end
+
+void
+drawingarea_size_allocate_cb (GtkWidget* widget_in,
+                              GdkRectangle* allocation_in,
+                              gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_size_allocate_cb"));
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->AVStream);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkDrawingArea* drawing_area_p = NULL;
+  //   GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+  //                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  // ACE_ASSERT (drawing_area_p);
+
+  bool delay_resize_b = true;
+  Stream_Module_t* module_p = NULL;
+  Stream_Visualization_IResize* iresize_p = NULL;
+
+  if (widget_in == GTK_WIDGET (drawing_area_p))
+  {
+    if (allocation_in->width <= 1 || allocation_in->height <= 1) // minimized ?
+      return;
+    delay_resize_b = false;
+  } // end IF
+
+  if (!data_p->AVStream->isRunning ())
+    goto continue_;
+
+         // *NOTE*: two things need doing:
+         //         - drop inbound frames until the 'resize' session message is through
+         //         - enqueue a 'resize' session message
+         //         The second item is done in a timeout callback to avoid multiple
+         //         messages during resizing
+
+         // step1:
+  module_p =
+    const_cast<Stream_Module_t*> (data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)));
+  ACE_ASSERT (module_p);
+  iresize_p =
+    dynamic_cast<Stream_Visualization_IResize*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  ACE_ASSERT (iresize_p);
+  try {
+    iresize_p->resizing ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Stream_Visualization_IResize::resizing(), aborting\n")));
+    return;
+  }
+
+continue_:
+  if (unlikely (!delay_resize_b))
+  {
+    drawing_area_resize_end (userData_in);
+    return;
+  } // end IF
+
+  static gint timer_id = 0;
+  if (timer_id == 0)
+  {
+    timer_id = g_timeout_add (300, drawing_area_resize_end, userData_in);
+    return;
+  } // end IF
+  g_source_remove (timer_id);
+  timer_id = g_timeout_add (300, drawing_area_resize_end, userData_in);
+} // drawingarea_size_allocate_cb
 
 gint
 button_about_clicked_cb (GtkWidget* widget_in,

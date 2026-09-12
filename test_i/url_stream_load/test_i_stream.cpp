@@ -201,6 +201,13 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     module_p = NULL;
 
     ACE_NEW_RETURN (module_p,
+                    Test_I_Video_Tagger_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
+    ACE_NEW_RETURN (module_p,
                     Test_I_Audio_Injector_Module (this,
                                                   ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_INJECTOR_DEFAULT_NAME_STRING)),
                     false);

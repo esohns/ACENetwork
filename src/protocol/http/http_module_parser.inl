@@ -346,18 +346,18 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // make sure the whole fragment chain references the same data record
   // sanity check(s)
-  message_p = static_cast<DataMessageType*> (headFragment_->cont ());
-  while (message_p)
-  {
-    data_container_p->increase ();
-    data_container_2 = data_container_p;
-    message_p->initialize (data_container_2,
-                           message_p->sessionId (),
-                           NULL);
-    if (message_p->cont () == NULL)
-      message_block_p = message_p;
-    message_p = static_cast<DataMessageType*> (message_p->cont ());
-  } // end WHILE
+  //message_p = static_cast<DataMessageType*> (headFragment_->cont ());
+  //while (message_p)
+  //{
+  //  data_container_p->increase ();
+  //  data_container_2 = data_container_p;
+  //  message_p->initialize (data_container_2,
+  //                         message_p->sessionId (),
+  //                         NULL);
+  //  if (message_p->cont () == NULL)
+  //    message_block_p = message_p;
+  //  message_p = static_cast<DataMessageType*> (message_p->cont ());
+  //} // end WHILE
 
   // adjust buffer ?
   // *NOTE*: message_block_p points at the tail fragment (see above)

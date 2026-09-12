@@ -34,6 +34,7 @@
 #if defined (FFMPEG_SUPPORT)
 #include "stream_dec_libav_audio_decoder.h"
 #include "stream_dec_libav_decoder.h"
+#include "stream_dec_libav_hw_decoder.h"
 #include "stream_dec_libav_demuxer.h"
 #include "stream_dec_libav_hw_decoder.h"
 #endif // FFMPEG_SUPPORT

@@ -47,6 +47,7 @@
 #define TEST_I_UI_GTK_DIALOG_ABOUT_NAME                   "dialog_about"
 #define TEST_I_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
 #define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea"
+#define TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME         "drawingarea_fullscreen"
 #define TEST_I_UI_GTK_ENTRY_URL_NAME                      "entry_url"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
 #define TEST_I_UI_GTK_LISTSTORE_FORMAT_AUDIO_NAME         "liststore_format_audio"

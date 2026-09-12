@@ -153,14 +153,14 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
                    ACE_TEXT ((*iterator).second.c_str ())));
         goto error;
       } // end IF
-      if ((host_name_string != host_name_string_2) ||
-          (use_SSL != use_SSL_2))
-      {
-        ACE_DEBUG ((LM_WARNING,
-                   ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),
-                   inherited::mod_->name (),
-                   ACE_TEXT (inherited::configuration_->URL.c_str ()),
-                   ACE_TEXT (host_name_string.c_str ())));
+      //if ((host_name_string != host_name_string_2) ||
+      //    (use_SSL != use_SSL_2))
+      //{
+      //  ACE_DEBUG ((LM_WARNING,
+      //             ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),
+      //             inherited::mod_->name (),
+      //             ACE_TEXT (inherited::configuration_->URL.c_str ()),
+      //             ACE_TEXT (host_name_string.c_str ())));
 
 #if defined (GTK_USE)
         struct Test_I_URLStreamLoad_Redirect_CBData* cb_data_p = NULL;
@@ -183,7 +183,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
 #endif // GTK_USE
 
         break;
-      } // end IF
+      //} // end IF
 
       if (!inherited::send ((*iterator).second,
                             HTTP_Codes::HTTP_METHOD_GET,
@@ -231,12 +231,13 @@ Test_I_Module_HTTPGet::handleSessionMessage (Test_I_SessionMessage*& message_ino
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
+  struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
   if (likely (inherited::sessionData_))
   {
-    struct Test_I_URLStreamLoad_SessionData& session_data_r =
-      const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
-    if (session_data_r.connection)
-      handle_ = static_cast<ACE_HANDLE> (session_data_r.connection->id ());
+    session_data_p =
+      &const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
+    if (session_data_p && session_data_p->connection)
+      handle_ = static_cast<ACE_HANDLE> (session_data_p->connection->id ());
   } // end IF
 
   switch (message_inout->type ())
@@ -245,6 +246,9 @@ Test_I_Module_HTTPGet::handleSessionMessage (Test_I_SessionMessage*& message_ino
     {
       // sanity check(s)
       ACE_ASSERT (inherited::configuration_);
+      ACE_ASSERT (inherited::sessionData_ && session_data_p);
+
+      inherited::sessionId_ = session_data_p->sessionId;
 
       // send HTTP request ?
       if (inherited::configuration_->waitForConnect)

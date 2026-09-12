@@ -804,7 +804,7 @@ void http_antlr_scanner::CRLF_HEADERSAction(antlr4::RuleContext *context, size_t
                                          converter >> content_length;
                                          parser->contentLengthOrChunkSize (content_length);
                                          missing_body_or_chunk_bytes = content_length;
-                                         setMode (content_length ? REGULAR_BODY : DEFAULT_MODE);
+                                         setMode (REGULAR_BODY);
                                          break;
                                        } // end IF
                                        iterator =
@@ -824,11 +824,11 @@ void http_antlr_scanner::CRLF_HEADERSAction(antlr4::RuleContext *context, size_t
                                            ACE_DEBUG ((LM_ERROR,
                                                        ACE_TEXT ("invalid/unknown transfer encoding (was: \"%s\"), continuing\n"),
                                                        ACE_TEXT ((*iterator).second.c_str ())));
-                                           setMode (DEFAULT_MODE);
+                                           setMode (REGULAR_BODY);
                                          } // end ELSE
                                        } // end IF
                                        else
-                                         setMode (DEFAULT_MODE);
+                                         setMode (REGULAR_BODY);
                                      }
                                       break;
 
@@ -880,7 +880,7 @@ void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionI
                                        ACE_ASSERT (missing_body_or_chunk_bytes);
                                        --missing_body_or_chunk_bytes;
                                        parser->bodyOrChunkBytesSkipped (1);
-                                       if (unlikely (!missing_body_or_chunk_bytes))
+                                       if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
                                        {
                                          std::ostringstream converter;
                                          converter << content_length;
