@@ -125,11 +125,7 @@ class Test_I_EventHandler_2
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2 (const Test_I_EventHandler_2&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_2& operator= (const Test_I_EventHandler_2&))
 
-  typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
-  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
-
   struct Test_I_URLStreamLoad_UI_CBData* CBData_;
-  SESSION_DATA_MAP_T                     sessionDataMap_;
 };
 
 #endif

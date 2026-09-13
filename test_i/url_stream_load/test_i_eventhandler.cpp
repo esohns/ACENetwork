@@ -511,7 +511,6 @@ Test_I_EventHandler_1b::notify (Stream_SessionId_t sessionId_in,
 
 Test_I_EventHandler_2::Test_I_EventHandler_2 (struct Test_I_URLStreamLoad_UI_CBData* CBData_in)
  : CBData_ (CBData_in)
- , sessionDataMap_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::Test_I_EventHandler_2"));
 
@@ -533,12 +532,6 @@ Test_I_EventHandler_2::start (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-
-  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  ACE_ASSERT (iterator == sessionDataMap_.end ());
-
-  sessionDataMap_.insert (std::make_pair (sessionId_in,
-                                          &const_cast<struct Test_I_URLStreamLoad_SessionData&> (sessionData_in)));
 
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
@@ -630,7 +623,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
 
   CBData_->progressData.transferred += message_in.total_length ();
-  CBData_->progressData.statistic.bytes += message_in.total_length ();
+  //CBData_->progressData.statistic.bytes += message_in.total_length ();
 
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
@@ -644,12 +637,10 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
 
-  int result = -1;
+  int result;
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -677,21 +668,26 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
       break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
-      if ((*iterator).second->lock)
+      const Test_I_URLStreamLoad_SessionData_t& session_data_container_r =
+        sessionMessage_in.getR ();
+      struct Test_I_URLStreamLoad_SessionData& session_data_r =
+        const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_data_container_r.getR ());
+
+      if (session_data_r.lock)
       {
-        result = (*iterator).second->lock->acquire ();
+        result = session_data_r.lock->acquire ();
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
 
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
-      CBData_->progressData.statistic = (*iterator).second->statistic;
+      CBData_->progressData.statistic = session_data_r.statistic;
 #endif // GTK_USE || WXWIDGETS_USE
 
-      if ((*iterator).second->lock)
+      if (session_data_r.lock)
       {
-        result = (*iterator).second->lock->release ();
+        result = session_data_r.lock->release ();
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
