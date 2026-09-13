@@ -659,9 +659,10 @@ HTTP_ANTLRParserDriver_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("HTTP_ANTLRParserDriver_T::hasFinished"));
 
   // *TODO*: this "short-cut" is not entirely safe
+  size_t total_length_i = 0;
   ACE_Message_Block* head_fragment_p = this->head ();
-  ACE_ASSERT (head_fragment_p);
-  size_t total_length_i = head_fragment_p->total_length ();
+  if (likely (head_fragment_p))
+    total_length_i = head_fragment_p->total_length ();
   if ((lexer_.chunks.empty ()                  &&
        lexer_.content_length                   &&
        (lexer_.scanned_content_length >= lexer_.content_length - 1) &&

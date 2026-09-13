@@ -652,6 +652,11 @@ do_work (bool debugParser_in,
   codec_configuration_1b.format.videoFormat = AV_PIX_FMT_YUV420P;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  codec_configuration_2.codecName = ACE_TEXT_ALWAYS_CHAR ("h264_mf");
+#endif // ACE_WIN32 || ACE_WIN64
+  // codec_configuration_2.profile = AV_PROFILE_H264_HIGH;
+  codec_configuration_2.profile = AV_PROFILE_H264_BASELINE;
 #endif // FFMPEG_SUPPORT
 
   struct Stream_ModuleConfiguration module_configuration;
@@ -725,7 +730,11 @@ do_work (bool debugParser_in,
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_1b.inputFormat = ACE_TEXT_ALWAYS_CHAR ("mp4");
 #if defined (FFMPEG_SUPPORT)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_RGB24;
+#else
   modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_BGRA;
+#endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_1b.parserConfiguration =
     &configuration_in.parserConfiguration_1b;
@@ -771,7 +780,11 @@ do_work (bool debugParser_in,
   stream_configuration_2.mediaType.audio.channels = 2;
   stream_configuration_2.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
   stream_configuration_2.mediaType.audio.sampleRate = 48000;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  stream_configuration_2.mediaType.video.format = AV_PIX_FMT_RGB24;
+#else
   stream_configuration_2.mediaType.video.format = AV_PIX_FMT_BGRA;
+#endif // ACE_WIN32 || ACE_WIN64
   stream_configuration_2.mediaType.video.frameRate = { 25, 1 };
   stream_configuration_2.mediaType.video.resolution = { 640, 360 };
 #endif // FFMPEG_SUPPORT
