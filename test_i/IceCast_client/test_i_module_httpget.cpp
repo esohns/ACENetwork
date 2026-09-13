@@ -626,6 +626,11 @@ Test_I_HTTPGet_2::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
     {
       // sanity check(s)
       ACE_ASSERT (inherited::configuration_);
+      ACE_ASSERT (inherited::sessionData_);
+
+      struct Test_I_IceCastClient_SessionData_2& session_data_r =
+        const_cast<struct Test_I_IceCastClient_SessionData_2&> (inherited::sessionData_->getR ());
+      inherited::sessionId_ = session_data_r.sessionId;
 
       // send HTTP request ?
       if (inherited::configuration_->waitForConnect)

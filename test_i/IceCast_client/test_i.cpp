@@ -960,6 +960,9 @@ do_work (bool debugParser_in,
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  codec_configuration_2.codecName = ACE_TEXT_ALWAYS_CHAR ("h264_mf");
+#endif // ACE_WIN32 || ACE_WIN64
   codec_configuration_2.profile = AV_PROFILE_H264_MAIN;
 #endif // FFMPEG_SUPPORT
 

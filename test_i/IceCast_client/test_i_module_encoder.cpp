@@ -608,7 +608,8 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage_2*& message_inout,
         video_codec_id = output_format_p->video_codec;
       ACE_ASSERT (inherited::formatContext_);
       inherited::formatContext_->video_codec =
-        avcodec_find_encoder (video_codec_id);
+        inherited::configuration_->codecConfiguration->codecName.empty () ? avcodec_find_encoder (video_codec_id)
+                                                                          : avcodec_find_encoder_by_name (inherited::configuration_->codecConfiguration->codecName.c_str ());
       if (unlikely (!inherited::formatContext_->video_codec))
       {
         ACE_DEBUG ((LM_ERROR,
