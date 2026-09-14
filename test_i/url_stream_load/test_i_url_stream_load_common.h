@@ -130,7 +130,7 @@ struct Test_I_URLStreamLoad_UI_ProgressData
   {}
 
 //  HTTP_Statistic_t statistic;
-  unsigned int transferred; // byte(s)
+  ACE_UINT64 transferred; // byte(s)
 };
 
 struct Test_I_URLStreamLoad_UI_CBData

@@ -1189,7 +1189,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
       converter.str (resolution_string.substr (position + 1, std::string::npos));
       converter >> resolution_s.cy;
 
-      if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av1")))
+      if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av1")) ||
+          Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av01")))
         codec_id_e = AV_CODEC_ID_AV1;
       else if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("avc1")))
         codec_id_e = AV_CODEC_ID_H264;
