@@ -576,7 +576,8 @@ do_work (bool debugParser_in,
                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
   struct Common_Parser_FlexAllocatorConfiguration allocator_configuration;
-  allocator_configuration.defaultBufferSize = 16384 * 10;
+  allocator_configuration.defaultBufferSize = 16384;
+  allocator_configuration.paddingBytes = AV_INPUT_BUFFER_PADDING_SIZE;
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (allocator_configuration))
@@ -648,8 +649,10 @@ do_work (bool debugParser_in,
   codec_configuration.codecId = AV_CODEC_ID_OPUS;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video (decoder)
   codec_configuration_1b.codecId = AV_CODEC_ID_AV1;
+  codec_configuration_1b.delayOpen = true;
   codec_configuration_1b.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   codec_configuration_1b.format.videoFormat = AV_PIX_FMT_YUV420P;
+  //codec_configuration_1b.useParser = false;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

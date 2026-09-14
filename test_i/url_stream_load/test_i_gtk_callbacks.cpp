@@ -32,6 +32,15 @@
 #include "document.h"
 #endif // RAPIDJSON_SUPPORT
 
+#if defined (FFMPEG_SUPPORT)
+#ifdef __cplusplus
+extern "C"
+{
+#include "libavcodec/codec_id.h"
+}
+#endif /* __cplusplus */
+#endif // FFMPEG_SUPPORT
+
 #include <limits>
 #include <sstream>
 
@@ -39,6 +48,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_file_tools.h"
+#include "common_string_tools.h"
 
 #include "common_timer_manager.h"
 
@@ -1127,6 +1137,10 @@ button_load_clicked_cb (GtkWidget* widget_in,
   GtkListStore* list_store_3 = NULL;
   std::string format_id_string, acodec_string, vcodec_string, resolution_string, ext_string, format_string;
   bool is_audio_b;
+  std::istringstream converter;
+  std::string::size_type position;
+  Common_Image_Resolution_t resolution_s;
+  enum AVCodecID codec_id_e = AV_CODEC_ID_NONE;
   for (rapidjson::SizeType i = 0;
        i < formats_value_r.Size ();
        ++i)
@@ -1158,16 +1172,52 @@ button_load_clicked_cb (GtkWidget* widget_in,
 
     format_string = format_id_string;
     format_string += ACE_TEXT_ALWAYS_CHAR (" - ") + (is_audio_b ? acodec_string : vcodec_string) + ACE_TEXT_ALWAYS_CHAR (" ");
-    if (!resolution_string.empty ())
+    if (!is_audio_b && !resolution_string.empty ())
     {
+      position = resolution_string.find ('x', 0);
+      if (position == std::string::npos)
+      {
+        resolution_s = {0, 0};
+        goto continue_;
+      } // end IF
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (resolution_string.substr (0, position));
+      converter >> resolution_s.cx;
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter.str (resolution_string.substr (position + 1, std::string::npos));
+      converter >> resolution_s.cy;
+
+      if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av1")))
+        codec_id_e = AV_CODEC_ID_AV1;
+      else if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("avc1")))
+        codec_id_e = AV_CODEC_ID_H264;
+      else
+      { ACE_ASSERT (false); // *TODO*
+        codec_id_e = AV_CODEC_ID_NONE;
+      } // end ELSE
+
+continue_:
       format_string += ACE_TEXT_ALWAYS_CHAR (" (") + resolution_string + ACE_TEXT_ALWAYS_CHAR (")");
     } // end IF
+    else
+      resolution_s = { 0, 0 };
     list_store_3 = (is_audio_b ? list_store_p : list_store_2);
     gtk_list_store_append (list_store_3, &iterator_2);
-    gtk_list_store_set (list_store_3, &iterator_2,
-                        0, format_string.c_str (),
-                        1, i,
-                        -1);
+    if (is_audio_b)
+      gtk_list_store_set (list_store_3, &iterator_2,
+                          0, format_string.c_str (),
+                          1, i,
+                          -1);
+    else
+      gtk_list_store_set (list_store_3, &iterator_2,
+                          0, format_string.c_str (),
+                          1, i,
+                          2, resolution_s.cx,
+                          3, resolution_s.cy,
+                          4, codec_id_e,
+                          -1);
   } // end FOR
 
   return FALSE;
@@ -1250,6 +1300,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_6 =
       data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_6 != data_p->configuration->streamConfiguration_2.end ());
+    Common_Image_Resolution_t resolution_s;
 
     Test_I_TCPConnector_t connector;
 #if defined (SSL_SUPPORT)
@@ -1304,6 +1355,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
     guint format_index_i = g_value_get_uint (&value);
     g_value_unset (&value);
+
     ACE_ASSERT (data_p->formats.HasMember (ACE_TEXT_ALWAYS_CHAR ("requested_formats")));
     const rapidjson::Value& formats_value_r =
       data_p->formats[ACE_TEXT_ALWAYS_CHAR ("requested_formats")];
@@ -1336,6 +1388,35 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
     format_index_i = g_value_get_uint (&value);
     g_value_unset (&value);
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
+                              &tree_iterator,
+                              2,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    resolution_s.cx = g_value_get_uint (&value);
+    g_value_unset (&value);
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
+                              &tree_iterator,
+                              3,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    resolution_s.cy = g_value_get_uint (&value);
+    g_value_unset (&value);
+    data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.resolution =
+      resolution_s;
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution =
+      resolution_s;
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
+                              &tree_iterator,
+                              4,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.codecId =
+      static_cast<enum AVCodecID> (g_value_get_uint (&value));
+    g_value_unset (&value);
+    (*iterator_5).second.second->codecConfiguration->codecId =
+      data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.codecId;
+
     const rapidjson::Value& format_value_2 = formats_value_r[format_index_i];
     ACE_ASSERT (format_value_2.HasMember (ACE_TEXT_ALWAYS_CHAR ("url")));
     const rapidjson::Value& url_value_2 = format_value_2[ACE_TEXT_ALWAYS_CHAR ("url")];
@@ -1753,6 +1834,8 @@ combobox_format_changed_cb (GtkWidget* combobox_in,
   if (!gtk_combo_box_get_active_iter (combo_box_2,
                                       &iterator_3))
     return;
+
+
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
