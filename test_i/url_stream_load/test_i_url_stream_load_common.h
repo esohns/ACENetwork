@@ -126,11 +126,11 @@ struct Test_I_URLStreamLoad_UI_ProgressData
 #else
    : transferred (0)
 #endif // GTK_USE || WXWIDGETS_USE
-//   , statistic ()
+   , statistic_1b ()
   {}
 
-//  HTTP_Statistic_t statistic;
-  ACE_UINT64 transferred; // byte(s)
+  ACE_UINT64              transferred; // byte(s)
+  struct Stream_Statistic statistic_1b;
 };
 
 struct Test_I_URLStreamLoad_UI_CBData

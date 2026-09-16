@@ -261,14 +261,13 @@ do_process_arguments (int argc_in,
     return false;
   } // end IF
   useSSL_out = false;
-
+  std::string options_string = ACE_TEXT_ALWAYS_CHAR ("de:f:g:lrs:tu:vz");
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  options_string += ACE_TEXT_ALWAYS_CHAR ("c");
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               ACE_TEXT ("cde:f:g:lrs:tu:vz"),
-#else
-                               ACE_TEXT ("de:f:g:lrs:tu:vz"),
-#endif // ACE_WIN32 || ACE_WIN64
+                               ACE_TEXT_CHAR_TO_TCHAR (options_string.c_str ()),
                                1,                         // skip command name
                                1,                         // report parsing errors
                                ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -384,17 +383,17 @@ do_process_arguments (int argc_in,
 
         // step2: validate address/verify host name exists
         //        --> resolve
-        ACE_TCHAR buffer_a[HOST_NAME_MAX];
-        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[HOST_NAME_MAX]));
+        char buffer_a[HOST_NAME_MAX];
+        ACE_OS::memset (buffer_a, 0, sizeof (char[HOST_NAME_MAX]));
         result = remoteHost_out.get_host_name (buffer_a,
-                                               sizeof (ACE_TCHAR[HOST_NAME_MAX]));
+                                               sizeof (char[HOST_NAME_MAX]));
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(): \"%m\", aborting\n")));
           return false;
         } // end IF
-        std::string hostname = ACE_TEXT_ALWAYS_CHAR (buffer_a);
+        std::string hostname = buffer_a;
         std::string dotted_decimal_string;
         if (!Net_Common_Tools::getAddress (hostname,
                                            dotted_decimal_string))
@@ -429,14 +428,14 @@ do_process_arguments (int argc_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("unrecognized option \"%s\", aborting\n"),
-                    ACE_TEXT (argument_parser.last_option ())));
+                    argument_parser.last_option ()));
         return false;
       }
       case 0:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("found long option \"%s\", aborting\n"),
-                    ACE_TEXT (argument_parser.long_option ())));
+                    argument_parser.long_option ()));
         return false;
       }
       default:
@@ -684,6 +683,7 @@ do_work (bool debugParser_in,
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration.codecConfiguration = &codec_configuration;
 #endif // FFMPEG_SUPPORT
+  modulehandler_configuration.computeThroughput = true;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration.outputFormat.audio.channels = 2;
   modulehandler_configuration.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;
@@ -760,7 +760,7 @@ do_work (bool debugParser_in,
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_2.codecConfiguration = &codec_configuration_2;
 #endif // FFMPEG_SUPPORT
-  modulehandler_configuration_2.computeThroughput = true;
+  //modulehandler_configuration_2.computeThroughput = true;
   modulehandler_configuration_2.concurrency =
     STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration_2.connectionConfigurations =
@@ -953,7 +953,8 @@ do_work (bool debugParser_in,
   connection_manager_p->wait ();
 
   Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
+                                             true,   // wait ?
+                                             false); // close singletons ?
 
   Common_Timer_Tools::finalize ();
 
@@ -963,9 +964,6 @@ do_work (bool debugParser_in,
   return;
 
 clean:
-  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                             true); // wait ?
-  Common_Timer_Tools::finalize ();
   if (!UIDefinitionFileName_in.empty ())
 #if defined (GTK_USE)
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true,  // wait ?
@@ -973,6 +971,10 @@ clean:
 #else
     ;
 #endif // GTK_USE
+  Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
+                                             true,   // wait ?
+                                             false); // close singletons ?
+  Common_Timer_Tools::finalize ();
 }
 
 void

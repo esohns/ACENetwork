@@ -59,11 +59,11 @@ class Test_I_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler (const Test_I_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler& operator= (const Test_I_EventHandler&))
 
-  typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
-  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
+  //typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
+  //typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
   struct Test_I_URLStreamLoad_UI_CBData* CBData_;
-  SESSION_DATA_MAP_T                     sessionDataMap_;
+  //SESSION_DATA_MAP_T                     sessionDataMap_;
 };
 
 //////////////////////////////////////////
@@ -92,11 +92,11 @@ class Test_I_EventHandler_1b
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1b (const Test_I_EventHandler_1b&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1b& operator= (const Test_I_EventHandler_1b&))
 
-  typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
-  typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
+  //typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
+  //typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
   struct Test_I_URLStreamLoad_UI_CBData* CBData_;
-  SESSION_DATA_MAP_T                     sessionDataMap_;
+  //SESSION_DATA_MAP_T                     sessionDataMap_;
 };
 
 //////////////////////////////////////////

@@ -51,9 +51,7 @@ struct Test_I_GTK_ProgressData
   Test_I_GTK_ProgressData ()
    : Common_UI_GTK_ProgressData ()
    , statistic ()
-  {
-    ACE_OS::memset (&statistic, 0, sizeof (struct Stream_Statistic));
-  }
+  {}
 
   struct Stream_Statistic statistic;
 };
