@@ -152,30 +152,31 @@ struct Test_I_URLStreamLoad_UI_CBData
 #endif // GTK_USE || WXWIDGETS_USE
    , AVStream (NULL)
    , dispatch (NULL)
+#if defined (RAPIDJSON_SUPPORT)
+   , formats ()
+#endif // RAPIDJSON_SUPPORT
    , audioHandle (ACE_INVALID_HANDLE)
    , videoHandle (ACE_INVALID_HANDLE)
 #if defined (GTK_USE)
    , videoUpdateEventSourceId (0)
 #endif // GTK_USE
    , progressData ()
-#if defined (RAPIDJSON_SUPPORT)
-   , formats ()
-#endif // RAPIDJSON_SUPPORT
+   , title ()
   {}
 
   struct Test_I_URLStreamLoad_Configuration*  configuration;
   Test_I_AVStream*                            AVStream;
   Common_IDispatch*                           dispatch; // display module
+#if defined (RAPIDJSON_SUPPORT)
+  rapidjson::Document                         formats;
+#endif // RAPIDJSON_SUPPORT
   ACE_HANDLE                                  audioHandle;
   ACE_HANDLE                                  videoHandle;
 #if defined (GTK_USE)
   guint                                       videoUpdateEventSourceId;
 #endif // GTK_USE
   struct Test_I_URLStreamLoad_UI_ProgressData progressData;
-
-#if defined (RAPIDJSON_SUPPORT)
-  rapidjson::Document                         formats;
-#endif // RAPIDJSON_SUPPORT
+  std::string                                 title;
 };
 
 //struct Test_I_URLStreamLoad_ThreadData

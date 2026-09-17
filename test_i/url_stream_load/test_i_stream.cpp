@@ -392,9 +392,25 @@ failed:
   return false;
 }
 
+void
+Test_I_AVStream::resize (const Common_Image_Resolution_t& resolution_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream::resize"));
+
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+
+  (*iterator).second.second->outputFormat.video.resolution = resolution_in;
+
+  inherited::notify (STREAM_SESSION_MESSAGE_RESIZE,
+                     false,
+                     true);
+}
+
 //////////////////////////////////////////
 
-Test_I_AudioStream::Test_I_AudioStream()
+Test_I_AudioStream::Test_I_AudioStream ()
     : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_AudioStream::Test_I_AudioStream"));

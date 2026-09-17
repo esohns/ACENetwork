@@ -790,12 +790,12 @@ idle_end_session_cb (gpointer userData_in)
   gtk_widget_set_sensitive (GTK_WIDGET (box_p), TRUE);
 
   // stop progress reporting
-  GtkSpinner* spinner_p =
-    GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
-  ACE_ASSERT (spinner_p);
-  gtk_spinner_stop (spinner_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
+  //GtkSpinner* spinner_p =
+  //  GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
+  //                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
+  //ACE_ASSERT (spinner_p);
+  //gtk_spinner_stop (spinner_p);
+  //gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), FALSE);
 
   //ACE_ASSERT (data_p->progressData.eventSourceId);
   //{ ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
@@ -1107,10 +1107,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
   std::string URL_string =
     Common_UI_GTK_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p), -1);
   
-  // retrieve formats/URLs
+  // retrieve title/formats/URLs
   std::string json_string = executeYtdl (URL_string);
-  //data_p->formats.Clear ();
-
   if (data_p->formats.Parse (json_string.c_str ()).HasParseError ())
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1118,6 +1116,13 @@ button_load_clicked_cb (GtkWidget* widget_in,
                 data_p->formats.GetParseError ()));
     return FALSE;
   } // end IF
+
+  ACE_ASSERT (data_p->formats.HasMember (ACE_TEXT_ALWAYS_CHAR ("title")));
+  const rapidjson::Value& title_value_r =
+    data_p->formats[ACE_TEXT_ALWAYS_CHAR ("title")];
+  ACE_ASSERT (title_value_r.IsString ());
+  data_p->title = title_value_r.GetString ();
+
   if (!data_p->formats.HasMember (ACE_TEXT_ALWAYS_CHAR ("requested_formats")))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1136,20 +1141,16 @@ button_load_clicked_cb (GtkWidget* widget_in,
   // populate comboboxes with formats
   GtkTreeIter iterator_2;
   GtkListStore* list_store_3 = NULL;
-  std::string format_id_string, acodec_string, vcodec_string, resolution_string, ext_string, format_string;
+  std::string acodec_string, vcodec_string, value_string, format_string;
   bool is_audio_b;
-  std::istringstream converter;
-  std::string::size_type position;
   Common_Image_Resolution_t resolution_s;
+  ACE_UINT32 channels_i, sample_rate_i, fps_i;
   enum AVCodecID codec_id_e = AV_CODEC_ID_NONE;
   for (rapidjson::SizeType i = 0;
        i < formats_value_r.Size ();
        ++i)
   {
     const rapidjson::Value& format_value_r = formats_value_r[i];
-    format_id_string =
-      format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("format_id")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("format_id")].GetString ()
-                                                                    : ACE_TEXT_ALWAYS_CHAR ("unknown");
 
     if (!format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("acodec")) &&
         !format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("vcodec")))
@@ -1164,31 +1165,27 @@ button_load_clicked_cb (GtkWidget* widget_in,
       vcodec_string = iterator->value.GetString ();
     is_audio_b =
       (!acodec_string.empty () && acodec_string != ACE_TEXT_ALWAYS_CHAR ("none"));
-    resolution_string =
-      format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("resolution")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("resolution")].GetString ()
-                                                                     : ACE_TEXT_ALWAYS_CHAR ("");
-    ext_string =
-      format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("ext")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("ext")].GetString ()
-                                                              : ACE_TEXT_ALWAYS_CHAR ("unknown");
 
-    format_string = format_id_string;
-    format_string += ACE_TEXT_ALWAYS_CHAR (" - ") + (is_audio_b ? acodec_string : vcodec_string) + ACE_TEXT_ALWAYS_CHAR (" ");
-    if (!is_audio_b && !resolution_string.empty ())
+    if (is_audio_b)
     {
-      position = resolution_string.find ('x', 0);
-      if (position == std::string::npos)
-      {
-        resolution_s = {0, 0};
-        goto continue_;
-      } // end IF
-      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-      converter.clear ();
-      converter.str (resolution_string.substr (0, position));
-      converter >> resolution_s.cx;
-      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-      converter.clear ();
-      converter.str (resolution_string.substr (position + 1, std::string::npos));
-      converter >> resolution_s.cy;
+      sample_rate_i =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("asr")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("asr")].GetUint ()
+                                                                : 0;
+      channels_i =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("audio_channels")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("audio_channels")].GetUint ()
+                                                                           : 0;
+    } // end IF
+    else
+    {
+      resolution_s.cx =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("width")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("width")].GetUint ()
+                                                                  : 0;
+      resolution_s.cy =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("height")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("height")].GetUint ()
+                                                                   : 0;
+      fps_i =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("fps")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("fps")].GetUint ()
+                                                                : 0;
 
       if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av1")) ||
           Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av01")))
@@ -1199,18 +1196,40 @@ button_load_clicked_cb (GtkWidget* widget_in,
       { ACE_ASSERT (false); // *TODO*
         codec_id_e = AV_CODEC_ID_NONE;
       } // end ELSE
+    } // end ELSE
 
-continue_:
-      format_string += ACE_TEXT_ALWAYS_CHAR (" (") + resolution_string + ACE_TEXT_ALWAYS_CHAR (")");
+    format_string.clear ();
+    format_string = (is_audio_b ? acodec_string : vcodec_string);
+    if (is_audio_b)
+    {
+      value_string =
+        (channels_i >= 2 ? (channels_i == 2 ? ACE_TEXT_ALWAYS_CHAR ("Stereo")
+                                            : std::to_string (channels_i) + ACE_TEXT_ALWAYS_CHAR (" channels"))
+                         : ACE_TEXT_ALWAYS_CHAR ("Mono"));
+
+      format_string +=
+        ACE_TEXT_ALWAYS_CHAR (" (") + value_string +
+        ACE_TEXT_ALWAYS_CHAR (" @ ") + std::to_string (sample_rate_i) +
+        ACE_TEXT_ALWAYS_CHAR (")");
     } // end IF
     else
-      resolution_s = { 0, 0 };
+    {
+      value_string =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("resolution")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("resolution")].GetString ()
+                                                                       : ACE_TEXT_ALWAYS_CHAR ("");
+
+      format_string += ACE_TEXT_ALWAYS_CHAR (" (") + value_string +
+                       ACE_TEXT_ALWAYS_CHAR (" @ ") + std::to_string (fps_i) +
+                       ACE_TEXT_ALWAYS_CHAR (")");
+    } // end ELSE
     list_store_3 = (is_audio_b ? list_store_p : list_store_2);
     gtk_list_store_append (list_store_3, &iterator_2);
     if (is_audio_b)
       gtk_list_store_set (list_store_3, &iterator_2,
                           0, format_string.c_str (),
                           1, i,
+                          2, channels_i,
+                          3, sample_rate_i,
                           -1);
     else
       gtk_list_store_set (list_store_3, &iterator_2,
@@ -1218,7 +1237,8 @@ continue_:
                           1, i,
                           2, resolution_s.cx,
                           3, resolution_s.cy,
-                          4, codec_id_e,
+                          4, fps_i,
+                          5, codec_id_e,
                           -1);
   } // end FOR
 
@@ -1269,6 +1289,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (box_p);
     gtk_widget_set_sensitive (GTK_WIDGET (box_p),
                               FALSE);
+    GtkStatusbar* statusbar_p =
+      GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_NAME)));
+    ACE_ASSERT (statusbar_p);
+    Common_UI_GTK_StatusContextIdsIterator_t iterator_10 =
+      data_p->UIState->contextIds.find (COMMON_UI_GTK_STATUSCONTEXT_INFORMATION);
+    ACE_ASSERT (iterator_10 != data_p->UIState->contextIds.end ());
+    std::string status_string = ACE_TEXT_ALWAYS_CHAR ("loading \"");
+    status_string += data_p->title;
+    status_string += ACE_TEXT_ALWAYS_CHAR ("\"");
+    gtk_statusbar_push (statusbar_p,
+                        (*iterator_10).second,
+                        status_string.c_str ());
 
     // step2: update configuration
     GtkSpinButton* spin_button_p = NULL;
@@ -1334,7 +1367,11 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     //static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.bufferSize =
     //  static_cast<int> (gtk_spin_button_get_value_as_int (spin_button_p));
 
-    // retrieve stream URLs
+    // retrieve stream URLs and format
+    ACE_ASSERT (data_p->formats.HasMember (ACE_TEXT_ALWAYS_CHAR ("requested_formats")));
+    const rapidjson::Value& formats_value_r =
+      data_p->formats[ACE_TEXT_ALWAYS_CHAR ("requested_formats")];
+
     GtkComboBox* combo_box_p =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_FORMAT_AUDIO_NAME)));
@@ -1357,16 +1394,34 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
     guint format_index_i = g_value_get_uint (&value);
     g_value_unset (&value);
-
-    ACE_ASSERT (data_p->formats.HasMember (ACE_TEXT_ALWAYS_CHAR ("requested_formats")));
-    const rapidjson::Value& formats_value_r =
-      data_p->formats[ACE_TEXT_ALWAYS_CHAR ("requested_formats")];
     const rapidjson::Value& format_value_r = formats_value_r[format_index_i];
     ACE_ASSERT (format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("url")));
     const rapidjson::Value& url_value_r = format_value_r[ACE_TEXT_ALWAYS_CHAR ("url")];
     ACE_ASSERT (url_value_r.IsString ());
     std::string URL_string = url_value_r.GetString ();
     (*iterator_4).second.second->URL = URL_string;
+
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                              &tree_iterator,
+                              2,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    data_p->configuration->streamConfiguration.configuration_->mediaType.audio.channels =
+      g_value_get_uint (&value);
+    g_value_unset (&value);
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.audio.channels =
+      data_p->configuration->streamConfiguration.configuration_->mediaType.audio.channels;
+
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                              &tree_iterator,
+                              3,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    data_p->configuration->streamConfiguration.configuration_->mediaType.audio.sampleRate =
+      g_value_get_uint (&value);
+    g_value_unset (&value);
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.audio.sampleRate =
+      data_p->configuration->streamConfiguration.configuration_->mediaType.audio.sampleRate;
 
     GtkComboBox* combo_box_2 =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -1390,6 +1445,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
     format_index_i = g_value_get_uint (&value);
     g_value_unset (&value);
+    const rapidjson::Value& format_value_2 = formats_value_r[format_index_i];
+    ACE_ASSERT (format_value_2.HasMember (ACE_TEXT_ALWAYS_CHAR ("url")));
+    const rapidjson::Value& url_value_2 = format_value_2[ACE_TEXT_ALWAYS_CHAR ("url")];
+    ACE_ASSERT (url_value_2.IsString ());
+    std::string URL_string_2 = url_value_2.GetString ();
+    (*iterator_5).second.second->URL = URL_string_2;
+
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
                               &tree_iterator,
                               2,
@@ -1408,9 +1470,21 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       resolution_s;
     data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution =
       resolution_s;
+
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
                               &tree_iterator,
                               4,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.frameRate =
+      { static_cast<int> (g_value_get_uint (&value)), 1 };
+    g_value_unset (&value);
+    data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.frameRate =
+      data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.frameRate;
+
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
+                              &tree_iterator,
+                              5,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
     data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.codecId =
@@ -1418,13 +1492,6 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     g_value_unset (&value);
     (*iterator_5).second.second->codecConfiguration->codecId =
       data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.codecId;
-
-    const rapidjson::Value& format_value_2 = formats_value_r[format_index_i];
-    ACE_ASSERT (format_value_2.HasMember (ACE_TEXT_ALWAYS_CHAR ("url")));
-    const rapidjson::Value& url_value_2 = format_value_2[ACE_TEXT_ALWAYS_CHAR ("url")];
-    ACE_ASSERT (url_value_2.IsString ());
-    std::string URL_string_2 = url_value_2.GetString ();
-    (*iterator_5).second.second->URL = URL_string_2;
 
     if (!HTTP_Tools::parseURL (URL_string,
                                host_address,
@@ -1686,12 +1753,12 @@ continue_:
       goto error;
 
     // step3: start progress reporting
-    spinner_p =
-      GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
-    ACE_ASSERT (spinner_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), TRUE);
-    gtk_spinner_start (spinner_p);
+    //spinner_p =
+    //  GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
+    //                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINNER_NAME)));
+    //ACE_ASSERT (spinner_p);
+    //gtk_widget_set_sensitive (GTK_WIDGET (spinner_p), TRUE);
+    //gtk_spinner_start (spinner_p);
     progress_bar_p =
       GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
