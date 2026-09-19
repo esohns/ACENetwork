@@ -40,6 +40,7 @@
 #define TEST_I_UI_GTK_BUTTON_LOAD_NAME                    "button_load"
 #define TEST_I_UI_GTK_BUTTON_QUIT_NAME                    "button_quit"
 #define TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME             "checkbutton_asynch"
+#define TEST_I_UI_GTK_CHECKBUTTON_FULLSCREEN_NAME         "checkbutton_fullscreen"
 #define TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME           "checkbutton_loopback"
 #define TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME               "checkbutton_save"
 #define TEST_I_UI_GTK_COMBOBOX_FORMAT_AUDIO_NAME          "combobox_format_audio"
@@ -62,5 +63,6 @@
 #define TEST_I_UI_GTK_STATUSBAR_NAME                      "statusbar"
 #define TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME           "togglebutton_connect"
 #define TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME             "vbox_configuration"
+#define TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME              "window_fullscreen"
 
 #endif

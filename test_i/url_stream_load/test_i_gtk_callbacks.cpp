@@ -1039,18 +1039,18 @@ idle_update_video_display_cb (gpointer userData_in)
     GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
   ACE_ASSERT (drawing_area_p);
-  // GtkDrawingArea* drawing_area_2 =
-  //   GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-  //                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
-  // ACE_ASSERT (drawing_area_2);
-  // GtkToggleButton* toggle_button_p =
-  //   GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-  //                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
-  // ACE_ASSERT (toggle_button_p);
+  GtkDrawingArea* drawing_area_2 =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  ACE_ASSERT (drawing_area_2);
+  GtkToggleButton* toggle_button_p =
+    GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_FULLSCREEN_NAME)));
+  ACE_ASSERT (toggle_button_p);
 
-  // drawing_area_p =
-  //   (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
-  //                                                   : drawing_area_p);
+  drawing_area_p =
+    (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
+                                                    : drawing_area_p);
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
   //if (unlikely (!window_p))
@@ -1177,12 +1177,21 @@ button_load_clicked_cb (GtkWidget* widget_in,
     } // end IF
     else
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       resolution_s.cx =
         format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("width")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("width")].GetUint ()
                                                                   : 0;
       resolution_s.cy =
         format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("height")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("height")].GetUint ()
                                                                    : 0;
+#else
+      resolution_s.width =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("width")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("width")].GetUint ()
+                                                                    : 0;
+      resolution_s.height =
+        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("height")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("height")].GetUint ()
+                                                                     : 0;
+#endif // ACE_WIN32 || ACE_WIN64
       fps_i =
         format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("fps")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("fps")].GetUint ()
                                                                 : 0;
@@ -1235,8 +1244,13 @@ button_load_clicked_cb (GtkWidget* widget_in,
       gtk_list_store_set (list_store_3, &iterator_2,
                           0, format_string.c_str (),
                           1, i,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
                           2, resolution_s.cx,
                           3, resolution_s.cy,
+#else
+                          2, resolution_s.width,
+                          3, resolution_s.height,
+#endif // ACE_WIN32 || ACE_WIN64
                           4, fps_i,
                           5, codec_id_e,
                           -1);
@@ -1457,14 +1471,22 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                               2,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     resolution_s.cx = g_value_get_uint (&value);
+#else
+    resolution_s.width = g_value_get_uint (&value);
+#endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
                               &tree_iterator,
                               3,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     resolution_s.cy = g_value_get_uint (&value);
+#else
+    resolution_s.height = g_value_get_uint (&value);
+#endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
     data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.resolution =
       resolution_s;
@@ -1904,7 +1926,6 @@ combobox_format_changed_cb (GtkWidget* combobox_in,
                                       &iterator_3))
     return;
 
-
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
@@ -1990,25 +2011,23 @@ drawing_area_resize_end (gpointer userData_in)
   Common_UI_GTK_BuildersConstIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  // GtkToggleButton* toggle_button_p =
-  //   GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-  //                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_FULLSCREEN_NAME)));
-  // ACE_ASSERT (toggle_button_p);
-  bool is_active_b = false;
-    // gtk_toggle_button_get_active (toggle_button_p);
+   GtkToggleButton* toggle_button_p =
+     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_FULLSCREEN_NAME)));
+  ACE_ASSERT (toggle_button_p);
   GtkDrawingArea* drawing_area_p =
     GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-                                              (is_active_b ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)
-                                                           : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME))));
+                                              (gtk_toggle_button_get_active (toggle_button_p) ? ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)
+                                                                                              : ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME))));
   ACE_ASSERT (drawing_area_p);
 
   GtkAllocation allocation_s;
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation_s);
 
-         //ACE_DEBUG ((LM_DEBUG,
-         //           ACE_TEXT ("window resized to %dx%d\n"),
-         //           allocation_s.width, allocation_s.height));
+  //ACE_DEBUG ((LM_DEBUG,
+  //           ACE_TEXT ("window resized to %dx%d\n"),
+  //           allocation_s.width, allocation_s.height));
 
   Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_2 =
     data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
@@ -2050,8 +2069,8 @@ drawing_area_resize_end (gpointer userData_in)
 
   // step2
   data_p->AVStream->notify (STREAM_SESSION_MESSAGE_RESIZE,
-                            false,  // recurse upstream ?
-                            false); // expedite ?
+                            false, // recurse upstream ?
+                            true); // expedite ?
 
   return G_SOURCE_REMOVE;
 } // drawing_area_resize_end
@@ -2068,13 +2087,14 @@ drawingarea_size_allocate_cb (GtkWidget* widget_in,
     static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->AVStream);
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  GtkDrawingArea* drawing_area_p = NULL;
-  //   GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
-  //                                             ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
-  // ACE_ASSERT (drawing_area_p);
+  GtkDrawingArea* drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  ACE_ASSERT (drawing_area_p);
 
   bool delay_resize_b = true;
   Stream_Module_t* module_p = NULL;
@@ -2228,6 +2248,188 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   return FALSE;
 } // button_quit_clicked_cb
+
+void
+checkbutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
+                                   gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::checkbutton_fullscreen_toggled_cb"));
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->AVStream);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_2 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration_2.end ());
+  ACE_ASSERT ((*iterator_2).second.second->window.type == Common_UI_Window::TYPE_GTK);
+
+  GtkDrawingArea* drawing_area_p =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_NAME)));
+  ACE_ASSERT (drawing_area_p);
+  GtkDrawingArea* drawing_area_2 =
+    GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME)));
+  ACE_ASSERT (drawing_area_2);
+
+  GtkWindow* window_p =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DIALOG_MAIN_NAME)));
+  ACE_ASSERT (window_p);
+  GtkWindow* window_2 =
+    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME)));
+  ACE_ASSERT (window_2);
+
+  if (gtk_toggle_button_get_active (toggleButton_in))
+  {
+    gtk_widget_show (GTK_WIDGET (window_2));
+
+    (*iterator_2).second.second->window.gdk_window =
+      gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
+
+    gtk_window_maximize (window_2);
+    // gtk_window_fullscreen (window_2);
+    gtk_window_present (window_2); // bring to front
+
+    gtk_window_iconify (window_p);
+  } // end IF
+  else
+  {
+    (*iterator_2).second.second->window.gdk_window =
+      gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+
+    gtk_window_deiconify (window_p);
+    g_signal_emit_by_name (G_OBJECT (drawing_area_p),
+                           ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
+                           userData_in);
+    gtk_window_present (window_p); // bring to front
+
+    //gtk_window_unfullscreen (window_2);
+    gtk_window_unmaximize (window_2);
+    gtk_widget_hide (GTK_WIDGET (window_2));
+  } // end ELSE
+  ACE_ASSERT ((*iterator_2).second.second->window.gdk_window);
+
+  // if (!data_p->AVStream->isRunning ())
+  //   return;
+
+  // const Stream_Module_t* module_p = NULL;
+  // module_p =
+  //   data_p->AVStream->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING));
+  // if (!module_p)
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s: failed to Stream_IStream::find(\"Display\"), returning\n"),
+  //              ACE_TEXT (data_p->AVStream->name ().c_str ())));
+  //   return;
+  // } // end IF
+
+  // Common_UI_IFullscreen* ifullscreen_p =
+  //   dynamic_cast<Common_UI_IFullscreen*> (const_cast<Stream_Module_t*> (module_p)->writer ());
+  // if (unlikely (!ifullscreen_p))
+  // {
+  //   ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("%s:%s: failed to dynamic_cast<Common_UI_IFullscreen*>(0x%@), returning\n"),
+  //              ACE_TEXT (data_p->AVStream->name ().c_str ()),
+  //              module_p->name (),
+  //              const_cast<Stream_Module_t*> (module_p)->writer ()));
+  //   return;
+  // } // end IF
+  // try {
+  //   ifullscreen_p->toggle ();
+  // } catch (...) {
+  //   ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("caught exception in Common_UI_IFullscreen::toggle(), returning\n")));
+  //   return;
+  // }
+} // checkbutton_fullscreen_toggled_cb
+
+gboolean
+key_cb (GtkWidget* widget_in,
+        GdkEventKey* eventKey_in,
+        gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::key_cb"));
+
+  ACE_UNUSED_ARG (widget_in);
+
+  // sanity check(s)
+  ACE_ASSERT (eventKey_in);
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    reinterpret_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  switch (eventKey_in->keyval)
+  {
+#if GTK_CHECK_VERSION (3,0,0)
+    case GDK_KEY_Escape:
+    case GDK_KEY_f:
+    case GDK_KEY_F:
+#else
+    case GDK_Escape:
+    case GDK_f:
+    case GDK_F:
+#endif // GTK_CHECK_VERSION (3,0,0)
+    {
+      bool is_active_b = false;
+      GtkToggleButton* toggle_button_p =
+          GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_FULLSCREEN_NAME)));
+      ACE_ASSERT (toggle_button_p);
+      is_active_b = gtk_toggle_button_get_active (toggle_button_p);
+
+     // sanity check(s)
+#if GTK_CHECK_VERSION (3,0,0)
+      if ((eventKey_in->keyval == GDK_KEY_Escape) &&
+#else
+      if ((eventKey_in->keyval == GDK_Escape) &&
+#endif // GTK_CHECK_VERSION (3,0,0)
+          !is_active_b)
+        break; // <-- not in fullscreen mode, nothing to do
+
+      gtk_toggle_button_set_active (toggle_button_p,
+                                    !is_active_b);
+
+      break;
+    }
+    default:
+      return FALSE; // propagate
+  } // end SWITCH
+
+  return TRUE; // done (do not propagate further)
+} // key_cb
+
+gboolean
+dialog_main_key_press_event_cb (GtkWidget* widget_in,
+                                GdkEventKey* eventKey_in,
+                                gpointer userData_in)
+{
+  return key_cb (widget_in,
+                 eventKey_in,
+                 userData_in);
+} // dialog_main_key_press_event_cb
+
+gboolean
+window_fullscreen_key_press_event_cb (GtkWidget* widget_in,
+                                      GdkEventKey* eventKey_in,
+                                      gpointer userData_in)
+{
+  return key_cb (widget_in,
+                 eventKey_in,
+                 userData_in);
+} // window_fullscreen_key_press_event_cb
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

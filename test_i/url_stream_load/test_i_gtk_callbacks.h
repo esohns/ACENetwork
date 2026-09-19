@@ -60,21 +60,21 @@ extern "C"
 {
 #endif /* __cplusplus */
 // callbacks
-G_MODULE_EXPORT gint button_load_clicked_cb (GtkWidget*, gpointer);
-G_MODULE_EXPORT void togglebutton_connect_toggled_cb (GtkToggleButton*, gpointer);
-G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
-G_MODULE_EXPORT void combobox_format_changed_cb (GtkWidget*, gpointer);
-//G_MODULE_EXPORT void filechooserbutton_output_file_set_cb (GtkWidget*, gpointer);
-//G_MODULE_EXPORT void spinbutton_buffer_value_changed_cb (GtkWidget*, gpointer);
-//G_MODULE_EXPORT void checkbutton_save_toggled_cb (GtkCheckButton*, gpointer);
 G_MODULE_EXPORT gint button_about_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gint button_load_clicked_cb (GtkWidget*, gpointer);
 G_MODULE_EXPORT gint button_quit_clicked_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT void checkbutton_fullscreen_toggled_cb (GtkToggleButton*, gpointer);
+G_MODULE_EXPORT void combobox_format_changed_cb (GtkWidget*, gpointer);
+G_MODULE_EXPORT gboolean dialog_main_key_press_event_cb (GtkWidget*, GdkEventKey*, gpointer);
 #if GTK_CHECK_VERSION (3,0,0)
 G_MODULE_EXPORT gboolean drawingarea_draw_cb (GtkWidget*, cairo_t*, gpointer);
 #else
 G_MODULE_EXPORT gboolean drawingarea_expose_event_cb (GtkWidget*, GdkEvent*, gpointer);
 #endif // GTK_CHECK_VERSION (3,0,0)
 G_MODULE_EXPORT void drawingarea_size_allocate_cb (GtkWidget*, GdkRectangle*, gpointer);
+G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
+G_MODULE_EXPORT void togglebutton_connect_toggled_cb (GtkToggleButton*, gpointer);
+G_MODULE_EXPORT gboolean window_fullscreen_key_press_event_cb (GtkWidget*, GdkEventKey*, gpointer);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
