@@ -1146,6 +1146,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
   Common_Image_Resolution_t resolution_s;
   ACE_UINT32 channels_i, sample_rate_i, fps_i;
   enum AVCodecID codec_id_e = AV_CODEC_ID_NONE;
+  std::string container_string, input_string;
   for (rapidjson::SizeType i = 0;
        i < formats_value_r.Size ();
        ++i)
@@ -1166,6 +1167,11 @@ button_load_clicked_cb (GtkWidget* widget_in,
     is_audio_b =
       (!acodec_string.empty () && acodec_string != ACE_TEXT_ALWAYS_CHAR ("none"));
 
+    iterator = format_value_r.FindMember (ACE_TEXT_ALWAYS_CHAR ("container"));
+    container_string.clear ();
+    if (iterator != format_value_r.MemberEnd ())
+      container_string = iterator->value.GetString ();
+
     if (is_audio_b)
     {
       sample_rate_i =
@@ -1174,6 +1180,24 @@ button_load_clicked_cb (GtkWidget* widget_in,
       channels_i =
         format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("audio_channels")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("audio_channels")].GetUint ()
                                                                            : 0;
+
+      if (Common_String_Tools::startswith (acodec_string, ACE_TEXT_ALWAYS_CHAR ("opus")))
+        codec_id_e = AV_CODEC_ID_OPUS;
+      else if (Common_String_Tools::startswith (acodec_string, ACE_TEXT_ALWAYS_CHAR ("mp4a")))
+        codec_id_e = AV_CODEC_ID_AAC;
+      else
+      { ACE_ASSERT (false); // *TODO*
+        codec_id_e = AV_CODEC_ID_NONE;
+      } // end ELSE
+
+      if (Common_String_Tools::startswith (container_string, ACE_TEXT_ALWAYS_CHAR ("webm")))
+        input_string = ACE_TEXT_ALWAYS_CHAR ("webm");
+      else if (Common_String_Tools::startswith (container_string, ACE_TEXT_ALWAYS_CHAR ("m4a")))
+        input_string = ACE_TEXT_ALWAYS_CHAR ("mov");
+      else
+      { ACE_ASSERT (false); // *TODO*
+        input_string.clear ();
+      } // end ELSE
     } // end IF
     else
     {
@@ -1204,6 +1228,13 @@ button_load_clicked_cb (GtkWidget* widget_in,
       else
       { ACE_ASSERT (false); // *TODO*
         codec_id_e = AV_CODEC_ID_NONE;
+      } // end ELSE
+
+      if (Common_String_Tools::startswith (container_string, ACE_TEXT_ALWAYS_CHAR ("mp4")))
+        input_string = ACE_TEXT_ALWAYS_CHAR ("mp4");
+      else
+      { ACE_ASSERT (false); // *TODO*
+        input_string.clear ();
       } // end ELSE
     } // end ELSE
 
@@ -1239,6 +1270,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
                           1, i,
                           2, channels_i,
                           3, sample_rate_i,
+                          4, codec_id_e,
+                          5, input_string.c_str (),
                           -1);
     else
       gtk_list_store_set (list_store_3, &iterator_2,
@@ -1253,6 +1286,7 @@ button_load_clicked_cb (GtkWidget* widget_in,
 #endif // ACE_WIN32 || ACE_WIN64
                           4, fps_i,
                           5, codec_id_e,
+                          6, input_string.c_str (),
                           -1);
   } // end FOR
 
@@ -1434,8 +1468,27 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     data_p->configuration->streamConfiguration.configuration_->mediaType.audio.sampleRate =
       g_value_get_uint (&value);
     g_value_unset (&value);
-    data_p->configuration->streamConfiguration_2.configuration_->mediaType.audio.sampleRate =
-      data_p->configuration->streamConfiguration.configuration_->mediaType.audio.sampleRate;
+    //data_p->configuration->streamConfiguration_2.configuration_->mediaType.audio.sampleRate =
+    //  data_p->configuration->streamConfiguration.configuration_->mediaType.audio.sampleRate;
+
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                              &tree_iterator,
+                              4,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
+    data_p->configuration->streamConfiguration.configuration_->mediaType.audio.codecId =
+      static_cast<enum AVCodecID> (g_value_get_uint (&value));
+    g_value_unset (&value);
+    (*iterator_4).second.second->codecConfiguration->codecId =
+      data_p->configuration->streamConfiguration.configuration_->mediaType.audio.codecId;
+
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                              &tree_iterator,
+                              5,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+    (*iterator_4).second.second->inputFormat = g_value_get_string (&value);
+    g_value_unset (&value);
 
     GtkComboBox* combo_box_2 =
       GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -1514,6 +1567,14 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     g_value_unset (&value);
     (*iterator_5).second.second->codecConfiguration->codecId =
       data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.codecId;
+
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
+                              &tree_iterator,
+                              6,
+                              &value);
+    ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+    (*iterator_5).second.second->inputFormat = g_value_get_string (&value);
+    g_value_unset (&value);
 
     if (!HTTP_Tools::parseURL (URL_string,
                                host_address,

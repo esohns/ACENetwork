@@ -646,6 +646,8 @@ do_work (bool debugParser_in,
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration; // audio (decoder)
   codec_configuration.codecId = AV_CODEC_ID_OPUS;
+  codec_configuration.delayOpen = true;
+  codec_configuration.useParser = false; // *NOTE*: does not work with "mp4a" i.e. aac streams
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video (decoder)
   codec_configuration_1b.codecId = AV_CODEC_ID_AV1;
   codec_configuration_1b.delayOpen = true;
@@ -712,6 +714,7 @@ do_work (bool debugParser_in,
   //    bufferSize_in;
 #if defined (FFMPEG_SUPPORT)
   stream_configuration.mediaType.audio.codecId = AV_CODEC_ID_OPUS;
+  stream_configuration.mediaType.audio.format = AV_SAMPLE_FMT_FLTP;
 #endif // FFMPEG_SUPPORT
   stream_configuration.messageAllocator = &message_allocator;
   stream_configuration.module = &event_handler_module;
@@ -1074,9 +1077,9 @@ ACE_TMAIN (int argc_in,
   configuration.GTKConfiguration.argv = argv_in;
   configuration.GTKConfiguration.CBData = &ui_cb_data;
   configuration.GTKConfiguration.eventHooks.finiHook =
-      idle_finalize_UI_cb;
+    idle_finalize_UI_cb;
   configuration.GTKConfiguration.eventHooks.initHook =
-      idle_initialize_UI_cb;
+    idle_initialize_UI_cb;
   configuration.GTKConfiguration.definition = &gtk_ui_definition;
 #endif // GTK_USE
   ACE_High_Res_Timer timer;

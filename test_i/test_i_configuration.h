@@ -93,7 +93,7 @@ struct Test_I_Configuration
   Test_I_Configuration ()
    : dispatchConfiguration ()
    , parserConfiguration ()
-   , timerConfiguration ()
+   //, timerConfiguration ()
    , signalHandlerConfiguration ()
    , allocatorConfiguration ()
    , GUIFramework (COMMON_UI_FRAMEWORK_INVALID)
@@ -105,7 +105,7 @@ struct Test_I_Configuration
   // **************************** parser data **********************************
   struct Common_FlexBisonParserConfiguration parserConfiguration;
   // **************************** timer data **********************************
-  struct Common_TimerConfiguration           timerConfiguration;
+  //struct Common_TimerConfiguration           timerConfiguration;
   // **************************** signal data **********************************
   struct Test_I_SignalHandlerConfiguration   signalHandlerConfiguration;
   // **************************** stream data **********************************
