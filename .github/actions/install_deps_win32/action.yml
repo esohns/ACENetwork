@@ -17,5 +17,5 @@ runs:
 
   - run: choco install libreoffice-fresh
     shell: cmd
-  - run: choco install libreoffice-sdk -y -ia "INSTALLDIR=""C:\Program Files\LibreOffice\sdk"""
+  - run: choco install libreoffice-sdk -y --ia "INSTALLDIR='C:\Program Files\LibreOffice\sdk'"
     shell: cmd
