@@ -647,7 +647,7 @@ do_work (bool debugParser_in,
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration; // audio (decoder)
   codec_configuration.codecId = AV_CODEC_ID_OPUS;
   codec_configuration.delayOpen = true;
-  codec_configuration.useParser = false; // *NOTE*: does not work with "mp4a" i.e. aac streams
+  codec_configuration.useParser = false; // *NOTE*: a setting of "true" does not work with "mp4a" (i.e. aac-) streams
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video (decoder)
   codec_configuration_1b.codecId = AV_CODEC_ID_AV1;
   codec_configuration_1b.delayOpen = true;

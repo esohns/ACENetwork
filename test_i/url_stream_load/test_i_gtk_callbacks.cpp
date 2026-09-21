@@ -841,8 +841,8 @@ idle_update_progress_cb (gpointer userData_in)
 
   char buffer_a[BUFSIZ];
   ACE_OS::memset (buffer_a, 0, sizeof (char[BUFSIZ]));
-  int result = -1;
-  float speed = 0.0F;
+  int result;
+  float speed;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
     speed = data_p->statistic.bytesPerSecond;
@@ -2000,7 +2000,7 @@ drawingarea_draw_cb (GtkWidget* widget_in,
                      cairo_t* context_in,
                      gpointer userData_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::drawingarea_draw_cb"));
 
   // sanity check(s)
   ACE_ASSERT (context_in);

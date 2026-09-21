@@ -15,5 +15,7 @@ runs:
      vcpkgJsonGlob: '**/vcpkg.json'
      doNotCache: false
 
-  - run: choco install libreoffice-fresh libreoffice-sdk
+  - run: choco install libreoffice-fresh
+    shell: cmd
+  - run: choco install libreoffice-sdk -y --ia "INSTALLDIR=""C:\Program Files\LibreOffice\sdk"""
     shell: cmd
