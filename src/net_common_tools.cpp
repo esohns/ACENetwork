@@ -2838,7 +2838,7 @@ continue_:
   std::regex regex (regex_string);
   std::cmatch match_results;
   converter.str (ip_route_records_string);
-  int result_2 = -1;
+  int result_2;
   std::string ip_address_string;
   do
   {
