@@ -278,11 +278,11 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
                     Test_I_VideoResize_Module (this,
                                                ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING)),
                     false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
 #else
 #error "no supported video resizer, aborting"
 #endif // FFMPEG_SUPPORT
-    layout_in->append (module_p, branch_p, index_i);
-    module_p = NULL;
 
     ACE_NEW_RETURN (module_p,
                     Test_I_VideoDelay_Module (this,
@@ -296,11 +296,11 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
                     Test_I_GTK_Cairo_Module (this,
                                              ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_GTK_CAIRO_DEFAULT_NAME_STRING)),
                     false);
+    layout_in->append (module_p, branch_p, index_i);
+    module_p = NULL;
 #else
 #error "no supported GUI, aborting"
 #endif // GTK_SUPPORT
-    layout_in->append (module_p, branch_p, index_i);
-    module_p = NULL;
   } // end ELSE
   //++index_i;
 

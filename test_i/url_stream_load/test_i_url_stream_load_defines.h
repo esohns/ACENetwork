@@ -50,6 +50,9 @@
 #define TEST_I_UI_GTK_DRAWINGAREA_NAME                    "drawingarea"
 #define TEST_I_UI_GTK_DRAWINGAREA_FULLSCREEN_NAME         "drawingarea_fullscreen"
 #define TEST_I_UI_GTK_ENTRY_URL_NAME                      "entry_url"
+#define TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
+#define TEST_I_UI_GTK_FRAME_SAVE_NAME                     "frame_save"
+#define TEST_I_UI_GTK_SCALE_VOLUME_NAME                   "scale_volume"
 #define TEST_I_UI_GTK_FILECHOOSERBUTTON_SAVE_NAME         "filechooserbutton_save"
 #define TEST_I_UI_GTK_LISTSTORE_FORMAT_AUDIO_NAME         "liststore_format_audio"
 #define TEST_I_UI_GTK_LISTSTORE_FORMAT_VIDEO_NAME         "liststore_format_video"
@@ -62,7 +65,7 @@
 #define TEST_I_UI_GTK_SPINNER_NAME                        "spinner"
 #define TEST_I_UI_GTK_STATUSBAR_NAME                      "statusbar"
 #define TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME           "togglebutton_connect"
-#define TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME             "vbox_configuration"
+//#define TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME             "vbox_configuration"
 #define TEST_I_UI_GTK_WINDOW_FULLSCREEN_NAME              "window_fullscreen"
 
 #endif

@@ -48,6 +48,7 @@ extern "C"
 #include "ace/Synch_Traits.h"
 
 #include "common_file_tools.h"
+#include "common_process_tools.h"
 #include "common_string_tools.h"
 
 #include "common_timer_manager.h"
@@ -56,6 +57,10 @@ extern "C"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
 #include "common_ui_gtk_tools.h"
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "stream_lib_guids.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_vis_defines.h"
 #include "stream_vis_iresize.h"
@@ -107,26 +112,31 @@ executeYtdl (const std::string& URL_in)
   std::string command_string = yt_dlp_executable +
                                ACE_TEXT_ALWAYS_CHAR (" --dump-json \"") +
                                URL_in + ACE_TEXT_ALWAYS_CHAR ("\"");
+  int status_i = 0;
+  Common_Process_Tools::command (command_string,
+                                 status_i,
+                                 result,
+                                 true); // return stdout ?
 
-  char buffer_a[4096];
-  FILE* file_p = NULL;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  file_p = _popen (command_string.c_str (), ACE_TEXT_ALWAYS_CHAR ("r"));
-#else
-  file_p =  popen (command_string.c_str (), ACE_TEXT_ALWAYS_CHAR ("r"));
-#endif // ACE_WIN32 || ACE_WIN64
-  if (!file_p)
-    return result;
-  while (fgets (buffer_a, sizeof (buffer_a), file_p) != NULL)
-    result += buffer_a;
-  if (!result.empty () && result.back () == '\n')
-    result.pop_back ();
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  _pclose (file_p);
-#else
-  pclose (file_p);
-#endif // ACE_WIN32 || ACE_WIN64
+//  char buffer_a[4096];
+//  FILE* file_p = NULL;
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  file_p = _popen (command_string.c_str (), ACE_TEXT_ALWAYS_CHAR ("r"));
+//#else
+//  file_p =  popen (command_string.c_str (), ACE_TEXT_ALWAYS_CHAR ("r"));
+//#endif // ACE_WIN32 || ACE_WIN64
+//  if (!file_p)
+//    return result;
+//  while (ACE_OS::fgets (buffer_a, sizeof (char[4096]), file_p) != NULL)
+//    result += buffer_a;
+//  if (!result.empty () && result.back () == '\n')
+//    result.pop_back ();
+//
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  _pclose (file_p);
+//#else
+//  pclose (file_p);
+//#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
 }
@@ -392,7 +402,39 @@ idle_finalize_UI_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
 
+  for (Common_UI_GTK_EventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
+       iterator != data_p->UIState->eventSourceIds.end ();
+       ++iterator)
+    g_source_remove (*iterator);
   data_p->UIState->eventSourceIds.clear ();
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if (data_p->volumeControl)
+  {
+    data_p->volumeControl->Release (); data_p->volumeControl = NULL;
+  } // end IF
+#else
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct pw_thread_loop* dummy_p = NULL;
+  if (data_p->pipewireConfiguration->loop)
+    pw_thread_loop_lock (data_p->pipewireConfiguration->loop);
+  Stream_MediaFramework_Pipewire_Tools::freeVolumeControl (dummy_p,
+                                                           data_p->pipewireConfiguration->context,
+                                                           data_p->pipewireConfiguration->core,
+                                                           data_p->pipewireConfiguration->stream);
+  if (data_p->pipewireConfiguration->loop)
+  {
+    pw_thread_loop_unlock (data_p->pipewireConfiguration->loop);
+    pw_thread_loop_stop (data_p->pipewireConfiguration->loop);
+    pw_thread_loop_destroy (data_p->pipewireConfiguration->loop); data_p->pipewireConfiguration->loop = NULL;
+  } // end IF
+  ACE_ASSERT (!data_p->pipewireConfiguration->loop && !data_p->pipewireConfiguration->context && !data_p->pipewireConfiguration->core && !data_p->pipewireConfiguration->stream);
+#endif // LIBPIPEWIRE_SUPPORT
+
+  Stream_MediaFramework_ALSA_Tools::freeMixerHandle (data_p->mixerHandle);
+  data_p->mixerHandle = NULL;
+  data_p->volumeControl = NULL;
+#endif // ACE_WIN32 || ACE_WIN64
 
   gtk_main_quit ();
 
@@ -497,7 +539,128 @@ idle_initialize_UI_cb (gpointer userData_in)
     Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).second.second->URL);
   gtk_entry_set_text (entry_p,
                       text_p);
-  g_free (text_p);
+  g_free (text_p); text_p = NULL;
+
+  GtkScale* scale_p =
+    GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SCALE_VOLUME_NAME)));
+  ACE_ASSERT (scale_p);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID GUID_s = GUID_NULL;
+  switch ((*iterator_3).second.second->deviceIdentifier.identifierDiscriminator)
+  {
+    case Stream_Device_Identifier::ID:
+    {
+      GUID_s =
+        Stream_MediaFramework_DirectSound_Tools::waveDeviceIdToDirectSoundGUID ((*iterator_3).second.second->deviceIdentifier.identifier._id,
+                                                                                false); // playback
+      break;
+    }
+    case Stream_Device_Identifier::GUID:
+    {
+      GUID_s = (*iterator_3).second.second->deviceIdentifier.identifier._guid;
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown device identifier discriminator (was: %d), continuing\n"),
+                  (*iterator_3).second.second->deviceIdentifier.identifierDiscriminator));
+      break;
+    }
+  } // end SWITCH
+  if (unlikely (InlineIsEqualGUID (GUID_s, GUID_NULL)))
+  {
+    GUID_s = Stream_MediaFramework_DirectSound_Tools::getDefaultDevice (false); // render
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("invalid/unknown audio output device identifier, falling back to: \"%s\"\n"),
+                ACE_TEXT (Stream_MediaFramework_DirectSound_Tools::directSoundGUIDToString (GUID_s).c_str ())));
+  } // end IF
+
+  data_p->volumeControl =
+    //Stream_MediaFramework_DirectSound_Tools::getMasterVolumeControl (GUID_s);
+    Stream_MediaFramework_DirectSound_Tools::getSessionVolumeControl (GUID_s,
+                                                                      CLSID_ACEStream_MediaFramework_WASAPI_AudioSession_Render); // session GUID
+  float volume_level_f = 0.0f;
+  HRESULT result_3;
+  if (!data_p->volumeControl)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_MediaFramework_DirectSound_Tools::getSessionVolumeControl(\"%s\"), continuing\n"),
+                //ACE_TEXT ("failed to Stream_MediaFramework_DirectSound_Tools::getMasterVolumeControl(\"%s\"), continuing\n"),
+                ACE_TEXT (Stream_MediaFramework_DirectSound_Tools::directSoundGUIDToString (GUID_s).c_str ())));
+    goto continue_2;
+  } // end IF
+  result_3 =
+    //data_p->volumeControl->GetMasterVolumeLevelScalar (&volume_level_f);
+    data_p->volumeControl->GetMasterVolume (&volume_level_f);
+  ACE_ASSERT (SUCCEEDED (result_3));
+  gtk_range_set_value (GTK_RANGE (scale_p),
+                       static_cast<gdouble> (volume_level_f) * 100.0);
+#else
+  if (unlikely ((*iterator_3).second.second->deviceIdentifier.identifier.empty ()))
+  {
+    (*iterator_3).second.second->deviceIdentifier.identifier =
+      ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_DEFAULT_DEVICE_PREFIX);
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("invalid/unknown audio output device identifier, falling back to: \"%s\"\n"),
+                ACE_TEXT ((*iterator_3).second.second->deviceIdentifier.identifier.c_str ())));
+  } // end IF
+
+#if defined (LIBPIPEWIRE_SUPPORT)
+  ACE_ASSERT (!data_p->pipewireConfiguration->loop);
+  data_p->pipewireConfiguration->loop =
+    pw_thread_loop_new (ACE_TEXT_ALWAYS_CHAR ("urlstreamload-thread-loop"),
+                        NULL);
+  ACE_ASSERT (data_p->pipewireConfiguration->loop);
+  int result_3 = pw_thread_loop_start (data_p->pipewireConfiguration->loop);
+  ACE_ASSERT (result_3 >= 0);
+  pw_thread_loop_lock (data_p->pipewireConfiguration->loop);
+  struct Stream_MediaFramework_ALSA_MediaType media_type_s;
+  media_type_s.format = SND_PCM_FORMAT_FLOAT;
+  if (!Stream_MediaFramework_Pipewire_Tools::getVolumeControl (media_type_s,
+                                                               data_p->pipewireConfiguration->loop,
+                                                               data_p->pipewireConfiguration->context,
+                                                               data_p->pipewireConfiguration->core,
+                                                               data_p->pipewireConfiguration->stream))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_MediaFramework_Pipewire_Tools::getVolumeControl(), continuing\n")));
+  } // end IF
+  pw_thread_loop_unlock (data_p->pipewireConfiguration->loop);
+  ACE_ASSERT (data_p->pipewireConfiguration->loop && data_p->pipewireConfiguration->context && data_p->pipewireConfiguration->core && data_p->pipewireConfiguration->stream);
+#endif // LIBPIPEWIRE_SUPPORT
+
+  long min_level_i, current_level_i;
+  if (!Stream_MediaFramework_ALSA_Tools::getVolumeControl ((*iterator_3).second.second->deviceIdentifier.identifier,
+                                                           ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME),
+                                                           false, // playback
+                                                           min_level_i,
+                                                           data_p->maxVolumeLevel,
+                                                           current_level_i,
+                                                           data_p->mixerHandle,
+                                                           data_p->volumeControl))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Stream_MediaFramework_ALSA_Tools::getVolumeControl(\"%s\",\"%s\"), continuing\n"),
+                ACE_TEXT ((*iterator_3).second.second->deviceIdentifier.identifier.c_str ()),
+                ACE_TEXT (STREAM_LIB_ALSA_PLAYBACK_DEFAULT_SELEM_VOLUME_NAME)));
+    goto continue_2;
+  } // end IF
+  ACE_ASSERT (data_p->mixerHandle && data_p->volumeControl);
+
+  gtk_scale_set_digits (scale_p,
+                        0);
+  gtk_range_set_range (GTK_RANGE (scale_p),
+                       static_cast<gdouble> (min_level_i),
+                       static_cast<gdouble> (data_p->maxVolumeLevel));
+  gtk_range_set_increments (GTK_RANGE (scale_p),
+                            static_cast<gdouble> (1),
+                            static_cast<gdouble> (1));
+  gtk_range_set_value (GTK_RANGE (scale_p),
+                       static_cast<gdouble> (current_level_i));
+#endif // ACE_WIN32 || ACE_WIN64
+continue_2:
 
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -694,17 +857,10 @@ idle_reset_UI_cb (gpointer userData_in)
   struct Test_I_URLStreamLoad_UI_CBData* data_p =
     static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkSpinButton* spin_button_p =
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -731,9 +887,12 @@ idle_reset_UI_cb (gpointer userData_in)
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
-  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_progress_bar_set_text (progress_bar_p,
+                             ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_progress_bar_set_show_text (progress_bar_p,
+                                  FALSE);
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     data_p->progressData.transferred = 0;
   } // end lock scope
 
@@ -749,16 +908,10 @@ idle_start_session_cb (gpointer userData_in)
   struct Test_I_URLStreamLoad_UI_CBData* data_p =
     static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
-
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  const Common_UI_GTK_State_t& state_r = gtk_manager_p->getR ();
-
+  ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   return G_SOURCE_REMOVE;
 } // idle_start_session_cb
@@ -783,11 +936,26 @@ idle_end_session_cb (gpointer userData_in)
   ACE_ASSERT (toggle_button_p);
   gtk_button_set_label (GTK_BUTTON (toggle_button_p),
                         GTK_STOCK_CONNECT);
-  GtkBox* box_p =
-    GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME)));
-  ACE_ASSERT (box_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (box_p), TRUE);
+  un_toggling_connect = true;
+  gtk_toggle_button_toggled (toggle_button_p);
+  //GtkBox* box_p =
+  //  GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
+  //                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME)));
+  //ACE_ASSERT (box_p);
+  //gtk_widget_set_sensitive (GTK_WIDGET (box_p),
+  //                          TRUE);
+  GtkFrame* frame_p =
+    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME)));
+  ACE_ASSERT (frame_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
+                            TRUE);
+  frame_p =
+    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_SAVE_NAME)));
+  ACE_ASSERT (frame_p);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
+                            TRUE);
 
   // stop progress reporting
   //GtkSpinner* spinner_p =
@@ -814,9 +982,6 @@ idle_end_session_cb (gpointer userData_in)
   //gtk_progress_bar_set_fraction (progress_bar_p, 0.0);
   //gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
   //gtk_progress_bar_set_show_text (progress_bar_p, FALSE);
-
-  un_toggling_connect = true;
-  gtk_toggle_button_toggled (toggle_button_p);
 
   return G_SOURCE_REMOVE;
 } // idle_end_session_cb
@@ -882,8 +1047,12 @@ idle_update_info_display_cb (gpointer userData_in)
 
   // sanity check(s)
   struct Test_I_URLStreamLoad_UI_CBData* data_p =
-      static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
+  Common_UI_GTK_BuildersConstIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkSpinButton* spin_button_p = NULL;
   bool is_session_message = false;
@@ -891,19 +1060,8 @@ idle_update_info_display_cb (gpointer userData_in)
   int result = -1;
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
 
-  Common_UI_GTK_Manager_t* gtk_manager_p =
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
-  Common_UI_GTK_State_t& state_r =
-    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
-
-  Common_UI_GTK_BuildersConstIterator_t iterator =
-    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != state_r.builders.end ());
-
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
-    for (Common_UI_Events_t::ITERATOR iterator_2 (state_r.eventStack);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+    for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->UIState->eventStack);
          iterator_2.next (event_p);
          iterator_2.advance ())
     { ACE_ASSERT (event_p);
@@ -1010,14 +1168,21 @@ idle_update_info_display_cb (gpointer userData_in)
     } // end FOR
 
     // clean up
-    while (!state_r.eventStack.is_empty ())
+    while (!data_p->UIState->eventStack.is_empty ())
     {
-      result = state_r.eventStack.pop (event_e);
+      result = data_p->UIState->eventStack.pop (event_e);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Unbounded_Stack::pop(): \"%m\", continuing\n")));
     } // end WHILE
   } // end lock scope
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  if (!data_p->mixerHandle)
+    return G_SOURCE_CONTINUE;
+  snd_mixer_handle_events (data_p->mixerHandle);
+#endif // ACE_WIN32 || ACE_WIN64
 
   return G_SOURCE_CONTINUE;
 }
@@ -1047,20 +1212,15 @@ idle_update_video_display_cb (gpointer userData_in)
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_FULLSCREEN_NAME)));
   ACE_ASSERT (toggle_button_p);
-
-  drawing_area_p =
-    (gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
-                                                    : drawing_area_p);
-  GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
+  GdkWindow* window_p =
+    gtk_widget_get_window (GTK_WIDGET ((gtk_toggle_button_get_active (toggle_button_p) ? drawing_area_2
+                                                                                       : drawing_area_p)));
   ACE_ASSERT (window_p);
-  //if (unlikely (!window_p))
-  //  goto continue_;
 
   gdk_window_invalidate_rect (window_p,
                               NULL,
                               FALSE);
 
-  //continue_:
   return G_SOURCE_CONTINUE;
 }
 
@@ -1315,7 +1475,18 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   bool success = false;
-  GtkBox* box_p = NULL;
+  //GtkBox* box_p =
+  //  GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
+  //                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME)));
+  //ACE_ASSERT (box_p);
+  GtkFrame* frame_p =
+    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_CONFIGURATION_NAME)));
+  ACE_ASSERT (frame_p);
+  GtkFrame* frame_2 =
+    GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_FRAME_SAVE_NAME)));
+  ACE_ASSERT (frame_2);
   GtkSpinner* spinner_p = NULL;
   GtkProgressBar* progress_bar_p = NULL;
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
@@ -1331,12 +1502,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // step1: update widgets
     gtk_button_set_label (GTK_BUTTON (toggleButton_in),
                           GTK_STOCK_DISCONNECT);
-    box_p =
-      GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME)));
-    ACE_ASSERT (box_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (box_p),
+    //gtk_widget_set_sensitive (GTK_WIDGET (box_p),
+    //                          FALSE);
+    gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
                               FALSE);
+    gtk_widget_set_sensitive (GTK_WIDGET (frame_2),
+                              FALSE);
+
     GtkStatusbar* statusbar_p =
       GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_STATUSBAR_NAME)));
@@ -1846,9 +2018,12 @@ continue_:
       GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_PROGRESSBAR_NAME)));
     ACE_ASSERT (progress_bar_p);
-    gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
-    gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
-    gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+    gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p),
+                              TRUE);
+    gtk_progress_bar_set_show_text (progress_bar_p,
+                                    TRUE);
+    gtk_progress_bar_set_text (progress_bar_p,
+                               ACE_TEXT_ALWAYS_CHAR (""));
 
     if (!data_p->progressData.eventSourceId)
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
@@ -1876,6 +2051,16 @@ continue_:
   } // end IF
 
   // --> disconnect
+
+  // step1: update widgets
+  gtk_button_set_label (GTK_BUTTON (toggleButton_in),
+                        GTK_STOCK_CONNECT);
+  //gtk_widget_set_sensitive (GTK_WIDGET (box_p),
+  //                          TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
+                            TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_2),
+                            TRUE);
 
   iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1918,16 +2103,20 @@ continue_:
 error:
   gtk_button_set_label (GTK_BUTTON (toggleButton_in),
                         GTK_STOCK_CONNECT);
-  box_p =
-    GTK_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                     ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_VBOX_CONFIGURATION_NAME)));
-  ACE_ASSERT (box_p);
-  gtk_widget_set_sensitive (GTK_WIDGET (box_p), TRUE);
+  //gtk_widget_set_sensitive (GTK_WIDGET (box_p),
+  //                          TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_p),
+                            TRUE);
+  gtk_widget_set_sensitive (GTK_WIDGET (frame_2),
+                            TRUE);
 
   un_toggling_connect = true;
-  gtk_toggle_button_set_active (toggleButton_in, FALSE);
+  gtk_toggle_button_set_active (toggleButton_in,
+                                FALSE);
 
-  data_p->AVStream->stop ();
+  data_p->AVStream->stop (false,
+                          false,
+                          true);
 } // toggle_button_connect_toggled_cb
 
 void
@@ -1953,6 +2142,57 @@ entry_url_activate_cb (GtkEntry* entry_in,
 
   gtk_button_clicked (button_p);
 } // entry_url_activate_cb
+
+void
+scale_volume_value_changed_cb (GtkRange* range_in,
+                               gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::scale_volume_value_changed_cb"));
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+
+  gdouble value_d = gtk_range_get_value (range_in);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if (!data_p->volumeControl)
+    return;
+  HRESULT result =
+    data_p->volumeControl->SetMasterVolume (static_cast<float> (value_d / 100.0),
+                                            NULL);
+    //data_p->volumeControl->SetMasterVolumeLevelScalar (static_cast<float> (value_d / 100.0),
+    //                                                   NULL);
+  ACE_ASSERT (SUCCEEDED (result));
+#else
+  bool use_pipewire_b =
+    data_p->configuration->streamConfiguration_2.configuration_->renderer == STREAM_DEVICE_RENDERER_PIPEWIRE;
+  if (use_pipewire_b)
+  {
+#if defined (LIBPIPEWIRE_SUPPORT)
+    ACE_ASSERT (data_p->pipewireConfiguration->loop);
+    // pw_thread_loop_lock (data_p->pipewireConfiguration->loop);
+    if (!Stream_MediaFramework_Pipewire_Tools::setVolumeLevel (//data_p->pipewireConfiguration->loop,
+                                                               data_p->pipewireConfiguration->stream,
+                                                               2,
+                                                               value_d / data_p->maxVolumeLevel))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Stream_MediaFramework_Pipewire_Tools::setVolumeLevel(), continuing\n")));
+    } // end IF
+    // pw_thread_loop_unlock (data_p->pipewireConfiguration->loop);
+#endif // LIBPIPEWIRE_SUPPORT
+  } // end IF
+  else
+  {
+    if (!data_p->mixerHandle || !data_p->volumeControl)
+      return;
+    // snd_mixer_handle_events (data_p->mixerHandle);
+    snd_mixer_selem_set_playback_volume_all (data_p->volumeControl,
+                                             static_cast<long> (value_d));
+  } // end ELSE
+#endif // ACE_WIN32 || ACE_WIN64
+} // scale_volume_value_changed_cb
 
 void
 combobox_format_changed_cb (GtkWidget* combobox_in,

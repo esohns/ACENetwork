@@ -73,6 +73,7 @@ G_MODULE_EXPORT gboolean drawingarea_expose_event_cb (GtkWidget*, GdkEvent*, gpo
 #endif // GTK_CHECK_VERSION (3,0,0)
 G_MODULE_EXPORT void drawingarea_size_allocate_cb (GtkWidget*, GdkRectangle*, gpointer);
 G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
+G_MODULE_EXPORT void scale_volume_value_changed_cb (GtkRange*, gpointer);
 G_MODULE_EXPORT void togglebutton_connect_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT gboolean window_fullscreen_key_press_event_cb (GtkWidget*, GdkEventKey*, gpointer);
 #ifdef __cplusplus

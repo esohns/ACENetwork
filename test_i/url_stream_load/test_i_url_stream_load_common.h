@@ -160,8 +160,18 @@ struct Test_I_URLStreamLoad_UI_CBData
 #if defined (GTK_USE)
    , videoUpdateEventSourceId (0)
 #endif // GTK_USE
+#if defined (LIBPIPEWIRE_SUPPORT)
+   , pipewireConfiguration (NULL)
+#endif // LIBPIPEWIRE_SUPPORT
    , progressData ()
    , title ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , volumeControl (NULL)
+#else
+   , mixerHandle (NULL)
+   , volumeControl (NULL)
+   , maxVolumeLevel (0)
+#endif // ACE_WIN32 || ACE_WIN64
   {}
 
   struct Test_I_URLStreamLoad_Configuration*  configuration;
@@ -175,8 +185,19 @@ struct Test_I_URLStreamLoad_UI_CBData
 #if defined (GTK_USE)
   guint                                       videoUpdateEventSourceId;
 #endif // GTK_USE
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct Stream_MediaFramework_Pipewire_Configuration* pipewireConfiguration;
+#endif // LIBPIPEWIRE_SUPPORT
   struct Test_I_URLStreamLoad_UI_ProgressData progressData;
   std::string                                 title;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //IAudioEndpointVolume*                               volumeControl;
+  ISimpleAudioVolume*                         volumeControl;
+#else
+  snd_mixer_t*                                mixerHandle;
+  snd_mixer_elem_t*                           volumeControl;
+  long                                        maxVolumeLevel;
+#endif // ACE_WIN32 || ACE_WIN64
 };
 
 //struct Test_I_URLStreamLoad_ThreadData
