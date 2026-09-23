@@ -720,12 +720,12 @@ continue_2:
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
                                 (data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0));
-  check_button_p =
-    GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
-  ACE_ASSERT (check_button_p);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ());
+  //check_button_p =
+  //  GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+  //                                            ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
+  //ACE_ASSERT (check_button_p);
+  //gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
+  //                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ());
 
   GtkDrawingArea* drawing_area_p =
     GTK_DRAWING_AREA (gtk_builder_get_object ((*iterator).second.second,
@@ -1449,6 +1449,25 @@ button_load_clicked_cb (GtkWidget* widget_in,
                           6, input_string.c_str (),
                           -1);
   } // end FOR
+
+  GtkComboBox* combo_box_p =
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_FORMAT_AUDIO_NAME)));
+  ACE_ASSERT (combo_box_p);
+  GtkTreeModel* tree_model_p = gtk_combo_box_get_model (combo_box_p);
+  ACE_ASSERT (tree_model_p);
+  gint count = gtk_tree_model_iter_n_children (tree_model_p, NULL);
+  if (count == 1)
+    gtk_combo_box_set_active (combo_box_p, 0);
+  combo_box_p =
+    GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_COMBOBOX_FORMAT_VIDEO_NAME)));
+  ACE_ASSERT (combo_box_p);
+  tree_model_p = gtk_combo_box_get_model (combo_box_p);
+  ACE_ASSERT (tree_model_p);
+  count = gtk_tree_model_iter_n_children (tree_model_p, NULL);
+  if (count == 1)
+    gtk_combo_box_set_active (combo_box_p, 0);
 
   return FALSE;
 } // button_load_clicked_cb

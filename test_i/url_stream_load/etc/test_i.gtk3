@@ -166,7 +166,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">False</property>
+                                        <property name="fill">True</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -189,7 +189,7 @@
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">False</property>
+                                        <property name="fill">True</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -197,7 +197,7 @@
                                   <packing>
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
-                                    <property name="x_options"/>
+                                    <property name="x_options">GTK_FILL</property>
                                     <property name="y_options"/>
                                   </packing>
                                 </child>
@@ -243,7 +243,7 @@
                                     <property name="numeric">True</property>
                                   </object>
                                   <packing>
-                                    <property name="x_options"/>
+                                    <property name="x_options">GTK_FILL</property>
                                     <property name="y_options"/>
                                   </packing>
                                 </child>
@@ -267,7 +267,7 @@
                                   <packing>
                                     <property name="top_attach">3</property>
                                     <property name="bottom_attach">4</property>
-                                    <property name="x_options"/>
+                                    <property name="x_options">GTK_FILL</property>
                                     <property name="y_options"/>
                                   </packing>
                                 </child>
@@ -489,6 +489,8 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_text" translatable="yes">fullscreen</property>
                                         <property name="relief">half</property>
                                         <property name="use_stock">True</property>
                                         <property name="focus_on_click">False</property>
@@ -509,7 +511,6 @@
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip_markup" translatable="yes">save to file</property>
                                         <property name="tooltip_text" translatable="yes">save to file</property>
                                         <property name="relief">half</property>
                                         <property name="use_stock">True</property>
@@ -540,10 +541,9 @@
                                         <property name="label" translatable="yes">Asynchronous</property>
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
-                                        <property name="can_focus">True</property>
+                                        <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip_markup" translatable="yes">asynchronous event dispatch</property>
                                         <property name="tooltip_text" translatable="yes">asynchronous event dispatch</property>
                                         <property name="relief">half</property>
                                         <property name="focus_on_click">False</property>
@@ -561,10 +561,9 @@
                                         <property name="label">Loopback</property>
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
-                                        <property name="can_focus">True</property>
+                                        <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="has_tooltip">True</property>
-                                        <property name="tooltip_markup" translatable="yes">loopback interface</property>
                                         <property name="tooltip_text" translatable="yes">loopback interface</property>
                                         <property name="relief">half</property>
                                         <property name="focus_on_click">False</property>
