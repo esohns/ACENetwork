@@ -97,13 +97,23 @@ executeYtdl (const std::string& URL_in)
 
   std::string result;
 
+  std::string yt_dlp_executable;
+#if defined (_DEBUG)
   char* lib_root_p = ACE_OS::getenv (ACE_TEXT_ALWAYS_CHAR ("LIB_ROOT"));
   ACE_ASSERT (lib_root_p);
-  std::string yt_dlp_executable = lib_root_p;
+  yt_dlp_executable = lib_root_p;
   yt_dlp_executable += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  yt_dlp_executable += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
+  yt_dlp_executable +=
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_PARENT_SUBDIRECTORY);
   yt_dlp_executable += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  yt_dlp_executable += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_EXECUTABLE_SUBDIRECTORY);
+  yt_dlp_executable +=
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_EXECUTABLE_SUBDIRECTORY);
+#else
+  yt_dlp_executable = Common_File_Tools::getWorkingDirectory ();
+  yt_dlp_executable += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  yt_dlp_executable +=
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_EXECUTABLE_SUBDIRECTORY);
+#endif // _DEBUG
   yt_dlp_executable += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   yt_dlp_executable += ACE_TEXT_ALWAYS_CHAR ("yt-dlp");
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
