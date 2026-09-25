@@ -31,6 +31,12 @@
 #include "stream_control_message.h"
 #include "stream_messageallocatorheap_base.h"
 
+#if defined (LIBPIPEWIRE_SUPPORT)
+#include "stream_lib_pipewire_common.h"
+#endif // LIBPIPEWIRE_SUPPORT
+
+#include "net_connection_configuration.h"
+
 #include "http_common.h"
 
 #include "test_i_common.h"

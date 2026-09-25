@@ -112,16 +112,16 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
                       false);
       break;
     }
+#if defined (LIBPIPEWIRE_SUPPORT)
     case STREAM_DEVICE_RENDERER_PIPEWIRE:
     {
-#if defined (LIBPIPEWIRE_SUPPORT)
       ACE_NEW_RETURN (module_p,
                       Test_I_Pipewire_Module (this,
                                               ACE_TEXT_ALWAYS_CHAR (STREAM_DEV_TARGET_PIPEWIRE_DEFAULT_NAME_STRING)),
                       false);
-#endif // LIBPIPEWIRE_SUPPORT
       break;
     }
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
     default:
     {

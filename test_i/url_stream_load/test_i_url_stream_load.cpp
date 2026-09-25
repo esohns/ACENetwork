@@ -181,6 +181,13 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-w        : use pipewire [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+#endif // ACE_WIN32 || ACE_WIN64
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-z        : use hardware decoder [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -206,6 +213,10 @@ do_process_arguments (int argc_in,
                       bool& traceInformation_out,
                       std::string& URL_out,
                       bool& printVersionAndExit_out,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                      bool& usePipewire_out,
+#endif // ACE_WIN32 || ACE_WIN64
                       bool& useHardwareDecoder_out,
                       std::string& hostName_out,
                       ACE_INET_Addr& remoteHost_out,
@@ -246,6 +257,10 @@ do_process_arguments (int argc_in,
   traceInformation_out = false;
   URL_out = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   printVersionAndExit_out = false;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  usePipewire_out = false;
+#endif // ACE_WIN32 || ACE_WIN64
   useHardwareDecoder_out = false;
 
   hostName_out.clear ();
@@ -264,6 +279,8 @@ do_process_arguments (int argc_in,
   std::string options_string = ACE_TEXT_ALWAYS_CHAR ("de:f:g:lrs:tu:vz");
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   options_string += ACE_TEXT_ALWAYS_CHAR ("c");
+#else
+  options_string += ACE_TEXT_ALWAYS_CHAR ("w");
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_Get_Opt argument_parser (argc_in,
                                argv_in,
@@ -411,6 +428,14 @@ do_process_arguments (int argc_in,
         printVersionAndExit_out = true;
         break;
       }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      case 'w':
+      {
+        usePipewire_out = true;
+        break;
+      }
+#endif // ACE_WIN32 || ACE_WIN64
       case 'z':
       {
         useHardwareDecoder_out = true;
@@ -530,6 +555,10 @@ do_work (bool debugParser_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const std::string& URL_in,
          const ACE_INET_Addr& remoteHost_in,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+         bool usePipewire_in,
+#endif // ACE_WIN32 || ACE_WIN64
          bool useHardwareDecoder_in,
          struct Test_I_URLStreamLoad_Configuration& configuration_in,
          struct Test_I_URLStreamLoad_UI_CBData& CBData_in,
@@ -641,6 +670,10 @@ do_work (bool debugParser_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   struct Stream_MediaFramework_ALSA_Configuration ALSA_configuration;
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct Stream_MediaFramework_Pipewire_Configuration pipewire_configuration;
+  CBData_in.pipewireConfiguration = &pipewire_configuration;
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (FFMPEG_SUPPORT)
@@ -680,6 +713,9 @@ do_work (bool debugParser_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   modulehandler_configuration.ALSAConfiguration = &ALSA_configuration;
+#if defined (LIBPIPEWIRE_SUPPORT)
+  modulehandler_configuration.pipewireConfiguration = &pipewire_configuration;
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   modulehandler_configuration.CBData = &CBData_in;
 #if defined (FFMPEG_SUPPORT)
@@ -797,6 +833,11 @@ do_work (bool debugParser_in,
   stream_configuration_2.messageAllocator = &message_allocator;
   stream_configuration_2.module = &event_handler_module_2;
   stream_configuration_2.printFinalReport = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  if (usePipewire_in)
+    stream_configuration_2.renderer = STREAM_DEVICE_RENDERER_PIPEWIRE;
+#endif // ACE_WIN32 || ACE_WIN64
   configuration_in.streamConfiguration_2.initialize (module_configuration,
                                                      modulehandler_configuration_2,
                                                      stream_configuration_2);
@@ -1051,6 +1092,10 @@ ACE_TMAIN (int argc_in,
   bool trace_information;
   std::string url;
   bool print_version_and_exit;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  bool use_pipewire_b;
+#endif // ACE_WIN32 || ACE_WIN64
   bool use_hardware_decoder_b;
   ACE_INET_Addr address;
   bool use_ssl;
@@ -1107,6 +1152,9 @@ ACE_TMAIN (int argc_in,
                             false); // RNG ?
   Stream_MediaFramework_DirectSound_Tools::initialize ();
 #else
+#if defined (LIBPIPEWIRE_SUPPORT)
+  pw_init (&argc_in, &argv_in);
+#endif // LIBPIPEWIRE_SUPPORT
   Common_Tools::initialize (false); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
@@ -1154,6 +1202,10 @@ ACE_TMAIN (int argc_in,
   trace_information = false;
   url = ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_URL);
   print_version_and_exit = false;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  use_pipewire_b = false;
+#endif // ACE_WIN32 || ACE_WIN64
   use_hardware_decoder_b = false;
   use_ssl = false;
   ACE_OS::memset (&elapsed_rusage, 0, sizeof (elapsed_rusage));
@@ -1177,6 +1229,10 @@ ACE_TMAIN (int argc_in,
                              trace_information,
                              url,
                              print_version_and_exit,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                             use_pipewire_b,
+#endif // ACE_WIN32 || ACE_WIN64
                              use_hardware_decoder_b,
                              hostname,
                              address,
@@ -1333,6 +1389,10 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            url,
            address,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+           use_pipewire_b,
+#endif // ACE_WIN32 || ACE_WIN64
            use_hardware_decoder_b,
            configuration,
            ui_cb_data,
@@ -1430,6 +1490,10 @@ error:
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#else
+#if defined (LIBPIPEWIRE_SUPPORT)
+  pw_deinit ();
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   return EXIT_FAILURE;
 } // end main

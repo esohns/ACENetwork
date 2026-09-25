@@ -157,6 +157,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
 #if defined (FFMPEG_SUPPORT)
    , outputFormat ()
 #endif // FFMPEG_SUPPORT
+#if defined (LIBPIPEWIRE_SUPPORT)
+   , pipewireConfiguration (NULL)
+#endif // LIBPIPEWIRE_SUPPORT
    , queue (NULL)
    , subscriber (NULL)
    , targetFileName ()
@@ -180,6 +183,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType           outputFormat;
 #endif // FFMPEG_SUPPORT
+#if defined (LIBPIPEWIRE_SUPPORT)
+  struct Stream_MediaFramework_Pipewire_Configuration*    pipewireConfiguration;
+#endif // LIBPIPEWIRE_SUPPORT
   ACE_Message_Queue_Base*                                 queue;
   Test_I_ISessionNotify_t*                                subscriber;
   std::string                                             targetFileName; // dump module

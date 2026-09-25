@@ -60,6 +60,10 @@ extern "C"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "stream_lib_guids.h"
+#else
+#if defined (LIBPIPEWIRE_SUPPORT)
+#include "stream_lib_pipewire_tools.h"
+#endif // LIBPIPEWIRE_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_vis_defines.h"
@@ -2610,7 +2614,17 @@ checkbutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
 
   if (gtk_toggle_button_get_active (toggleButton_in))
   {
+    guint num_signal_handlers =
+      g_signal_handlers_block_by_func (G_OBJECT (drawing_area_2),
+                                       (gpointer)drawingarea_size_allocate_cb,
+                                       userData_in);
+    ACE_ASSERT (num_signal_handlers == 1);
     gtk_widget_show (GTK_WIDGET (window_2));
+    num_signal_handlers =
+      g_signal_handlers_unblock_by_func (G_OBJECT (drawing_area_2),
+                                         (gpointer)drawingarea_size_allocate_cb,
+                                         userData_in);
+    ACE_ASSERT (num_signal_handlers == 1);
 
     (*iterator_2).second.second->window.gdk_window =
       gtk_widget_get_window (GTK_WIDGET (drawing_area_2));
@@ -2627,13 +2641,15 @@ checkbutton_fullscreen_toggled_cb (GtkToggleButton* toggleButton_in,
       gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
 
     gtk_window_deiconify (window_p);
+    gtk_window_present (window_p); // bring to front
+
     g_signal_emit_by_name (G_OBJECT (drawing_area_p),
                            ACE_TEXT_ALWAYS_CHAR ("size-allocate"),
                            userData_in);
-    gtk_window_present (window_p); // bring to front
 
     //gtk_window_unfullscreen (window_2);
     gtk_window_unmaximize (window_2);
+
     gtk_widget_hide (GTK_WIDGET (window_2));
   } // end ELSE
   ACE_ASSERT ((*iterator_2).second.second->window.gdk_window);
