@@ -1,5 +1,7 @@
 set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/scripts")
 include (flex)
+#include (reflex)
+#include (antlr)
 
 add_subdirectory (dhcp)
 add_subdirectory (ftp)
@@ -10,3 +12,4 @@ add_subdirectory (pcp)
 add_subdirectory (pop)
 add_subdirectory (ssdp)
 add_subdirectory (smtp)
+add_subdirectory (ws)
