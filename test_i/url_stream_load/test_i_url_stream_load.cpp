@@ -1021,53 +1021,7 @@ clean:
   Common_Timer_Tools::finalize ();
 }
 
-void
-do_print_version (const std::string& programName_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::do_print_version"));
-
-  std::ostringstream converter;
-
-  // compiler version string
-  converter << ACE::compiler_major_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::compiler_minor_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::compiler_beta_version ();
-
-  std::cout << programName_in
-            << ACE_TEXT (" compiled on ")
-            << ACE::compiler_name ()
-            << ACE_TEXT (" ")
-            << converter.str ()
-            << std::endl << std::endl;
-
-  std::cout << ACE_TEXT ("libraries: ")
-            << std::endl
-#if defined (HAVE_CONFIG_H)
-            << ACE_TEXT (ACENetwork_PACKAGE_NAME)
-            << ACE_TEXT (": ")
-            << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
-            << std::endl
-#endif // HAVE_CONFIG_H
-            ;
-
-  converter.str ("");
-  // ACE version string
-  converter << ACE::major_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::minor_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::beta_version ();
-
-  // *NOTE*: cannot use ACE_VERSION, as it doesn't contain the (potential) beta
-  // version number... Need this, as the library soname is compared to this
-  // string
-  std::cout << ACE_TEXT ("ACE: ")
-//             << ACE_VERSION
-            << converter.str ()
-            << std::endl;
-}
+COMMON_DEFINE_PRINTVERSION_FUNCTION (do_print_version, NETWORK_MAKE_VERSION_STRING_VARIABLE (programName_in, ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL), version_string), version_string)
 
 int
 ACE_TMAIN (int argc_in,

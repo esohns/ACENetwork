@@ -39,24 +39,24 @@ test_i_libxml2_sax_error_cb (void* userData_in,
                              const char* message_in,
                              ...)
 {
-  //NETWORK_TRACE (ACE_TEXT ("::test_i_libxml2_sax_error_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::test_i_libxml2_sax_error_cb"));
 
   int result = -1;
 
   struct Test_I_SAXParserContext* data_p =
-      static_cast<struct Test_I_SAXParserContext*> (userData_in);
+    static_cast<struct Test_I_SAXParserContext*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_TCHAR buffer[BUFSIZ];
+  char buffer_a[BUFSIZ];
   va_list arguments;
 
   va_start (arguments, message_in);
-  result = ACE_OS::vsnprintf (buffer,
-                              sizeof (buffer),
-//                            sizeof (buffer) / sizeof (buffer[0]),
-                              message_in, arguments);
+  result = ACE_OS::vsnprintf (buffer_a,
+                              sizeof (char[BUFSIZ]),
+                              message_in,
+                              arguments);
   ACE_UNUSED_ARG (result);
   va_end (arguments);
 
@@ -64,14 +64,14 @@ test_i_libxml2_sax_error_cb (void* userData_in,
               ACE_TEXT ("test_i_libxml2_sax_error_cb[%s:%d:%d] (%d,%d): %s"),
               data_p->parserContext->lastError.file, data_p->parserContext->lastError.line, data_p->parserContext->lastError.int2,
               data_p->parserContext->lastError.domain, data_p->parserContext->lastError.code,
-              buffer));
+              ACE_TEXT (buffer_a)));
 }
 
 void
 test_i_libxml2_sax_structured_error_cb (void* userData_in,
                                         xmlErrorPtr error_in)
 {
-  //NETWORK_TRACE (ACE_TEXT ("::test_i_libxml2_sax_structured_error_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::test_i_libxml2_sax_structured_error_cb"));
 
   ACE_DEBUG ((LM_ERROR,
               ACE_TEXT ("test_i_libxml2_sax_structured_error_cb: %s\n"),
@@ -357,7 +357,7 @@ test_i_libxml2_sax_characters_cb (void* userData_in,
 
   // sanity check(s)
   struct Test_I_SAXParserContext* data_p =
-      static_cast<struct Test_I_SAXParserContext*> (userData_in);
+    static_cast<struct Test_I_SAXParserContext*> (userData_in);
   ACE_ASSERT (data_p);
 
   data_p->characters = reinterpret_cast<const char*> (string_in);
@@ -372,7 +372,7 @@ test_i_libxml2_sax_start_element_cb (void* userData_in,
 
   // sanity check(s)
   struct Test_I_SAXParserContext* data_p =
-      static_cast<struct Test_I_SAXParserContext*> (userData_in);
+    static_cast<struct Test_I_SAXParserContext*> (userData_in);
   ACE_ASSERT (data_p);
 
   const xmlChar** attributes_p = attributes_in;
@@ -600,7 +600,7 @@ test_i_libxml2_sax_characters_2 (void* userData_in,
 
   // sanity check(s)
   struct Test_I_SAXParserContext* data_p =
-      static_cast<struct Test_I_SAXParserContext*> (userData_in);
+    static_cast<struct Test_I_SAXParserContext*> (userData_in);
   ACE_ASSERT (data_p);
 
   if (likely (data_p->accumulate))
@@ -620,7 +620,7 @@ test_i_libxml2_sax_start_element_2 (void* userData_in,
 
   // sanity check(s)
   struct Test_I_SAXParserContext* data_p =
-      static_cast<struct Test_I_SAXParserContext*> (userData_in);
+    static_cast<struct Test_I_SAXParserContext*> (userData_in);
   ACE_ASSERT (data_p);
 
   const xmlChar** attributes_p = attributes_in;

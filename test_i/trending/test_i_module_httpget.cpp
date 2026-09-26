@@ -105,6 +105,70 @@ Test_I_Stream_HTTPGet::handleSessionMessage (Test_I_Stream_SessionMessage*& mess
 
   switch (message_inout->type ())
   {
+    case STREAM_SESSION_MESSAGE_BEGIN:
+    {
+      // sanity check(s)
+      ACE_ASSERT (inherited::sessionData_);
+
+      struct Test_I_Trending_SessionData& session_data_r =
+        const_cast<struct Test_I_Trending_SessionData&> (inherited::sessionData_->getR ());
+      inherited::sessionId_ = session_data_r.sessionId;
+
+      // send HTTP request ?
+      if (inherited::configuration_->waitForConnect)
+        break;
+      if (!inherited::send (inherited::configuration_->URL,
+                            HTTP_Codes::HTTP_METHOD_GET,
+                            inherited::configuration_->HTTPHeaders,
+                            inherited::configuration_->HTTPForm))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to send HTTP request \"%s\", aborting\n"),
+                    inherited::mod_->name (),
+                    ACE_TEXT (inherited::configuration_->URL.c_str ())));
+        goto error;
+      } // end IF
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("%s: started HTTP request for \"%s\"\n"),
+      //            inherited::mod_->name (),
+      //            ACE_TEXT (inherited::configuration_->URL.c_str ())));
+      break;
+
+error:
+      this->notify (STREAM_SESSION_MESSAGE_ABORT);
+
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_CONNECT:
+    {
+      // sanity check(s)
+      ACE_ASSERT (inherited::configuration_);
+
+      // send HTTP request ?
+      if (!inherited::configuration_->waitForConnect)
+        break;
+      if (!inherited::send (inherited::configuration_->URL,
+                            HTTP_Codes::HTTP_METHOD_GET,
+                            inherited::configuration_->HTTPHeaders,
+                            inherited::configuration_->HTTPForm))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to send HTTP request \"%s\", aborting\n"),
+                    inherited::mod_->name (),
+                    ACE_TEXT (inherited::configuration_->URL.c_str ())));
+        goto error_2;
+      } // end IF
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("%s: started HTTP request for \"%s\"\n"),
+      //            inherited::mod_->name (),
+      //            ACE_TEXT (inherited::configuration_->URL.c_str ())));
+      break;
+
+error_2:
+      this->notify (STREAM_SESSION_MESSAGE_ABORT);
+
+      break;
+    }
     case STREAM_SESSION_MESSAGE_LINK:
     {
       // sanity check(s)
