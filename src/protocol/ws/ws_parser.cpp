@@ -110,7 +110,7 @@ static YYLTYPE yyloc_default
 /* Unqualified %code blocks.  */
 
 // *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
-#if defined (YYDEBUG)
+#if defined (ZZDEBUG)
 #include <iostream>
 #endif
 #include <regex>
@@ -455,7 +455,7 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3
 };
 
-#if YYDEBUG
+#if ZZDEBUG
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
@@ -799,7 +799,7 @@ yylhsNonterm (yyRuleNum yyrule)
   return YY_CAST (yysymbol_kind_t, yyr1[yyrule]);
 }
 
-#if YYDEBUG
+#if ZZDEBUG
 
 # ifndef YYFPRINTF
 #  define YYFPRINTF fprintf
@@ -819,7 +819,7 @@ yylhsNonterm (yyRuleNum yyrule)
 
 # define YY_DPRINTF_(Args)                      \
   do {                                          \
-    if (yydebug)                                \
+    if (zzdebug)                                \
       YYFPRINTF Args;                           \
     YY_IGNORE_USELESS_CAST_END                  \
   } while (0)
@@ -941,7 +941,7 @@ yy_symbol_print (FILE *yyo,
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                  \
   do {                                                                  \
-    if (yydebug)                                                        \
+    if (zzdebug)                                                        \
       {                                                                 \
         YY_FPRINTF ((stderr, "%s ", Title));                            \
         yy_symbol_print (stderr, Kind, Value, Location, iparser_p, yyscanner);        \
@@ -955,26 +955,26 @@ yy_reduce_print (yybool yynormal, yyGLRStackItem* yyvsp, YYPTRDIFF_T yyk,
 
 # define YY_REDUCE_PRINT(Args)          \
   do {                                  \
-    if (yydebug)                        \
+    if (zzdebug)                        \
       yy_reduce_print Args;             \
   } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
-int yydebug;
+int zzdebug;
 
 static void yypstack (yyGLRStack* yystackp, YYPTRDIFF_T yyk)
   YY_ATTRIBUTE_UNUSED;
 static void yypdumpstack (yyGLRStack* yystackp)
   YY_ATTRIBUTE_UNUSED;
 
-#else /* !YYDEBUG */
+#else /* !ZZDEBUG */
 
 # define YY_DPRINTF(Args) do {} while (yyfalse)
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)
 # define YY_REDUCE_PRINT(Args)
 
-#endif /* !YYDEBUG */
+#endif /* !ZZDEBUG */
 
 #ifndef yystrlen
 # define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
@@ -1063,7 +1063,7 @@ yyfillin (yyGLRStackItem *yyvsp, int yylow0, int yylow1)
   yyGLRState *s = yyvsp[yylow0].yystate.yypred;
   for (i = yylow0-1; i >= yylow1; i -= 1)
     {
-#if YYDEBUG
+#if ZZDEBUG
       yyvsp[i].yystate.yylrState = s->yylrState;
 #endif
       yyvsp[i].yystate.yyresolved = s->yyresolved;
@@ -1280,8 +1280,8 @@ yydestroyGLRState (char const *yymsg, yyGLRState *yys, WebSocket_IParser* iparse
                 &yys->yysemantics.yyval, &yys->yyloc, iparser_p, yyscanner);
   else
     {
-#if YYDEBUG
-      if (yydebug)
+#if ZZDEBUG
+      if (zzdebug)
         {
           if (yys->yysemantics.yyfirstVal)
             YY_FPRINTF ((stderr, "%s unresolved", yymsg));
@@ -1673,7 +1673,7 @@ yyglrShiftDefer (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yy_state_t yylrState,
   yyaddDeferredAction (yystackp, yyk, yynewState, yyrhs, yyrule);
 }
 
-#if YYDEBUG
+#if ZZDEBUG
 
 /*----------------------------------------------------------------------.
 | Report that stack #YYK of *YYSTACKP is going to be reduced by YYRULE. |
@@ -2037,7 +2037,7 @@ yyresolveAction (yySemanticOption* yyopt, yyGLRStack* yystackp,
   return yyflag;
 }
 
-#if YYDEBUG
+#if ZZDEBUG
 static void
 yyreportTree (yySemanticOption* yyx, int yyindent)
 {
@@ -2092,7 +2092,7 @@ yyreportAmbiguity (yySemanticOption* yyx0,
   YY_USE (yyx0);
   YY_USE (yyx1);
 
-#if YYDEBUG
+#if ZZDEBUG
   YY_FPRINTF ((stderr, "Ambiguity detected.\n"));
   YY_FPRINTF ((stderr, "Option 1,\n"));
   yyreportTree (yyx0, 2);
@@ -2899,7 +2899,7 @@ yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner)
 }
 
 /* DEBUGGING ONLY */
-#if YYDEBUG
+#if ZZDEBUG
 /* Print *YYS and its predecessors. */
 static void
 yy_yypstack (yyGLRState* yys)
@@ -3017,7 +3017,7 @@ yysetdebug (int debug_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::yysetdebug"));
 
-  yydebug = debug_in;
+  zzdebug = debug_in;
 }*/
 
 void

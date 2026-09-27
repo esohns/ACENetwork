@@ -35,6 +35,8 @@
 
 #include "net_common.h"
 
+#include "http_common.h"
+
 #include "ws_codes.h"
 
 // forward declarations
@@ -52,27 +54,54 @@ typedef Common_IStatistic_T<WebSocket_Statistic_t> WebSocket_IStatisticReporting
 typedef Common_StatisticHandler_T<WebSocket_Statistic_t> WebSocket_StatisticReportingHandler_t;
 
 struct WebSocket_Record
+ : HTTP_Record
 {
   WebSocket_Record ()
-   : final (true)
+   : HTTP_Record ()
+   , final (true)
    , opcode (WebSocket_Codes::OPCODE_INVALID)
+   , payload ()
    , payloadSize (0)
    , reason ()
    , status (WebSocket_Codes::STATUS_INVALID)
-  {}
-  
+  {
+    payload.blob = NULL;
+  }
+  ~WebSocket_Record ()
+  {
+    if (opcode == WebSocket_Codes::OPCODE_TEXT && payload.string)
+      delete [] payload.string;
+    else if (opcode == WebSocket_Codes::OPCODE_BINARY && payload.blob)
+      delete [] payload.blob;
+    payload.blob = NULL;
+  }
+
+  inline struct WebSocket_Record& operator= (struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); return *this; }
   inline void operator+= (struct WebSocket_Record rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   void reset ()
   {
+    HTTP_Record::reset ();
+
     final = true;
+    if (opcode == WebSocket_Codes::OPCODE_TEXT && payload.string)
+      delete [] payload.string;
+    else if (opcode == WebSocket_Codes::OPCODE_BINARY && payload.blob)
+      delete [] payload.blob;
     opcode = WebSocket_Codes::OPCODE_INVALID;
+    payload.blob = NULL;
+    payloadSize = 0;
     reason.clear ();
     status = WebSocket_Codes::STATUS_INVALID;
   }
 
   bool                        final; // i.e. FIN-bit was set
   WebSocket_Codes::OpCodeType opcode;
+  union
+  {
+    uint8_t* blob;
+    char*    string;
+  }                           payload;
   ACE_UINT64                  payloadSize;
   std::string                 reason;
   WebSocket_Codes::StatusType status;

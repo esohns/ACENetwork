@@ -2168,7 +2168,7 @@ case 2:
 YY_RULE_SETUP
 { iparser_p->offset (1);
                              uint8_t byte_i = *yytext;
-                             ACE_ASSERT (byte_i & 0x80 == 0); // --> frame is not masked
+                             ACE_ASSERT ((byte_i & 0x80) == 0); // --> frame is not masked
                              struct WebSocket_Record& record_r =
                                iparser_p->current ();
                              record_r.payloadSize = byte_i & 0x7F;
@@ -2216,7 +2216,7 @@ YY_RULE_SETUP
                              struct WebSocket_Record& record_r =
                                iparser_p->current ();
                              record_r.payloadSize = quad_word_i;
-                             ACE_ASSERT (quad_word_i & 0x8000000000000000 == 0); // --> MSB is 0
+                             ACE_ASSERT ((quad_word_i & 0x8000000000000000) == 0); // --> MSB is 0
                              iparser_p->dataSize (record_r.payloadSize);
                              BEGIN (payload); }
 	YY_BREAK

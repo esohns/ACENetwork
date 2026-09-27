@@ -27,6 +27,8 @@
 #include "stream_common.h"
 #include "stream_task_base_synch.h"
 
+#include "http_module_streamer.h"
+
 extern const char libacenetwork_protocol_default_ws_streamer_module_name_string[];
 
 template <ACE_SYNCH_DECL,
@@ -38,28 +40,22 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType>
 class WebSocket_Module_Streamer_T
- : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+ : public HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 struct Stream_UserData>
+                                 SessionMessageType>
 {
-  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+  typedef HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
-                                 SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 struct Stream_UserData> inherited;
+                                 SessionMessageType> inherited;
 
  public:
-  WebSocket_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
+  WebSocket_Module_Streamer_T (typename inherited::TASK_BASE_T::ISTREAM_T*); // stream handle
   inline virtual ~WebSocket_Module_Streamer_T () {}
 
   // implement (part of) Stream_ITaskBase
@@ -70,6 +66,8 @@ class WebSocket_Module_Streamer_T
   ACE_UNIMPLEMENTED_FUNC (WebSocket_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (WebSocket_Module_Streamer_T (const WebSocket_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (WebSocket_Module_Streamer_T& operator= (const WebSocket_Module_Streamer_T&))
+
+  bool handshakeComplete_;
 };
 
 // include template definition

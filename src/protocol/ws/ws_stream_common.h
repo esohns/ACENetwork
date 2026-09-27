@@ -86,8 +86,8 @@ struct WebSocket_ModuleHandlerConfiguration
 
   //HTTP_Form_t                           HTTPForm; // HTTP get module
   //HTTP_Headers_t                        HTTPHeaders; // HTTP get module
-  struct WebSocket_ParserConfiguration* parserConfiguration; // parser module(s)
-  bool                                  waitForConnect; // HTTP get module
+  struct HTTP_ParserConfiguration* parserConfiguration; // parser module(s)
+  bool                             waitForConnect; // HTTP get module
 };
 
 //struct WebSocket_ProtocolConfiguration;

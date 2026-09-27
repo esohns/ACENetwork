@@ -30,6 +30,9 @@
 #include "stream_headmoduletask_base.h"
 #include "stream_task_base_synch.h"
 
+#include "http_module_parser.h"
+#include "http_parser_driver.h"
+
 #include "ws_common.h"
 #include "ws_defines.h"
 
@@ -48,26 +51,26 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType,
           typename ParserDriverType>
 class WebSocket_Module_Parser_T
- : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
-                                 TimePolicyType,
-                                 ConfigurationType,
-                                 ControlMessageType,
-                                 DataMessageType,
-                                 SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 struct Stream_UserData>
+ : public HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                               TimePolicyType,
+                               ConfigurationType,
+                               ControlMessageType,
+                               DataMessageType,
+                               SessionMessageType,
+                               HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                                                   TimePolicyType,
+                                                   SessionMessageType> >
  , public ParserDriverType
 {
-  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
-                                 TimePolicyType,
-                                 ConfigurationType,
-                                 ControlMessageType,
-                                 DataMessageType,
-                                 SessionMessageType,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 struct Stream_UserData> inherited;
+  typedef HTTP_Module_Parser_T<ACE_SYNCH_USE,
+                               TimePolicyType,
+                               ConfigurationType,
+                               ControlMessageType,
+                               DataMessageType,
+                               SessionMessageType,
+                               HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                                                   TimePolicyType,
+                                                   SessionMessageType> > inherited;
   typedef ParserDriverType inherited2;
 
  public:
@@ -104,12 +107,15 @@ class WebSocket_Module_Parser_T
   virtual int svc (void);
 
   // helper methods
-  void dispatch (ACE_Message_Block*);
+  void dispatch_2 (ACE_Message_Block*);
   size_t getPayloadLength ();
 
   // override (part of) Common_IScannerBase
   inline virtual ACE_Message_Block* head () { return headFragment_; }
   inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
+
+  // override (part of) HTTP_(|Reflex|ANTLR)_IParser
+  virtual void record (struct HTTP_Record*&); // data record
 
   // implement (part of) WebSocket_(|Reflex|ANTLR)_IParser
   virtual void record (struct WebSocket_Record*&); // data record
@@ -125,6 +131,7 @@ class WebSocket_Module_Parser_T
 
   ACE_UINT64                          dataBytesToSkip_;
   ACE_UINT64                          dataSize_;
+  bool                                handshakeComplete_;
   typename inherited::MESSAGE_QUEUE_T queue_; // parser-
 };
 
@@ -151,34 +158,40 @@ template <ACE_SYNCH_DECL,
           typename UserDataType,
           typename ParserDriverType>
 class WebSocket_Module_ParserH_T
- : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      StatisticContainerType,
-                                      SessionManagerType,
-                                      TimerManagerType,
-                                      UserDataType>
+ : public HTTP_Module_ParserH_T<ACE_SYNCH_USE,
+                                TimePolicyType,
+                                ControlMessageType,
+                                DataMessageType,
+                                SessionMessageType,
+                                ConfigurationType,
+                                StreamControlType,
+                                StreamNotificationType,
+                                StreamStateType,
+                                StatisticContainerType,
+                                SessionManagerType,
+                                TimerManagerType,
+                                UserDataType,
+                                HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                                                   TimePolicyType,
+                                                   SessionMessageType> >
  , public ParserDriverType
 {
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      StatisticContainerType,
-                                      SessionManagerType,
-                                      TimerManagerType,
-                                      UserDataType> inherited;
+  typedef HTTP_Module_ParserH_T<ACE_SYNCH_USE,
+                                TimePolicyType,
+                                ControlMessageType,
+                                DataMessageType,
+                                SessionMessageType,
+                                ConfigurationType,
+                                StreamControlType,
+                                StreamNotificationType,
+                                StreamStateType,
+                                StatisticContainerType,
+                                SessionManagerType,
+                                TimerManagerType,
+                                UserDataType,
+                                HTTP_ParserDriver_T<ACE_SYNCH_USE,
+                                                    TimePolicyType,
+                                                    SessionMessageType> > inherited;
   typedef ParserDriverType inherited2;
 
  public:
@@ -186,19 +199,19 @@ class WebSocket_Module_ParserH_T
   virtual ~WebSocket_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()
-  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                    TimePolicyType,
-                                    ControlMessageType,
-                                    DataMessageType,
-                                    SessionMessageType,
-                                    ConfigurationType,
-                                    StreamControlType,
-                                    StreamNotificationType,
-                                    StreamStateType,
-                                    StatisticContainerType,
-                                    SessionManagerType,
-                                    TimerManagerType,
-                                    UserDataType>::setP;
+  //using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+  //                                  TimePolicyType,
+  //                                  ControlMessageType,
+  //                                  DataMessageType,
+  //                                  SessionMessageType,
+  //                                  ConfigurationType,
+  //                                  StreamControlType,
+  //                                  StreamNotificationType,
+  //                                  StreamStateType,
+  //                                  StatisticContainerType,
+  //                                  SessionManagerType,
+  //                                  TimerManagerType,
+  //                                  UserDataType>::setP;
 
   // override some baseclass methods
   virtual int put (ACE_Message_Block*,

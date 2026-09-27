@@ -66,6 +66,18 @@ class HTTP_Module_Streamer_T
   virtual void handleDataMessage (DataMessageType*&, // data message handle
                                   bool&);            // return value: pass message downstream ?
 
+ protected:
+  // convenient types
+  typedef Stream_TaskBase_T<ACE_SYNCH_USE,
+                            TimePolicyType,
+                            ConfigurationType,
+                            ControlMessageType,
+                            DataMessageType,
+                            SessionMessageType,
+                            enum Stream_ControlType,
+                            enum Stream_SessionMessageType,
+                            struct Stream_UserData> TASK_BASE_T;
+
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T (const HTTP_Module_Streamer_T&))

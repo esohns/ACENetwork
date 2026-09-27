@@ -50,7 +50,7 @@ WebSocket_Module_Parser_T<ACE_SYNCH_USE,
  , headFragment_ (NULL)
  , dataBytesToSkip_ (0)
  , dataSize_ (0)
- , isFirstFragment_ (true)
+ , handshakeComplete_ (false)
  , queue_ (0,    // max # slots --> unlimited
            NULL) // notification handle
 {
@@ -112,7 +112,7 @@ WebSocket_Module_Parser_T<ACE_SYNCH_USE,
 
     dataBytesToSkip_ = 0;
     dataSize_ = 0;
-    isFirstFragment_ = true;
+    handshakeComplete_ = false;
     queue_.activate ();
     queue_.flush (true); // flush any messages
   } // end IF
@@ -270,12 +270,36 @@ template <ACE_SYNCH_DECL,
           typename ParserDriverType>
 void
 WebSocket_Module_Parser_T<ACE_SYNCH_USE,
-                     TimePolicyType,
-                     ConfigurationType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType,
-                     ParserDriverType>::record (struct WebSocket_Record*& record_inout)
+                          TimePolicyType,
+                          ConfigurationType,
+                          ControlMessageType,
+                          DataMessageType,
+                          SessionMessageType,
+                          ParserDriverType>::record (struct HTTP_Record*& record_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("WebSocket_Module_Parser_T::record"));
+
+  // invoke base-class implementation
+  inherited::record (record_inout);
+
+  handshakeComplete_ = true;
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename ConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType,
+          typename ParserDriverType>
+void
+WebSocket_Module_Parser_T<ACE_SYNCH_USE,
+                          TimePolicyType,
+                          ConfigurationType,
+                          ControlMessageType,
+                          DataMessageType,
+                          SessionMessageType,
+                          ParserDriverType>::record (struct WebSocket_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("WebSocket_Module_Parser_T::record"));
 
@@ -578,7 +602,10 @@ WebSocket_Module_Parser_T<ACE_SYNCH_USE,
       break; // done
     } // end IF
 
-    dispatch (message_block_p);
+    if (likely (handshakeComplete_))
+      dispatch_2 (message_block_p);
+    else
+      inherited::dispatch (message_block_p);
     message_block_p = NULL;
   } while (true);
 
@@ -605,9 +632,9 @@ WebSocket_Module_Parser_T<ACE_SYNCH_USE,
                           ControlMessageType,
                           DataMessageType,
                           SessionMessageType,
-                          ParserDriverType>::dispatch (ACE_Message_Block* message_in)
+                          ParserDriverType>::dispatch_2 (ACE_Message_Block* message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("WebSocket_Module_Parser_T::dispatch"));
+  NETWORK_TRACE (ACE_TEXT ("WebSocket_Module_Parser_T::dispatch_2"));
 
   ACE_Message_Block* message_block_p = NULL, *message_block_2 = NULL;
   int result = -1;
@@ -645,7 +672,7 @@ WebSocket_Module_Parser_T<ACE_SYNCH_USE,
   //            message_block_p->total_length ()));
 
 parse:
-  if (!this->parse (message_block_p))
+  if (!inherited2::parse (message_block_p))
   { // *NOTE*: most probable reason: connection
     //         has been closed --> session end
     ACE_DEBUG ((LM_DEBUG,
@@ -657,9 +684,9 @@ parse:
   } // end IF
   // the message fragment has been parsed successfully
 
-  if (!this->hasFinished ())
+  if (!inherited2::hasFinished ())
   {
-    if (!this->switchBuffer (false)) // do not begin()(, will be done in parse())
+    if (!inherited2::switchBuffer (false)) // do not begin()(, will be done in parse())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to WebSocket_IParser::switchBuffer(), returning\n"),

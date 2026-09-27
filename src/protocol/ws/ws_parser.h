@@ -33,11 +33,11 @@
 #ifndef YY_YY_WS_PARSER_H_INCLUDED
 # define YY_YY_WS_PARSER_H_INCLUDED
 /* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 1
+#ifndef ZZDEBUG
+# define ZZDEBUG 1
 #endif
-#if YYDEBUG
-extern int yydebug;
+#if ZZDEBUG
+extern int zzdebug;
 #endif
 /* "%code requires" blocks.  */
 
@@ -78,12 +78,9 @@ typedef void* yyscan_t;
 //         header manually, as there is no way to add the export symbol to
 //         the declaration
 #define ZZDEBUG 1
-extern int zzdebug;
+//extern int zzdebug;
 #define ZZERROR_VERBOSE 1
 //#define YYLTYPE_IS_DECLARED 1
-
-#undef YYTOKENTYPE
-
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE

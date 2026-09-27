@@ -777,7 +777,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   //            message_block_p->total_length ()));
 
 parse:
-  if (!this->parse (message_block_p))
+  if (!inherited2::parse (message_block_p))
   { // *NOTE*: most probable reason: connection
     //         has been closed --> session end
     ACE_DEBUG ((LM_DEBUG,
@@ -789,9 +789,9 @@ parse:
   } // end IF
   // the message fragment has been parsed successfully
 
-  if (!this->hasFinished ())
+  if (!inherited2::hasFinished ())
   {
-    if (!this->switchBuffer (false)) // do not begin()(, will be done in parse())
+    if (!inherited2::switchBuffer (false)) // do not begin()(, will be done in parse())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to HTTP_IParser::switchBuffer(), returning\n"),

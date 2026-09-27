@@ -29,7 +29,7 @@
 #include "common_parser_defines.h"
 
 #include "http_iparser.h"
-#include "http_parser.h"
+//#include "http_parser.h"
 #include "http_scanner.h"
 
 #include "location.hh"

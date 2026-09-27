@@ -103,6 +103,8 @@ target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>)
 target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
+target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../http>)
 
 ########### next target ###############
 set (source_files
@@ -220,9 +222,8 @@ set_property (TARGET ${PROJECT_NAME}_Protocol_WebSocket PROPERTY FOLDER "protoco
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_WebSocket Common)
 add_dependencies (${PROJECT_NAME}_Protocol_WebSocket ACEStream)
+add_dependencies (${PROJECT_NAME}_Protocol_WebSocket ${PROJECT_NAME}_Protocol_HTTP)
 
-#set_target_properties (${PROJECT_NAME}_Protocol_WebSocket PROPERTIES DEFINE_SYMBOL HTTP_BUILD_DLL)
-#set_target_properties (${PROJECT_NAME}_Protocol_WebSocket PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_WebSocket PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
 endif (WIN32 AND MSVC)
@@ -238,6 +239,7 @@ if (WIN32)
 endif (WIN32)
 target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC ACEStream)
+target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
 
 # add PCH
 target_precompile_headers (${PROJECT_NAME}_Protocol_WebSocket

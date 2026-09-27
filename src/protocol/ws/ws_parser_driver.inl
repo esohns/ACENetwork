@@ -143,7 +143,7 @@ WebSocket_ParserDriver_T<ACE_SYNCH_USE,
                                scannerState_);
   //parser_.set_debug_level (trace_ ? 1 : 0); // binary (see bison manual)
 //  yysetdebug (trace_ ? 1 : 0);
-  yydebug = (COMMON_PARSER_DEFAULT_YACC_TRACE ? 1 : 0);
+  zzdebug = (COMMON_PARSER_DEFAULT_YACC_TRACE ? 1 : 0);
 }
 
 template <ACE_SYNCH_DECL,
@@ -220,7 +220,7 @@ WebSocket_ParserDriver_T<ACE_SYNCH_USE,
   } // end IF
 
   configuration_ =
-    &const_cast<struct WebSocket_ParserConfiguration&> (configuration_in);
+    &const_cast<struct Common_FlexBisonParserConfiguration&> (configuration_in);
   messageQueue_ = configuration_->messageQueue;
   ACE_ASSERT (messageQueue_);
 
@@ -229,7 +229,7 @@ WebSocket_ParserDriver_T<ACE_SYNCH_USE,
                                scannerState_);
   //parser_.set_debug_level (trace_ ? 1 : 0); // binary (see bison manual)
   //yysetdebug (trace_ ? 1 : 0);
-  yydebug = (configuration_->debugParser ? 1 : 0);
+  zzdebug = (configuration_->debugParser ? 1 : 0);
 #endif // _DEBUG
 
   isInitialized_ = true;

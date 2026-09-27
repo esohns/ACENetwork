@@ -42,8 +42,9 @@ WebSocket_Module_Streamer_T<ACE_SYNCH_USE,
                             ConfigurationType,
                             ControlMessageType,
                             DataMessageType,
-                            SessionMessageType>::WebSocket_Module_Streamer_T (typename inherited::ISTREAM_T* stream_in)
+                            SessionMessageType>::WebSocket_Module_Streamer_T (typename inherited::TASK_BASE_T::ISTREAM_T* stream_in)
  : inherited (stream_in)
+ , handshakeComplete_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("WebSocket_Module_Streamer_T::WebSocket_Module_Streamer_T"));
 
@@ -66,7 +67,12 @@ WebSocket_Module_Streamer_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("WebSocket_Module_Streamer_T::handleDataMessage"));
 
-  int result = -1;
+  if (unlikely (!handshakeComplete_))
+  { handshakeComplete_ = true;
+    inherited::handleDataMessage (message_inout,
+                                  passMessageDownstream_out);
+    return;
+  } // end IF
 
   // don't care (implies yes per default, if part of a stream)
   // *NOTE*: as this is an "upstream" module, the "wording" is wrong
@@ -85,32 +91,71 @@ WebSocket_Module_Streamer_T<ACE_SYNCH_USE,
 
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
+  int result;
   const typename DataMessageType::DATA_T& data_container_r =
     message_inout->getR ();
   typename DataMessageType::DATA_T::DATA_T& data_r =
     const_cast<typename DataMessageType::DATA_T::DATA_T&> (data_container_r.getR ());
-  std::string buffer;
-  std::ostringstream converter;
-  std::string content_buffer;
   // *TODO*: remove type inferences
   struct WebSocket_Record& record_r = static_cast<struct WebSocket_Record&> (data_r);
 
+  std::vector<uint8_t> buffer_a;
+  uint8_t value_i = 0x80; // set "FIN" bit
+  value_i |= record_r.opcode & 0x0F; // 4 bits
+  buffer_a.push_back (value_i);
+  
+  value_i = 0x80; // set "masked" bit
+  if (record_r.payloadSize <= 125)
+  {
+    value_i |= record_r.payloadSize & 0x7F; // 7 bits
+    buffer_a.push_back (value_i);
+  } // end IF
+  else if (record_r.payloadSize <= Common_Tools::max<ACE_UINT64> (2, false))
+  {
+    value_i |= 0x7E; // 126
+    buffer_a.push_back (value_i);
+    uint16_t payload_size_i = record_r.payloadSize;
+    buffer_a.push_back ((payload_size_i & 0xFF00) >> 8);
+    buffer_a.push_back (payload_size_i & 0x00FF);
+  } // end ELSE IF
+  else
+  {
+    value_i |= 0x7F; // 127
+    buffer_a.push_back (value_i);
+    buffer_a.push_back ((record_r.payloadSize & 0xFF00000000000000) >> 56);
+    buffer_a.push_back ((record_r.payloadSize & 0x00FF000000000000) >> 48);
+    buffer_a.push_back ((record_r.payloadSize & 0x0000FF0000000000) >> 40);
+    buffer_a.push_back ((record_r.payloadSize & 0x000000FF00000000) >> 32);
+    buffer_a.push_back ((record_r.payloadSize & 0x00000000FF000000) >> 24);
+    buffer_a.push_back ((record_r.payloadSize & 0x0000000000FF0000) >> 16);
+    buffer_a.push_back ((record_r.payloadSize & 0x000000000000FF00) >> 8);
+    buffer_a.push_back (record_r.payloadSize & 0x00000000000000FF);
+  } // end ELSE
+
+  static std::uniform_int_distribution<uint32_t> uniform_uint32_distribution;
+  uint32_t masking_key_i =
+    Common_Tools::getRandomNumber (uniform_uint32_distribution);
+  buffer_a.push_back ((masking_key_i & 0xFF000000) >> 24);
+  buffer_a.push_back ((masking_key_i & 0x00FF0000) >> 16);
+  buffer_a.push_back ((masking_key_i & 0x0000FF00) >> 8);
+  buffer_a.push_back (masking_key_i & 0x000000FF);
+
   // sanity check
-  if (message_inout->space () < buffer.size ())
+  if (unlikely (message_inout->space () < buffer_a.size ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: [%u]: not enough buffer space (was: %d/%d), aborting\n"),
+                ACE_TEXT ("%s: [%u]: not enough buffer space (was: %B/%B), aborting\n"),
                 inherited::mod_->name (),
                 message_inout->id (),
-                message_inout->space (), buffer.size ()));
+                message_inout->space (), buffer_a.size ()));
     passMessageDownstream_out = false;
     message_inout->release (); message_inout = NULL;
     return;
   } // end IF
 
-  result = message_inout->copy (buffer.c_str (),
-                                buffer.size ());
-  if (result == -1)
+  result = message_inout->copy (reinterpret_cast<char*> (buffer_a.data ()),
+                                buffer_a.size ());
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_Message_Block::copy(): \"%m\", aborting\n"),
@@ -121,24 +166,44 @@ WebSocket_Module_Streamer_T<ACE_SYNCH_USE,
   } // end IF
 
   // insert content ?
-  if (content_buffer.empty ())
+  std::vector<uint8_t> payload_buffer_a;
+  std::vector<uint8_t> masking_key_a;
+  masking_key_a.push_back ((masking_key_i & 0xFF000000) >> 24);
+  masking_key_a.push_back ((masking_key_i & 0x00FF0000) >> 16);
+  masking_key_a.push_back ((masking_key_i & 0x0000FF00) >> 8);
+  masking_key_a.push_back (masking_key_i & 0x000000FF);
+  uint8_t* data_p =
+    record_r.opcode == WebSocket_Codes::OPCODE_TEXT ? reinterpret_cast<uint8_t*> (record_r.payload.string)
+                                                    : record_r.payload.blob;
+  ACE_ASSERT (data_p);
+
+  if (record_r.payloadSize == 0)
     goto continue_;
 
+  // XOR the payload data with the masking key
+  for (ACE_UINT64 i = 0;
+       i < record_r.payloadSize;
+       ++i)
+  {
+    payload_buffer_a.push_back (*data_p ^ masking_key_a[i % 4]);
+    ++data_p;
+  } // end FOR
+
   // sanity check
-  if (message_inout->space () < content_buffer.size ())
+  if (message_inout->space () < payload_buffer_a.size ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: [%u]: not enough buffer space (was: %d/%d), aborting\n"),
+                ACE_TEXT ("%s: [%u]: not enough buffer space (was: %B/%B), aborting\n"),
                 inherited::mod_->name (),
                 message_inout->id (),
-                message_inout->space (), content_buffer.size ()));
+                message_inout->space (), payload_buffer_a.size ()));
     passMessageDownstream_out = false;
     message_inout->release (); message_inout = NULL;
     return;
   } // end IF
 
-  result = message_inout->copy (content_buffer.c_str (),
-                                content_buffer.size ());
+  result = message_inout->copy (reinterpret_cast<char*> (payload_buffer_a.data ()),
+                                payload_buffer_a.size ());
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,

@@ -41,7 +41,7 @@ class WebSocket_Codes
     OPCODE_INVALID
   };
 
-  enum StatusType
+  enum StatusType : uint16_t
   {
     STATUS_OK                    = 1000,
     STATUS_GOING_AWAY            = 1001,
