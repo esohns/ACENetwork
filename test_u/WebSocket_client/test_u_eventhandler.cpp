@@ -169,7 +169,27 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
     }
     case WebSocket_Codes::OPCODE_CLOSE:
     {
-      CBData_->message = ACE_TEXT_ALWAYS_CHAR ("Close");
+      size_t payload_length_i = message_in.length ();
+      if (payload_length_i > 0)
+      { ACE_ASSERT (payload_length_i >= 2);
+        uint16_t value_i = *reinterpret_cast<uint16_t*> (message_in.rd_ptr ());
+        record_r.status =
+          (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? static_cast<WebSocket_Status_t> (ACE_SWAP_WORD (value_i))
+                                                : static_cast<WebSocket_Status_t> (value_i);
+        const_cast<Test_U_Message&> (message_in).rd_ptr (2);
+        payload_length_i -= 2;
+        CBData_->message = WebSocket_Tools::StatusToString (record_r.status);
+      } // end IF
+      else
+        CBData_->message = ACE_TEXT_ALWAYS_CHAR ("Close");
+      if (payload_length_i > 0)
+      {
+        ACE_Message_Block* message_block_p =
+          &const_cast<Test_U_Message&> (message_in);
+        CBData_->message += ACE_TEXT_ALWAYS_CHAR (": ");
+        CBData_->message += Stream_Tools::toString (message_block_p);
+      } // end IF
+
       guint event_source_id_i = g_idle_add (idle_message_received_cb,
                                             CBData_);
       if (event_source_id_i)
@@ -179,7 +199,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
     }
     case WebSocket_Codes::OPCODE_PONG:
     {
-      CBData_->message = ACE_TEXT_ALWAYS_CHAR ("Pong");
+      ACE_Message_Block* message_block_p =
+        &const_cast<Test_U_Message&> (message_in);
+      CBData_->message = Stream_Tools::toString (message_block_p);
       guint event_source_id_i = g_idle_add (idle_message_received_cb,
                                             CBData_);
       if (event_source_id_i)
