@@ -85,6 +85,13 @@ class WebSocket_Client_ConnectionConfiguration
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct WebSocket_ConnectionState,
                           WebSocket_Statistic_t> WebSocket_Client_IConnection_t;
+typedef Net_IStreamConnection_T<ACE_INET_Addr,
+                                WebSocket_Client_ConnectionConfiguration,
+                                struct WebSocket_ConnectionState,
+                                WebSocket_Statistic_t,
+                                Net_TCPSocketConfiguration_t,
+                                WebSocket_Client_ConnectionStream,
+                                enum Stream_StateMachine_ControlState> WebSocket_Client_IStreamConnection_t;
 
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Net_TCPSocketHandler_t,

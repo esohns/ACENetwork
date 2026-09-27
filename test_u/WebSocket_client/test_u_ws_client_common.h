@@ -56,9 +56,9 @@
 #include "stream_messageallocatorheap_base.h"
 #include "stream_session_data.h"
 
-#include "stream_html_common.h"
+//#include "stream_html_common.h"
 
-#include "stream_module_xmlparser.h"
+//#include "stream_module_xmlparser.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -154,16 +154,18 @@ struct WebSocket_Client_ModuleHandlerConfiguration
    , connectionConfigurations (NULL)
    //, mode (STREAM_MODULE_XML_PARSER_MODE_DOM)
    , subscriber (NULL)
+   , URL ()
    //, xPathQueryString ()
    //, xPathNameSpaces ()
   {
     passive = false;
   }
 
-  WebSocket_Client_IConnection_t*    connection; // UDP target/net IO module
+  WebSocket_Client_IConnection_t*    connection;
   Net_ConnectionConfigurations_t*    connectionConfigurations;
   //enum Stream_Module_XML_Parser_Mode mode;
   WebSocket_Client_ISessionNotify_t* subscriber;
+  std::string                        URL;
   //std::string                        xPathQueryString;
   //Stream_HTML_XPathNameSpaces_t      xPathNameSpaces;
 };
@@ -213,7 +215,6 @@ struct WebSocket_Client_Configuration
    , parserConfiguration ()
    //, parserContext()
    , streamConfiguration ()
-   , handle (ACE_INVALID_HANDLE)
   {
     //parserConfiguration.headerOnly = true; // WebSocket is header-only HTTP
   }
@@ -228,9 +229,6 @@ struct WebSocket_Client_Configuration
   //struct Stream_Module_XMLParser_SAXParserContextBase parserContext;
   // **************************** stream data **********************************
   WebSocket_Client_StreamConfiguration_t             streamConfiguration;
-  // *************************** listener data *********************************
-
-  ACE_HANDLE                                         handle;
 };
 
 //////////////////////////////////////////
@@ -260,13 +258,17 @@ struct WebSocket_Client_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE
-   , eventHandler (NULL)
+   , handle (ACE_INVALID_HANDLE)
+   , message ()
    , progressData ()
+   , URL ()
   {}
 
   struct WebSocket_Client_Configuration*  configuration;
-  Test_U_EventHandler*                    eventHandler;
+  ACE_HANDLE                              handle;
+  std::string                             message;
   struct WebSocket_Client_UI_ProgressData progressData;
+  std::string                             URL;
 };
 
 struct WebSocket_Client_ThreadData

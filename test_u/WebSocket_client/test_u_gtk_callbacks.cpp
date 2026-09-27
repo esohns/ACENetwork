@@ -49,6 +49,7 @@
 #include "net_client_common_tools.h"
 
 #include "http_defines.h"
+#include "http_tools.h"
 
 #include "ws_codes.h"
 #include "ws_defines.h"
@@ -187,7 +188,7 @@ stop_progress_reporting (gpointer userData_in)
 
   // sanity check(s)
   struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
+    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   Common_UI_GTK_BuildersIterator_t iterator =
@@ -198,6 +199,7 @@ stop_progress_reporting (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
 
+  gtk_progress_bar_set_show_text (progress_bar_p, FALSE);
   gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), FALSE);
 
@@ -224,10 +226,11 @@ start_progress_reporting (gpointer userData_in)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkProgressBar* progress_bar_p =
-      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
+    GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), TRUE);
+  gtk_progress_bar_set_show_text (progress_bar_p, TRUE);
 
   ACE_ASSERT (!data_p->progressData.eventSourceId);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
@@ -236,11 +239,11 @@ start_progress_reporting (gpointer userData_in)
       //                 idle_update_progress_cb,
       //                 &data_p->progressData,
       //                 NULL);
-        g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                          // _LOW doesn't work (on Win32)
-                            TEST_U_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
-                            idle_update_progress_cb,
-                            &data_p->progressData,
-                            NULL);
+      g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                          // _LOW doesn't work (on Win32)
+                          TEST_U_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
+                          idle_update_progress_cb,
+                          &data_p->progressData,
+                          NULL);
     if (data_p->progressData.eventSourceId > 0)
       data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
     else
@@ -259,16 +262,13 @@ idle_initialize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
-  struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-
   // sanity check(s)
+  struct WebSocket_Client_UI_CBData* data_p =
+    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
-
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // step1: initialize dialog window(s)
@@ -325,31 +325,25 @@ idle_initialize_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
-                              true);
+                              TRUE);
   // *NOTE*: cell_renderer_p does not need to be g_object_unref()ed because it
   //         is GInitiallyUnowned and the floating reference has been
   //         passed to combo_box_p by the gtk_cell_layout_pack_start() call
   gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo_box_p), cell_renderer_p,
                                   //"cell-background", 0,
                                   //"text", 1,
-                                  "text", 0,
+                                  ACE_TEXT_ALWAYS_CHAR ("text"), 0,
                                   NULL);
 
   GtkEntry* entry_p =
       GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_SERVER_ADDRESS_NAME)));
+                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_URL_NAME)));
   ACE_ASSERT (entry_p);
-  //gtk_entry_set_text (entry_p,
-  //                    Net_Common_Tools::IPAddressToString (data_p->gatewayAddress, true, false).c_str ());
-  spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME)));
-  ACE_ASSERT (spin_button_p);
+  gtk_entry_set_text (entry_p,
+                      data_p->URL.c_str ());
   Net_ConnectionConfigurationsIterator_t iterator_2 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.get_port_number ()));
 
   GtkCheckButton* check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -357,32 +351,6 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
                                 (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR));
-
-  entry_p =
-      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_EXTERNAL_ADDRESS_NAME)));
-  ACE_ASSERT (entry_p);
-  //gtk_entry_set_text (entry_p,
-  //                    Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
-  spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_EXTERNAL_PORT_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> (HTTP_DEFAULT_SERVER_PORT));
-
-  entry_p =
-      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_INTERNAL_ADDRESS_NAME)));
-  ACE_ASSERT (entry_p);
-  //gtk_entry_set_text (entry_p,
-  //                    Net_Common_Tools::IPAddressToString (data_p->interfaceAddress, true, false).c_str ());
-  spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_INTERNAL_PORT_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> (HTTP_DEFAULT_SERVER_PORT));
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -546,7 +514,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                     ACE_TEXT ("failed to gtk_tree_model_get_iter_first(): \"%m\", aborting\n")));
         return G_SOURCE_REMOVE;
       } // end IF
-#if GTK_CHECK_VERSION(2,30,0)
+#if GTK_CHECK_VERSION (2,30,0)
       GValue value = G_VALUE_INIT;
 #else
       GValue value;
@@ -592,171 +560,95 @@ idle_initialize_UI_cb (gpointer userData_in)
   else
     gtk_widget_set_sensitive (GTK_WIDGET (combo_box_p), FALSE);
 
-  // step7: start listening
-  GtkToggleAction* toggle_action_p =
-    GTK_TOGGLE_ACTION (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME)));
-  ACE_ASSERT (toggle_action_p);
-  gtk_action_activate (GTK_ACTION (toggle_action_p));
-
   return G_SOURCE_REMOVE;
 }
 
 gboolean
-idle_discovery_complete_cb (gpointer userData_in)
+idle_start_session_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_discovery_complete_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_start_session_cb"));
 
   // sanity check(s)
   struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
+    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   GtkAction* action_p =
     GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_DISCOVERY_NAME)));
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_CONNECT_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, FALSE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PING_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_CLOSE_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+
+  start_progress_reporting (userData_in);
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_message_received_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_message_received_cb"));
+
+  // sanity check(s)
+  struct WebSocket_Client_UI_CBData* data_p =
+    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  GtkStatusbar* statusbar_p =
+    GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
+                                           ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_STATUSBAR_NAME)));
+  ACE_ASSERT (statusbar_p);
+  gtk_statusbar_push (statusbar_p,
+                      0,
+                      data_p->message.c_str ());
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+idle_end_session_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_cb"));
+
+  // sanity check(s)
+  WebSocket_Client_UI_CBData* data_p =
+    static_cast<WebSocket_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+
+  GtkAction* action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_CONNECT_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PING_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, FALSE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_CLOSE_NAME)));
   ACE_ASSERT (action_p);
   gtk_action_set_sensitive (action_p, FALSE);
 
-  return G_SOURCE_REMOVE;
-}
-
-gboolean
-idle_service_description_complete_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_service_description_complete_cb"));
-
-  // sanity check(s)
-  struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  GtkAction* action_p =
-    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_EXTERNAL_ADDRESS_NAME)));
-  ACE_ASSERT (action_p);
-  gtk_action_set_sensitive (action_p, TRUE);
-  action_p =
-    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_MAP_NAME)));
-  ACE_ASSERT (action_p);
-  gtk_action_set_sensitive (action_p, TRUE);
-  action_p =
-    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PRESENTATION_URL_NAME)));
-  ACE_ASSERT (action_p);
-  gtk_action_set_sensitive (action_p, TRUE);
-
   stop_progress_reporting (userData_in);
-
-  return G_SOURCE_REMOVE;
-}
-
-gboolean
-idle_end_session_success_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_success_cb"));
-
-  // sanity check(s)
-  WebSocket_Client_UI_CBData* data_p =
-      static_cast<WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  ACE_ASSERT (data_p->eventHandler);
-
-  stop_progress_reporting (userData_in);
-
-  //switch (data_p->eventHandler->state_)
-  //{
-  //  case EVENT_HANDLER_STATE_EXTERNAL_ADDRESS_CONTROL:
-  //  {
-  //    GtkStatusbar* statusbar_p =
-  //      GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
-  //                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_STATUSBAR_NAME)));
-  //    ACE_ASSERT (statusbar_p);
-  //    gtk_statusbar_push (statusbar_p, 0,
-  //                        Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
-
-  //    GtkDialog* dialog_p =
-  //      GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-  //                                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
-  //    ACE_ASSERT (dialog_p);
-  //    GtkWidget* widget_p =
-  //      gtk_message_dialog_new (GTK_WINDOW (dialog_p),
-  //                              GTK_DIALOG_DESTROY_WITH_PARENT,
-  //                              GTK_MESSAGE_INFO,
-  //                              GTK_BUTTONS_CLOSE,
-  //                              ACE_TEXT_ALWAYS_CHAR ("success: %s"),
-  //                              Net_Common_Tools::IPAddressToString (data_p->externalAddress, true, false).c_str ());
-  //    gint result = gtk_dialog_run (GTK_DIALOG (widget_p));
-  //    ACE_UNUSED_ARG (result);
-  //    gtk_widget_destroy (widget_p); widget_p = NULL;
-
-  //    break;
-  //  }
-  //  case EVENT_HANDLER_STATE_MAP_CONTROL:
-  //  {
-  //    GtkDialog* dialog_p =
-  //      GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-  //                                          ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
-  //    ACE_ASSERT (dialog_p);
-  //    GtkWidget* widget_p =
-  //      gtk_message_dialog_new (GTK_WINDOW (dialog_p),
-  //                              GTK_DIALOG_DESTROY_WITH_PARENT,
-  //                              GTK_MESSAGE_INFO,
-  //                              GTK_BUTTONS_CLOSE,
-  //                              ACE_TEXT_ALWAYS_CHAR ("success"));
-  //    gtk_dialog_run (GTK_DIALOG (widget_p));
-  //    gtk_widget_destroy (widget_p); widget_p = NULL;
-
-  //    break;
-  //  }
-  //  default:
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("invalid/unknown state (was: %d), continuing\n"),
-  //                data_p->eventHandler->state_));
-  //    break;
-  //  }
-  //} // end SWITCH
-
-  return G_SOURCE_REMOVE;
-}
-
-gboolean
-idle_end_session_error_cb (gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_error_cb"));
-
-  // sanity check(s)
-  WebSocket_Client_UI_CBData* data_p =
-      static_cast<WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  ACE_ASSERT (data_p->eventHandler);
-
-  stop_progress_reporting (userData_in);
-
-  GtkDialog* dialog_p = 
-    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
-  ACE_ASSERT (dialog_p);
-  GtkWidget* widget_p =
-    gtk_message_dialog_new (GTK_WINDOW (dialog_p),
-                            GTK_DIALOG_DESTROY_WITH_PARENT,
-                            GTK_MESSAGE_ERROR,
-                            GTK_BUTTONS_CLOSE,
-                            ACE_TEXT_ALWAYS_CHAR ("action failed"));
-  gtk_dialog_run (GTK_DIALOG (widget_p));
-  gtk_widget_destroy (widget_p); widget_p = NULL;
 
   return G_SOURCE_REMOVE;
 }
@@ -769,7 +661,7 @@ idle_update_progress_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (userData_in);
   struct WebSocket_Client_UI_ProgressData* data_p =
-      static_cast<struct WebSocket_Client_UI_ProgressData*> (userData_in);
+    static_cast<struct WebSocket_Client_UI_ProgressData*> (userData_in);
   ACE_ASSERT (data_p->state);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -800,14 +692,16 @@ idle_update_progress_cb (gpointer userData_in)
       speed /= 1024.0f;
       magnitude_string = ACE_TEXT_ALWAYS_CHAR ("mbyte(s)/s");
     } // end IF
-    result = ACE_OS::sprintf (buffer_a, ACE_TEXT ("%.2f %s"),
-                              speed, magnitude_string.c_str ());
+    result = ACE_OS::sprintf (buffer_a,
+                              ACE_TEXT_ALWAYS_CHAR ("%.2f %s"),
+                              speed,
+                              magnitude_string.c_str ());
     if (result < 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", continuing\n")));
   } // end IF
   gtk_progress_bar_set_text (progress_bar_p,
-                             ACE_TEXT_ALWAYS_CHAR (buffer_a));
+                             buffer_a);
   gtk_progress_bar_pulse (progress_bar_p);
 
   // --> reschedule
@@ -822,29 +716,28 @@ idle_finalize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
   // sanity check(s)
-  ACE_ASSERT (userData_in);
   struct WebSocket_Client_UI_CBData* data_p =
     static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->configuration);
-
+  ACE_ASSERT (data_p);
   WebSocket_Client_ConnectionManager_t* connection_manager_p =
     WEBSOCKET_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
+
   WebSocket_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-  if (data_p->configuration->handle != ACE_INVALID_HANDLE)
+  if (data_p->handle != ACE_INVALID_HANDLE)
   {
     iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
 #else
-      connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
 #endif // ACE_WIN32 || ACE_WIN64
     if (iconnection_p)
     {
       iconnection_p->abort ();
       iconnection_p->decrease (); iconnection_p = NULL;
     } // end ELSE
-    data_p->configuration->handle = ACE_INVALID_HANDLE;
+    data_p->handle = ACE_INVALID_HANDLE;
   } // end IF
 
   // leave GTK
@@ -997,12 +890,12 @@ idle_update_log_display_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 
   // sanity check(s)
-  ACE_ASSERT (userData_in);
   WebSocket_Client_UI_CBData* data_p =
-      static_cast<WebSocket_Client_UI_CBData*> (userData_in);
+    static_cast<WebSocket_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
-      data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   GtkTextView* view_p =
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
@@ -1082,10 +975,10 @@ extern "C"
 {
 #endif /* __cplusplus */
 void
-action_discovery_activate_cb (GtkAction* action_in,
-                              gpointer userData_in)
+action_connect_activate_cb (GtkAction* action_in,
+                            gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::action_discovery_activate_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::action_connect_activate_cb"));
 
   ACE_UNUSED_ARG (action_in);
 
@@ -1101,6 +994,106 @@ action_discovery_activate_cb (GtkAction* action_in,
   Net_ConnectionConfigurationsIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+  WebSocket_Client_StreamConfiguration_t::ITERATOR_T iterator_3 =
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
+  GtkEntry* entry_p =
+    GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
+                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_URL_NAME)));
+  ACE_ASSERT (entry_p);
+  const gchar* text_p = gtk_entry_get_text (entry_p);
+  ACE_ASSERT (text_p);
+  data_p->URL = text_p;
+
+  (*iterator_3).second.second->parserConfiguration->messageQueue = NULL;
+  (*iterator_3).second.second->URL = data_p->URL;
+
+  WebSocket_Client_Connector_t connector;
+#if defined (SSL_SUPPORT)
+  WebSocket_Client_SSLConnector_t ssl_connector;
+#endif // SSL_SUPPORT
+  WebSocket_Client_AsynchConnector_t asynch_connector;
+  struct Net_UserData user_data_s;
+  ACE_INET_Addr address;
+  std::string hostname_string, URI_string, key_string;
+  bool use_SSL = false;
+  if (!HTTP_Tools::parseURL (data_p->URL,
+                             address,
+                             hostname_string,
+                             URI_string,
+                             use_SSL))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
+                ACE_TEXT (data_p->URL.c_str ())));
+    return;
+  } // end IF
+
+  std::string::size_type position =
+    hostname_string.find_last_of (':', std::string::npos);
+  if (position == std::string::npos)
+    address.set_port_number (use_SSL ? HTTPS_DEFAULT_SERVER_PORT : HTTP_DEFAULT_SERVER_PORT,
+                             1);
+
+  static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.address =
+    address;
+  static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.hostname =
+    hostname_string;
+
+  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+  {
+#if defined (SSL_SUPPORT)
+    if (use_SSL)
+      data_p->handle = Net_Client_Common_Tools::connect (ssl_connector,
+                                                         *static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second),
+                                                         user_data_s,
+                                                         static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.address,
+                                                         false, // wait ?
+                                                         true,  // peer address ?
+                                                         0);    // #retries
+    else
+#endif // SSL_SUPPORT
+      data_p->handle = Net_Client_Common_Tools::connect (connector,
+                                                         *static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second),
+                                                         user_data_s,
+                                                         static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.address,
+                                                         false, // wait ?
+                                                         true,  // peer address ?
+                                                         0);    // #retries
+  } // end IF
+  else
+  {
+#if defined (SSL_SUPPORT)
+    // *TODO*: add SSL support to the proactor framework
+    ACE_ASSERT (!use_SSL);
+#endif // SSL_SUPPORT
+    data_p->handle =
+      Net_Client_Common_Tools::connect (asynch_connector,
+                                        *static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second),
+                                        user_data_s,
+                                        static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.address,
+                                        false, // wait ?
+                                        true,  // peer address ?
+                                        0);    // #retries
+  } // end ELSE
+  if (data_p->handle == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to %s, returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+    return;
+  } // end IF
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("0x%@: opened socket to %s\n"),
+//              data_p->handle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%d: opened socket to %s\n"),
+//              data_p->handle,
+//              ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<WebSocket_Client_ConnectionConfiguration*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+//#endif // ACE_WIN32 || ACE_WIN64
 
   struct WebSocket_Client_MessageData* record_p = NULL;
   ACE_NEW_NORETURN (record_p,
@@ -1111,25 +1104,22 @@ action_discovery_activate_cb (GtkAction* action_in,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     return;
   } // end IF
-  record_p->method = static_cast<HTTP_Method_t> (HTTP_Codes::HTTP_METHOD_M_SEARCH);
-  //record_p->URI = ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_REQUEST_URI_STRING);
+  record_p->method = static_cast<HTTP_Method_t> (HTTP_Codes::HTTP_METHOD_GET);
+  record_p->URI = URI_string;
   record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
-  //std::string UUID_string = Net_Common_Tools::makeUUID ();
-  //record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_S_HEADER_STRING),
-  //                                          UUID_string));
   record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
-                                            Net_Common_Tools::IPAddressToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress, false, false)));
-  //std::string temp_string = "\"";
-  //temp_string += ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_MAN_SSDP_DISCOVER_STRING);
-  //temp_string += "\"";
-  //record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_MAN_HEADER_STRING),
-  //                                          temp_string));
-  //record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_SERVICE_TYPE_HEADER_STRING),
-  //                                          ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_ST_SSDP_ALL_STRING)));
-  //std::ostringstream converter;
-  //converter << SSDP_DISCOVER_MX_DEFAULT_DELAY_S;
-  //record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (SSDP_DISCOVER_MX_HEADER_STRING),
-  //                                          converter.str ()));
+                                            hostname_string));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_UPGRADE_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR ("websocket")));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONNECTION_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR ("Upgrade")));
+  key_string = WebSocket_Tools::generateSecHeaderKey ();
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (WEBSOCKET_PRT_HEADER_SEC_WEBSOCKET_KEY_STRING),
+                                            key_string));
+  //record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ORIGIN_STRING),
+  //                                          ACE_TEXT_ALWAYS_CHAR ("")));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (WEBSOCKET_PRT_HEADER_SEC_WEBSOCKET_VERSION_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR ("13")));
 
   WebSocket_Client_MessageData_t* message_data_container_p = NULL;
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
@@ -1171,156 +1161,194 @@ allocate:
 
   WebSocket_Client_ConnectionManager_t* connection_manager_p =
     WEBSOCKET_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT(connection_manager_p);
+  ACE_ASSERT (connection_manager_p);
   WebSocket_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+    connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
 #else
-    connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+    connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iconnection_p);
-  //WebSocket_Client_IStreamConnection_t* istream_connection_p =
-  //  dynamic_cast<WebSocket_Client_IStreamConnection_t*> (iconnection_p);
-  //ACE_ASSERT (istream_connection_p);
-  //istream_connection_p->send (message_block_p);
+  WebSocket_Client_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<WebSocket_Client_IStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
+  istream_connection_p->send (message_block_p);
   iconnection_p->decrease (); iconnection_p = NULL;
-} // action_discovery_activate_cb
+} // action_connect_activate_cb
 
 void
-action_external_address_activate_cb (GtkAction* action_in,
-                                     gpointer userData_in)
+action_ping_activate_cb (GtkAction* action_in,
+                         gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::action_external_address_activate_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::action_ping_activate_cb"));
 
-  // sanity check(s)
-  ACE_ASSERT (userData_in);
-  struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-  //ACE_ASSERT (data_p->UIState);
-  //Common_UI_GTK_BuildersIterator_t iterator =
-  //  data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  //ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  ACE_ASSERT (data_p->configuration);
-  ACE_ASSERT (data_p->eventHandler);
-
-  start_progress_reporting (userData_in);
-
-  //data_p->eventHandler->state_ = EVENT_HANDLER_STATE_EXTERNAL_ADDRESS_CONTROL;
-
-  //ACE_ASSERT (data_p->control);
-  //data_p->control->getP ()->externalAddress ();
-} // action_external_address_activate_cb
-
-void
-action_map_activate_cb (GtkAction* action_in,
-                        gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::action_map_activate_cb"));
-
-  // sanity check(s)
-  ACE_ASSERT (userData_in);
-  struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  ACE_ASSERT (data_p->eventHandler);
-
-  start_progress_reporting (userData_in);
-
-  // retrieve data
-  GtkSpinButton* spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_EXTERNAL_PORT_NAME)));
-  ACE_ASSERT (spin_button_p);
-  GtkEntry* entry_p =
-      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_EXTERNAL_ADDRESS_NAME)));
-  ACE_ASSERT (entry_p);
-  std::string address = gtk_entry_get_text (entry_p);
-  address += ':';
-  std::ostringstream converter;
-  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-  address += converter.str ();
-  ACE_INET_Addr external_address;
-  int result = external_address.set (address.c_str ());
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-                ACE_TEXT (address.c_str ())));
-    return;
-  } // end IF
-
-  spin_button_p =
-      GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_INTERNAL_PORT_NAME)));
-  ACE_ASSERT (spin_button_p);
-  entry_p =
-      GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ENTRY_INTERNAL_ADDRESS_NAME)));
-    ACE_ASSERT (entry_p);
-  address = gtk_entry_get_text (entry_p);
-  address += ':';
-  converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-  converter.clear ();
-  converter << gtk_spin_button_get_value_as_int (spin_button_p);
-  address += converter.str ();
-  ACE_INET_Addr internal_address;
-  result = internal_address.set (address.c_str ());
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-                ACE_TEXT (address.c_str ())));
-    return;
-  } // end IF
-
-  //data_p->eventHandler->state_ = EVENT_HANDLER_STATE_MAP_CONTROL;
-
-  //ACE_ASSERT (data_p->control);
-  //data_p->control->getP ()->map (external_address,
-  //                               internal_address);
-} // action_map_activate_cb
-
-void
-action_presentation_url_activate_cb (GtkAction* action_in,
-                                     gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::action_presentation_url_activate_cb"));
+  ACE_UNUSED_ARG (action_in);
 
   // sanity check(s)
   ACE_ASSERT (userData_in);
   struct WebSocket_Client_UI_CBData* data_p =
     static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-  //ACE_ASSERT (data_p->control);
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
-  GtkStatusbar* statusbar_p =
-    GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
-                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_STATUSBAR_NAME)));
-  ACE_ASSERT (statusbar_p);
-  //gtk_statusbar_push (statusbar_p, 0,
-  //                    data_p->control->getP ()->presentationURL ().c_str ());
+  struct WebSocket_Client_MessageData* record_p = NULL;
+  ACE_NEW_NORETURN (record_p,
+                    struct WebSocket_Client_MessageData ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    return;
+  } // end IF
+  record_p->opcode = WebSocket_Codes::OPCODE_PING;
 
-  GtkDialog* dialog_p =
-    GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_MAIN_NAME)));
-  ACE_ASSERT (dialog_p);
-  //GtkWidget* widget_p =
-  //  gtk_message_dialog_new (GTK_WINDOW (dialog_p),
-  //                          GTK_DIALOG_DESTROY_WITH_PARENT,
-  //                          GTK_MESSAGE_INFO,
-  //                          GTK_BUTTONS_CLOSE,
-  //                          ACE_TEXT_ALWAYS_CHAR ("Success: \"%s\""),
-  //                          data_p->control->getP ()->presentationURL ().c_str ());
-  //gtk_dialog_run (GTK_DIALOG (widget_p));
-  //gtk_widget_destroy (widget_p); widget_p = NULL;
-} // action_presentation_url_activate_cb
+  WebSocket_Client_MessageData_t* message_data_container_p = NULL;
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
+  ACE_NEW_NORETURN (message_data_container_p,
+                    WebSocket_Client_MessageData_t (record_p,
+                                                    true)); // delete record in dtor ?
+  if (!message_data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    delete record_p;
+    return;
+  } // end IF
+
+  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
+  ACE_UINT32 pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize;// +
+//    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+  Test_U_Message* message_p = NULL;
+allocate:
+  message_p =
+    static_cast<Test_U_Message*> ((*iterator_2).second->messageAllocator->malloc (pdu_size_i));
+  // keep retrying ?
+  if (!message_p && !(*iterator_2).second->messageAllocator->block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
+    message_data_container_p->decrease (); message_data_container_p = NULL;
+    return;
+  } // end IF
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
+  message_p->initialize (message_data_container_p,
+                         1,//message_p->sessionId (),
+                         NULL);
+  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
+  ACE_Message_Block* message_block_p = message_p;
+
+  WebSocket_Client_ConnectionManager_t* connection_manager_p =
+    WEBSOCKET_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  WebSocket_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+    connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (iconnection_p);
+  WebSocket_Client_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<WebSocket_Client_IStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
+  istream_connection_p->send (message_block_p);
+  iconnection_p->decrease (); iconnection_p = NULL;
+} // action_ping_activate_cb
+
+void
+action_close_activate_cb (GtkAction* action_in,
+                          gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::action_close_activate_cb"));
+
+  ACE_UNUSED_ARG (action_in);
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct WebSocket_Client_UI_CBData* data_p =
+    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+
+  struct WebSocket_Client_MessageData* record_p = NULL;
+  ACE_NEW_NORETURN (record_p,
+                    struct WebSocket_Client_MessageData ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    return;
+  } // end IF
+  record_p->opcode = WebSocket_Codes::OPCODE_CLOSE;
+
+  WebSocket_Client_MessageData_t* message_data_container_p = NULL;
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
+  ACE_NEW_NORETURN (message_data_container_p,
+                    WebSocket_Client_MessageData_t (record_p,
+                                                    true)); // delete record in dtor ?
+  if (!message_data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    delete record_p;
+    return;
+  } // end IF
+
+  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
+  ACE_UINT32 pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize;// +
+//    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+  Test_U_Message* message_p = NULL;
+allocate:
+  message_p =
+    static_cast<Test_U_Message*> ((*iterator_2).second->messageAllocator->malloc (pdu_size_i));
+  // keep retrying ?
+  if (!message_p && !(*iterator_2).second->messageAllocator->block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
+    message_data_container_p->decrease (); message_data_container_p = NULL;
+    return;
+  } // end IF
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
+  message_p->initialize (message_data_container_p,
+                         1,//message_p->sessionId (),
+                         NULL);
+  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
+  ACE_Message_Block* message_block_p = message_p;
+
+  WebSocket_Client_ConnectionManager_t* connection_manager_p =
+    WEBSOCKET_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  WebSocket_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+    connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (iconnection_p);
+  WebSocket_Client_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<WebSocket_Client_IStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
+  istream_connection_p->send (message_block_p);
+  iconnection_p->decrease (); iconnection_p = NULL;
+} // action_close_activate_cb
 
 void
 combobox_interface_changed_cb (GtkComboBox* comboBox_in,
@@ -1338,7 +1366,8 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
   GtkTreeIter tree_iterator;
-  if (!gtk_combo_box_get_active_iter (comboBox_in, &tree_iterator))
+  if (!gtk_combo_box_get_active_iter (comboBox_in,
+                                      &tree_iterator))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_combo_box_get_active_iter(): \"%m\", returning\n")));
@@ -1355,201 +1384,18 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                             0, &value);
 #endif
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-//  data_p->configuration->listenerConfiguration.interfaceIdentifier =
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    Common_Tools::StringToGUID (g_value_get_string (&value));
-//#else
-//      g_value_get_string (&value);
-//#endif
-  NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier =
+  NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
     Common_OS_Tools::StringToGUID (g_value_get_string (&value));
 #else
     g_value_get_string (&value);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
     g_value_get_string (&value);
 #endif // ACE_WIN32 || ACE_WIN64
   g_value_unset (&value);
 }
-
-//void
-//checkbutton_broadcast_toggled_cb (GtkCheckButton* checkButton_in,
-//                                  gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::checkbutton_broadcast_toggled_cb"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (userData_in);
-//  struct WebSocket_Client_UI_CBData* data_p =
-//      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p->configuration);
-//
-//  data_p->configuration->protocolConfiguration.requestBroadcastReplies =
-//    gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (checkButton_in));
-//}
-//
-//void
-//checkbutton_request_toggled_cb (GtkCheckButton* checkButton_in,
-//                                gpointer userData_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("::checkbutton_request_toggled_cb"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (userData_in);
-//  struct WebSocket_Client_UI_CBData* data_p =
-//      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-//  ACE_ASSERT (data_p->configuration);
-//
-//  data_p->configuration->protocolConfiguration.sendRequestOnOffer =
-//      gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (checkButton_in));
-//}
-
-void
-toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
-                                gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::toggleaction_listen_toggled_cb"));
-
-  if (un_toggling_listen)
-  {
-    un_toggling_listen = false;
-    return;
-  } // end IF
-
-  // sanity check(s)
-  struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-  Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
-  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
-
-  //GtkToggleButton* toggle_button_p =
-  //  GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-  //                                             ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEBUTTON_LISTEN_NAME)));
-  //ACE_ASSERT (toggle_button_p);
-  bool start_listening = gtk_toggle_action_get_active (toggleAction_in);
-  //gtk_button_set_label (GTK_BUTTON (toggle_button_p),
-  //                      (start_listening ? ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEBUTTON_LABEL_LISTENING_STRING)
-  //                                       : ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_TOGGLEBUTTON_LABEL_LISTEN_STRING)));
-
-//  GtkImage* image_p =
-//    GTK_IMAGE (gtk_builder_get_object ((*iterator).second.second,
-//                                       (start_listening ? ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_IMAGE_CONNECT_NAME)
-//                                                        : ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_IMAGE_DISCONNECT_NAME))));
-//  ACE_ASSERT (image_p);
-//  gtk_button_set_image (GTK_BUTTON (toggle_button_p), GTK_WIDGET (image_p));
-  gtk_action_set_stock_id (GTK_ACTION (toggleAction_in),
-                           (start_listening ? GTK_STOCK_DISCONNECT
-                                            : GTK_STOCK_CONNECT));
-
-  bool failed = true;
-  WebSocket_Client_ConnectionManager_t* connection_manager_p =
-    WEBSOCKET_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
-  if (start_listening)
-  {
-    WebSocket_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-    if (data_p->configuration->handle != ACE_INVALID_HANDLE)
-    {
-      iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
-#else
-        connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
-#endif // ACE_WIN32 || ACE_WIN64
-      if (iconnection_p)
-      {
-        iconnection_p->abort ();
-        iconnection_p->decrease (); iconnection_p = NULL;
-      } // end ELSE
-      data_p->configuration->handle = ACE_INVALID_HANDLE;
-    } // end IF
-
-    Net_ConnectionConfigurationsIterator_t iterator_3;
-
-    failed = false;
-
-continue_2:
-    if (unlikely (failed))
-      goto error;
-
-    // step3: start progress reporting
-    start_progress_reporting (userData_in);
-  } // end IF
-  else
-  {
-    WebSocket_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p = NULL;
-    if (data_p->configuration->handle != ACE_INVALID_HANDLE)
-    {
-      iconnection_p =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
-#else
-        connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
-#endif
-      if (iconnection_p)
-      {
-        iconnection_p->abort ();
-        iconnection_p->decrease (); iconnection_p = NULL;
-      } // end ELSE
-      data_p->configuration->handle = ACE_INVALID_HANDLE;
-    } // end IF
-
-    // stop progress reporting
-    if (data_p->progressData.eventSourceId)
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
-      if (!g_source_remove (data_p->progressData.eventSourceId))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                    data_p->progressData.eventSourceId));
-      data_p->UIState->eventSourceIds.erase (data_p->progressData.eventSourceId);
-      data_p->progressData.eventSourceId = 0;
-    } // end lock scope
-    GtkProgressBar* progressbar_p =
-      GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_PROGRESSBAR_NAME)));
-    ACE_ASSERT (progressbar_p);
-    // *NOTE*: this disables "activity mode" (in Gtk2)
-    gtk_progress_bar_set_fraction (progressbar_p, 0.0);
-    gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), false);
-  } // end ELSE
-
-  return;
-
-error:
-  gtk_action_set_stock_id (GTK_ACTION (toggleAction_in), GTK_STOCK_CONNECT);
-  un_toggling_listen = true;
-  gtk_toggle_action_set_active (toggleAction_in, FALSE);
-} // toggle_action_listen_toggled_cb
-
-void
-spinbutton_server_port_value_changed_cb (GtkSpinButton* spinButton_in,
-                                         gpointer userData_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::spinbutton_server_port_value_changed_cb"));
-
-  // sanity check(s)
-  ACE_ASSERT (userData_in);
-  struct WebSocket_Client_UI_CBData* data_p =
-    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
-  ACE_ASSERT (data_p->UIState);
-
-  // sanity check(s)
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->configuration);
-
-  unsigned short port_number =
-    static_cast<unsigned short> (gtk_spin_button_get_value_as_int (spinButton_in));
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
-    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.peerAddress.set_port_number (port_number,
-                                                                                                      1);
-} // spinbutton_server_port_value_changed_cb
 
 // -----------------------------------------------------------------------------
 
@@ -1593,7 +1439,7 @@ button_about_clicked_cb (GtkButton* button_in,
   // sanity check(s)
   ACE_ASSERT (userData_in);
   struct WebSocket_Client_UI_CBData* data_p =
-      static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
+    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
   ACE_ASSERT (data_p->UIState);
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
@@ -1602,6 +1448,7 @@ button_about_clicked_cb (GtkButton* button_in,
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_DIALOG_ABOUT_NAME)));
   ACE_ASSERT (about_dialog);
+  //gtk_widget_show (GTK_WIDGET (about_dialog));
 
   // run dialog
   gint result = gtk_dialog_run (about_dialog);

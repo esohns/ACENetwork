@@ -172,6 +172,10 @@ do_print_usage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-u          : URL [\"]")
+            << ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL_STRING)
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v          : print version information and exit [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -203,10 +207,11 @@ do_process_arguments (int argc_in,
                       bool& useReactor_out,
                       unsigned int& statisticReportingInterval_out,
                       bool& traceInformation_out,
+                      std::string& URL_out,
                       bool& printVersionAndExit_out,
                       unsigned int& numberOfDispatchThreads_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("::do_print_arguments"));
+  NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
 
   std::string path =
     Common_File_Tools::getWorkingDirectory ();
@@ -216,7 +221,7 @@ do_process_arguments (int argc_in,
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GTK_USE)
   GtkRcFileName_out = configuration_path;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -242,23 +247,24 @@ do_process_arguments (int argc_in,
   statisticReportingInterval_out =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   traceInformation_out = false;
+  URL_out = ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL_STRING);
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out =
     TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
-  ACE_Get_Opt argumentParser (argc_in,
-                              argv_in,
+  ACE_Get_Opt argument_parser (argc_in,
+                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (GTK_USE)
-                              ACE_TEXT ("de:g::lrs:tvx:"),
+                               ACE_TEXT ("de:g::lrs:tu:vx:"),
 #else
-                              ACE_TEXT ("dg::lrs:tvx:"),
+                               ACE_TEXT ("dg::lrs:tu:vx:"),
 #endif // GTK_USE
 #else
 #if defined (GTK_USE)
-                              ACE_TEXT ("de:g::ln::rs:tvx:"),
+                               ACE_TEXT ("de:g::ln::rs:tu:vx:"),
 #else
-                              ACE_TEXT ("dg::ln::rs:tvx:"),
+                               ACE_TEXT ("dg::ln::rs:tu:vx:"),
 #endif // GTK_USE
 #endif // ACE_WIN32 || ACE_WIN64
                               1,                         // skip command name
@@ -268,7 +274,7 @@ do_process_arguments (int argc_in,
 
   int option = 0;
   std::stringstream converter;
-  while ((option = argumentParser ()) != EOF)
+  while ((option = argument_parser ()) != EOF)
   {
     switch (option)
     {
@@ -280,13 +286,13 @@ do_process_arguments (int argc_in,
 #if defined (GTK_USE)
       case 'e':
       {
-        GtkRcFileName_out = argumentParser.opt_arg ();
+        GtkRcFileName_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
 #endif // GTK_USE
       case 'g':
       {
-        ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
+        ACE_TCHAR* opt_arg = argument_parser.opt_arg ();
         if (opt_arg)
           UIDefinitonFileName_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
         else
@@ -302,7 +308,7 @@ do_process_arguments (int argc_in,
 #else
       case 'n':
       {
-        ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
+        ACE_TCHAR* opt_arg = argument_parser.opt_arg ();
         if (opt_arg)
           interfaceIdentifier_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
         else
@@ -319,13 +325,18 @@ do_process_arguments (int argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+        converter << ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         converter >> statisticReportingInterval_out;
         break;
       }
       case 't':
       {
         traceInformation_out = true;
+        break;
+      }
+      case 'u':
+      {
+        URL_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
       case 'v':
@@ -337,7 +348,7 @@ do_process_arguments (int argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> numberOfDispatchThreads_out;
         break;
       }
@@ -346,21 +357,21 @@ do_process_arguments (int argc_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("option \"%c\" requires an argument, aborting\n"),
-                    argumentParser.opt_opt ()));
+                    argument_parser.opt_opt ()));
         return false;
       }
       case '?':
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("unrecognized option \"%s\", aborting\n"),
-                    argumentParser.last_option ()));
+                    argument_parser.last_option ()));
         return false;
       }
       case 0:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("found long option \"%s\", aborting\n"),
-                    argumentParser.long_option ()));
+                    argument_parser.long_option ()));
         return false;
       }
       default:
@@ -461,6 +472,7 @@ do_work (bool debugParser_in,
 #endif // ACE_WIN32 || ACE_WIN64
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
+         const std::string& URL_in,
          unsigned int numberOfDispatchThreads_in,
          struct WebSocket_Client_Configuration& configuration_in,
          struct WebSocket_Client_UI_CBData& CBData_in,
@@ -475,8 +487,7 @@ do_work (bool debugParser_in,
 
   // step0c: initialize configuration and stream
   configuration_in.dispatchConfiguration.dispatch =
-      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                     : COMMON_EVENT_DISPATCH_PROACTOR);
+    (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR : COMMON_EVENT_DISPATCH_PROACTOR);
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_Parser_FlexAllocatorConfiguration> heap_allocator;
@@ -610,9 +621,6 @@ do_work (bool debugParser_in,
 #endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
-#if defined (GTK_USE)
-  CBData_in.eventHandler = &ui_event_handler;
-#endif // GTK_USE
 
   WebSocket_Client_ConnectionConfiguration connection_configuration;
   connection_configuration.allocatorConfiguration =
@@ -783,6 +791,7 @@ do_work (bool debugParser_in,
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFileName_in, static_cast<GtkBuilder*> (NULL));
+    CBData_in.URL = URL_in;
 
     gtk_manager_p->start (NULL);
     ACE_Time_Value one_second (1, 0);
@@ -899,6 +908,7 @@ ACE_TMAIN (int argc_in,
   unsigned int statistic_reporting_interval =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
+  std::string URL_string = ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL_STRING);
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
     TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -924,6 +934,7 @@ ACE_TMAIN (int argc_in,
                              use_reactor,
                              statistic_reporting_interval,
                              trace_information,
+                             URL_string,
                              print_version_and_exit,
                              number_of_dispatch_threads))
   {
@@ -1141,9 +1152,9 @@ ACE_TMAIN (int argc_in,
   ui_cb_data.configuration->GTKConfiguration.argv = argv_in;
   ui_cb_data.configuration->GTKConfiguration.CBData = &ui_cb_data;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.finiHook =
-      idle_finalize_UI_cb;
+    idle_finalize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.eventHooks.initHook =
-      idle_initialize_UI_cb;
+    idle_initialize_UI_cb;
   ui_cb_data.configuration->GTKConfiguration.definition = &gtk_ui_definition;
   if (!gtk_rc_file.empty ())
     ui_cb_data.configuration->GTKConfiguration.RCFiles.push_back (gtk_rc_file);
@@ -1186,6 +1197,7 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
            use_reactor,
            statistic_reporting_interval,
+           URL_string,
            number_of_dispatch_threads,
            configuration_s,
            ui_cb_data,

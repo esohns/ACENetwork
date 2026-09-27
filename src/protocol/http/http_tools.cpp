@@ -449,12 +449,14 @@ HTTP_Tools::parseURL (const std::string& URL_in,
     match_string += match_results[2];
   if (match_results[3].matched)
     match_string += match_results[3];
+  if (match_results[4].matched)
+    match_string += match_results[4];
   if (!match_string.empty ())
     useSSL_out = true;
 
   // step4: hostname[:port] ?
-  ACE_ASSERT (match_results[4].matched);
-  match_string = match_results[4];
+  ACE_ASSERT (match_results[5].matched);
+  match_string = match_results[5];
   if (!match_string.empty ())
   { // step4a: split hostname[:port]
     regex_string =
@@ -490,8 +492,8 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   } // end IF
 
   // step5: URI path
-  ACE_ASSERT (match_results[5].matched);
-  match_string = match_results[5];
+  ACE_ASSERT (match_results[6].matched);
+  match_string = match_results[6];
   if (!match_string.empty ())
     URI_out = match_string;
   else

@@ -28,10 +28,9 @@ bool load_network_interfaces (GtkListStore*);
 //------------------------------------------------------------------------------
 
 // idle routines
-gboolean idle_discovery_complete_cb (gpointer);
-gboolean idle_service_description_complete_cb (gpointer);
-gboolean idle_end_session_success_cb (gpointer);
-gboolean idle_end_session_error_cb (gpointer);
+gboolean idle_start_session_cb (gpointer);
+gboolean idle_message_received_cb (gpointer);
+gboolean idle_end_session_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 
 /////////////////////////////////////////
@@ -49,17 +48,10 @@ extern "C"
 {
 #endif /* __cplusplus */
 // callbacks
-G_MODULE_EXPORT void action_discovery_activate_cb (GtkAction*, gpointer);
-G_MODULE_EXPORT void action_external_address_activate_cb (GtkAction*, gpointer);
-G_MODULE_EXPORT void action_map_activate_cb (GtkAction*, gpointer);
-G_MODULE_EXPORT void action_presentation_url_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_connect_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_ping_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_close_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);
-G_MODULE_EXPORT void entry_external_address_changed_cb (GtkEntry*, gpointer);
-G_MODULE_EXPORT void entry_internal_address_changed_cb (GtkEntry*, gpointer);
-G_MODULE_EXPORT void entry_remote_peer_address_changed_cb (GtkEntry*, gpointer);
-G_MODULE_EXPORT void entry_server_address_changed_cb (GtkEntry*, gpointer);
-G_MODULE_EXPORT void spinbutton_server_port_value_changed_cb (GtkSpinButton*, gpointer);
-G_MODULE_EXPORT void toggleaction_listen_toggled_cb (GtkToggleAction*, gpointer);
 
 /////////////////////////////////////////
 

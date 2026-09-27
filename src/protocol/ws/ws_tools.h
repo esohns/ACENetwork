@@ -40,6 +40,8 @@ class WebSocket_Tools
   static std::string OpCodeToString (const WebSocket_OpCode_t&);
   static std::string StatusToString (const WebSocket_Status_t&);
 
+  static std::string generateSecHeaderKey ();
+
  private:
   ACE_UNIMPLEMENTED_FUNC (WebSocket_Tools ())
   ACE_UNIMPLEMENTED_FUNC (~WebSocket_Tools ())

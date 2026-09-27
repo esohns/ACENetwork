@@ -71,6 +71,11 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
 
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+
+  guint event_source_id_i = g_idle_add (idle_start_session_cb,
+                                        CBData_);
+  if (event_source_id_i)
+    CBData_->UIState->eventSourceIds.insert (event_source_id_i);
 #endif // GTK_USE
 
 //  CBData_->progressData.transferred = 0;
@@ -110,6 +115,11 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
 
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+
+  guint event_source_id_i = g_idle_add (idle_end_session_cb,
+                                        CBData_);
+  if (event_source_id_i)
+    CBData_->UIState->eventSourceIds.insert (event_source_id_i);
 #endif // GTK_USE
 
 #if defined (GTK_USE)
@@ -141,6 +151,46 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
 #if defined (GTK_USE)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+
+  switch (record_r.opcode)
+  {
+    case WebSocket_Codes::OPCODE_TEXT:
+    {
+      ACE_Message_Block* message_block_p =
+        &const_cast<Test_U_Message&> (message_in);
+      CBData_->message = Stream_Tools::toString (message_block_p);
+
+      guint event_source_id_i = g_idle_add (idle_message_received_cb,
+                                            CBData_);
+      if (event_source_id_i)
+        CBData_->UIState->eventSourceIds.insert (event_source_id_i);
+
+      break;
+    }
+    case WebSocket_Codes::OPCODE_CLOSE:
+    {
+      CBData_->message = ACE_TEXT_ALWAYS_CHAR ("Close");
+      guint event_source_id_i = g_idle_add (idle_message_received_cb,
+                                            CBData_);
+      if (event_source_id_i)
+        CBData_->UIState->eventSourceIds.insert (event_source_id_i);
+
+      break;
+    }
+    case WebSocket_Codes::OPCODE_PONG:
+    {
+      CBData_->message = ACE_TEXT_ALWAYS_CHAR ("Pong");
+      guint event_source_id_i = g_idle_add (idle_message_received_cb,
+                                            CBData_);
+      if (event_source_id_i)
+        CBData_->UIState->eventSourceIds.insert (event_source_id_i);
+
+      break;
+    }
+    default:
+      break;
+  } // end SWITCH
+
 #endif // GTK_USE
   CBData_->progressData.transferred += message_in.total_length ();
 #if defined (GTK_USE)

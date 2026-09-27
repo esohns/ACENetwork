@@ -34,7 +34,9 @@
 #include "common_defines.h"
 #include "common_tools.h"
 
-#include "stream_dec_common.h"
+#include "common_math_tools.h"
+
+//#include "stream_dec_common.h"
 
 #include "net_macros.h"
 
@@ -128,6 +130,42 @@ WebSocket_Tools::StatusToString (const WebSocket_Status_t& status_in)
       break;
     }
   } // end SWITCH
+
+  return result;
+}
+
+std::string
+WebSocket_Tools::generateSecHeaderKey ()
+{
+  NETWORK_TRACE (ACE_TEXT ("WebSocket_Tools::generateSecHeaderKey"));
+
+  // initialize result
+  std::string result;
+
+  static std::uniform_int_distribution<ACE_UINT64> distribution;
+  ACE_UINT64 value_i = Common_Tools::getRandomNumber (distribution);
+  ACE_UINT64 value_2 = Common_Tools::getRandomNumber (distribution);
+  std::vector<uint8_t> values_a;
+  values_a.push_back ((value_i & 0xFF00000000000000) >> 56);
+  values_a.push_back ((value_i & 0x00FF000000000000) >> 48);
+  values_a.push_back ((value_i & 0x0000FF0000000000) >> 40);
+  values_a.push_back ((value_i & 0x000000FF00000000) >> 32);
+  values_a.push_back ((value_i & 0x00000000FF000000) >> 24);
+  values_a.push_back ((value_i & 0x0000000000FF0000) >> 16);
+  values_a.push_back ((value_i & 0x000000000000FF00) >> 8);
+  values_a.push_back (value_i & 0x00000000000000FF);
+
+  values_a.push_back ((value_2 & 0xFF00000000000000) >> 56);
+  values_a.push_back ((value_2 & 0x00FF000000000000) >> 48);
+  values_a.push_back ((value_2 & 0x0000FF0000000000) >> 40);
+  values_a.push_back ((value_2 & 0x000000FF00000000) >> 32);
+  values_a.push_back ((value_2 & 0x00000000FF000000) >> 24);
+  values_a.push_back ((value_2 & 0x0000000000FF0000) >> 16);
+  values_a.push_back ((value_2 & 0x000000000000FF00) >> 8);
+  values_a.push_back (value_2 & 0x00000000000000FF);
+
+  result = Common_Math_Tools::encodeBase64 (values_a.data (),
+                                            values_a.size ());
 
   return result;
 }

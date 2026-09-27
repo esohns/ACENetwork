@@ -1,5 +1,5 @@
-#include (ffmpeg)
-#include (ImageMagick)
+include (ffmpeg)
+include (ImageMagick)
 #set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml/scripts;${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts")
 #include (libxml2)
 
@@ -43,8 +43,9 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/file)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/html)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec)
+ #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/file)
+ #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/html)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/lib)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
@@ -59,8 +60,9 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/file)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/html)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/dec)
+ #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/file)
+ #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/html)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/src/modules/stat)
@@ -151,9 +153,9 @@ endif (UNIX)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-if (LIBXML2_SUPPORT)
- target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
-endif (LIBXML2_SUPPORT)
+#if (LIBXML2_SUPPORT)
+# target_link_libraries (${EXECUTABLE} PUBLIC ${LIBXML2_LIBRARIES})
+#endif (LIBXML2_SUPPORT)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
@@ -165,7 +167,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
-target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
+#target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
@@ -220,8 +222,10 @@ endif ()
 ##########################################
 
 if (UNIX)
+ file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}" COMMAND)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t"
+                         COMMAND ${COMMAND}
+                         ARGS "-l -r -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
 #                                              /usr/local/lib
@@ -231,14 +235,14 @@ elseif (WIN32)
  file (TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${EXECUTABLE}.exe" COMMAND)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
 
-# if (FFMPEG_SUPPORT)
+ if (FFMPEG_SUPPORT)
   # *NOTE*: ffmpeg was built with "vcpkg-libpng" support, so now there is a new dependency to zlib1.dll, liblzma.dll, iconv-2.dll :-(
-#  file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
-#  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
-# endif (FFMPEG_SUPPORT)
-# if (IMAGEMAGICK_SUPPORT)
-#  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
-# endif (IMAGEMAGICK_SUPPORT)
+  file (TO_CMAKE_PATH "$ENV{VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin" VCPKG_LIB_PATH)
+  file (TO_CMAKE_PATH "${ffmpeg_LIB_DIR}" FFMPEG_PATH)
+ endif (FFMPEG_SUPPORT)
+ if (IMAGEMAGICK_SUPPORT)
+  file (TO_CMAKE_PATH "${ImageMagick_LIB_DIR}" IMAGEMAGICK_PATH)
+ endif (IMAGEMAGICK_SUPPORT)
 
 # if (LIBXML2_SUPPORT)
 #  file (TO_CMAKE_PATH "${LIBXML2_LIB_DIR}" LIBXML2_LIB_PATH)
@@ -256,16 +260,16 @@ elseif (WIN32)
  file (TO_CMAKE_PATH $ENV{LIB_ROOT}/ACE_TAO/ACE/lib ACE_LIB_PATH)
  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                            ${SSL_LIB_PATH}
-#                           ${VCPKG_LIB_PATH}
-#                           ${FFMPEG_PATH}
-#                           ${IMAGEMAGICK_PATH}
+                           ${VCPKG_LIB_PATH}
+                           ${FFMPEG_PATH}
+                           ${IMAGEMAGICK_PATH}
 #                           ${LIBXML2_LIB_PATH}
                            ${GTK_LIB_PATH}
                            ${WXWIDGETS_LIB_PATH}
                            ${ACE_LIB_PATH})
  create_target_launcher (${EXECUTABLE}
                          COMMAND ${COMMAND}
-                         ARGS "-l -t"
+                         ARGS "-l -r -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
                          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

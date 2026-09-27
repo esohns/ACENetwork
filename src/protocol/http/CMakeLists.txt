@@ -192,9 +192,11 @@ foreach (script_file ${script_files})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_HTTP
 #  PRIVATE stdafx.cpp
-  PRIVATE stdafx.h
-  PRIVATE ${absolute_source_files}
-  INTERFACE ${absolute_script_files})
+                PRIVATE stdafx.h
+                PRIVATE ${absolute_source_files}
+#                INTERFACE ${absolute_script_files})
+                scripts/scanner.l
+                scripts/parser.y)
 target_precompile_headers (${PROJECT_NAME}_Protocol_HTTP
                            PUBLIC stdafx.h)
 

@@ -41,12 +41,12 @@ if (ANTLR_SUPPORT)
 #                             $<BUILD_INTERFACE:${ANTLR_INCLUDE_DIRS}>)
 endif (ANTLR_SUPPORT)
 if (UNIX)
-# target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC ${BIND9_CFLAGS})
-
  target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src/math>)
  target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src/parser>)
  target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
@@ -75,6 +75,8 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/math>)
  target_include_directories (${PROJECT_NAME}_Protocol_WebSocket PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/parser>)
 
@@ -221,6 +223,7 @@ set_property (TARGET ${PROJECT_NAME}_Protocol_WebSocket PROPERTY FOLDER "protoco
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_WebSocket Common)
+add_dependencies (${PROJECT_NAME}_Protocol_WebSocket CommonMath)
 add_dependencies (${PROJECT_NAME}_Protocol_WebSocket ACEStream)
 add_dependencies (${PROJECT_NAME}_Protocol_WebSocket ${PROJECT_NAME}_Protocol_HTTP)
 
@@ -238,6 +241,7 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
 target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC Common)
+target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC CommonMath)
 target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC ACEStream)
 target_link_libraries (${PROJECT_NAME}_Protocol_WebSocket PUBLIC ${PROJECT_NAME}_Protocol_HTTP)
 

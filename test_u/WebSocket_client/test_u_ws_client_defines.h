@@ -27,15 +27,15 @@
 #elif defined (GTK3_USE)
 #define TEST_U_DEFAULT_GLADE_FILE                         "test_u.gtk3"
 #endif // GTK2_USE || GTK3_USE
-//#define TEST_U_THREAD_NAME                                "stream processor"
+
+#define TEST_U_DEFAULT_URL_STRING                         "wss://echo.websocket.org"
 
 //----------------------------------------
 
 #define TEST_U_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
-#define TEST_U_UI_GTK_ACTION_DISCOVERY_NAME               "action_discovery"
-#define TEST_U_UI_GTK_ACTION_EXTERNAL_ADDRESS_NAME        "action_external_address"
-#define TEST_U_UI_GTK_ACTION_MAP_NAME                     "action_map"
-#define TEST_U_UI_GTK_ACTION_PRESENTATION_URL_NAME        "action_presentation_url"
+#define TEST_U_UI_GTK_ACTION_CONNECT_NAME                 "action_connect"
+#define TEST_U_UI_GTK_ACTION_PING_NAME                    "action_ping"
+#define TEST_U_UI_GTK_ACTION_CLOSE_NAME                   "action_close"
 //#define TEST_U_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"
 #define TEST_U_UI_GTK_BUTTONBOX_ACTIONS_NAME              "vbuttonbox"
 #define TEST_U_UI_GTK_BUTTON_ABOUT_NAME                   "button_about"
@@ -47,9 +47,7 @@
 #define TEST_U_UI_GTK_DIALOG_ABOUT_NAME                   "dialog_about"
 #define TEST_U_UI_GTK_DIALOG_MAIN_NAME                    "dialog_main"
 #define TEST_U_UI_GTK_FRAME_CONFIGURATION_NAME            "frame_configuration"
-#define TEST_U_UI_GTK_ENTRY_EXTERNAL_ADDRESS_NAME         "entry_external_address"
-#define TEST_U_UI_GTK_ENTRY_INTERNAL_ADDRESS_NAME         "entry_internal_address"
-#define TEST_U_UI_GTK_ENTRY_SERVER_ADDRESS_NAME           "entry_server_address"
+#define TEST_U_UI_GTK_ENTRY_URL_NAME                      "entry_url"
 #define TEST_U_UI_GTK_HBOX_OPTIONS_NAME                   "hbox_options"
 #define TEST_U_UI_GTK_LISTSTORE_INTERFACE_NAME            "liststore_interface"
 #define TEST_U_UI_GTK_PANGO_LOG_FONT_DESCRIPTION          "Monospace 8"

@@ -175,12 +175,12 @@ WebSocket_Module_Streamer_T<ACE_SYNCH_USE,
   uint8_t* data_p =
     record_r.opcode == WebSocket_Codes::OPCODE_TEXT ? reinterpret_cast<uint8_t*> (record_r.payload.string)
                                                     : record_r.payload.blob;
-  ACE_ASSERT (data_p);
 
   if (record_r.payloadSize == 0)
     goto continue_;
 
   // XOR the payload data with the masking key
+  ACE_ASSERT (data_p);
   for (ACE_UINT64 i = 0;
        i < record_r.payloadSize;
        ++i)

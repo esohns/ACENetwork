@@ -1176,6 +1176,14 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
   case 2: /* frames: frames "frame"  */
                                                   { /* NOTE*: use right-recursion here to force early state reductions */
                                                     ((*yyvalp).ival) = (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (-1)].yystate.yysemantics.yyval.ival) + (YY_CAST (yyGLRStackItem const *, yyvsp)[YYFILL (0)].yystate.yysemantics.yyval.ival);
+
+                                                    try {
+                                                      iparser_p->finished ();
+                                                    } catch (...) {
+                                                      ACE_DEBUG ((LM_ERROR,
+                                                                  ACE_TEXT ("caught exception in WebSocket_IParser::finished(), continuing\n")));
+                                                    }
+
                                                     struct WebSocket_Record& record_r =
                                                       iparser_p->current ();
                                                     struct WebSocket_Record* record_p =

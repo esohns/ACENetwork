@@ -39,7 +39,7 @@
 
 #define HTTP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 
-#define HTTP_URL_REGEX_STRING                     "^(?:(http(s)?|(s)?ftp)(?:\\://))?([^\\/]*)(.*)$"
+#define HTTP_URL_REGEX_STRING                     "^(?:(http(s)?|(s)?ftp|ws(s)?)(?:\\://))?([^\\/]*)(.*)$"
 // *NOTE*: matches a an (absolute) URI path, i.e. a string that starts with a
 //         slash and is followed by one ore more path segments, where each
 //         segment is a string of characters that does not contain a slash
@@ -69,10 +69,12 @@
 #define HTTP_PRT_HEADER_COOKIE_STRING             "Cookie"
 #define HTTP_PRT_HEADER_HOST_STRING               "Host"
 #define HTTP_PRT_HEADER_LOCATION_STRING           "Location"
+#define HTTP_PRT_HEADER_ORIGIN_STRING             "Origin"
 #define HTTP_PRT_HEADER_REFERER_STRING            "Referer"
 #define HTTP_PRT_HEADER_SERVER_STRING             "Server"
 #define HTTP_PRT_HEADER_TRACKING_STRING           "DNT"
 #define HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING  "Transfer-Encoding"
+#define HTTP_PRT_HEADER_UPGRADE_STRING            "Upgrade"
 
 #define HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING "chunked"
 

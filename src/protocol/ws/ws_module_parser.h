@@ -111,7 +111,7 @@ class WebSocket_Module_Parser_T
   size_t getPayloadLength ();
 
   // override (part of) Common_IScannerBase
-  inline virtual ACE_Message_Block* head () { return headFragment_; }
+  inline virtual ACE_Message_Block* head () { return handshakeComplete_ ? headFragment_ : inherited::headFragment_; }
   inline virtual void head (ACE_Message_Block* newHead_in) { ACE_ASSERT (newHead_in && !headFragment_); headFragment_ = static_cast<DataMessageType*> (newHead_in); }
 
   // override (part of) HTTP_(|Reflex|ANTLR)_IParser

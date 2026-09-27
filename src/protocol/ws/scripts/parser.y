@@ -92,7 +92,7 @@ extern int zzdebug;
 #define ZZERROR_VERBOSE 1
 //#define YYLTYPE_IS_DECLARED 1
 
-#undef YYTOKENTYPE
+//#undef YYTOKENTYPE
 }
 
 // calling conventions / parameter passing
@@ -194,6 +194,14 @@ void yyerror (YYLTYPE*, WebSocket_IParser*, yyscan_t, const char*);
 %start              frames;
 frames:            frames "frame"                 { /* NOTE*: use right-recursion here to force early state reductions */
                                                     $$ = $1 + $2;
+
+                                                    try {
+                                                      iparser_p->finished ();
+                                                    } catch (...) {
+                                                      ACE_DEBUG ((LM_ERROR,
+                                                                  ACE_TEXT ("caught exception in WebSocket_IParser::finished(), continuing\n")));
+                                                    }
+
                                                     struct WebSocket_Record& record_r =
                                                       iparser_p->current ();
                                                     struct WebSocket_Record* record_p =

@@ -1,36 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkAction" id="action_discovery">
-    <property name="label">Discover</property>
-    <property name="short_label">Discover</property>
-    <property name="tooltip">Discover</property>
+  <object class="GtkAction" id="action_close">
+    <property name="label" translatable="yes">Close</property>
+    <property name="short_label" translatable="yes">Close</property>
+    <property name="tooltip" translatable="yes">Close</property>
+    <property name="stock_id">gtk-close</property>
+    <property name="sensitive">False</property>
+    <signal name="activate" handler="action_close_activate_cb" swapped="no"/>
+  </object>
+  <object class="GtkAction" id="action_connect">
+    <property name="label">Connect</property>
+    <property name="short_label">Connect</property>
+    <property name="tooltip">Connect</property>
+    <property name="stock_id">gtk-connect</property>
+    <signal name="activate" handler="action_connect_activate_cb" swapped="no"/>
+  </object>
+  <object class="GtkAction" id="action_ping">
+    <property name="label" translatable="yes">Ping</property>
+    <property name="short_label" translatable="yes">Ping</property>
+    <property name="tooltip" translatable="yes">Ping</property>
     <property name="stock_id">gtk-find</property>
-    <signal name="activate" handler="action_discovery_activate_cb" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="action_external_address">
-    <property name="label" translatable="yes">External Address</property>
-    <property name="short_label" translatable="yes">External Address</property>
-    <property name="tooltip" translatable="yes">External Address</property>
-    <property name="stock_id">gtk-about</property>
     <property name="sensitive">False</property>
-    <signal name="activate" handler="action_external_address_activate_cb" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="action_map">
-    <property name="label">Map</property>
-    <property name="short_label">Map</property>
-    <property name="tooltip">Map</property>
-    <property name="stock_id">gtk-add</property>
-    <property name="sensitive">False</property>
-    <signal name="activate" handler="action_map_activate_cb" swapped="no"/>
-  </object>
-  <object class="GtkAction" id="action_presentation_url">
-    <property name="label" translatable="yes">Presentation URL</property>
-    <property name="short_label" translatable="yes">Presentation URL</property>
-    <property name="tooltip" translatable="yes">Presentation URL</property>
-    <property name="stock_id">gtk-about</property>
-    <property name="sensitive">False</property>
-    <signal name="activate" handler="action_presentation_url_activate_cb" swapped="no"/>
+    <signal name="activate" handler="action_ping_activate_cb" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="adjustment_data">
     <property name="upper">10000000</property>
@@ -42,44 +34,18 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="adjustment_external_port">
-    <property name="lower">1</property>
-    <property name="upper">65535</property>
-    <property name="value">80</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">100</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment_internal_port">
-    <property name="lower">1</property>
-    <property name="upper">65535</property>
-    <property name="value">80</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">100</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment_remote_peer_port">
-    <property name="lower">1</property>
-    <property name="upper">65535</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">100</property>
-  </object>
-  <object class="GtkAdjustment" id="adjustment_server_port">
-    <property name="lower">1</property>
-    <property name="upper">65535</property>
-    <property name="value">1900</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">100</property>
-  </object>
   <object class="GtkAdjustment" id="adjustment_sessionmessages">
     <property name="upper">10000000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkToggleAction" id="toggleaction_listen">
-    <property name="label">Listen</property>
-    <property name="short_label">Listen</property>
-    <property name="tooltip">Listen</property>
-    <property name="stock_id">gtk-connect</property>
-    <signal name="toggled" handler="toggleaction_listen_toggled_cb" swapped="no"/>
+  <object class="GtkListStore" id="liststore_interface">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name identifier -->
+      <column type="gchararray"/>
+    </columns>
   </object>
   <object class="GtkAboutDialog" id="dialog_about">
     <property name="can_focus">False</property>
@@ -87,12 +53,14 @@
     <property name="title" translatable="yes">About</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="type_hint">normal</property>
-    <property name="program_name">UPnP client</property>
+    <property name="type_hint">dialog</property>
+    <property name="deletable">False</property>
+    <property name="has_resize_grip">False</property>
+    <property name="program_name">WebSocket client</property>
     <property name="version">0.1</property>
-    <property name="copyright" translatable="yes">Copyright (C) 2021 Erik Sohns</property>
-    <property name="comments" translatable="yes">UPnP client</property>
-    <property name="website">https://www.github.com/esohns/ACENetwork</property>
+    <property name="copyright" translatable="yes">Copyright (C) 2026 Erik Sohns</property>
+    <property name="comments" translatable="yes">simple WebSocket client</property>
+    <property name="website">https://github.com/esohns/ACENetwork</property>
     <property name="website_label" translatable="yes">github project page</property>
     <property name="authors">Erik Sohns</property>
     <child internal-child="vbox">
@@ -116,11 +84,25 @@
       </object>
     </child>
   </object>
+  <object class="GtkEntryBuffer" id="entrybuffer"/>
+  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
+  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">UPnP client</property>
-    <property name="type_hint">normal</property>
+    <property name="title" translatable="yes">WebSocket client</property>
+    <property name="type_hint">dialog</property>
+    <property name="deletable">False</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="vbox_dialog">
         <property name="visible">True</property>
@@ -142,8 +124,8 @@
                     <property name="can_focus">False</property>
                     <property name="homogeneous">True</property>
                     <child>
-                      <object class="GtkToggleButton" id="togglebutton_listen">
-                        <property name="related_action">toggleaction_listen</property>
+                      <object class="GtkButton" id="button_connect">
+                        <property name="related_action">action_connect</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -157,8 +139,8 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button_discovery">
-                        <property name="related_action">action_discovery</property>
+                      <object class="GtkButton" id="button_ping">
+                        <property name="related_action">action_ping</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -172,8 +154,8 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button_map">
-                        <property name="related_action">action_map</property>
+                      <object class="GtkButton" id="button_close">
+                        <property name="related_action">action_close</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -184,36 +166,6 @@
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="button_external_address">
-                        <property name="related_action">action_external_address</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="relief">half</property>
-                        <property name="focus_on_click">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="button_presentation_URL">
-                        <property name="related_action">action_presentation_url</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="relief">half</property>
-                        <property name="focus_on_click">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
@@ -236,11 +188,6 @@
                           <object class="GtkTable" id="table_options">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="n_columns">2</property>
-                            <property name="homogeneous">True</property>
-                            <child>
-                              <placeholder/>
-                            </child>
                             <child>
                               <placeholder/>
                             </child>
@@ -255,16 +202,21 @@
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="checkbutton_asynch">
-                                <property name="label" translatable="yes">asynch</property>
+                                <property name="label" translatable="yes">asynchronous</property>
                                 <property name="visible">True</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
                                 <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">asynchronous</property>
                                 <property name="relief">half</property>
                                 <property name="focus_on_click">False</property>
                                 <property name="xalign">0.5</property>
                                 <property name="draw_indicator">True</property>
                               </object>
+                              <packing>
+                                <property name="x_options"/>
+                                <property name="y_options"/>
+                              </packing>
                             </child>
                           </object>
                           <packing>
@@ -290,51 +242,16 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkHBox" id="hbox_server">
+                          <object class="GtkEntry" id="entry_url">
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkEntry" id="entry_server_address">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_markup">UPnP server address</property>
-                                <property name="tooltip_text" translatable="yes">UPnP server address</property>
-                                <property name="has_frame">False</property>
-                                <property name="invisible_char">●</property>
-                                <property name="text" translatable="yes">localhost</property>
-                                <property name="shadow_type">etched-in</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="primary_icon_stock">gtk-network</property>
-                                <signal name="changed" handler="entry_server_address_changed_cb" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="spinbutton_server_port">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_markup">UPnP server port</property>
-                                <property name="tooltip_text" translatable="yes">UPnP server port</property>
-                                <property name="max_length">5</property>
-                                <property name="has_frame">False</property>
-                                <property name="invisible_char">●</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="primary_icon_stock">gtk-connect</property>
-                                <property name="adjustment">adjustment_server_port</property>
-                                <property name="numeric">True</property>
-                                <property name="wrap">True</property>
-                                <signal name="value-changed" handler="spinbutton_server_port_value_changed_cb" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">URL</property>
+                            <property name="buffer">entrybuffer</property>
+                            <property name="has_frame">False</property>
+                            <property name="invisible_char">●</property>
+                            <property name="shadow_type">etched-in</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="primary_icon_stock">gtk-network</property>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -352,128 +269,6 @@
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="frame_map">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0</property>
-                    <child>
-                      <object class="GtkVBox" id="vbox_mapping">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkHBox" id="hbox_mapping">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkEntry" id="entry_external_address">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_markup">external address</property>
-                                <property name="tooltip_text" translatable="yes">external address</property>
-                                <property name="has_frame">False</property>
-                                <property name="invisible_char">●</property>
-                                <property name="text" translatable="yes">localhost</property>
-                                <property name="shadow_type">etched-in</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="primary_icon_stock">gtk-network</property>
-                                <signal name="changed" handler="entry_external_address_changed_cb" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="spinbutton_external_port">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_markup">external port</property>
-                                <property name="tooltip_text" translatable="yes">external port</property>
-                                <property name="has_frame">False</property>
-                                <property name="invisible_char">●</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="primary_icon_stock">gtk-connect</property>
-                                <property name="adjustment">adjustment_external_port</property>
-                                <property name="numeric">True</property>
-                                <property name="wrap">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkHBox" id="hbox_mapping_2">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkEntry" id="entry_internal_address">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_markup">internal address</property>
-                                <property name="tooltip_text" translatable="yes">internal address</property>
-                                <property name="has_frame">False</property>
-                                <property name="invisible_char">●</property>
-                                <property name="text" translatable="yes">localhost</property>
-                                <property name="shadow_type">etched-in</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="primary_icon_stock">gtk-network</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="spinbutton_internal_port">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_markup">internal port</property>
-                                <property name="tooltip_text" translatable="yes">internal port</property>
-                                <property name="has_frame">False</property>
-                                <property name="invisible_char">●</property>
-                                <property name="caps_lock_warning">False</property>
-                                <property name="primary_icon_stock">gtk-connect</property>
-                                <property name="adjustment">adjustment_internal_port</property>
-                                <property name="numeric">True</property>
-                                <property name="wrap">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label_item">
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -555,7 +350,7 @@
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
@@ -594,7 +389,6 @@
                             <property name="can_focus">False</property>
                             <property name="wrap_mode">word</property>
                             <property name="cursor_visible">False</property>
-                            <property name="buffer">textbuffer</property>
                             <property name="accepts_tab">False</property>
                             <signal name="size-allocate" handler="textview_size_allocate_cb" swapped="no"/>
                           </object>
@@ -717,6 +511,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -728,25 +523,4 @@
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkListStore" id="liststore_interface">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name identifier -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
-  </object>
-  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
-  </object>
-  <object class="GtkTextBuffer" id="textbuffer"/>
 </interface>

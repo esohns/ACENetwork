@@ -1262,8 +1262,7 @@ idle_start_session_cb (gpointer userData_in)
   if ((data_p->currentAudioStream == -1) ||
       (*stream_iterator_3a).second.second->URL.empty ())
     goto continue_;
-  current_URL_1 =
-    (*channel_iterator).second.audioSegment.URLs.front ();
+  current_URL_1 = (*channel_iterator).second.audioSegment.URLs.front ();
   (*channel_iterator).second.audioSegment.URLs.pop_front ();
 
   is_URI_b = HTTP_Tools::URLIsURI (current_URL_1,
