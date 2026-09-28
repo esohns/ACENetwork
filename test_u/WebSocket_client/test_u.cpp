@@ -657,6 +657,7 @@ do_work (bool debugParser_in,
 //  struct WebSocket_Client_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &configuration_in.allocatorConfiguration;
+  modulehandler_configuration.computeThroughput = true;
   modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
@@ -701,12 +702,11 @@ do_work (bool debugParser_in,
                                     ACE_Time_Value (0, NET_STATISTIC_DEFAULT_VISIT_INTERVAL_MS * 1000));
 
   // step0d: initialize regular (global) statistic reporting
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+  Common_Timer_Tools::initialize ();
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  struct Common_TimerConfiguration timer_configuration;
-  timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start (NULL);
   HTTP_StatisticReportingHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                       connection_manager_p,
                                                       false);
@@ -723,6 +723,7 @@ do_work (bool debugParser_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", returning\n")));
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
   } // end IF
@@ -757,6 +758,7 @@ do_work (bool debugParser_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 
@@ -774,6 +776,7 @@ do_work (bool debugParser_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
+    Common_Timer_Tools::finalize ();
     return;
   } // end IF
 
@@ -805,6 +808,7 @@ do_work (bool debugParser_in,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
       connection_manager_p->abort (false);
       connection_manager_p->wait (true);
+      Common_Timer_Tools::finalize ();
       return;
     } // end IF
 #endif // GTK_USE
@@ -831,12 +835,13 @@ do_work (bool debugParser_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 
-  timer_manager_p->stop ();
-  connection_manager_p->wait ();
+  connection_manager_p->abort (false);
+  connection_manager_p->wait (true);
   if (!UIDefinitionFileName_in.empty ())
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
                                                true,   // wait ?
                                                false); // clean up singletons ?
+  Common_Timer_Tools::finalize ();
 }
 
 COMMON_DEFINE_PRINTVERSION_FUNCTION (do_print_version, NETWORK_MAKE_VERSION_STRING_VARIABLE (programName_in, ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL), version_string), version_string)

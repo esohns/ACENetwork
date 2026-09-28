@@ -1301,13 +1301,15 @@ action_close_activate_cb (GtkAction* action_in,
   record_p->opcode = WebSocket_Codes::OPCODE_CLOSE;
   ACE_NEW_NORETURN (record_p->payload.blob,
                     uint8_t[BUFSIZ]);
+  ACE_ASSERT (record_p->payload.blob);
   uint16_t value_i = WebSocket_Codes::STATUS_GOING_AWAY;
   if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
     value_i = ACE_SWAP_WORD (value_i);
   *reinterpret_cast<uint16_t*> (record_p->payload.blob) = value_i;
   ACE_OS::strcpy (reinterpret_cast<char*> (record_p->payload.blob + 2),
                   ACE_TEXT_ALWAYS_CHAR ("going away"));
-  record_p->payloadSize = 2 + ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR ("going away"));
+  record_p->payloadSize =
+    2 + ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR ("going away"));
 
   WebSocket_Client_MessageData_t* message_data_container_p = NULL;
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)

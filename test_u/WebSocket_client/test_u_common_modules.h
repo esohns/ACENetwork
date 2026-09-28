@@ -36,6 +36,8 @@
 
 #include "stream_misc_messagehandler.h"
 
+#include "stream_stat_statistic_report.h"
+
 #include "net_connection_manager.h"
 
 #include "ws_module_parser.h"
@@ -138,28 +140,26 @@ typedef WebSocket_Module_Streamer_T<ACE_MT_SYNCH,
                                     Test_U_Message,
                                     Test_U_SessionMessage> WebSocket_Streamer;
 
-//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct WebSocket_Client_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_U_Message,
-//                                                      Test_U_SessionMessage,
-//                                                      WebSocket_Codes::MethodType,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      struct WebSocket_Client_SessionData,
-//                                                      WebSocket_Client_SessionData_t> WebSocket_Client_Module_StatisticReport_ReaderTask_t;
-//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct WebSocket_Client_ModuleHandlerConfiguration,
-//                                                      Stream_ControlMessage_t,
-//                                                      Test_U_Message,
-//                                                      Test_U_SessionMessage,
-//                                                      WebSocket_Codes::MethodType,
-//                                                      struct Stream_Statistic,
-//                                                      Common_Timer_Manager_t,
-//                                                      struct WebSocket_Client_SessionData,
-//                                                      WebSocket_Client_SessionData_t> WebSocket_Client_Module_StatisticReport_WriterTask_t;
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct WebSocket_Client_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_U_Message,
+                                                      Test_U_SessionMessage,
+                                                      WebSocket_Codes::OpCodeType,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> WebSocket_StatisticReport_ReaderTask_t;
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                      Common_TimePolicy_t,
+                                                      struct WebSocket_Client_ModuleHandlerConfiguration,
+                                                      Stream_ControlMessage_t,
+                                                      Test_U_Message,
+                                                      Test_U_SessionMessage,
+                                                      WebSocket_Codes::OpCodeType,
+                                                      struct Stream_Statistic,
+                                                      Common_Timer_Manager_t,
+                                                      struct Stream_UserData> WebSocket_StatisticReport_WriterTask_t;
 
 //typedef Stream_Module_XMLParser_T<ACE_MT_SYNCH,
 //                                  Common_TimePolicy_t,
@@ -224,14 +224,14 @@ DATASTREAM_MODULE_DUPLEX (struct WebSocket_Client_SessionData,                  
                           WebSocket_Parser,                                            // writer type
                           WebSocket_Marshal);                                          // name
 
-//DATASTREAM_MODULE_DUPLEX (struct WebSocket_Client_SessionData,                  // session data type
-//                          enum Stream_SessionMessageType,                 // session event type
-//                          struct WebSocket_Client_ModuleHandlerConfiguration,   // module handler configuration type
-//                          libacestream_default_stat_report_module_name_string,
-//                          Stream_INotify_t,                               // stream notification interface type
-//                          WebSocket_Client_Module_StatisticReport_ReaderTask_t, // reader type
-//                          WebSocket_Client_Module_StatisticReport_WriterTask_t, // writer type
-//                          WebSocket_Client_Module_StatisticReport);             // name
+DATASTREAM_MODULE_DUPLEX (struct WebSocket_Client_SessionData,                 // session data type
+                          enum Stream_SessionMessageType,                      // session event type
+                          struct WebSocket_Client_ModuleHandlerConfiguration,  // module handler configuration type
+                          libacestream_default_stat_report_module_name_string,
+                          Stream_INotify_t,                                    // stream notification interface type
+                          WebSocket_StatisticReport_ReaderTask_t,              // reader type
+                          WebSocket_StatisticReport_WriterTask_t,              // writer type
+                          WebSocket_StatisticReport);                          // name
 
 //DATASTREAM_MODULE_INPUT_ONLY (struct WebSocket_Client_SessionData,                  // session data type
 //                              enum Stream_SessionMessageType,                  // session event type

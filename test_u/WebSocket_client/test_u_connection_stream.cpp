@@ -23,8 +23,6 @@
 
 #include "ace/Log_Msg.h"
 
-//#include "stream_html_defines.h"
-
 #include "stream_misc_defines.h"
 
 #include "stream_net_defines.h"
@@ -63,24 +61,21 @@ WebSocket_Client_ConnectionStream::load (Stream_ILayout* layout_inout,
     return false;
 
   Stream_Module_t* module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                WebSocket_Client_Module_WebSocket_Net_IO_Module (this,
-  //                                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_inout->append (module_p, NULL, 0);
-  //module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  WebSocket_StatisticReport_Module (this,
+                                                    ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_inout->append (module_p, NULL, 0);
+  module_p = NULL;
+
   ACE_NEW_RETURN (module_p,
                   WebSocket_Marshal_Module (this,
                                             ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),
                   false);
   layout_inout->append (module_p, NULL, 0);
   module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                WebSocket_Client_Module_StatisticReport_Module (this,
-  //                                                                ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
-  //                false);
-  //modules_out.push_back (module_p);
-  //module_p = NULL;
+
   //ACE_NEW_RETURN (module_p,
   //                WebSocket_Client_XMLParser_Module (this,
   //                                              ACE_TEXT_ALWAYS_CHAR (MODULE_XML_PARSER_DEFAULT_NAME_STRING)),
