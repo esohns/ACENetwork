@@ -34,6 +34,7 @@
 
 #define TEST_U_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
 #define TEST_U_UI_GTK_ACTION_CONNECT_NAME                 "action_connect"
+#define TEST_U_UI_GTK_ACTION_SEND_NAME                    "action_send"
 #define TEST_U_UI_GTK_ACTION_PING_NAME                    "action_ping"
 #define TEST_U_UI_GTK_ACTION_CLOSE_NAME                   "action_close"
 //#define TEST_U_UI_GTK_ADJUSTMENT_NAME                     "scrolledwindow_vadjustment"

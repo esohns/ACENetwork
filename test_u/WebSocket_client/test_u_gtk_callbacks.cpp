@@ -582,6 +582,11 @@ idle_start_session_cb (gpointer userData_in)
   gtk_action_set_sensitive (action_p, FALSE);
   action_p =
     GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_SEND_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, TRUE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PING_NAME)));
   ACE_ASSERT (action_p);
   gtk_action_set_sensitive (action_p, TRUE);
@@ -637,6 +642,11 @@ idle_end_session_cb (gpointer userData_in)
                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_CONNECT_NAME)));
   ACE_ASSERT (action_p);
   gtk_action_set_sensitive (action_p, TRUE);
+  action_p =
+    GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
+                                        ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_SEND_NAME)));
+  ACE_ASSERT (action_p);
+  gtk_action_set_sensitive (action_p, FALSE);
   action_p =
     GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
                                         ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_ACTION_PING_NAME)));
@@ -1175,6 +1185,98 @@ allocate:
   istream_connection_p->send (message_block_p);
   iconnection_p->decrease (); iconnection_p = NULL;
 } // action_connect_activate_cb
+
+void
+action_send_activate_cb (GtkAction* action_in,
+                         gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::action_send_activate_cb"));
+
+  ACE_UNUSED_ARG (action_in);
+
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
+  struct WebSocket_Client_UI_CBData* data_p =
+    static_cast<struct WebSocket_Client_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_->messageAllocator);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  Net_ConnectionConfigurationsIterator_t iterator_2 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+
+  struct WebSocket_Client_MessageData* record_p = NULL;
+  ACE_NEW_NORETURN (record_p,
+                    struct WebSocket_Client_MessageData ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    return;
+  } // end IF
+  record_p->opcode = WebSocket_Codes::OPCODE_TEXT;
+  ACE_NEW_NORETURN (record_p->payload.string,
+                    char[BUFSIZ]);
+  ACE_OS::strcpy (record_p->payload.string,
+                  ACE_TEXT_ALWAYS_CHAR ("Hello World from the ACENetwork WebSocket client"));
+  record_p->payloadSize = ACE_OS::strlen (record_p->payload.string);
+
+  WebSocket_Client_MessageData_t* message_data_container_p = NULL;
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
+  ACE_NEW_NORETURN (message_data_container_p,
+                    WebSocket_Client_MessageData_t (record_p,
+                                                    true)); // delete record in dtor ?
+  if (!message_data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    delete record_p;
+    return;
+  } // end IF
+
+  ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
+  ACE_UINT32 pdu_size_i =
+    (*iterator_2).second->allocatorConfiguration->defaultBufferSize;// +
+//    (*iterator_2).second->allocatorConfiguration->paddingBytes;
+  Test_U_Message* message_p = NULL;
+allocate:
+  message_p =
+    static_cast<Test_U_Message*> ((*iterator_2).second->messageAllocator->malloc (pdu_size_i));
+  // keep retrying ?
+  if (!message_p && !(*iterator_2).second->messageAllocator->block ())
+    goto allocate;
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
+    message_data_container_p->decrease (); message_data_container_p = NULL;
+    return;
+  } // end IF
+  // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
+  message_p->initialize (message_data_container_p,
+                         1,//message_p->sessionId (),
+                         NULL);
+  // *IMPORTANT NOTE*: fire-and-forget API (message_p)
+  ACE_Message_Block* message_block_p = message_p;
+
+  WebSocket_Client_ConnectionManager_t* connection_manager_p =
+    WEBSOCKET_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  WebSocket_Client_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->handle));
+#else
+    connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->handle));
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_ASSERT (iconnection_p);
+  WebSocket_Client_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<WebSocket_Client_IStreamConnection_t*> (iconnection_p);
+  ACE_ASSERT (istream_connection_p);
+  istream_connection_p->send (message_block_p);
+  iconnection_p->decrease (); iconnection_p = NULL;
+} // action_send_activate_cb
 
 void
 action_ping_activate_cb (GtkAction* action_in,

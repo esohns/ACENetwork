@@ -49,6 +49,7 @@ extern "C"
 #endif /* __cplusplus */
 // callbacks
 G_MODULE_EXPORT void action_connect_activate_cb (GtkAction*, gpointer);
+G_MODULE_EXPORT void action_send_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_ping_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void action_close_activate_cb (GtkAction*, gpointer);
 G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);

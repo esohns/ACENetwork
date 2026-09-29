@@ -24,6 +24,14 @@
     <property name="sensitive">False</property>
     <signal name="activate" handler="action_ping_activate_cb" swapped="no"/>
   </object>
+  <object class="GtkAction" id="action_send">
+    <property name="label" translatable="yes">Send</property>
+    <property name="short_label" translatable="yes">Send</property>
+    <property name="tooltip" translatable="yes">Send</property>
+    <property name="stock_id">gtk-refresh</property>
+    <property name="sensitive">False</property>
+    <signal name="activate" handler="action_send_activate_cb" swapped="no"/>
+  </object>
   <object class="GtkAdjustment" id="adjustment_data">
     <property name="upper">10000000</property>
     <property name="step_increment">1</property>
@@ -38,14 +46,6 @@
     <property name="upper">10000000</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
-  </object>
-  <object class="GtkListStore" id="liststore_interface">
-    <columns>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name identifier -->
-      <column type="gchararray"/>
-    </columns>
   </object>
   <object class="GtkAboutDialog" id="dialog_about">
     <property name="can_focus">False</property>
@@ -85,18 +85,6 @@
     </child>
   </object>
   <object class="GtkEntryBuffer" id="entrybuffer"/>
-  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
-  </object>
-  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-    <property name="page_size">10</property>
-  </object>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -129,6 +117,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                       </object>
@@ -139,11 +128,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button_ping">
-                        <property name="related_action">action_ping</property>
+                      <object class="GtkButton" id="button_send">
+                        <property name="related_action">action_send</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                       </object>
@@ -154,11 +144,12 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button_close">
-                        <property name="related_action">action_close</property>
+                      <object class="GtkButton" id="button_ping">
+                        <property name="related_action">action_ping</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
                         <property name="relief">half</property>
                         <property name="focus_on_click">False</property>
                       </object>
@@ -166,6 +157,22 @@
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button_close">
+                        <property name="related_action">action_close</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="has_tooltip">True</property>
+                        <property name="relief">half</property>
+                        <property name="focus_on_click">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
@@ -207,6 +214,7 @@
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
                                 <property name="receives_default">False</property>
+                                <property name="has_tooltip">True</property>
                                 <property name="tooltip_text" translatable="yes">asynchronous</property>
                                 <property name="relief">half</property>
                                 <property name="focus_on_click">False</property>
@@ -229,7 +237,6 @@
                           <object class="GtkComboBox" id="combobox_interface">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="tooltip_markup">interface</property>
                             <property name="tooltip_text" translatable="yes">interface</property>
                             <property name="model">liststore_interface</property>
                             <property name="has_frame">False</property>
@@ -284,7 +291,6 @@
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="tooltip_markup">session messages</property>
                             <property name="tooltip_text" translatable="yes">session messages</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
@@ -304,7 +310,6 @@
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="tooltip_markup">data messages</property>
                             <property name="tooltip_text" translatable="yes">data messages</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
@@ -331,7 +336,6 @@
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_markup">received bytes</property>
                         <property name="tooltip_text" translatable="yes">received bytes</property>
                         <property name="editable">False</property>
                         <property name="has_frame">False</property>
@@ -522,5 +526,25 @@
       <action-widget response="0">button_clear</action-widget>
       <action-widget response="0">button_quit</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkListStore" id="liststore_interface">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name identifier -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkAdjustment" id="scrolledwindow_hadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
+  <object class="GtkAdjustment" id="scrolledwindow_vadjustment">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
   </object>
 </interface>
