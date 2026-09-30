@@ -98,27 +98,20 @@
 #include "file_server_listener_common.h"
 #include "file_server_signalhandler.h"
 
-// globals
-unsigned int random_seed;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-struct random_data random_data;
-char random_state_buffer[BUFSIZ];
-#endif // ACE_WIN32 || ACE_WIN64
-
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("FileServerStream");
 
 void
-do_printUsage (const std::string& programName_in)
+do_print_usage (const std::string& programName_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::do_printUsage"));
+  NETWORK_TRACE (ACE_TEXT ("::do_print_usage"));
 
   // enable verbatim boolean output
   std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
-      Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
-                                                        true);
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
+                                                      true);
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -190,32 +183,32 @@ do_printUsage (const std::string& programName_in)
 }
 
 bool
-do_processArguments (const int& argc_in,
-                     ACE_TCHAR** argv_in, // cannot be const...
+do_process_arguments (const int& argc_in,
+                      ACE_TCHAR** argv_in, // cannot be const...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                     bool& showConsole_out,
+                      bool& showConsole_out,
 #endif
-                     std::string& fileName_out,
-                     std::string& UIFile_out,
-                     std::string& networkInterface_out,
-                     //unsigned int& keepAliveTimeout_out,
-                     bool& logToFile_out,
-                     unsigned int& maximumNumberOfConnections_out,
-                     bool& useLoopBack_out,
-                     unsigned short& listeningPortNumber_out,
-                     bool& useReactor_out,
-                     unsigned int& statisticReportingInterval_out,
-                     bool& traceInformation_out,
-                     bool& useUDP_out,
-                     bool& printVersionAndExit_out,
-                     unsigned int& numberOfDispatchThreads_out)
+                      std::string& fileName_out,
+                      std::string& UIFile_out,
+                      std::string& networkInterface_out,
+                      //unsigned int& keepAliveTimeout_out,
+                      bool& logToFile_out,
+                      unsigned int& maximumNumberOfConnections_out,
+                      bool& useLoopBack_out,
+                      unsigned short& listeningPortNumber_out,
+                      bool& useReactor_out,
+                      unsigned int& statisticReportingInterval_out,
+                      bool& traceInformation_out,
+                      bool& useUDP_out,
+                      bool& printVersionAndExit_out,
+                      unsigned int& numberOfDispatchThreads_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
+  NETWORK_TRACE (ACE_TEXT ("::do_process_arguments"));
 
   std::string configuration_path =
-      Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
-                                                        true);
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
+                                                      true);
 
   // initialize results
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -237,7 +230,7 @@ do_processArguments (const int& argc_in,
   useReactor_out =
     (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
-      NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
+    NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   traceInformation_out = false;
   useUDP_out = false;
   printVersionAndExit_out = false;
@@ -377,12 +370,12 @@ do_processArguments (const int& argc_in,
 }
 
 void
-do_initializeSignals (bool useReactor_in,
-                      bool allowUserRuntimeStats_in,
-                      ACE_Sig_Set& signals_out,
-                      ACE_Sig_Set& ignoredSignals_out)
+do_initialize_signals (bool useReactor_in,
+                       bool allowUserRuntimeStats_in,
+                       ACE_Sig_Set& signals_out,
+                       ACE_Sig_Set& ignoredSignals_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("::do_initializeSignals"));
+  NETWORK_TRACE (ACE_TEXT ("::do_initialize_signals"));
 
   int result = -1;
 
@@ -489,7 +482,6 @@ do_work (
   int result = -1;
   struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
   struct Common_EventDispatchState event_dispatch_state_s;
-  struct Common_TimerConfiguration timer_configuration;
   struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
 #if defined (GTK_USE)
   Common_UI_GtkBuilderDefinition_t gtk_ui_definition;
@@ -497,7 +489,7 @@ do_work (
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   Common_UI_GTK_State_t& state_r =
-      const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   CBData_in.UIState = &state_r;
 #endif // GTK_USE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -560,6 +552,7 @@ do_work (
   struct FileServer_StreamConfiguration stream_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &configuration.allocatorConfiguration;
+  modulehandler_configuration.computeThroughput = true;
   modulehandler_configuration.concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   modulehandler_configuration.connectionConfigurations =
     &configuration.connectionConfigurations;
@@ -602,7 +595,7 @@ do_work (
 
   modulehandler_configuration_2 = modulehandler_configuration;
   modulehandler_configuration_2.concurrency =
-      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_OUTPUT_DEFAULT_NAME_STRING),
                                                             std::make_pair (&module_configuration,
                                                                             &modulehandler_configuration_2)));
@@ -634,7 +627,7 @@ do_work (
   if (useUDP_in)
   {
     udp_connection_configuration.allocatorConfiguration =
-        &configuration.allocatorConfiguration;
+      &configuration.allocatorConfiguration;
     udp_connection_configuration.messageAllocator = &message_allocator;
     udp_connection_configuration.streamConfiguration =
       &configuration.streamConfiguration;
@@ -673,8 +666,7 @@ do_work (
   event_dispatch_state_s.configuration =
     &configuration.dispatchConfiguration;
   if (useReactor_in)
-    configuration.dispatchConfiguration.numberOfReactorThreads =
-      numberOfDispatchThreads_in;
+    configuration.dispatchConfiguration.numberOfReactorThreads = numberOfDispatchThreads_in;
   else
   {
     configuration.dispatchConfiguration.numberOfReactorThreads =
@@ -689,8 +681,8 @@ do_work (
     goto error;
   } // end IF
 
-  timer_manager_p->initialize (timer_configuration);
-  timer_manager_p->start (NULL);
+  Common_Timer_Tools::configuration_.publishSeconds = true;
+  Common_Timer_Tools::initialize ();
 
   // step1: initialize regular (global) statistic reporting
   if (statisticReportingInterval_in)
@@ -750,10 +742,10 @@ do_work (
   if (useLoopBack_in)
   {
     result =
-      NET_CONFIGURATION_TCP_CAST((*iterator).second)->socketConfiguration.address.set (listeningPortNumber_in,
-                                                                                       INADDR_LOOPBACK,
-                                                                                       1,
-                                                                                       0);
+      NET_CONFIGURATION_TCP_CAST ((*iterator).second)->socketConfiguration.address.set (listeningPortNumber_in,
+                                                                                        INADDR_LOOPBACK,
+                                                                                        1,
+                                                                                        0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -774,8 +766,8 @@ do_work (
   } // end IF
   else
   {
-    NET_CONFIGURATION_TCP_CAST((*iterator).second)->socketConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                                                 1);
+    NET_CONFIGURATION_TCP_CAST ((*iterator).second)->socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                                                  1);
 //    configuration.UDPListenerConfiguration.listenAddress.set_port_number (listeningPortNumber_in,
 //                                                                          1);
   } // end ELSE
@@ -996,7 +988,6 @@ do_work (
               ACE_TEXT ("finished working...\n")));
 
 error:
-  timer_manager_p->stop ();
 //		{ // synch access
 //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1013,59 +1004,16 @@ error:
 #endif // GTK_USE
   if (stop_event_dispatch)
     Common_Event_Tools::finalizeEventDispatch (event_dispatch_state_s,
-                                               true); // wait ?
+                                               true,   // wait ?
+                                               false); // close singletons ?
   if (configuration.listener &&
       !useUDP_in)
     configuration.listener->stop ();
+
+  Common_Timer_Tools::finalize ();
 }
 
-void
-do_printVersion (const std::string& programName_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
-
-  std::ostringstream converter;
-
-  // compiler version string...
-  converter << ACE::compiler_major_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::compiler_minor_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::compiler_beta_version ();
-
-  std::cout << programName_in
-            << ACE_TEXT (" compiled on ")
-            << ACE::compiler_name ()
-            << ACE_TEXT (" ")
-            << converter.str ()
-            << std::endl << std::endl;
-
-  std::cout << ACE_TEXT ("libraries: ")
-            << std::endl
-#if defined (HAVE_CONFIG_H)
-            << ACE_TEXT (ACENetwork_PACKAGE_NAME)
-            << ACE_TEXT (": ")
-            << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
-            << std::endl
-#endif // HAVE_CONFIG_H
-  ;
-
-  converter.str ("");
-  // ACE version string...
-  converter << ACE::major_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::minor_version ();
-  converter << ACE_TEXT (".");
-  converter << ACE::beta_version ();
-
-  // *NOTE*: cannot use ACE_VERSION, as it doesn't contain the (potential) beta
-  // version number... Need this, as the library soname is compared to this
-  // string
-  std::cout << ACE_TEXT ("ACE: ")
-//             << ACE_VERSION
-            << converter.str ()
-            << std::endl;
-}
+COMMON_DEFINE_PRINTVERSION_FUNCTION (do_print_version, NETWORK_MAKE_VERSION_STRING_VARIABLE (programName_in, ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL), version_string), version_string)
 
 int
 ACE_TMAIN (int argc_in,
@@ -1094,12 +1042,18 @@ ACE_TMAIN (int argc_in,
   // start profile timer...
   process_profile.start ();
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Tools::initialize (false,  // COM ?
+                            true);  // RNG ?
+#else
+  Common_Tools::initialize (true); // RNG ?
+#endif // ACE_WIN32 || ACE_WIN64
   Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
 
   std::string configuration_path =
-      Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                                        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
-                                                        true); // configuration-
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_U_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // step1a set defaults
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1119,7 +1073,7 @@ ACE_TMAIN (int argc_in,
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor =
-          (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;
@@ -1129,27 +1083,27 @@ ACE_TMAIN (int argc_in,
     NET_SERVER_DEFAULT_NUMBER_OF_PROACTOR_DISPATCH_THREADS;
 
   // step1b: parse/process/validate configuration
-  if (!do_processArguments (argc_in,
-                            argv_in,
+  if (!do_process_arguments (argc_in,
+                             argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                            show_console,
+                             show_console,
 #endif // ACE_WIN32 || ACE_WIN64
-                            source_file,
-                            UI_file_path,
-                            network_interface,
-                            //keep_alive_timeout,
-                            log_to_file,
-                            maximum_number_of_connections,
-                            use_loopback,
-                            listening_port_number,
-                            use_reactor,
-                            statistic_reporting_interval,
-                            trace_information,
-                            use_udp,
-                            print_version_and_exit,
-                            number_of_dispatch_threads))
+                             source_file,
+                             UI_file_path,
+                             network_interface,
+                             //keep_alive_timeout,
+                             log_to_file,
+                             maximum_number_of_connections,
+                             use_loopback,
+                             listening_port_number,
+                             use_reactor,
+                             statistic_reporting_interval,
+                             trace_information,
+                             use_udp,
+                             print_version_and_exit,
+                             number_of_dispatch_threads))
   {
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_print_usage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1182,7 +1136,7 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_print_usage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1243,7 +1197,7 @@ ACE_TMAIN (int argc_in,
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
-    do_printVersion (ACE::basename (argv_in[0]));
+    do_print_version (ACE::basename (argv_in[0]));
 
     Common_Log_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE
@@ -1266,12 +1220,12 @@ ACE_TMAIN (int argc_in,
   // step1e: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (false);
   ACE_Sig_Set ignored_signal_set (false);
-  do_initializeSignals (use_reactor,
-                        (statistic_reporting_interval == 0), // handle SIGUSR1/SIGBREAK
-                                                             // iff regular reporting
-                                                             // is off
-                        signal_set,
-                        ignored_signal_set);
+  do_initialize_signals (use_reactor,
+                         (statistic_reporting_interval == 0), // handle SIGUSR1/SIGBREAK
+                                                              // iff regular reporting
+                                                              // is off
+                         signal_set,
+                         ignored_signal_set);
   Common_SignalActions_t previous_signal_actions;
   ACE_Sig_Set previous_signal_mask (false); // fill ?
   if (!Common_Signal_Tools::preInitialize (signal_set,

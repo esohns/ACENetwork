@@ -32,7 +32,6 @@
 
 //----------------------------------------
 
-#define TEST_U_UI_GTKEVENT_RESOLUTION                     200 // ms --> 5 FPS
 #define TEST_U_UI_GTK_ACTION_CONNECT_NAME                 "action_connect"
 #define TEST_U_UI_GTK_ACTION_SEND_NAME                    "action_send"
 #define TEST_U_UI_GTK_ACTION_PING_NAME                    "action_ping"
@@ -60,16 +59,8 @@
 #define TEST_U_UI_GTK_SPINBUTTON_DATA_NAME                "spinbutton_data"
 #define TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME        "spinbutton_data_messages"
 #define TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME     "spinbutton_session_messages"
-#define TEST_U_UI_GTK_SPINBUTTON_SERVER_PORT_NAME         "spinbutton_server_port"
-#define TEST_U_UI_GTK_SPINBUTTON_EXTERNAL_PORT_NAME       "spinbutton_external_port"
-#define TEST_U_UI_GTK_SPINBUTTON_INTERNAL_PORT_NAME       "spinbutton_internal_port"
 #define TEST_U_UI_GTK_STATUSBAR_NAME                      "statusbar"
 //#define TEST_U_UI_GTK_TABLE_OPTIONS_NAME                  "table_options"
-#define TEST_U_UI_GTK_TOGGLEACTION_LISTEN_NAME            "toggleaction_listen"
 #define TEST_U_UI_GTK_TEXTVIEW_NAME                       "textview"
-
-// GTK progress/status bar
-#define TEST_U_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL         27 // ms (?)
-#define TEST_U_UI_GTK_STATUSBAR_CONTEXT_DESCRIPTION       "Stream::main"
 
 #endif

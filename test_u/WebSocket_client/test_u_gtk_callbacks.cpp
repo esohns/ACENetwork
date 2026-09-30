@@ -239,8 +239,8 @@ start_progress_reporting (gpointer userData_in)
       //                 idle_update_progress_cb,
       //                 &data_p->progressData,
       //                 NULL);
-      g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                          // _LOW doesn't work (on Win32)
-                          TEST_U_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
+      g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,               // _LOW doesn't work (on Win32)
+                          COMMON_UI_REFRESH_DEFAULT_PROGRESS_MS, // ms (?)
                           idle_update_progress_cb,
                           &data_p->progressData,
                           NULL);
@@ -431,7 +431,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     } // end ELSE
 
     // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (TEST_U_UI_GTKEVENT_RESOLUTION,
+    event_source_id = g_timeout_add (COMMON_UI_REFRESH_DEFAULT_WIDGET_MS,
                                      idle_update_info_display_cb,
                                      data_p);
     if (event_source_id > 0)
@@ -491,16 +491,16 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (combo_box_p);
   gint n_rows =
     gtk_tree_model_iter_n_children (GTK_TREE_MODEL (list_store_p), NULL);
-  if (n_rows)
+  if (n_rows > 0)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    if (InlineIsEqualGUID (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier, GUID_NULL))
+#if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
+    if (InlineIsEqualGUID (NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier, GUID_NULL))
 #else
-    if (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.empty ())
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+    if (NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.empty ())
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #else
-    if (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.empty ())
+    if (NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.empty ())
 #endif // ACE_WIN32 || ACE_WIN64
       gtk_combo_box_set_active (combo_box_p, 0);
     else
@@ -508,7 +508,8 @@ idle_initialize_UI_cb (gpointer userData_in)
       GtkTreeModel* tree_model_p = gtk_combo_box_get_model (combo_box_p);
       ACE_ASSERT (tree_model_p);
       GtkTreeIter tree_iterator;
-      if (!gtk_tree_model_get_iter_first (tree_model_p, &tree_iterator))
+      if (!gtk_tree_model_get_iter_first (tree_model_p,
+                                          &tree_iterator))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to gtk_tree_model_get_iter_first(): \"%m\", aborting\n")));
@@ -524,9 +525,9 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       std::string interface_identifier =
 #if COMMON_OS_WIN32_TARGET_PLATFORM (0x0600) // _WIN32_WINNT_VISTA
-        Common_OS_Tools::GUIDToString (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
+        Common_OS_Tools::GUIDToString (NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier);
 #else
-        NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier;
+        NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM (0x0600)
 #endif // ACE_WIN32 || ACE_WIN64
       do
@@ -542,7 +543,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         if (ACE_OS::strcmp (interface_identifier.c_str (),
 #else
-        if (ACE_OS::strcmp (NET_CONFIGURATION_UDP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str (),
+        if (ACE_OS::strcmp (NET_CONFIGURATION_TCP_CAST ((*iterator_2).second)->socketConfiguration.interfaceIdentifier.c_str (),
 #endif // ACE_WIN32 || ACE_WIN64
                             g_value_get_string (&value)) == 0)
         {
