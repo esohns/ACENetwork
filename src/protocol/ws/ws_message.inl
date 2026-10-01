@@ -98,7 +98,7 @@ template <typename RecordType,
           typename MessageType>
 std::string
 WebSocket_Message_T<RecordType,
-                    MessageType>::CommandToString (WebSocket_OpCode_t opcode_in)
+                    MessageType>::CommandTypeToString (WebSocket_OpCode_t opcode_in)
 {
   NETWORK_TRACE (ACE_TEXT ("WebSocket_Message_T::CommandToString"));
 

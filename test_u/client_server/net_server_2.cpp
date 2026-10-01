@@ -1257,11 +1257,11 @@ ACE_TMAIN (int argc_in,
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
   std::string network_interface =
-      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL_S;
   bool trace_information = false;

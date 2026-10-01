@@ -321,6 +321,7 @@ WebSocket_Module_Parser_T<ACE_SYNCH_USE,
   DataMessageType* message_p = NULL;
   DATA_T* data_p = NULL;
   ACE_Message_Block* message_block_p = headFragment_;
+  ACE_Message_Block* message_block_2 = NULL;
   size_t bytes_to_skip = 0;
   size_t total_length, available_data;
 
@@ -392,7 +393,6 @@ WebSocket_Module_Parser_T<ACE_SYNCH_USE,
 
   bytes_to_skip = data_p->payloadSize;
 
-  ACE_Message_Block* message_block_2 = NULL;
   do
   { ACE_ASSERT (message_block_p);
     available_data = message_block_p->length ();
@@ -928,9 +928,6 @@ WebSocket_Module_ParserH_T<ACE_SYNCH_USE,
   const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
     NULL;
 
-  if (unlikely (configuration_in.parserConfiguration->multiBody))
-    multiBody_ = true;
-
   return inherited::initialize (configuration_in,
                                 allocator_in);
 }
@@ -1109,7 +1106,6 @@ WebSocket_Module_ParserH_T<ACE_SYNCH_USE,
       {
         headFragment_->release (); headFragment_ = NULL;
       } // end IF
-      chunks_.clear ();
 
       break;
     }
@@ -1150,7 +1146,6 @@ WebSocket_Module_ParserH_T<ACE_SYNCH_USE,
       {
         headFragment_->release (); headFragment_ = NULL;
       } // end IF
-      chunks_.clear ();
 
       if (inherited::configuration_->concurrency != STREAM_HEADMODULECONCURRENCY_CONCURRENT)
       { Common_ITask* itask_p = this;
@@ -1270,7 +1265,9 @@ WebSocket_Module_ParserH_T<ACE_SYNCH_USE,
   DataMessageType* message_p = NULL;
   DATA_T* data_p = NULL;
   ACE_Message_Block* message_block_p = headFragment_;
-  unsigned int bytes_to_skip = 0;
+  ACE_Message_Block* message_block_2 = NULL;
+  size_t bytes_to_skip = 0;
+  size_t total_length, available_data;
 
   ACE_NEW_NORETURN (data_p,
                     DATA_T ());
@@ -1339,7 +1336,6 @@ WebSocket_Module_ParserH_T<ACE_SYNCH_USE,
 
   bytes_to_skip = data_p->payloadSize;
 
-  ACE_Message_Block* message_block_2 = NULL;
   do
   { ACE_ASSERT (message_block_p);
     available_data = message_block_p->length ();
@@ -1361,7 +1357,7 @@ WebSocket_Module_ParserH_T<ACE_SYNCH_USE,
     ACE_ASSERT (bytes_to_skip == available_data);
   } // end ELSE
 
-  inherited2::finished_ = true;
+  // inherited2::finished_ = true;
 
 error:
   ;

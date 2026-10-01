@@ -876,6 +876,8 @@ ACE_TMAIN (int argc_in,
 #else
   Common_Tools::initialize (true); // RNG ?
 #endif // ACE_WIN32 || ACE_WIN64
+  // Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (argv_in[0]));
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR ("WebSocket_client"));
 
   std::string configuration_path =
     Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),

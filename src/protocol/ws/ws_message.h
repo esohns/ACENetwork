@@ -80,7 +80,7 @@ class WebSocket_Message_T
   inline virtual ~WebSocket_Message_T () {}
 
   virtual WebSocket_OpCode_t command () const; // return value: message type
-  static std::string CommandToString (WebSocket_OpCode_t);
+  static std::string CommandTypeToString (WebSocket_OpCode_t);
 
   // implement Common_IDumpState
   virtual void dump_state () const;
