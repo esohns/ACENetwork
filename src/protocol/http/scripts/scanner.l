@@ -535,6 +535,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                  ACE_UINT64 content_length_i = message_block_p->total_length () - iparser_p->offset ();
                                  iparser_p->contentLengthOrChunkSize (content_length_i);
                                  iparser_p->multiBody ();
+                                 // *IMPORTANT NOTE*: put the data back
+                                 *yy_cp = yyg->yy_hold_char;
                                  BEGIN (INITIAL); // unknown length
                                }
                                else
@@ -562,6 +564,8 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                  ACE_UINT64 content_length_i = message_block_p->total_length () - iparser_p->offset ();
                                  iparser_p->contentLengthOrChunkSize (content_length_i);
                                  iparser_p->multiBody ();
+                                 // *IMPORTANT NOTE*: put the data back
+                                 *yy_cp = yyg->yy_hold_char;
                                  BEGIN (INITIAL); // unknown length
                                } // end ELSE
                              } // end ELSE
