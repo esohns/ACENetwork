@@ -643,8 +643,8 @@ Test_I_Encoder::handleSessionMessage (Test_I_SessionMessage*& message_inout,
                                   inherited::videoFrame_->height,
                                   1); // *TODO*: linesize alignment
 
-      inherited::videoCodecContext_->bit_rate =
-        inherited::videoFrameSize_ * inherited::videoFrame_->time_base.den * 8;
+      //inherited::videoCodecContext_->bit_rate =
+      //  inherited::videoFrameSize_ * inherited::videoFrame_->time_base.den * 8;
       /* Resolution must be a multiple of two. */
       inherited::videoCodecContext_->width = inherited::videoFrame_->width;
       inherited::videoCodecContext_->height = inherited::videoFrame_->height;
