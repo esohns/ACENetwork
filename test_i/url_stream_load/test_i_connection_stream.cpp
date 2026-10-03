@@ -221,6 +221,11 @@ Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
 {
   STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::load"));
 
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+  bool use_demuxer_b = !(*iterator).second.second->inputFormat.empty ();
+
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
   ACE_ASSERT (result);
@@ -248,12 +253,15 @@ Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
   module_p = NULL;
 
 #if defined (FFMPEG_SUPPORT)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Demuxer_Module (this,
-                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
+  if (use_demuxer_b)
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Demuxer_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+  } // end IF
 
   if (inherited::configuration_->configuration_->useHardwareDecoder)
     ACE_NEW_RETURN (module_p,

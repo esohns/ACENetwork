@@ -686,7 +686,7 @@ do_work (bool debugParser_in,
   codec_configuration_1b.delayOpen = true;
   codec_configuration_1b.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   codec_configuration_1b.format.videoFormat = AV_PIX_FMT_YUV420P;
-  //codec_configuration_1b.useParser = false;
+  codec_configuration_1b.useParser = false; // *NOTE*: a setting of "true" does not work with "webm" (i.e. vp09-) streams
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

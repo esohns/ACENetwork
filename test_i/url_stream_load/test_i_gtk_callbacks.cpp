@@ -124,33 +124,14 @@ executeYtdl (const std::string& URL_in)
   ACE_ASSERT (Common_File_Tools::isExecutable (yt_dlp_executable));
 
   std::string command_string = yt_dlp_executable +
-                               ACE_TEXT_ALWAYS_CHAR (" --dump-json \"") +
-                               URL_in + ACE_TEXT_ALWAYS_CHAR ("\"");
+                               ACE_TEXT_ALWAYS_CHAR (" --dump-json") +
+//                               ACE_TEXT_ALWAYS_CHAR (" -S vcodec:h264") + // *NOTE*: vp9-in-mp4 doesn't currently work
+                               ACE_TEXT_ALWAYS_CHAR (" \"") + URL_in + ACE_TEXT_ALWAYS_CHAR ("\"");
   int status_i = 0;
   Common_Process_Tools::command (command_string,
                                  status_i,
                                  result,
                                  true); // return stdout ?
-
-//  char buffer_a[4096];
-//  FILE* file_p = NULL;
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  file_p = _popen (command_string.c_str (), ACE_TEXT_ALWAYS_CHAR ("r"));
-//#else
-//  file_p =  popen (command_string.c_str (), ACE_TEXT_ALWAYS_CHAR ("r"));
-//#endif // ACE_WIN32 || ACE_WIN64
-//  if (!file_p)
-//    return result;
-//  while (ACE_OS::fgets (buffer_a, sizeof (char[4096]), file_p) != NULL)
-//    result += buffer_a;
-//  if (!result.empty () && result.back () == '\n')
-//    result.pop_back ();
-//
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  _pclose (file_p);
-//#else
-//  pclose (file_p);
-//#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
 }
@@ -1330,7 +1311,8 @@ button_load_clicked_cb (GtkWidget* widget_in,
     if (!format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("acodec")) &&
         !format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("vcodec")))
       continue;
-    auto iterator = format_value_r.FindMember (ACE_TEXT_ALWAYS_CHAR ("acodec"));
+    rapidjson::Value::ConstMemberIterator iterator =
+      format_value_r.FindMember (ACE_TEXT_ALWAYS_CHAR ("acodec"));
     acodec_string.clear ();
     if (iterator != format_value_r.MemberEnd ())
       acodec_string = iterator->value.GetString ();
@@ -1341,10 +1323,18 @@ button_load_clicked_cb (GtkWidget* widget_in,
     is_audio_b =
       (!acodec_string.empty () && acodec_string != ACE_TEXT_ALWAYS_CHAR ("none"));
 
-    iterator = format_value_r.FindMember (ACE_TEXT_ALWAYS_CHAR ("container"));
     container_string.clear ();
+    iterator = format_value_r.FindMember (ACE_TEXT_ALWAYS_CHAR ("container"));
     if (iterator != format_value_r.MemberEnd ())
       container_string = iterator->value.GetString ();
+    else
+    { // *TODO*: support HLS protocol(s)
+      iterator = format_value_r.FindMember (ACE_TEXT_ALWAYS_CHAR ("protocol"));
+      ACE_ASSERT (iterator != format_value_r.MemberEnd ());
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("JSON format contains 'protocol' (was: \"%s\") member, which is currently not supported, continuing\n"),
+                  ACE_TEXT (iterator->value.GetString ())));
+    } // end ELSE
 
     if (is_audio_b)
     {
@@ -1390,21 +1380,31 @@ button_load_clicked_cb (GtkWidget* widget_in,
         format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("height")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("height")].GetUint ()
                                                                      : 0;
 #endif // ACE_WIN32 || ACE_WIN64
-      fps_i =
-        format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("fps")) ? format_value_r[ACE_TEXT_ALWAYS_CHAR ("fps")].GetUint ()
-                                                                : 0;
+      if (format_value_r.HasMember (ACE_TEXT_ALWAYS_CHAR ("fps")))
+      {
+        const rapidjson::Value& value_r = format_value_r[ACE_TEXT_ALWAYS_CHAR ("fps")];
+        ACE_ASSERT (value_r.IsNumber ());
+        fps_i = (value_r.IsDouble () ? static_cast<ACE_UINT32> (value_r.GetDouble ())
+                                     : value_r.GetUint ());
+      } // end IF
+      else
+        fps_i = 0;
 
       if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av1")) ||
           Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("av01")))
         codec_id_e = AV_CODEC_ID_AV1;
       else if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("avc1")))
         codec_id_e = AV_CODEC_ID_H264;
+      else if (Common_String_Tools::startswith (vcodec_string, ACE_TEXT_ALWAYS_CHAR ("vp09")))
+        codec_id_e = AV_CODEC_ID_VP9;
       else
       { ACE_ASSERT (false); // *TODO*
         codec_id_e = AV_CODEC_ID_NONE;
       } // end ELSE
 
       if (Common_String_Tools::startswith (container_string, ACE_TEXT_ALWAYS_CHAR ("mp4")))
+        input_string = ACE_TEXT_ALWAYS_CHAR ("mp4");
+      else if ((codec_id_e == AV_CODEC_ID_VP9) && container_string.empty ()) // VP9-in-MP4: 616
         input_string = ACE_TEXT_ALWAYS_CHAR ("mp4");
       else
       { ACE_ASSERT (false); // *TODO*
