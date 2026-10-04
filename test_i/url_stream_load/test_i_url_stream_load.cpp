@@ -108,8 +108,9 @@
 #include "test_i_url_stream_load_common.h"
 #include "test_i_url_stream_load_defines.h"
 
-const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream");
-const char stream_name_string_1b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream_1b");
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadAudioStream");
+const char stream_name_string_1b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadVideoStream");
+const char stream_name_string_1c[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadM3UStream");
 
 void
 do_print_usage (const std::string& programName_in)
@@ -595,10 +596,13 @@ do_work (bool debugParser_in,
 
   Test_I_EventHandler message_handler (&CBData_in);
   Test_I_EventHandler_1b message_handler_1b (&CBData_in);
+  Test_I_EventHandler_1c message_handler_1c (&CBData_in);
   Test_I_EventHandler_2 message_handler_2 (&CBData_in);
   Test_I_MessageHandler_Module event_handler_module (NULL,
                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_1b (NULL,
+                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_Module event_handler_module_1c (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_2 (NULL,
                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
@@ -656,6 +660,21 @@ do_work (bool debugParser_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("1b"),
                                                                     &connection_configuration_1b));
 
+  Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1c;
+  connection_configuration_1c.socketConfiguration.address = remoteHost_in;
+  connection_configuration_1c.allocatorConfiguration = &allocator_configuration;
+  connection_configuration_1c.socketConfiguration.useLoopBackDevice =
+    connection_configuration_1c.socketConfiguration.address.is_loopback ();
+//  connection_configuration_1c.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  connection_configuration_1c.messageAllocator = &message_allocator;
+  //connection_configuration_1c.PDUSize = bufferSize_in;
+  //connection_configuration_1c.userData = &CBData_in.configuration->userData;
+  connection_configuration_1c.streamConfiguration =
+    &configuration_in.streamConfiguration_1c;
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("1c"),
+                                                                    &connection_configuration_1c));
+
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
 #if defined (_DEBUG)
@@ -700,12 +719,15 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1_queuetarget_2;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1c;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1c_b; // m3u parser
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2a_video_resize;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b; // save video converter
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b_audio_injector;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1b;
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1c;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_2;
 
   modulehandler_configuration.allocatorConfiguration =
@@ -791,6 +813,24 @@ do_work (bool debugParser_in,
   configuration_in.streamConfiguration_1b.initialize (module_configuration,
                                                       modulehandler_configuration_1b,
                                                       stream_configuration_1b);
+
+  modulehandler_configuration_1c = modulehandler_configuration;
+  modulehandler_configuration_1c.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration_1c.parserConfiguration =
+    &configuration_in.parserConfiguration_1c;
+  modulehandler_configuration_1c.subscriber = &message_handler_1c;
+  stream_configuration_1c = stream_configuration;
+  stream_configuration_1c.module = &event_handler_module_1c;
+  configuration_in.streamConfiguration_1c.initialize (module_configuration,
+                                                      modulehandler_configuration_1c,
+                                                      stream_configuration_1c);
+
+  modulehandler_configuration_1c_b = modulehandler_configuration_1c;
+  modulehandler_configuration_1c_b.parserConfiguration =
+    &configuration_in.parserConfiguration_1c_2;
+  configuration_in.streamConfiguration_1c.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING),
+                                                                  std::make_pair (&module_configuration,
+                                                                                  &modulehandler_configuration_1c_b)));
 
   modulehandler_configuration_2 = modulehandler_configuration;
   modulehandler_configuration_2.allocatorConfiguration =

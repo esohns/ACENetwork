@@ -244,7 +244,6 @@ HEX            [a-fA-F[:digit:]]
                              { // *IMPORTANT NOTE*: put the data back
                                *yy_cp = yyg->yy_hold_char;
                                yyterminate (); // not enough data, cannot proceed
-//                               return yy::WebSocket_Parser::token::END_OF_FRAGMENT;
                              } // end IF
 
                              // wait for more data fragment(s)

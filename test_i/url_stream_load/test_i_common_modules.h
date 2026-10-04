@@ -53,6 +53,7 @@
 
 #include "stream_lib_tagger.h"
 
+#include "stream_misc_defragment.h"
 #include "stream_misc_delay.h"
 #include "stream_misc_injector.h"
 #include "stream_misc_media_splitter.h"
@@ -179,6 +180,19 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           Test_I_StatisticReport_ReaderTask_t,                    // reader type
                           Test_I_StatisticReport_WriterTask_t,                    // writer type
                           Test_I_StatisticReport);                                // name
+
+typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
+                                   Common_TimePolicy_t,
+                                   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                   Stream_ControlMessage_t,
+                                   Test_I_Message,
+                                   Test_I_SessionMessage> Test_I_Defragment;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,                 // session data type
+                              enum Stream_SessionMessageType,                          // session event type
+                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,  // module handler configuration type
+                              libacestream_default_misc_defragment_module_name_string,
+                              Stream_INotify_t,                                        // stream notification interface type
+                              Test_I_Defragment);                                      // writer type
 
 typedef Stream_Module_Tagger_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,

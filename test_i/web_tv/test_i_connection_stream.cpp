@@ -60,13 +60,13 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
                                              ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
+  module_p = NULL;
   //ACE_NEW_RETURN (module_p,
   //                Test_I_StatisticReport_Module (this,
   //                                               ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
   //                false);
   //layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
+  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_Defragment_Module (this,
                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),

@@ -196,13 +196,13 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
   ACE_ASSERT (CBData_->channels);
   ACE_ASSERT (CBData_->currentChannel);
   Test_I_WebTV_ChannelConfigurationsIterator_t channel_iterator =
-      CBData_->channels->find (CBData_->currentChannel);
+    CBData_->channels->find (CBData_->currentChannel);
   ACE_ASSERT (channel_iterator != CBData_->channels->end ());
 
   // process video stream data
   struct Test_I_WebTV_Channel_Resolution resolution_s;
   std::istringstream converter;
-  struct Test_I_WebTV_ChannelSegment channel_segment_s;
+  //struct Test_I_WebTV_ChannelSegment channel_segment_s;
   int UTC_offset_i = 0;
 
   // *NOTE*: some channels (e.g. QVC) publish their segment directly
@@ -218,8 +218,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                            ACE_TEXT_ALWAYS_CHAR (COMMON_PARSER_M3U_EXT_X_PROGRAM_DATE_TIME)))
       {
         (*channel_iterator).second.videoSegment.start =
-            Common_Timer_Tools::ISO8601ToTimestamp ((*iterator_2).second,
-                                                    UTC_offset_i);
+          Common_Timer_Tools::ISO8601ToTimestamp ((*iterator_2).second,
+                                                  UTC_offset_i);
         break;
       } // end IF
     } // end FOR
@@ -243,7 +243,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                             ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_EXTINFO_RESOLUTION_KEY_STRING)))
       {
         std::string regex_string =
-            ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(?:[[:space:]xX]+)([[:digit:]]+)$");
+          ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+)(?:[[:space:]xX]+)([[:digit:]]+)$");
         std::regex regex (regex_string);
         std::smatch match_results;
         if (unlikely(!std::regex_match ((*iterator_2).second,
@@ -316,11 +316,10 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
       if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                            ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_DEFAULT_KEY_STRING)))
-        channel_s.default_ =
-          !ACE_OS::strcmp ((*iterator_2).first.c_str (),
-                           ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_DEFAULT_YES_STRING));
+        channel_s.default_ = !ACE_OS::strcmp ((*iterator_2).first.c_str (),
+                                              ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_DEFAULT_YES_STRING));
       else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
-                           ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_NAME_KEY_STRING)))
+                                ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_NAME_KEY_STRING)))
         channel_s.description = (*iterator_2).second;
       else if (!ACE_OS::strcmp ((*iterator_2).first.c_str (),
                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_M3U_MEDIAINFO_URI_KEY_STRING)))

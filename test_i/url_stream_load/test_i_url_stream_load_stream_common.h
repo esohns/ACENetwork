@@ -115,20 +115,15 @@ struct Test_I_URLStreamLoad_MessageData
 {
   Test_I_URLStreamLoad_MessageData ()
    : HTTP_Record ()
-#if defined (LIBXML2_SUPPORT)
-   //, document (NULL)
-#endif // LIBXML2_SUPPORT
- //, M3UPlaylist ()
+   , M3UPlaylist ()
   {}
   ~Test_I_URLStreamLoad_MessageData ()
   {}
+
   inline void operator= (const struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); }
   inline void operator+= (Test_I_URLStreamLoad_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
-#if defined (LIBXML2_SUPPORT)
-  //htmlDocPtr document;
-#endif // LIBXML2_SUPPORT
-  //struct M3U_Playlist M3UPlaylist;
+  struct M3U_Playlist M3UPlaylist;
 };
 
 typedef Stream_ISessionDataNotify_T<struct Test_I_URLStreamLoad_SessionData,

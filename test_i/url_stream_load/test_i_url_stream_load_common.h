@@ -80,10 +80,13 @@ struct Test_I_URLStreamLoad_Configuration
 #endif // GTK_USE
    , parserConfiguration ()
    , parserConfiguration_1b ()
+   , parserConfiguration_1c ()
+   , parserConfiguration_1c_2 ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
    , streamConfiguration_1b ()
+   , streamConfiguration_1c ()
    , streamConfiguration_2 ()
   {
     parserConfiguration.notifyProgress = true;
@@ -95,6 +98,8 @@ struct Test_I_URLStreamLoad_Configuration
   // **************************** parser data **********************************
   struct HTTP_ParserConfiguration                        parserConfiguration;    // audio connection-
   struct HTTP_ParserConfiguration                        parserConfiguration_1b; // video connection-
+  struct HTTP_ParserConfiguration                        parserConfiguration_1c; // M3U connection-
+  struct HTTP_ParserConfiguration                        parserConfiguration_1c_2; // M3U parser-
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
@@ -102,7 +107,8 @@ struct Test_I_URLStreamLoad_Configuration
   // **************************** stream data **********************************
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration; // audio connection-
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1b; // video connection-
-  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_2; // A/V
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1c; // m3u connection-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_2; // A/V processing-
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -138,6 +144,20 @@ struct Test_I_URLStreamLoad_UI_ProgressData
   ACE_UINT64              transferred; // byte(s)
   struct Stream_Statistic statistic_1b;
 };
+
+struct Test_I_URLStreamLoad_AVSegment
+{
+  Test_I_URLStreamLoad_AVSegment ()
+   : length (0.0f)
+   , URL ()
+  {}
+
+  float       length; // s
+  std::string URL;
+};
+typedef std::list<struct Test_I_URLStreamLoad_AVSegment> Test_I_URLStreamLoad_AVSegments_t;
+typedef Test_I_URLStreamLoad_AVSegments_t::iterator Test_I_URLStreamLoad_AVSegmentsIterator_t;
+typedef Test_I_URLStreamLoad_AVSegments_t::const_iterator Test_I_URLStreamLoad_AVSegmentsConstIterator_t;
 
 struct Test_I_URLStreamLoad_UI_CBData
 #if defined (GTK_USE)
@@ -178,32 +198,38 @@ struct Test_I_URLStreamLoad_UI_CBData
    , volumeControl (NULL)
    , maxVolumeLevel (0)
 #endif // ACE_WIN32 || ACE_WIN64
-  {}
+   , videoSegmentIterator ()
+   , videoSegments ()
+  {
+    videoSegmentIterator = videoSegments.end ();
+  }
 
-  struct Test_I_URLStreamLoad_Configuration*  configuration;
-  Test_I_AVStream*                            AVStream;
-  Common_IDispatch*                           dispatch; // display module
+  struct Test_I_URLStreamLoad_Configuration*           configuration;
+  Test_I_AVStream*                                     AVStream;
+  Common_IDispatch*                                    dispatch; // display module
 #if defined (RAPIDJSON_SUPPORT)
-  rapidjson::Document                         formats;
+  rapidjson::Document                                  formats;
 #endif // RAPIDJSON_SUPPORT
-  ACE_HANDLE                                  audioHandle;
-  ACE_HANDLE                                  videoHandle;
+  ACE_HANDLE                                           audioHandle;
+  ACE_HANDLE                                           videoHandle;
 #if defined (GTK_USE)
-  guint                                       videoUpdateEventSourceId;
+  guint                                                videoUpdateEventSourceId;
 #endif // GTK_USE
 #if defined (LIBPIPEWIRE_SUPPORT)
   struct Stream_MediaFramework_Pipewire_Configuration* pipewireConfiguration;
 #endif // LIBPIPEWIRE_SUPPORT
-  struct Test_I_URLStreamLoad_UI_ProgressData progressData;
-  std::string                                 title;
+  struct Test_I_URLStreamLoad_UI_ProgressData          progressData;
+  std::string                                          title;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   //IAudioEndpointVolume*                               volumeControl;
-  ISimpleAudioVolume*                         volumeControl;
+  ISimpleAudioVolume*                                  volumeControl;
 #else
-  snd_mixer_t*                                mixerHandle;
-  snd_mixer_elem_t*                           volumeControl;
-  long                                        maxVolumeLevel;
+  snd_mixer_t*                                         mixerHandle;
+  snd_mixer_elem_t*                                    volumeControl;
+  long                                                 maxVolumeLevel;
 #endif // ACE_WIN32 || ACE_WIN64
+  Test_I_URLStreamLoad_AVSegmentsConstIterator_t       videoSegmentIterator;
+  Test_I_URLStreamLoad_AVSegments_t                    videoSegments;
 };
 
 //struct Test_I_URLStreamLoad_ThreadData

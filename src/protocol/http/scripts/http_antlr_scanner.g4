@@ -375,11 +375,20 @@ CRLF_HEAD                      : CRLF {
 
 mode REGULAR_BODY;
 BODY                           : OCTET {
+                                   if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
+                                   {
+                                     std::ostringstream converter;
+                                     converter << content_length;
+                                     setText (converter.str ());
+                                     setType (BODY);
+                                     setMode (DEFAULT_MODE);
+                                     break;
+                                   } // end IF
                                    ++scanned_content_length;
                                    ACE_ASSERT (missing_body_or_chunk_bytes);
                                    --missing_body_or_chunk_bytes;
                                    parser->bodyOrChunkBytesSkipped (1);
-                                   if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
+                                   if (unlikely (!missing_body_or_chunk_bytes))
                                    {
                                      std::ostringstream converter;
                                      converter << content_length;

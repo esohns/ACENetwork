@@ -59,11 +59,7 @@ class Test_I_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler (const Test_I_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler& operator= (const Test_I_EventHandler&))
 
-  //typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
-  //typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
-
   struct Test_I_URLStreamLoad_UI_CBData* CBData_;
-  //SESSION_DATA_MAP_T                     sessionDataMap_;
 };
 
 //////////////////////////////////////////
@@ -92,11 +88,36 @@ class Test_I_EventHandler_1b
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1b (const Test_I_EventHandler_1b&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1b& operator= (const Test_I_EventHandler_1b&))
 
-  //typedef std::map<Stream_SessionId_t, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
-  //typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
+  struct Test_I_URLStreamLoad_UI_CBData* CBData_;
+};
+
+//////////////////////////////////////////
+
+class Test_I_EventHandler_1c
+ : public Test_I_ISessionNotify_t
+{
+ public:
+  Test_I_EventHandler_1c (struct Test_I_URLStreamLoad_UI_CBData*); // UI state
+  inline virtual ~Test_I_EventHandler_1c () {}
+
+  // implement Stream_ISessionDataNotify_T
+  virtual void start (Stream_SessionId_t,                              // session id
+                      const struct Test_I_URLStreamLoad_SessionData&); // session data
+  virtual void notify (Stream_SessionId_t,
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,     // session id
+                       const Test_I_Message&); // data message
+  virtual void notify (Stream_SessionId_t,            // session id
+                       const Test_I_SessionMessage&); // session message
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1c ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1c (const Test_I_EventHandler_1c&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1c& operator= (const Test_I_EventHandler_1c&))
 
   struct Test_I_URLStreamLoad_UI_CBData* CBData_;
-  //SESSION_DATA_MAP_T                     sessionDataMap_;
 };
 
 //////////////////////////////////////////

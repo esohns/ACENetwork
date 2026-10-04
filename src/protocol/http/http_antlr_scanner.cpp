@@ -875,12 +875,21 @@ void http_antlr_scanner::CRLF_HEADAction(antlr4::RuleContext *context, size_t ac
 
 void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionIndex) {
   switch (actionIndex) {
-    case 11: 
+    case 11:
+                                       if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
+                                       {
+                                         std::ostringstream converter;
+                                         converter << content_length;
+                                         setText (converter.str ());
+                                         setType (BODY);
+                                         setMode (DEFAULT_MODE);
+                                         break;
+                                       } // end IF
                                        ++scanned_content_length;
                                        ACE_ASSERT (missing_body_or_chunk_bytes);
                                        --missing_body_or_chunk_bytes;
                                        parser->bodyOrChunkBytesSkipped (1);
-                                       if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
+                                       if (unlikely (!missing_body_or_chunk_bytes))
                                        {
                                          std::ostringstream converter;
                                          converter << content_length;

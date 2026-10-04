@@ -55,6 +55,7 @@ typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
 
 extern const char stream_name_string_[];
 extern const char stream_name_string_1b[];
+extern const char stream_name_string_1c[];
 
 class Test_I_ConnectionStream
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -110,9 +111,6 @@ class Test_I_ConnectionStream
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream (const Test_I_ConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream& operator= (const Test_I_ConnectionStream&))
-
-  // *TODO*: re-consider this API
-  //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 //////////////////////////////////////////
@@ -171,9 +169,64 @@ class Test_I_ConnectionStream_1b
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_1b (const Test_I_ConnectionStream_1b&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_1b& operator= (const Test_I_ConnectionStream_1b&))
+};
 
-  // *TODO*: re-consider this API
-  //inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+//////////////////////////////////////////
+
+class Test_I_ConnectionStream_1c
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_1c,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_I_URLStreamLoad_StreamState,
+                                        struct Test_I_URLStreamLoad_StreamConfiguration,
+                                        struct Stream_Statistic,
+                                        Common_Timer_Manager_t,
+                                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                        Test_I_SessionManager_t,
+                                        Stream_ControlMessage_t,
+                                        Test_I_Message,
+                                        Test_I_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_I_ConnectionManager_t,
+                                        struct Stream_UserData>
+{
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_1c,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_I_URLStreamLoad_StreamState,
+                                        struct Test_I_URLStreamLoad_StreamConfiguration,
+                                        struct Stream_Statistic,
+                                        Common_Timer_Manager_t,
+                                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                        Test_I_SessionManager_t,
+                                        Stream_ControlMessage_t,
+                                        Test_I_Message,
+                                        Test_I_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_I_ConnectionManager_t,
+                                        struct Stream_UserData> inherited;
+
+ public:
+  Test_I_ConnectionStream_1c ();
+  inline virtual ~Test_I_ConnectionStream_1c () { inherited::shutdown (); }
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ILayout*, // i/o value: layout
+                     bool&);          // return value: delete modules ?
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_1c (const Test_I_ConnectionStream_1c&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream_1c& operator= (const Test_I_ConnectionStream_1c&))
 };
 
 #endif

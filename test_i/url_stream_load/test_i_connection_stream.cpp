@@ -42,6 +42,7 @@
 #include "test_i_common_modules.h"
 #include "test_i_message.h"
 #include "test_i_module_httpget.h"
+#include "test_i_module_m3u_parser.h"
 #include "test_i_session_message.h"
 
 Test_I_ConnectionStream::Test_I_ConnectionStream ()
@@ -55,7 +56,7 @@ bool
 Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
                                bool& deleteModules_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream::load"));
 
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -219,7 +220,7 @@ bool
 Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
                                   bool& deleteModules_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::load"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::load"));
 
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -304,6 +305,144 @@ Test_I_ConnectionStream_1b::initialize (const inherited::CONFIGURATION_T& config
                                         ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::initialize"));
+
+  // sanity check(s)
+  ACE_ASSERT (!inherited::isRunning ());
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.end ());
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+  ACE_ASSERT (session_manager_p);
+
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
+  bool reset_setup_pipeline = false;
+  struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
+
+  // allocate a new session state, reset stream
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
+                ACE_TEXT (stream_name_string_1b)));
+    goto failed;
+  } // end IF
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
+
+  session_data_p =
+    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
+  // *TODO*: remove type inferences
+  ACE_ASSERT (session_data_p->formats.empty ());
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+
+  // ---------------------------------------------------------------------------
+
+  if (configuration_in.configuration_->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                  ACE_TEXT (stream_name_string_1b)));
+      goto failed;
+    } // end IF
+
+  // -------------------------------------------------------------
+
+  // set (session) message allocator
+  //inherited::allocator_ = configuration_in.messageAllocator;
+
+  inherited::isInitialized_ = true;
+
+  return true;
+
+failed:
+  if (reset_setup_pipeline)
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
+  if (!inherited::STREAM_BASE_T::reset ())
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
+                ACE_TEXT (stream_name_string_1b)));
+
+  return false;
+}
+
+//////////////////////////////////////////
+
+Test_I_ConnectionStream_1c::Test_I_ConnectionStream_1c ()
+ : inherited ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1c::Test_I_ConnectionStream_1c"));
+
+}
+
+bool
+Test_I_ConnectionStream_1c::load (Stream_ILayout* layout_in,
+                                  bool& deleteModules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1c::load"));
+
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+  bool use_demuxer_b = !(*iterator).second.second->inputFormat.empty ();
+
+  bool result = inherited::load (layout_in,
+                                 deleteModules_out);
+  ACE_ASSERT (result);
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_HTTPMarshal_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_StatisticReport_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Defragment_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_M3U_Parser_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_PARSER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Module_HTTPGet_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  deleteModules_out = true;
+
+  return true;
+}
+
+bool
+Test_I_ConnectionStream_1c::initialize (const inherited::CONFIGURATION_T& configuration_in,
+                                        ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1c::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (!inherited::isRunning ());
