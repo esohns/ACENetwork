@@ -106,6 +106,8 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
     case HTTP_Codes::HTTP_STATUS_TEMPORARYREDIRECT:
     case HTTP_Codes::HTTP_STATUS_PERMANENTREDIRECT:
     {
+      passMessageDownstream_out = false;
+
       // step1: redirected --> extract location
       iterator =
         data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_LOCATION_STRING));

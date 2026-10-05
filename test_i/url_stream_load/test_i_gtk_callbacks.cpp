@@ -547,8 +547,8 @@ idle_initialize_UI_cb (gpointer userData_in)
                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
   ACE_ASSERT (entry_p);
   Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3 =
-    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_2.end ());
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
   gchar* text_p =
     Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).second.second->URL);
   gtk_entry_set_text (entry_p,
@@ -844,14 +844,17 @@ continue_2:
 
   GdkWindow* window_p = gtk_widget_get_window (GTK_WIDGET (drawing_area_p));
   ACE_ASSERT (window_p);
-  (*iterator_3).second.second->window = window_p;
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_4a =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_4a != data_p->configuration->streamConfiguration_2.end ());
+  (*iterator_4a).second.second->window = window_p;
 
-  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_4 =
-    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
-  ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_2.end ());
   GtkAllocation allocation_s;
   gtk_widget_get_allocation (GTK_WIDGET (drawing_area_p),
                              &allocation_s);
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_4 =
+    data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
+  ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration_2.end ());
   (*iterator_4).second.second->outputFormat.video.resolution =
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
     { static_cast<LONG> (allocation_s.width), static_cast<LONG> (allocation_s.height) };
@@ -1013,6 +1016,8 @@ idle_load_next_segment_cb (gpointer userData_in)
   Common_UI_GTK_BuildersConstIterator_t iterator =
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
+  if (data_p->videoSegmentIterator == data_p->videoSegments.end ())
+    return G_SOURCE_REMOVE;
   ++data_p->videoSegmentIterator;
   if (data_p->videoSegmentIterator == data_p->videoSegments.end ())
     return G_SOURCE_REMOVE;
@@ -1866,28 +1871,34 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     GtkCheckButton* check_button_p = NULL;
     GtkFileChooserButton* file_chooser_button_p = NULL;
     gchar* directory_p = NULL;
-    Net_ConnectionConfigurationsIterator_t iterator_2 =
+    Net_ConnectionConfigurationsIterator_t iterator_1 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-    Net_ConnectionConfigurationsIterator_t iterator_3 =
+    ACE_ASSERT (iterator_1 != data_p->configuration->connectionConfigurations.end ());
+    Net_ConnectionConfigurationsIterator_t iterator_1b =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("1b"));
-    ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
-    Net_ConnectionConfigurationsIterator_t iterator_3a = // m3u
+    ACE_ASSERT (iterator_1b != data_p->configuration->connectionConfigurations.end ());
+    Net_ConnectionConfigurationsIterator_t iterator_1c = // m3u
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("1c"));
-    ACE_ASSERT (iterator_3a != data_p->configuration->connectionConfigurations.end ());
+    ACE_ASSERT (iterator_1c != data_p->configuration->connectionConfigurations.end ());
     Net_ConnectionConfigurationsIterator_t connection_configuration_iterator;
-    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_4 =
+    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_1_ =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_4 != data_p->configuration->streamConfiguration.end ());
-    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_5 =
+    ACE_ASSERT (iterator_1_ != data_p->configuration->streamConfiguration.end ());
+    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_1b_ =
       data_p->configuration->streamConfiguration_1b.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_5 != data_p->configuration->streamConfiguration_1b.end ());
-    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_5c =
+    ACE_ASSERT (iterator_1b_ != data_p->configuration->streamConfiguration_1b.end ());
+    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_1c_ =
       data_p->configuration->streamConfiguration_1c.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_5c != data_p->configuration->streamConfiguration_1c.end ());
-    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_6 =
+    ACE_ASSERT (iterator_1c_ != data_p->configuration->streamConfiguration_1c.end ());
+    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_2_ =
       data_p->configuration->streamConfiguration_2.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_6 != data_p->configuration->streamConfiguration_2.end ());
+    ACE_ASSERT (iterator_2_ != data_p->configuration->streamConfiguration_2.end ());
+    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3_ =
+      data_p->configuration->streamConfiguration_3.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_3_ != data_p->configuration->streamConfiguration_3.end ());
+    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_4_ =
+      data_p->configuration->streamConfiguration_4.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_4_ != data_p->configuration->streamConfiguration_4.end ());
     Common_Image_Resolution_t resolution_s;
 
     Test_I_TCPConnector_t connector;
@@ -1957,47 +1968,47 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     const rapidjson::Value& url_value_r = format_value_r[ACE_TEXT_ALWAYS_CHAR ("url")];
     ACE_ASSERT (url_value_r.IsString ());
     std::string URL_string = url_value_r.GetString ();
-    (*iterator_4).second.second->URL = URL_string;
+    (*iterator_1_).second.second->URL = URL_string;
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                               &tree_iterator,
                               2,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
-    data_p->configuration->streamConfiguration.configuration_->mediaType.audio.channels =
+    data_p->configuration->streamConfiguration_3.configuration_->mediaType.audio.channels =
       g_value_get_uint (&value);
     g_value_unset (&value);
     data_p->configuration->streamConfiguration_2.configuration_->mediaType.audio.channels =
-      data_p->configuration->streamConfiguration.configuration_->mediaType.audio.channels;
+      data_p->configuration->streamConfiguration_3.configuration_->mediaType.audio.channels;
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                               &tree_iterator,
                               3,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
-    data_p->configuration->streamConfiguration.configuration_->mediaType.audio.sampleRate =
+    data_p->configuration->streamConfiguration_3.configuration_->mediaType.audio.sampleRate =
       g_value_get_uint (&value);
     g_value_unset (&value);
     //data_p->configuration->streamConfiguration_2.configuration_->mediaType.audio.sampleRate =
-    //  data_p->configuration->streamConfiguration.configuration_->mediaType.audio.sampleRate;
+    //  data_p->configuration->streamConfiguration_3.configuration_->mediaType.audio.sampleRate;
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                               &tree_iterator,
                               4,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
-    data_p->configuration->streamConfiguration.configuration_->mediaType.audio.codecId =
+    data_p->configuration->streamConfiguration_3.configuration_->mediaType.audio.codecId =
       static_cast<enum AVCodecID> (g_value_get_uint (&value));
     g_value_unset (&value);
-    (*iterator_4).second.second->codecConfiguration->codecId =
-      data_p->configuration->streamConfiguration.configuration_->mediaType.audio.codecId;
+    (*iterator_3_).second.second->codecConfiguration->codecId =
+      data_p->configuration->streamConfiguration_3.configuration_->mediaType.audio.codecId;
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                               &tree_iterator,
                               5,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-    (*iterator_4).second.second->inputFormat = g_value_get_string (&value);
+    (*iterator_3_).second.second->inputFormat = g_value_get_string (&value);
     g_value_unset (&value);
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
@@ -2035,8 +2046,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     const rapidjson::Value& url_value_2 = format_value_2[ACE_TEXT_ALWAYS_CHAR ("url")];
     ACE_ASSERT (url_value_2.IsString ());
     std::string URL_string_2 = url_value_2.GetString ();
-    (*iterator_5).second.second->URL = URL_string_2;
-    (*iterator_5c).second.second->URL = URL_string_2;
+    (*iterator_1b_).second.second->URL = URL_string_2;
+    (*iterator_1c_).second.second->URL = URL_string_2;
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
                               &tree_iterator,
@@ -2060,7 +2071,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     resolution_s.height = g_value_get_uint (&value);
 #endif // ACE_WIN32 || ACE_WIN64
     g_value_unset (&value);
-    data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.resolution =
+    data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.resolution =
       resolution_s;
     data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.resolution =
       resolution_s;
@@ -2070,29 +2081,29 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                               4,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
-    data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.frameRate =
+    data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.frameRate =
       { static_cast<int> (g_value_get_uint (&value)), 1 };
     g_value_unset (&value);
     data_p->configuration->streamConfiguration_2.configuration_->mediaType.video.frameRate =
-      data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.frameRate;
+      data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.frameRate;
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
                               &tree_iterator,
                               5,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_UINT);
-    data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.codecId =
+    data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.codecId =
       static_cast<enum AVCodecID> (g_value_get_uint (&value));
     g_value_unset (&value);
-    (*iterator_5).second.second->codecConfiguration->codecId =
-      data_p->configuration->streamConfiguration_1b.configuration_->mediaType.video.codecId;
+    (*iterator_4_).second.second->codecConfiguration->codecId =
+      data_p->configuration->streamConfiguration_4.configuration_->mediaType.video.codecId;
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
                               &tree_iterator,
                               6,
                               &value);
     ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-    (*iterator_5).second.second->inputFormat = g_value_get_string (&value);
+    (*iterator_4_).second.second->inputFormat = g_value_get_string (&value);
     g_value_unset (&value);
 
     gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_2),
@@ -2126,11 +2137,11 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       return;
     } // end IF
 
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.hostname =
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.hostname =
       hostname_string;
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.hostname =
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.hostname =
       hostname_string_2;
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second)->socketConfiguration.hostname =
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second)->socketConfiguration.hostname =
       hostname_string_2;
 
     hostname_string_temp = hostname_string;
@@ -2145,7 +2156,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       hostname_string_temp += converter.str ();
     } // end IF
     result =
-      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
+      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
                                                                                                                             AF_INET);
     if (result == -1)
     {
@@ -2154,8 +2165,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (hostname_string_temp.c_str ())));
       return;
     } // end IF
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
-      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.useLoopBackDevice =
+      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.address.is_loopback ();
 
     hostname_string_temp = hostname_string_2;
     position =
@@ -2169,19 +2180,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       hostname_string_temp += converter.str ();
     } // end IF
     result =
-      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
-                                                                                                                            AF_INET);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
-                  ACE_TEXT (hostname_string_temp.c_str ())));
-      return;
-    } // end IF
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.useLoopBackDevice =
-      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.address.is_loopback ();
-    result =
-      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
+      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
                                                                                                                              AF_INET);
     if (result == -1)
     {
@@ -2190,8 +2189,20 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (hostname_string_temp.c_str ())));
       return;
     } // end IF
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second)->socketConfiguration.useLoopBackDevice =
-      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second)->socketConfiguration.address.is_loopback ();
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.useLoopBackDevice =
+      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address.is_loopback ();
+    result =
+      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
+                                                                                                                             AF_INET);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT (hostname_string_temp.c_str ())));
+      return;
+    } // end IF
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second)->socketConfiguration.useLoopBackDevice =
+      static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second)->socketConfiguration.address.is_loopback ();
 
     // save to file ?
     check_button_p =
@@ -2200,7 +2211,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (check_button_p);
     if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p)))
     {
-      (*iterator_4).second.second->targetFileName.clear ();
+      (*iterator_2_).second.second->targetFileName.clear (); // A/V
+      (*iterator_3_).second.second->targetFileName.clear (); // audio-
+      (*iterator_4_).second.second->targetFileName.clear (); // video-
       goto continue_;
     } // end IF
     // retrieve output filename
@@ -2219,14 +2232,14 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     directory_string = directory_p;
     g_free (directory_p); directory_p = NULL;
     ACE_ASSERT (Common_File_Tools::isDirectory (directory_string));
-    (*iterator_4).second.second->targetFileName = directory_string;
-    (*iterator_4).second.second->targetFileName += ACE_DIRECTORY_SEPARATOR_STR_A;
-    (*iterator_4).second.second->targetFileName +=
+    (*iterator_2_).second.second->targetFileName = directory_string;
+    (*iterator_2_).second.second->targetFileName += ACE_DIRECTORY_SEPARATOR_STR_A;
+    (*iterator_2_).second.second->targetFileName +=
       ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE);
-    (*iterator_5).second.second->targetFileName =
-      (*iterator_4).second.second->targetFileName;
-    (*iterator_6).second.second->targetFileName =
-      (*iterator_4).second.second->targetFileName;
+    (*iterator_3_).second.second->targetFileName =
+      (*iterator_2_).second.second->targetFileName;
+    (*iterator_4_).second.second->targetFileName =
+      (*iterator_2_).second.second->targetFileName;
 
 continue_:
     //HTTP_headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Host"), hostname_string));
@@ -2241,7 +2254,7 @@ continue_:
       HTTP_headers.insert (std::make_pair (iterator_7->name.GetString (),
                                            iterator_7->value.GetString ()));
     } // end FOR
-    (*iterator_4).second.second->HTTPHeaders = HTTP_headers;
+    (*iterator_1_).second.second->HTTPHeaders = HTTP_headers;
 
     HTTP_headers.clear ();
     //HTTP_headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Host"), hostname_string_2));
@@ -2256,13 +2269,28 @@ continue_:
       HTTP_headers.insert (std::make_pair (iterator_7->name.GetString (),
                                            iterator_7->value.GetString ()));
     } // end FOR
-    (*iterator_5).second.second->HTTPHeaders = HTTP_headers;
-    (*iterator_5c).second.second->HTTPHeaders = HTTP_headers;
+    (*iterator_1b_).second.second->HTTPHeaders = HTTP_headers;
+    (*iterator_1c_).second.second->HTTPHeaders = HTTP_headers;
+
+    if (!data_p->AudioStream->initialize (data_p->configuration->streamConfiguration_3))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize audio stream, returning\n")));
+      return;
+    } // end IF
+    data_p->AudioStream->start ();
+    if (!data_p->VideoStream->initialize (data_p->configuration->streamConfiguration_4))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize video stream, returning\n")));
+      return;
+    } // end IF
+    data_p->VideoStream->start ();
 
     if (!data_p->AVStream->initialize (data_p->configuration->streamConfiguration_2))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize AVStream, returning\n")));
+                  ACE_TEXT ("failed to initialize A/V stream, returning\n")));
       return;
     } // end IF
     data_p->AVStream->start ();
@@ -2286,23 +2314,23 @@ continue_:
     } // end IF
 
     // step3: connect to peers
-    if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
+    if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     {
 #if defined (SSL_SUPPORT)
       if (use_SSL)
         data_p->audioHandle = Net_Client_Common_Tools::connect (ssl_connector,
-                                                                *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                                *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second),
                                                                 user_data_s,
-                                                                static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                                static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.address,
                                                                 true,
                                                                 true,
                                                                 0);
       else
 #endif // SSL_SUPPORT
         data_p->audioHandle = Net_Client_Common_Tools::connect (connector,
-                                                                *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                                *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second),
                                                                 user_data_s,
-                                                                static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                                static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.address,
                                                                 true,
                                                                 true,
                                                                 0);
@@ -2314,9 +2342,9 @@ continue_:
       ACE_ASSERT (!use_SSL);
 #endif // SSL_SUPPORT
       data_p->audioHandle = Net_Client_Common_Tools::connect (asynch_connector,
-                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second),
                                                               user_data_s,
-                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.address,
                                                               true,
                                                               true,
                                                               0);
@@ -2325,43 +2353,43 @@ continue_:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1).second)->socketConfiguration.address).c_str ())));
       return;
     } // end IF
 
     connection_configuration_iterator =
-      protocol_string_2.empty () ? iterator_3 : iterator_3a;
-    if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
+      protocol_string_2.empty () ? iterator_1b : iterator_1c;
+    if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     {
 #if defined (SSL_SUPPORT)
       if (use_SSL_2)
         data_p->videoHandle = protocol_string_2.empty () ? Net_Client_Common_Tools::connect (ssl_connector_2,
-                                                                                             *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second),
+                                                                                             *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                                                              user_data_s,
-                                                                                             static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.address,
+                                                                                             static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                                                              true,
                                                                                              true,
                                                                                              0)
                                                           : Net_Client_Common_Tools::connect (ssl_connector_3,
-                                                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second),
+                                                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second),
                                                                                               user_data_s,
-                                                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second)->socketConfiguration.address,
+                                                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second)->socketConfiguration.address,
                                                                                               true,
                                                                                               true,
                                                                                               0);
       else
 #endif // SSL_SUPPORT
         data_p->videoHandle = protocol_string_2.empty () ? Net_Client_Common_Tools::connect (connector_2,
-                                                                                             *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second),
+                                                                                             *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                                                              user_data_s,
-                                                                                             static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.address,
+                                                                                             static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                                                              true,
                                                                                              true,
                                                                                              0)
                                                          : Net_Client_Common_Tools::connect (connector_3,
-                                                                                             *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second),
+                                                                                             *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second),
                                                                                              user_data_s,
-                                                                                             static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second)->socketConfiguration.address,
+                                                                                             static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second)->socketConfiguration.address,
                                                                                              true,
                                                                                              true,
                                                                                              0);
@@ -2373,16 +2401,16 @@ continue_:
       ACE_ASSERT (!use_SSL_2);
 #endif // SSL_SUPPORT
       data_p->videoHandle = protocol_string_2.empty () ? Net_Client_Common_Tools::connect (asynch_connector_2,
-                                                                                           *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second),
+                                                                                           *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                                                            user_data_s,
-                                                                                           static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3).second)->socketConfiguration.address,
+                                                                                           static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                                                            true,
                                                                                            true,
                                                                                            0)
                                                        : Net_Client_Common_Tools::connect (asynch_connector_3,
-                                                                                           *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second),
+                                                                                           *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second),
                                                                                            user_data_s,
-                                                                                           static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_3a).second)->socketConfiguration.address,
+                                                                                           static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1c).second)->socketConfiguration.address,
                                                                                            true,
                                                                                            true,
                                                                                            0);
@@ -2486,6 +2514,12 @@ continue_:
     data_p->videoUpdateEventSourceId = 0;
   } // end IF
 
+  data_p->AudioStream->stop (false,
+                             false,
+                             true);
+  data_p->VideoStream->stop (false,
+                             false,
+                             true);
   data_p->AVStream->stop (false,
                           false,
                           true);

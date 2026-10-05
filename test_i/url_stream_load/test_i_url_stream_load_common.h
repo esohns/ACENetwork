@@ -52,6 +52,8 @@
 // forward declarations
 class Test_I_Message;
 class Test_I_SessionMessage;
+class Test_I_AudioStream;
+class Test_I_VideoStream;
 class Test_I_AVStream;
 
 struct Test_I_URLStreamLoad_SignalHandlerConfiguration
@@ -88,6 +90,8 @@ struct Test_I_URLStreamLoad_Configuration
    , streamConfiguration_1b ()
    , streamConfiguration_1c ()
    , streamConfiguration_2 ()
+   , streamConfiguration_3 ()
+   , streamConfiguration_4 ()
   {
     parserConfiguration.notifyProgress = true;
     parserConfiguration.multiBody = true;
@@ -109,6 +113,8 @@ struct Test_I_URLStreamLoad_Configuration
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1b; // video connection-
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1c; // m3u connection-
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_2; // A/V processing-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_3; // Audio processing-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_4; // Video processing-
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -176,6 +182,8 @@ struct Test_I_URLStreamLoad_UI_CBData
 #else
    : configuration (NULL)
 #endif // GTK_USE || WXWIDGETS_USE
+   , AudioStream (NULL)
+   , VideoStream (NULL)
    , AVStream (NULL)
    , dispatch (NULL)
 #if defined (RAPIDJSON_SUPPORT)
@@ -205,6 +213,8 @@ struct Test_I_URLStreamLoad_UI_CBData
   }
 
   struct Test_I_URLStreamLoad_Configuration*           configuration;
+  Test_I_AudioStream*                                  AudioStream;
+  Test_I_VideoStream*                                  VideoStream;
   Test_I_AVStream*                                     AVStream;
   Common_IDispatch*                                    dispatch; // display module
 #if defined (RAPIDJSON_SUPPORT)

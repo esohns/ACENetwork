@@ -58,10 +58,10 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream::load"));
 
-  inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::configuration_->end ());
-  bool save_to_file_b = !(*iterator).second.second->targetFileName.empty ();
+  //inherited::CONFIGURATION_T::ITERATOR_T iterator =
+  //  inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  //ACE_ASSERT (iterator != inherited::configuration_->end ());
+  //bool save_to_file_b = !(*iterator).second.second->targetFileName.empty ();
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -89,38 +89,38 @@ Test_I_ConnectionStream::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-#if defined (FFMPEG_SUPPORT)
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Demuxer_Module (this,
-                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_AudioDecoder_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-#endif // FFMPEG_SUPPORT
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Audio_Tagger_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-
-  if (save_to_file_b)
-  {
-    ACE_NEW_RETURN (module_p,
-                    Test_I_QueueTarget_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2")),
-                    false);
-    layout_in->append (module_p, NULL, 0);
-    module_p = NULL;
-  } // end IF
+//#if defined (FFMPEG_SUPPORT)
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_Demuxer_Module (this,
+//                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_AudioDecoder_Module (this,
+//                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//#endif // FFMPEG_SUPPORT
+//
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_Audio_Tagger_Module (this,
+//                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//
+//  if (save_to_file_b)
+//  {
+//    ACE_NEW_RETURN (module_p,
+//                    Test_I_QueueTarget_Module (this,
+//                                               ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2")),
+//                    false);
+//    layout_in->append (module_p, NULL, 0);
+//    module_p = NULL;
+//  } // end IF
 
   ACE_NEW_RETURN (module_p,
                   Test_I_QueueTarget_Module (this,
@@ -222,10 +222,10 @@ Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1b::load"));
 
-  inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::configuration_->end ());
-  bool use_demuxer_b = !(*iterator).second.second->inputFormat.empty ();
+  //inherited::CONFIGURATION_T::ITERATOR_T iterator =
+  //  inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  //ACE_ASSERT (iterator != inherited::configuration_->end ());
+  //bool use_demuxer_b = !(*iterator).second.second->inputFormat.empty ();
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -253,40 +253,40 @@ Test_I_ConnectionStream_1b::load (Stream_ILayout* layout_in,
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
 
-#if defined (FFMPEG_SUPPORT)
-  if (use_demuxer_b)
-  {
-    ACE_NEW_RETURN (module_p,
-                    Test_I_Demuxer_Module (this,
-                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
-                    false);
-    layout_in->append (module_p, NULL, 0);
-    module_p = NULL;
-  } // end IF
-
-  if (inherited::configuration_->configuration_->useHardwareDecoder)
-    ACE_NEW_RETURN (module_p,
-                    Test_I_VideoHWDecoder_Module (this,
-                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
-                    false);
-  else
-    ACE_NEW_RETURN (module_p,
-                    Test_I_VideoDecoder_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
-                    false);
-#else
-#error "no supported video decoder, aborting"
-#endif // FFMPEG_SUPPORT
-  ACE_ASSERT (module_p);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Video_Tagger_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
+//#if defined (FFMPEG_SUPPORT)
+//  if (use_demuxer_b)
+//  {
+//    ACE_NEW_RETURN (module_p,
+//                    Test_I_Demuxer_Module (this,
+//                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+//                    false);
+//    layout_in->append (module_p, NULL, 0);
+//    module_p = NULL;
+//  } // end IF
+//
+//  if (inherited::configuration_->configuration_->useHardwareDecoder)
+//    ACE_NEW_RETURN (module_p,
+//                    Test_I_VideoHWDecoder_Module (this,
+//                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+//                    false);
+//  else
+//    ACE_NEW_RETURN (module_p,
+//                    Test_I_VideoDecoder_Module (this,
+//                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+//                    false);
+//#else
+//#error "no supported video decoder, aborting"
+//#endif // FFMPEG_SUPPORT
+//  ACE_ASSERT (module_p);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
+//
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_Video_Tagger_Module (this,
+//                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+//                  false);
+//  layout_in->append (module_p, NULL, 0);
+//  module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
                   Test_I_QueueTarget_Module (this,
@@ -388,10 +388,7 @@ Test_I_ConnectionStream_1c::load (Stream_ILayout* layout_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream_1c::load"));
 
-  inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::configuration_->end ());
-  bool use_demuxer_b = !(*iterator).second.second->inputFormat.empty ();
+  deleteModules_out = true;
 
   bool result = inherited::load (layout_in,
                                  deleteModules_out);
@@ -413,6 +410,13 @@ Test_I_ConnectionStream_1c::load (Stream_ILayout* layout_in,
   module_p = NULL;
 
   ACE_NEW_RETURN (module_p,
+                  Test_I_Module_HTTPGet_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
                   Test_I_Defragment_Module (this,
                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
                   false);
@@ -425,15 +429,6 @@ Test_I_ConnectionStream_1c::load (Stream_ILayout* layout_in,
                   false);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Module_HTTPGet_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR (MODULE_NET_HTTP_GET_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-  module_p = NULL;
-
-  deleteModules_out = true;
 
   return true;
 }
@@ -466,7 +461,7 @@ Test_I_ConnectionStream_1c::initialize (const inherited::CONFIGURATION_T& config
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_name_string_1b)));
+                ACE_TEXT (stream_name_string_1c)));
     goto failed;
   } // end IF
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -487,7 +482,7 @@ Test_I_ConnectionStream_1c::initialize (const inherited::CONFIGURATION_T& config
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_name_string_1b)));
+                  ACE_TEXT (stream_name_string_1c)));
       goto failed;
     } // end IF
 
@@ -506,7 +501,7 @@ failed:
   if (!inherited::STREAM_BASE_T::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
-                ACE_TEXT (stream_name_string_1b)));
+                ACE_TEXT (stream_name_string_1c)));
 
   return false;
 }

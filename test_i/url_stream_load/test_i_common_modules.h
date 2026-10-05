@@ -144,13 +144,13 @@ typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Test_I_SessionMessage,
                              HTTP_ParserDriver_t> Test_I_HTTPParser;
 DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
-                         enum Stream_SessionMessageType,                         // session event type
-                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
-                         libacenetwork_protocol_default_http_parser_module_name_string,
-                         Stream_INotify_t,                                       // stream notification interface type
-                         Test_I_HTTPStreamer,                                    // reader type
-                         Test_I_HTTPParser,                                      // writer type
-                         Test_I_HTTPMarshal);                                    // name
+                          enum Stream_SessionMessageType,                         // session event type
+                          struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
+                          libacenetwork_protocol_default_http_parser_module_name_string,
+                          Stream_INotify_t,                                       // stream notification interface type
+                          Test_I_HTTPStreamer,                                    // reader type
+                          Test_I_HTTPParser,                                      // writer type
+                          Test_I_HTTPMarshal);                                    // name
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,

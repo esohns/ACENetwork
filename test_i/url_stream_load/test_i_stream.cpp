@@ -35,8 +35,315 @@
 #include "test_i_common_modules.h"
 #include "test_i_module_encoder.h"
 
-const char stream_name_string_2[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream_2");
-const char stream_name_string_2b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream_2b");
+const char stream_name_string_2a[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadAudioStream");
+const char stream_name_string_2b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadVideoStream");
+const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadAVStream");
+
+//////////////////////////////////////////
+
+Test_I_AudioStream::Test_I_AudioStream ()
+ : inherited ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AudioStream::Test_I_AudioStream"));
+
+}
+
+bool
+Test_I_AudioStream::load (Stream_ILayout* layout_in,
+                          bool& deleteModules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AudioStream::load"));
+
+  deleteModules_out = true;
+
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+  bool save_to_file_b = !(*iterator).second.second->targetFileName.empty ();
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueSource_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SOURCE_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  //ACE_NEW_RETURN (module_p,
+//                Test_I_StatisticReport_Module (this,
+//                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+//                false);
+//layout_in->append (module_p, NULL, 0);
+  // module_p = NULL;
+
+#if defined (FFMPEG_SUPPORT)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Demuxer_Module (this,
+                                         ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AudioDecoder_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Audio_Tagger_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  if (save_to_file_b)
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_QueueTarget_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2")),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+  } // end IF
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueTarget_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  return true;
+}
+
+bool
+Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AudioStream::initialize"));
+
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
+  bool reset_setup_pipeline = false;
+  struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
+
+  // allocate a new session state, reset stream
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
+               ACE_TEXT (stream_name_string_2a)));
+    goto failed;
+  } // end IF
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
+
+  session_data_p =
+    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
+  // *TODO*: remove type inferences
+  ACE_ASSERT (session_data_p->formats.empty ());
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  //session_data_p->stream = this;
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+
+  // ---------------------------------------------------------------------------
+
+  if (configuration_in.configuration_->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                 ACE_TEXT (stream_name_string_2a)));
+      goto failed;
+    } // end IF
+
+  // ---------------------------------------------------------------------------
+
+  // set (session) message allocator
+  //inherited::allocator_ = configuration_in.messageAllocator;
+
+  inherited::isInitialized_ = true;
+
+  return true;
+
+failed:
+  if (reset_setup_pipeline)
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
+  if (!inherited::reset ())
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
+                ACE_TEXT (stream_name_string_2a)));
+
+  return false;
+}
+
+//////////////////////////////////////////
+
+Test_I_VideoStream::Test_I_VideoStream ()
+ : inherited ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_VideoStream::Test_I_VideoStream"));
+
+}
+
+bool
+Test_I_VideoStream::load (Stream_ILayout* layout_in,
+                          bool& deleteModules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_VideoStream::load"));
+
+  deleteModules_out = true;
+
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->end ());
+  bool use_demuxer_b = !(*iterator).second.second->inputFormat.empty ();
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueSource_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SOURCE_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+//ACE_NEW_RETURN (module_p,
+//                Test_I_StatisticReport_Module (this,
+//                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+//                false);
+//layout_in->append (module_p, NULL, 0);
+//module_p = NULL;
+
+#if defined (FFMPEG_SUPPORT)
+  if (use_demuxer_b)
+  {
+    ACE_NEW_RETURN (module_p,
+                    Test_I_Demuxer_Module (this,
+                                           ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, NULL, 0);
+    module_p = NULL;
+  } // end IF
+
+  if (inherited::configuration_->configuration_->useHardwareDecoder)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoHWDecoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_HW_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+  else
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoDecoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+#else
+#error "no supported video decoder, aborting"
+#endif // FFMPEG_SUPPORT
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Video_Tagger_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueTarget_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+  return true;
+}
+
+bool
+Test_I_VideoStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_VideoStream::initialize"));
+
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
+  bool reset_setup_pipeline = false;
+  struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
+
+  // allocate a new session state, reset stream
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
+               ACE_TEXT (stream_name_string_2b)));
+    goto failed;
+  } // end IF
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
+
+  session_data_p =
+    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
+  // *TODO*: remove type inferences
+  ACE_ASSERT (session_data_p->formats.empty ());
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  //session_data_p->stream = this;
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+
+  // ---------------------------------------------------------------------------
+
+  if (configuration_in.configuration_->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                 ACE_TEXT (stream_name_string_2b)));
+      goto failed;
+    } // end IF
+
+  // ---------------------------------------------------------------------------
+
+  // set (session) message allocator
+  //inherited::allocator_ = configuration_in.messageAllocator;
+
+  inherited::isInitialized_ = true;
+
+  return true;
+
+failed:
+  if (reset_setup_pipeline)
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
+  if (!inherited::reset ())
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
+                ACE_TEXT (stream_name_string_2b)));
+
+  return false;
+}
+
+//////////////////////////////////////////
 
 Test_I_AVStream::Test_I_AVStream ()
  : inherited ()
@@ -50,6 +357,8 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
                        bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream::load"));
+
+  deleteModules_out = true;
 
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
@@ -127,7 +436,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     {
       ACE_DEBUG ((LM_ERROR,
                  ACE_TEXT ("%s: invalid/unknown renderer (was: %d), aborting\n"),
-                 ACE_TEXT (stream_name_string_2b),
+                 ACE_TEXT (stream_name_string_3),
                  inherited::configuration_->configuration_->renderer));
       return false;
     }
@@ -262,7 +571,7 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: invalid/unknown container format (was: %d), aborting\n"),
-                    ACE_TEXT (stream_name_string_2b),
+                    ACE_TEXT (stream_name_string_3),
                     container_type_e));
         deleteModules_out = true;
         return false;
@@ -304,8 +613,6 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
   } // end ELSE
   //++index_i;
 
-  deleteModules_out = true;
-
   return true;
 }
 
@@ -334,7 +641,7 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
   {
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-               ACE_TEXT (stream_name_string_2b)));
+               ACE_TEXT (stream_name_string_3)));
     goto failed;
   } // end IF
   const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
@@ -368,7 +675,7 @@ Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
     {
       ACE_DEBUG ((LM_ERROR,
                  ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                 ACE_TEXT (stream_name_string_2b)));
+                 ACE_TEXT (stream_name_string_3)));
       goto failed;
     } // end IF
 
@@ -387,7 +694,7 @@ failed:
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
-               ACE_TEXT (stream_name_string_2b)));
+               ACE_TEXT (stream_name_string_3)));
 
   return false;
 }
@@ -406,128 +713,4 @@ Test_I_AVStream::resize (const Common_Image_Resolution_t& resolution_in)
   inherited::notify (STREAM_SESSION_MESSAGE_RESIZE,
                      false,
                      true);
-}
-
-//////////////////////////////////////////
-
-Test_I_AudioStream::Test_I_AudioStream ()
-    : inherited ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AudioStream::Test_I_AudioStream"));
-
-}
-
-bool
-Test_I_AudioStream::load (Stream_ILayout* layout_in,
-                          bool& deleteModules_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AudioStream::load"));
-
-  Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_QueueSource_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SOURCE_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-
-//module_p = NULL;
-//ACE_NEW_RETURN (module_p,
-//                Test_I_StatisticReport_Module (this,
-//                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
-//                false);
-//layout_in->append (module_p, NULL, 0);
-
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Defragment_3_Module (this,
-  //                                            ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DEFRAGMENT_DEFAULT_NAME_STRING)),
-  //                false);
-  //layout_in->append (module_p, NULL, 0);
-  //module_p = NULL;
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Audio_Tagger_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-
-  ACE_NEW_RETURN (module_p,
-                  Test_I_QueueTarget_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
-                  false);
-  layout_in->append (module_p, NULL, 0);
-
-  deleteModules_out = true;
-
-  return true;
-}
-
-bool
-Test_I_AudioStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AudioStream::initialize"));
-
-  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
-  bool reset_setup_pipeline = false;
-  struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
-  inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  Test_I_SessionManager_t* session_manager_p =
-    Test_I_SessionManager_t::SINGLETON_T::instance ();
-
-  // sanity check(s)
-  ACE_ASSERT (iterator != configuration_in.end ());
-  ACE_ASSERT (session_manager_p);
-
-  // allocate a new session state, reset stream
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-    false;
-  reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
-  {
-    ACE_DEBUG ((LM_ERROR,
-               ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-               ACE_TEXT (stream_name_string_2)));
-    goto failed;
-  } // end IF
-  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
-    setup_pipeline;
-  reset_setup_pipeline = false;
-
-  session_data_p =
-    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
-  // *TODO*: remove type inferences
-  ACE_ASSERT (session_data_p->formats.empty ());
-  //session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
-  //session_data_p->stream = this;
-  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
-
-  // ---------------------------------------------------------------------------
-
-  if (configuration_in.configuration_->setupPipeline)
-    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                 ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                 ACE_TEXT (stream_name_string_2)));
-      goto failed;
-    } // end IF
-
-  // ---------------------------------------------------------------------------
-
-  // set (session) message allocator
-  //inherited::allocator_ = configuration_in.messageAllocator;
-
-  inherited::isInitialized_ = true;
-
-  return true;
-
-failed:
-  if (reset_setup_pipeline)
-    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
-  if (!inherited::reset ())
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
-                ACE_TEXT (stream_name_string_2)));
-
-  return false;
 }

@@ -44,15 +44,16 @@ typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
                                  struct Stream_Statistic,
                                  struct Stream_UserData> Test_I_SessionManager_t;
 
-extern const char stream_name_string_2[];
-extern const char stream_name_string_2b[];
+extern const char stream_name_string_2a[]; // audio processing
+extern const char stream_name_string_2b[]; // video processing
+extern const char stream_name_string_3[];  // a/v processing
 
 //////////////////////////////////////////
 
 class Test_I_AudioStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_2,
+                        stream_name_string_2a,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -68,7 +69,7 @@ class Test_I_AudioStream
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_2,
+                        stream_name_string_2a,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -100,10 +101,61 @@ class Test_I_AudioStream
 
 //////////////////////////////////////////
 
-class Test_I_AVStream
+class Test_I_VideoStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         stream_name_string_2b,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_URLStreamLoad_StreamState,
+                        struct Test_I_URLStreamLoad_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                        Test_I_SessionManager_t,
+                        Stream_ControlMessage_t,
+                        Test_I_Message,
+                        Test_I_SessionMessage,
+                        struct Stream_UserData>
+{
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_2b,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_URLStreamLoad_StreamState,
+                        struct Test_I_URLStreamLoad_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                        Test_I_SessionManager_t,
+                        Stream_ControlMessage_t,
+                        Test_I_Message,
+                        Test_I_SessionMessage,
+                        struct Stream_UserData> inherited;
+
+ public:
+  Test_I_VideoStream ();
+  inline virtual ~Test_I_VideoStream () { inherited::shutdown (); }
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ILayout*, // i/o value: layout
+                     bool&);          // return value: delete modules ?
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_VideoStream (const Test_I_VideoStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_VideoStream& operator= (const Test_I_VideoStream&))
+};
+
+//////////////////////////////////////////
+
+class Test_I_AVStream
+ : public Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_3,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -120,7 +172,7 @@ class Test_I_AVStream
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_2b,
+                        stream_name_string_3,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,

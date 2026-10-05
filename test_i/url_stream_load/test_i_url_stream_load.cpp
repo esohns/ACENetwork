@@ -594,14 +594,14 @@ do_work (bool debugParser_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-  Test_I_EventHandler message_handler (&CBData_in);
-  Test_I_EventHandler_1b message_handler_1b (&CBData_in);
-  Test_I_EventHandler_1c message_handler_1c (&CBData_in);
-  Test_I_EventHandler_2 message_handler_2 (&CBData_in);
-  Test_I_MessageHandler_Module event_handler_module (NULL,
-                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
-  Test_I_MessageHandler_Module event_handler_module_1b (NULL,
-                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_EventHandler message_handler_3 (&CBData_in); // audio processing-
+  Test_I_EventHandler_1b message_handler_4 (&CBData_in); // video processing-
+  Test_I_EventHandler_1c message_handler_1c (&CBData_in); // m3u connection-
+  Test_I_EventHandler_2 message_handler_2 (&CBData_in); // A/V processing-
+  Test_I_MessageHandler_Module event_handler_module_3 (NULL,
+                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_Module event_handler_module_4 (NULL,
+                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_1c (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_2 (NULL,
@@ -621,12 +621,20 @@ do_work (bool debugParser_in,
   Test_I_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                &heap_allocator,         // heap allocator handle
                                                true);                   // block ?
+  Test_I_URLStreamLoad_MessageQueue_t audio_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                   NULL);
+  Test_I_URLStreamLoad_MessageQueue_t video_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                   NULL);
   Test_I_URLStreamLoad_MessageQueue_t av_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                                       NULL);
   Test_I_URLStreamLoad_MessageQueue_t audio_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                                          NULL);
-  Test_I_AVStream av_input_stream;
-  CBData_in.AVStream = &av_input_stream;
+  Test_I_AudioStream audio_stream;
+  Test_I_VideoStream video_stream;
+  Test_I_AVStream av_stream;
+  CBData_in.AudioStream = &audio_stream;
+  CBData_in.VideoStream = &video_stream;
+  CBData_in.AVStream = &av_stream;
 
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
@@ -696,16 +704,16 @@ do_work (bool debugParser_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (FFMPEG_SUPPORT)
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration; // audio (decoder)
-  codec_configuration.codecId = AV_CODEC_ID_OPUS;
-  codec_configuration.delayOpen = true;
-  codec_configuration.useParser = false; // *NOTE*: a setting of "true" does not work with "mp4a" (i.e. aac-) streams
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_1b; // video (decoder)
-  codec_configuration_1b.codecId = AV_CODEC_ID_AV1;
-  codec_configuration_1b.delayOpen = true;
-  codec_configuration_1b.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
-  codec_configuration_1b.format.videoFormat = AV_PIX_FMT_YUV420P;
-  codec_configuration_1b.useParser = false; // *NOTE*: a setting of "true" does not work with "webm" (i.e. vp09-) streams
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_3; // audio (decoder)
+  codec_configuration_3.codecId = AV_CODEC_ID_OPUS;
+  codec_configuration_3.delayOpen = true;
+  codec_configuration_3.useParser = false; // *NOTE*: a setting of "true" does not work with "mp4a" (i.e. aac-) streams
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_4; // video (decoder)
+  codec_configuration_4.codecId = AV_CODEC_ID_AV1;
+  codec_configuration_4.delayOpen = true;
+  codec_configuration_4.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
+  codec_configuration_4.format.videoFormat = AV_PIX_FMT_YUV420P;
+  codec_configuration_4.useParser = false; // *NOTE*: a setting of "true" does not work with "webm" (i.e. vp09-) streams
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -716,109 +724,66 @@ do_work (bool debugParser_in,
 #endif // FFMPEG_SUPPORT
 
   struct Stream_ModuleConfiguration module_configuration;
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1_queuetarget_2;
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b;
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1c;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration; // audio connection-
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b; // video connection-
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1c; // m3u connection-
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1c_b; // m3u parser
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2; // A/V processing-
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2a_video_resize;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b; // save video converter
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b_audio_injector;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_3; // audio processing-
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_3_queuetarget;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_3_queuetarget_2;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_4; // video processing-
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_4_queuetarget;
+
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1b;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1c;
-  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_2;
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_2; // A/V processing-
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_3; // audio processing-
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_4; // video processing-
 
-  modulehandler_configuration.allocatorConfiguration =
-    &allocator_configuration;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  modulehandler_configuration.ALSAConfiguration = &ALSA_configuration;
-#if defined (LIBPIPEWIRE_SUPPORT)
-  modulehandler_configuration.pipewireConfiguration = &pipewire_configuration;
-#endif // LIBPIPEWIRE_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
+  modulehandler_configuration.allocatorConfiguration = &allocator_configuration;
   modulehandler_configuration.CBData = &CBData_in;
-#if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration.codecConfiguration = &codec_configuration;
-#endif // FFMPEG_SUPPORT
   modulehandler_configuration.computeThroughput = true;
-#if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration.outputFormat.audio.channels = 2;
-  modulehandler_configuration.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;
-  modulehandler_configuration.outputFormat.audio.sampleRate = 48000;
-#endif // FFMPEG_SUPPORT
-  modulehandler_configuration.closeAfterReception = true;
   modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_CONCURRENT;
   modulehandler_configuration.connectionConfigurations =
     &configuration_in.connectionConfigurations;
-  //modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
-  modulehandler_configuration.inputFormat = ACE_TEXT_ALWAYS_CHAR ("webm");
   modulehandler_configuration.messageAllocator = &message_allocator;
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
-//  modulehandler_configuration.statisticReportingInterval =
-//    statisticReportingInterval_in;
-  modulehandler_configuration.queue = &av_input_queue;
-  modulehandler_configuration.subscriber = &message_handler;
-  modulehandler_configuration.targetFileName = fileName_in;
+  modulehandler_configuration.queue = &audio_queue;
   modulehandler_configuration.URL = URL_in;
   modulehandler_configuration.waitForConnect = true;
-  // ******************** (sub-)stream configuration data *********************
-  //if (bufferSize_in)
-  //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
-  //    bufferSize_in;
-#if defined (FFMPEG_SUPPORT)
-  stream_configuration.mediaType.audio.codecId = AV_CODEC_ID_OPUS;
-  stream_configuration.mediaType.audio.format = AV_SAMPLE_FMT_FLTP;
-#endif // FFMPEG_SUPPORT
+
   stream_configuration.messageAllocator = &message_allocator;
-  stream_configuration.module = &event_handler_module;
-  stream_configuration.printFinalReport = true;
-  stream_configuration.useHardwareDecoder = useHardwareDecoder_in;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
 
-  modulehandler_configuration_1_queuetarget_2 = modulehandler_configuration;
-  modulehandler_configuration_1_queuetarget_2.queue = &audio_input_queue;
-  configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2"),
-                                                               std::make_pair (&module_configuration,
-                                                                               &modulehandler_configuration_1_queuetarget_2)));
+  //--------------------------------------
 
   modulehandler_configuration_1b = modulehandler_configuration;
-#if defined (FFMPEG_SUPPORT)
-  modulehandler_configuration_1b.codecConfiguration = &codec_configuration_1b;
-#endif // FFMPEG_SUPPORT
-  modulehandler_configuration_1b.inputFormat = ACE_TEXT_ALWAYS_CHAR ("mp4");
-#if defined (FFMPEG_SUPPORT)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_RGB24;
-#else
-  modulehandler_configuration_1b.outputFormat.video.format = AV_PIX_FMT_BGRA;
-#endif // ACE_WIN32 || ACE_WIN64
-#endif // FFMPEG_SUPPORT
   modulehandler_configuration_1b.parserConfiguration =
     &configuration_in.parserConfiguration_1b;
-  modulehandler_configuration_1b.subscriber = &message_handler_1b;
+  modulehandler_configuration_1b.queue = &video_queue;
+
   stream_configuration_1b = stream_configuration;
-#if defined (FFMPEG_SUPPORT)
-  stream_configuration_1b.mediaType.video.codecId = AV_CODEC_ID_AV1;
-  stream_configuration_1b.mediaType.video.frameRate = { 25, 1 };
-  stream_configuration_1b.mediaType.video.resolution = { 640, 360 };
-#endif // FFMPEG_SUPPORT
-  stream_configuration_1b.module = &event_handler_module_1b;
   configuration_in.streamConfiguration_1b.initialize (module_configuration,
                                                       modulehandler_configuration_1b,
                                                       stream_configuration_1b);
+
+  //--------------------------------------
 
   modulehandler_configuration_1c = modulehandler_configuration;
   modulehandler_configuration_1c.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
   modulehandler_configuration_1c.parserConfiguration =
     &configuration_in.parserConfiguration_1c;
   modulehandler_configuration_1c.subscriber = &message_handler_1c;
+
   stream_configuration_1c = stream_configuration;
   stream_configuration_1c.module = &event_handler_module_1c;
   configuration_in.streamConfiguration_1c.initialize (module_configuration,
@@ -832,18 +797,105 @@ do_work (bool debugParser_in,
                                                                   std::make_pair (&module_configuration,
                                                                                   &modulehandler_configuration_1c_b)));
 
-  modulehandler_configuration_2 = modulehandler_configuration;
-  modulehandler_configuration_2.allocatorConfiguration =
+  //--------------------------------------
+
+  modulehandler_configuration_3.allocatorConfiguration =
     &allocator_configuration;
-  modulehandler_configuration_2.closeAfterReception = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  modulehandler_configuration_3.ALSAConfiguration = &ALSA_configuration;
+#if defined (LIBPIPEWIRE_SUPPORT)
+  modulehandler_configuration_3.pipewireConfiguration = &pipewire_configuration;
+#endif // LIBPIPEWIRE_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+  modulehandler_configuration_3.CBData = &CBData_in;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_3.codecConfiguration = &codec_configuration_3;
+#endif // FFMPEG_SUPPORT
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_3.outputFormat.audio.channels = 2;
+  modulehandler_configuration_3.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;
+  modulehandler_configuration_3.outputFormat.audio.sampleRate = 48000;
+#endif // FFMPEG_SUPPORT
+  modulehandler_configuration_3.concurrency =
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
+  //modulehandler_configuration.defragmentMode = STREAM_DEFRAGMENT_CONDENSE;
+  modulehandler_configuration_3.inputFormat = ACE_TEXT_ALWAYS_CHAR ("webm");
+  modulehandler_configuration_3.messageAllocator = &message_allocator;
+//  modulehandler_configuration.statisticReportingInterval =
+//    statisticReportingInterval_in;
+  modulehandler_configuration_3.queue = &audio_queue;
+  modulehandler_configuration_3.subscriber = &message_handler_3;
+  modulehandler_configuration_3.targetFileName = fileName_in;
+  // ******************** (sub-)stream configuration data *********************
+  //if (bufferSize_in)
+  //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
+  //    bufferSize_in;
+
+#if defined (FFMPEG_SUPPORT)
+  stream_configuration_3.mediaType.audio.codecId = AV_CODEC_ID_OPUS;
+  stream_configuration_3.mediaType.audio.format = AV_SAMPLE_FMT_FLTP;
+#endif // FFMPEG_SUPPORT
+  stream_configuration_3.messageAllocator = &message_allocator;
+  stream_configuration_3.module = &event_handler_module_3;
+  stream_configuration_3.printFinalReport = true;
+  stream_configuration_3.useHardwareDecoder = useHardwareDecoder_in;
+  configuration_in.streamConfiguration_3.initialize (module_configuration,
+                                                     modulehandler_configuration_3,
+                                                     stream_configuration_3);
+
+  modulehandler_configuration_3_queuetarget = modulehandler_configuration_3;
+  modulehandler_configuration_3_queuetarget.queue = &av_input_queue;
+  configuration_in.streamConfiguration_3.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_3_queuetarget)));
+
+  modulehandler_configuration_3_queuetarget_2 = modulehandler_configuration_3;
+  modulehandler_configuration_3_queuetarget_2.queue = &audio_input_queue;
+  configuration_in.streamConfiguration_3.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("QueueTarget_2"),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_3_queuetarget_2)));
+
+  //--------------------------------------
+
+  modulehandler_configuration_4 = modulehandler_configuration_3;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_4.codecConfiguration = &codec_configuration_4;
+#endif // FFMPEG_SUPPORT
+  modulehandler_configuration_4.inputFormat = ACE_TEXT_ALWAYS_CHAR ("mp4");
+#if defined (FFMPEG_SUPPORT)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  modulehandler_configuration_4.outputFormat.video.format = AV_PIX_FMT_RGB24;
+#else
+  modulehandler_configuration_4.outputFormat.video.format = AV_PIX_FMT_BGRA;
+#endif // ACE_WIN32 || ACE_WIN64
+#endif // FFMPEG_SUPPORT
+  modulehandler_configuration_4.queue = &video_queue;
+  modulehandler_configuration_4.subscriber = &message_handler_4;
+
+  stream_configuration_4 = stream_configuration_3;
+#if defined (FFMPEG_SUPPORT)
+  stream_configuration_4.mediaType.video.codecId = AV_CODEC_ID_AV1;
+  stream_configuration_4.mediaType.video.frameRate = { 25, 1 };
+  stream_configuration_4.mediaType.video.resolution = { 640, 360 };
+#endif // FFMPEG_SUPPORT
+  stream_configuration_4.module = &event_handler_module_4;
+  configuration_in.streamConfiguration_4.initialize (module_configuration,
+                                                     modulehandler_configuration_4,
+                                                     stream_configuration_4);
+
+  modulehandler_configuration_4_queuetarget = modulehandler_configuration_4;
+  modulehandler_configuration_4_queuetarget.queue = &av_input_queue;
+  configuration_in.streamConfiguration_4.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_4_queuetarget)));
+
+  //--------------------------------------
+
+  modulehandler_configuration_2 = modulehandler_configuration_3;
 #if defined (FFMPEG_SUPPORT)
   modulehandler_configuration_2.codecConfiguration = &codec_configuration_2;
 #endif // FFMPEG_SUPPORT
-  //modulehandler_configuration_2.computeThroughput = true;
-  modulehandler_configuration_2.concurrency =
-    STREAM_HEADMODULECONCURRENCY_ACTIVE;
-  modulehandler_configuration_2.connectionConfigurations =
-    &configuration_in.connectionConfigurations;
   struct Stream_Miscellaneous_DelayConfiguration delay_configuration;
   delay_configuration.averageTokensPerInterval = 1; // frames per second
   delay_configuration.catchUp = true;
@@ -853,11 +905,11 @@ do_work (bool debugParser_in,
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_2.handleResize = false;
+  modulehandler_configuration_2.queue = &av_input_queue;
   modulehandler_configuration_2.subscriber = &message_handler_2;
   modulehandler_configuration_2.targetFileName = fileName_in;
-  modulehandler_configuration_2.URL = URL_in;
-  modulehandler_configuration_2.waitForConnect = false;
-  stream_configuration_2 = stream_configuration;
+
+  stream_configuration_2 = stream_configuration_3;
 #if defined (FFMPEG_SUPPORT)
   stream_configuration_2.mediaType.audio.channels = 2;
   stream_configuration_2.mediaType.audio.format = AV_SAMPLE_FMT_FLT;
@@ -870,7 +922,6 @@ do_work (bool debugParser_in,
   stream_configuration_2.mediaType.video.frameRate = { 25, 1 };
   stream_configuration_2.mediaType.video.resolution = { 640, 360 };
 #endif // FFMPEG_SUPPORT
-  stream_configuration_2.messageAllocator = &message_allocator;
   stream_configuration_2.module = &event_handler_module_2;
   stream_configuration_2.printFinalReport = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
