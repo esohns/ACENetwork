@@ -594,14 +594,14 @@ do_work (bool debugParser_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-  Test_I_EventHandler message_handler_3 (&CBData_in); // audio processing-
-  Test_I_EventHandler_1b message_handler_4 (&CBData_in); // video processing-
+  Test_I_EventHandler message_handler (&CBData_in); // audio processing-
+  Test_I_EventHandler_1b message_handler_1b (&CBData_in); // video processing-
   Test_I_EventHandler_1c message_handler_1c (&CBData_in); // m3u connection-
   Test_I_EventHandler_2 message_handler_2 (&CBData_in); // A/V processing-
-  Test_I_MessageHandler_Module event_handler_module_3 (NULL,
-                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
-  Test_I_MessageHandler_Module event_handler_module_4 (NULL,
-                                                       ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_Module event_handler_module (NULL,
+                                                     ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_Module event_handler_module_1b (NULL,
+                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_1c (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_2 (NULL,
@@ -756,10 +756,12 @@ do_work (bool debugParser_in,
   modulehandler_configuration.parserConfiguration =
     &configuration_in.parserConfiguration;
   modulehandler_configuration.queue = &audio_queue;
+  modulehandler_configuration.subscriber = &message_handler;
   modulehandler_configuration.URL = URL_in;
   modulehandler_configuration.waitForConnect = true;
 
   stream_configuration.messageAllocator = &message_allocator;
+  stream_configuration.module = &event_handler_module;
   configuration_in.streamConfiguration.initialize (module_configuration,
                                                    modulehandler_configuration,
                                                    stream_configuration);
@@ -770,8 +772,10 @@ do_work (bool debugParser_in,
   modulehandler_configuration_1b.parserConfiguration =
     &configuration_in.parserConfiguration_1b;
   modulehandler_configuration_1b.queue = &video_queue;
+  modulehandler_configuration_1b.subscriber = &message_handler_1b;
 
   stream_configuration_1b = stream_configuration;
+  stream_configuration_1b.module = &event_handler_module_1b;
   configuration_in.streamConfiguration_1b.initialize (module_configuration,
                                                       modulehandler_configuration_1b,
                                                       stream_configuration_1b);
@@ -825,7 +829,6 @@ do_work (bool debugParser_in,
 //  modulehandler_configuration.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_3.queue = &audio_queue;
-  modulehandler_configuration_3.subscriber = &message_handler_3;
   modulehandler_configuration_3.targetFileName = fileName_in;
   // ******************** (sub-)stream configuration data *********************
   //if (bufferSize_in)
@@ -837,7 +840,6 @@ do_work (bool debugParser_in,
   stream_configuration_3.mediaType.audio.format = AV_SAMPLE_FMT_FLTP;
 #endif // FFMPEG_SUPPORT
   stream_configuration_3.messageAllocator = &message_allocator;
-  stream_configuration_3.module = &event_handler_module_3;
   stream_configuration_3.printFinalReport = true;
   stream_configuration_3.useHardwareDecoder = useHardwareDecoder_in;
   configuration_in.streamConfiguration_3.initialize (module_configuration,
@@ -871,7 +873,6 @@ do_work (bool debugParser_in,
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
   modulehandler_configuration_4.queue = &video_queue;
-  modulehandler_configuration_4.subscriber = &message_handler_4;
 
   stream_configuration_4 = stream_configuration_3;
 #if defined (FFMPEG_SUPPORT)
@@ -879,7 +880,6 @@ do_work (bool debugParser_in,
   stream_configuration_4.mediaType.video.frameRate = { 25, 1 };
   stream_configuration_4.mediaType.video.resolution = { 640, 360 };
 #endif // FFMPEG_SUPPORT
-  stream_configuration_4.module = &event_handler_module_4;
   configuration_in.streamConfiguration_4.initialize (module_configuration,
                                                      modulehandler_configuration_4,
                                                      stream_configuration_4);
