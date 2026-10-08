@@ -594,8 +594,8 @@ do_work (bool debugParser_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-  Test_I_EventHandler message_handler (&CBData_in); // audio processing-
-  Test_I_EventHandler_1b message_handler_1b (&CBData_in); // video processing-
+  Test_I_EventHandler message_handler (&CBData_in); // audio connection-
+  Test_I_EventHandler_1b message_handler_1b (&CBData_in); // video connection-
   Test_I_EventHandler_1c message_handler_1c (&CBData_in); // m3u connection-
   Test_I_EventHandler_2 message_handler_2 (&CBData_in); // A/V processing-
   Test_I_MessageHandler_Module event_handler_module (NULL,
@@ -713,7 +713,7 @@ do_work (bool debugParser_in,
   codec_configuration_4.delayOpen = true;
   codec_configuration_4.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   codec_configuration_4.format.videoFormat = AV_PIX_FMT_YUV420P;
-  codec_configuration_4.useParser = false; // *NOTE*: a setting of "true" does not work with "webm" (i.e. vp09-) streams
+  codec_configuration_4.useParser = false; // *NOTE*: a setting of "true" does not work with "mp4" (i.e. vp09-) streams
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
   codec_configuration_2.codecId = AV_CODEC_ID_H264;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

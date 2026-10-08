@@ -80,6 +80,7 @@ struct HTTP_ModuleHandlerConfiguration
   HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
   ////////////////////////////////////////
+   , addMissingHeaders (true)
    , closeAfterReception (HTTP_DEFAULT_CLOSE_AFTER_RECEPTION)
    , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
    , HTTPForm ()
@@ -92,6 +93,7 @@ struct HTTP_ModuleHandlerConfiguration
     printFinalReport = true;
   };
 
+  bool                             addMissingHeaders; // HTTP get module
   bool                             closeAfterReception; // HTTP get module
   bool                             crunchMessages; // HTTP parser module
   HTTP_Form_t                      HTTPForm; // HTTP get module

@@ -47,6 +47,7 @@ gboolean idle_handle_redirect_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);
 gboolean idle_initialize_UI_cb (gpointer);
 gboolean idle_loaded_segments_cb (gpointer);
+gboolean idle_received_video_preamble_cb (gpointer);
 gboolean idle_load_next_segment_cb (gpointer);
 gboolean idle_reset_UI_cb (gpointer);
 gboolean idle_start_session_cb (gpointer);

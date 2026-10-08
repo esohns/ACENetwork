@@ -206,6 +206,8 @@ struct Test_I_URLStreamLoad_UI_CBData
    , volumeControl (NULL)
    , maxVolumeLevel (0)
 #endif // ACE_WIN32 || ACE_WIN64
+   , closeAfterVideoPreamble (false)
+   , loadNextSegment (true)
    , videoSegmentIterator ()
    , videoSegments ()
   {
@@ -238,6 +240,8 @@ struct Test_I_URLStreamLoad_UI_CBData
   snd_mixer_elem_t*                                    volumeControl;
   long                                                 maxVolumeLevel;
 #endif // ACE_WIN32 || ACE_WIN64
+  bool                                                 closeAfterVideoPreamble;
+  bool                                                 loadNextSegment;
   Test_I_URLStreamLoad_AVSegmentsConstIterator_t       videoSegmentIterator;
   Test_I_URLStreamLoad_AVSegments_t                    videoSegments;
 };

@@ -883,17 +883,18 @@ idle_loaded_segments_cb (gpointer userData_in)
     data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   ACE_ASSERT (iterator != data_p->UIState->builders.end ());
   ACE_ASSERT (data_p->configuration);
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
+  Net_ConnectionConfigurationsIterator_t iterator_1b =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("1b")); // --> video
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3 =
+  ACE_ASSERT (iterator_1b != data_p->configuration->connectionConfigurations.end ());
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_1b_ =
     data_p->configuration->streamConfiguration_1b.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_1b.end ());
+  ACE_ASSERT (iterator_1b_ != data_p->configuration->streamConfiguration_1b.end ());
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   ACE_ASSERT (data_p->videoHandle != ACE_INVALID_HANDLE);
 
+  data_p->closeAfterVideoPreamble = true;
   data_p->configuration->parserConfiguration_1b.multiBody = false;
 
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p =
@@ -919,7 +920,7 @@ idle_loaded_segments_cb (gpointer userData_in)
 #endif // SSL_SUPPORT
   Test_I_AsynchTCPConnector_1b_t asynch_connector;
 
-  (*iterator_3).second.second->URL = (*data_p->videoSegmentIterator).URL;
+  (*iterator_1b_).second.second->URL = (*data_p->videoSegmentIterator).URL;
 
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string;
@@ -947,9 +948,12 @@ idle_loaded_segments_cb (gpointer userData_in)
                             : HTTP_DEFAULT_SERVER_PORT);
     hostname_string_temp += converter.str ();
   } // end IF
+
+  static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.hostname =
+    hostname_string;
   int result =
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
-                                                                                                                          AF_INET);
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
+                                                                                                                           AF_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -957,8 +961,8 @@ idle_loaded_segments_cb (gpointer userData_in)
                 ACE_TEXT (hostname_string_temp.c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-  static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
+  static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.useLoopBackDevice =
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address.is_loopback ();
 
   struct Net_UserData user_data_s;
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
@@ -966,18 +970,18 @@ idle_loaded_segments_cb (gpointer userData_in)
 #if defined (SSL_SUPPORT)
     if (use_SSL_b)
       data_p->videoHandle = Net_Client_Common_Tools::connect (ssl_connector,
-                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                               user_data_s,
-                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                               true,
                                                               true,
                                                               0);
     else
 #endif // SSL_SUPPORT
       data_p->videoHandle = Net_Client_Common_Tools::connect (connector,
-                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                               user_data_s,
-                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                               true,
                                                               true,
                                                               0);
@@ -989,9 +993,9 @@ idle_loaded_segments_cb (gpointer userData_in)
     ACE_ASSERT (!use_SSL_b);
 #endif // SSL_SUPPORT
     data_p->videoHandle = Net_Client_Common_Tools::connect (asynch_connector,
-                                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                             user_data_s,
-                                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                             true,
                                                             true,
                                                             0);
@@ -1000,12 +1004,42 @@ idle_loaded_segments_cb (gpointer userData_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address).c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
 
   return G_SOURCE_REMOVE;
 } // idle_loaded_segments_cb
+
+gboolean
+idle_received_video_preamble_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_received_video_preamble_cb"));
+
+  // sanity check(s)
+  struct Test_I_URLStreamLoad_UI_CBData* data_p =
+    static_cast<struct Test_I_URLStreamLoad_UI_CBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+    TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (iconnection_manager_p);
+  //ACE_ASSERT (data_p->videoHandle != ACE_INVALID_HANDLE);
+
+  Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->videoHandle));
+#else
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->videoHandle));
+#endif // ACE_WIN32 || ACE_WIN64
+  if (iconnection_p)
+  {
+    iconnection_p->abort ();
+    iconnection_p->decrease (); iconnection_p = NULL;
+  } // end IF
+  data_p->videoHandle = ACE_INVALID_HANDLE;
+
+  return G_SOURCE_REMOVE;
+}
 
 gboolean
 idle_load_next_segment_cb (gpointer userData_in)
@@ -1026,12 +1060,12 @@ idle_load_next_segment_cb (gpointer userData_in)
   if (data_p->videoSegmentIterator == data_p->videoSegments.end ())
     return G_SOURCE_REMOVE;
   ACE_ASSERT (data_p->configuration);
-  Net_ConnectionConfigurationsIterator_t iterator_2 =
+  Net_ConnectionConfigurationsIterator_t iterator_1b =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("1b")); // --> video
-  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3 =
+  ACE_ASSERT (iterator_1b != data_p->configuration->connectionConfigurations.end ());
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_1b_ =
     data_p->configuration->streamConfiguration_1b.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration_1b.end ());
+  ACE_ASSERT (iterator_1b_ != data_p->configuration->streamConfiguration_1b.end ());
   Test_I_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
@@ -1056,7 +1090,7 @@ idle_load_next_segment_cb (gpointer userData_in)
 #endif // SSL_SUPPORT
   Test_I_AsynchTCPConnector_1b_t asynch_connector;
 
-  (*iterator_3).second.second->URL = (*data_p->videoSegmentIterator).URL;
+  (*iterator_1b_).second.second->URL = (*data_p->videoSegmentIterator).URL;
 
   ACE_INET_Addr host_address;
   std::string hostname_string, URI_string;
@@ -1084,9 +1118,12 @@ idle_load_next_segment_cb (gpointer userData_in)
                             : HTTP_DEFAULT_SERVER_PORT);
     hostname_string_temp += converter.str ();
   } // end IF
+
+  static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.hostname =
+    hostname_string;
   int result =
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
-                                                                                                                          AF_INET);
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address.set (hostname_string_temp.c_str (),
+                                                                                                                           AF_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1094,8 +1131,8 @@ idle_load_next_segment_cb (gpointer userData_in)
                 ACE_TEXT (hostname_string_temp.c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
-  static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.useLoopBackDevice =
-    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address.is_loopback ();
+  static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.useLoopBackDevice =
+    static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address.is_loopback ();
 
   struct Net_UserData user_data_s;
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
@@ -1103,18 +1140,18 @@ idle_load_next_segment_cb (gpointer userData_in)
 #if defined (SSL_SUPPORT)
     if (use_SSL_b)
       data_p->videoHandle = Net_Client_Common_Tools::connect (ssl_connector,
-                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                               user_data_s,
-                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                               true,
                                                               true,
                                                               0);
     else
 #endif // SSL_SUPPORT
       data_p->videoHandle = Net_Client_Common_Tools::connect (connector,
-                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                              *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                               user_data_s,
-                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                              static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                               true,
                                                               true,
                                                               0);
@@ -1126,9 +1163,9 @@ idle_load_next_segment_cb (gpointer userData_in)
     ACE_ASSERT (!use_SSL_b);
 #endif // SSL_SUPPORT
     data_p->videoHandle = Net_Client_Common_Tools::connect (asynch_connector,
-                                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second),
+                                                            *static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second),
                                                             user_data_s,
-                                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address,
+                                                            static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address,
                                                             true,
                                                             true,
                                                             0);
@@ -1137,7 +1174,7 @@ idle_load_next_segment_cb (gpointer userData_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_2).second)->socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (static_cast<Test_I_URLStreamLoad_ConnectionConfiguration_t*> ((*iterator_1b).second)->socketConfiguration.address).c_str ())));
     return G_SOURCE_REMOVE;
   } // end IF
 
@@ -2278,10 +2315,32 @@ continue_:
     else
     {
       (*iterator_1c_).second.second->HTTPHeaders = HTTP_headers;
-      HTTP_HeadersIterator_t headers_iterator =
-        HTTP_headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING));
-      if (headers_iterator != HTTP_headers.end ())
-        (*iterator_1b_).second.second->HTTPHeaders.insert (*headers_iterator);
+      (*iterator_1b_).second.second->HTTPHeaders = HTTP_headers;
+      //(*iterator_1b_).second.second->HTTPHeaders.clear ();
+      //(*iterator_1b_).second.second->addMissingHeaders = false;
+      //HTTP_HeadersIterator_t headers_iterator =
+      //  HTTP_headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING));
+      //if (headers_iterator != HTTP_headers.end ())
+      //  (*iterator_1b_).second.second->HTTPHeaders.insert (*headers_iterator);
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("*/*")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_RANGE_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("bytes=0-")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("identity;q=1, *;q=0")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_LANGUAGE_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("en-US,en;q=0.9,de;q=0.8")));
+      std::string origin_header_value =
+        (use_SSL_2 ? ACE_TEXT_ALWAYS_CHAR ("https") :
+                     ACE_TEXT_ALWAYS_CHAR ("http"));
+      origin_header_value += ACE_TEXT_ALWAYS_CHAR ("://");
+      origin_header_value += hostname_string_2;
+      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ORIGIN_STRING),
+                                                                         origin_header_value));
+      std::string referer_header_value = origin_header_value;
+      referer_header_value += ACE_TEXT_ALWAYS_CHAR ("/");
+      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_REFERER_STRING),
+                                                                         referer_header_value));
     } // end ELSE
 
     if (!data_p->AudioStream->initialize (data_p->configuration->streamConfiguration_3))

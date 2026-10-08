@@ -70,6 +70,7 @@
 #define HTTP_PRT_HEADER_HOST_STRING               "Host"
 #define HTTP_PRT_HEADER_LOCATION_STRING           "Location"
 #define HTTP_PRT_HEADER_ORIGIN_STRING             "Origin"
+#define HTTP_PRT_HEADER_RANGE_STRING              "Range"
 #define HTTP_PRT_HEADER_REFERER_STRING            "Referer"
 #define HTTP_PRT_HEADER_SERVER_STRING             "Server"
 #define HTTP_PRT_HEADER_TRACKING_STRING           "DNT"

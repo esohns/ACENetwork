@@ -21,10 +21,6 @@
 
 #include "test_i_eventhandler.h"
 
-#if defined (RAPIDJSON_SUPPORT)
-#include "document.h"
-#endif // RAPIDJSON_SUPPORT
-
 #if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
 #endif // GTK_SUPPORT
@@ -44,8 +40,6 @@
 #include "stream_session_message_base.h"
 #include "stream_tools.h"
 
-// #include "stream_html_tools.h"
-
 #include "net_macros.h"
 
 #include "test_i_url_stream_load_defines.h"
@@ -57,7 +51,6 @@
 
 Test_I_EventHandler::Test_I_EventHandler (struct Test_I_URLStreamLoad_UI_CBData* CBData_in)
  : CBData_ (CBData_in)
- //, sessionDataMap_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::Test_I_EventHandler"));
 
@@ -79,9 +72,6 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-
-  //sessionDataMap_.insert (std::make_pair (sessionId_in,
-  //                                        &const_cast<struct Test_I_URLStreamLoad_SessionData&> (sessionData_in)));
 
 #if defined (GTK_USE)
 //  CBData_->progressData.transferred = 0;
@@ -124,8 +114,6 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-//  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -149,8 +137,6 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionId_in)
   //} // end IF
   //state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
-
-  //sessionDataMap_.erase (iterator);
 }
 
 void
@@ -191,8 +177,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  //SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -288,7 +272,6 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
 Test_I_EventHandler_1b::Test_I_EventHandler_1b (struct Test_I_URLStreamLoad_UI_CBData* CBData_in)
  : CBData_ (CBData_in)
- //, sessionDataMap_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1b::Test_I_EventHandler_1b"));
 
@@ -310,9 +293,6 @@ Test_I_EventHandler_1b::start (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-
-  //sessionDataMap_.insert (std::make_pair (sessionId_in,
-  //                                        &const_cast<struct Test_I_URLStreamLoad_SessionData&> (sessionData_in)));
 
 #if defined (GTK_USE)
   //  CBData_->progressData.transferred = 0;
@@ -368,7 +348,8 @@ Test_I_EventHandler_1b::end (Stream_SessionId_t sessionId_in)
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
 
-  if (CBData_->videoSegmentIterator != CBData_->videoSegments.end ())
+  if (CBData_->loadNextSegment &&
+      (CBData_->videoSegmentIterator != CBData_->videoSegments.end ()))
   {
     guint event_source_id = g_idle_add (idle_load_next_segment_cb,
                                         CBData_);
@@ -409,6 +390,27 @@ Test_I_EventHandler_1b::notify (Stream_SessionId_t sessionId_in,
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
 #endif // GTK_USE
+
+  static bool is_first_b = true;
+  if (is_first_b)
+  { is_first_b = false;
+    if (CBData_->closeAfterVideoPreamble)
+    {
+#if defined (GTK_USE)
+      //ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+
+      guint event_source_id = g_idle_add (idle_received_video_preamble_cb,
+                                          CBData_);
+      if (event_source_id == 0)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_received_video_preamble_cb): \"%m\", returning\n")));
+        return;
+      } // end IF
+      state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+    } // end IF
+  } // end IF
 }
 
 void
@@ -421,8 +423,6 @@ Test_I_EventHandler_1b::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  //SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -518,7 +518,6 @@ Test_I_EventHandler_1b::notify (Stream_SessionId_t sessionId_in,
 
 Test_I_EventHandler_1c::Test_I_EventHandler_1c (struct Test_I_URLStreamLoad_UI_CBData* CBData_in)
  : CBData_ (CBData_in)
- //, sessionDataMap_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1c::Test_I_EventHandler_1c"));
 
@@ -540,9 +539,6 @@ Test_I_EventHandler_1c::start (Stream_SessionId_t sessionId_in,
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
 #endif // GTK_USE
-
-  //sessionDataMap_.insert (std::make_pair (sessionId_in,
-  //                                        &const_cast<struct Test_I_URLStreamLoad_SessionData&> (sessionData_in)));
 
 #if defined (GTK_USE)
   //  CBData_->progressData.transferred = 0;
@@ -585,8 +581,6 @@ Test_I_EventHandler_1c::end (Stream_SessionId_t sessionId_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-//  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -610,8 +604,6 @@ Test_I_EventHandler_1c::end (Stream_SessionId_t sessionId_in)
   //} // end IF
   //state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
-
-  //sessionDataMap_.erase (iterator);
 }
 
 void
@@ -698,8 +690,6 @@ Test_I_EventHandler_1c::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-  //SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -763,7 +753,7 @@ Test_I_EventHandler_1c::notify (Stream_SessionId_t sessionId_in,
       } // end IF
 
 #if defined (GTK_USE) || defined (WXWIDGETS_USE)
-      CBData_->progressData.statistic_1b = session_data_r.statistic;
+      //CBData_->progressData.statistic_1b = session_data_r.statistic;
 #endif // GTK_USE || WXWIDGETS_USE
 
       if (session_data_r.lock)
@@ -858,8 +848,6 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
 
   // sanity check(s)
   ACE_ASSERT (CBData_);
-//  SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
-  //ACE_ASSERT (iterator != sessionDataMap_.end ());
 
 #if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
@@ -883,8 +871,6 @@ Test_I_EventHandler_2::end (Stream_SessionId_t sessionId_in)
   } // end IF
   state_r.eventSourceIds.insert (event_source_id);
 #endif // GTK_USE
-
-  //sessionDataMap_.erase (iterator);
 }
 
 void

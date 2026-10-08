@@ -90,11 +90,15 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
           } // end IF
         } // end lock scope
       } // end IF
-      else // most likely: chunked transfer
-        ACE_DEBUG ((LM_WARNING,
-                   ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
-                   inherited::mod_->name (),
-                   ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+      //else // most likely: chunked transfer
+      //  ACE_DEBUG ((LM_WARNING,
+      //             ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
+      //             inherited::mod_->name (),
+      //             ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
+      
+      ACE_ASSERT (inherited::configuration_->CBData);
+      inherited::configuration_->CBData->loadNextSegment = true;
+
       break; // done
     }
     case HTTP_Codes::HTTP_STATUS_MULTIPLECHOICES:
@@ -119,12 +123,12 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
                    ACE_TEXT (HTTP_PRT_HEADER_LOCATION_STRING)));
         goto error;
       } // end IF
-      //ACE_DEBUG ((LM_DEBUG,
-      //           ACE_TEXT ("%s: \"%s\" has been redirected to \"%s\" (status was: %d)\n"),
-      //           inherited::mod_->name (),
-      //           ACE_TEXT (inherited::configuration_->URL.c_str ()),
-      //           ACE_TEXT ((*iterator).second.c_str ()),
-      //           data_r.status));
+      ACE_DEBUG ((LM_DEBUG,
+                 ACE_TEXT ("%s: \"%s\" has been redirected to \"%s\" (status was: %d)\n"),
+                 inherited::mod_->name (),
+                 ACE_TEXT (inherited::configuration_->URL.c_str ()),
+                 ACE_TEXT ((*iterator).second.c_str ()),
+                 data_r.status));
 
       // step2: send request ?
       ACE_INET_Addr host_address;
@@ -155,14 +159,14 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
                    ACE_TEXT ((*iterator).second.c_str ())));
         goto error;
       } // end IF
-      //if ((host_name_string != host_name_string_2) ||
-      //    (use_SSL != use_SSL_2))
-      //{
-      //  ACE_DEBUG ((LM_WARNING,
-      //             ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),
-      //             inherited::mod_->name (),
-      //             ACE_TEXT (inherited::configuration_->URL.c_str ()),
-      //             ACE_TEXT (host_name_string.c_str ())));
+      if ((host_name_string != host_name_string_2) ||
+          (use_SSL != use_SSL_2))
+      {
+        ACE_DEBUG ((LM_WARNING,
+                   ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),
+                   inherited::mod_->name (),
+                   ACE_TEXT (inherited::configuration_->URL.c_str ()),
+                   ACE_TEXT (host_name_string.c_str ())));
 
 #if defined (GTK_USE)
         struct Test_I_URLStreamLoad_Redirect_CBData* cb_data_p = NULL;
@@ -172,6 +176,9 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
         cb_data_p->CBData = inherited::configuration_->CBData;
         cb_data_p->handle = handle_;
         cb_data_p->URL = (*iterator).second;
+
+        ACE_ASSERT (inherited::configuration_->CBData);
+        inherited::configuration_->CBData->loadNextSegment = false;
 
         guint event_source_id = g_idle_add (idle_handle_redirect_cb,
                                             cb_data_p);
@@ -185,7 +192,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
 #endif // GTK_USE
 
         break;
-      //} // end IF
+      } // end IF
 
       if (!inherited::send ((*iterator).second,
                             HTTP_Codes::HTTP_METHOD_GET,
@@ -238,7 +245,7 @@ Test_I_Module_HTTPGet::handleSessionMessage (Test_I_SessionMessage*& message_ino
   {
     session_data_p =
       &const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
-    if (session_data_p && session_data_p->connection)
+    if (session_data_p && session_data_p->connection && (handle_ == ACE_INVALID_HANDLE))
       handle_ = static_cast<ACE_HANDLE> (session_data_p->connection->id ());
   } // end IF
 
