@@ -130,6 +130,13 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
                  ACE_TEXT ((*iterator).second.c_str ()),
                  data_r.status));
 
+      bool connection_close_b = false;
+      HTTP_HeadersIterator_t iterator_2 =
+        data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONNECTION_STRING));
+      if (iterator_2 != data_r.headers.end () &&
+          !ACE_OS::strcmp ((*iterator_2).second.c_str (), ACE_TEXT_ALWAYS_CHAR ("close")))
+        connection_close_b = true;
+
       // step2: send request ?
       ACE_INET_Addr host_address;
       std::string host_name_string, host_name_string_2, uri_string, uri_string_2;
@@ -160,7 +167,8 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
         goto error;
       } // end IF
       if ((host_name_string != host_name_string_2) ||
-          (use_SSL != use_SSL_2))
+          (use_SSL != use_SSL_2)                   ||
+          connection_close_b)
       {
         ACE_DEBUG ((LM_WARNING,
                    ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),

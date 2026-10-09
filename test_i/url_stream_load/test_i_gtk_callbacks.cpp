@@ -2315,32 +2315,34 @@ continue_:
     else
     {
       (*iterator_1c_).second.second->HTTPHeaders = HTTP_headers;
-      (*iterator_1b_).second.second->HTTPHeaders = HTTP_headers;
-      //(*iterator_1b_).second.second->HTTPHeaders.clear ();
+      //(*iterator_1b_).second.second->HTTPHeaders = HTTP_headers;
+      (*iterator_1b_).second.second->HTTPHeaders.clear ();
       //(*iterator_1b_).second.second->addMissingHeaders = false;
-      //HTTP_HeadersIterator_t headers_iterator =
-      //  HTTP_headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING));
-      //if (headers_iterator != HTTP_headers.end ())
-      //  (*iterator_1b_).second.second->HTTPHeaders.insert (*headers_iterator);
-      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
-      //                                                                   ACE_TEXT_ALWAYS_CHAR ("*/*")));
+      HTTP_HeadersIterator_t headers_iterator =
+        HTTP_headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING));
+      if (headers_iterator != HTTP_headers.end ())
+        (*iterator_1b_).second.second->HTTPHeaders.insert (*headers_iterator);
+      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
+                                                                         ACE_TEXT_ALWAYS_CHAR ("*/*")));
       //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_RANGE_STRING),
       //                                                                   ACE_TEXT_ALWAYS_CHAR ("bytes=0-")));
-      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
-      //                                                                   ACE_TEXT_ALWAYS_CHAR ("identity;q=1, *;q=0")));
+      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
+                                                                         ACE_TEXT_ALWAYS_CHAR ("identity;q=1, *;q=0")));
+      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONNECTION_STRING),
+                                                                         ACE_TEXT_ALWAYS_CHAR ("keep-alive")));
       //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_LANGUAGE_STRING),
       //                                                                   ACE_TEXT_ALWAYS_CHAR ("en-US,en;q=0.9,de;q=0.8")));
-      std::string origin_header_value =
-        (use_SSL_2 ? ACE_TEXT_ALWAYS_CHAR ("https") :
-                     ACE_TEXT_ALWAYS_CHAR ("http"));
-      origin_header_value += ACE_TEXT_ALWAYS_CHAR ("://");
-      origin_header_value += hostname_string_2;
-      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ORIGIN_STRING),
-                                                                         origin_header_value));
-      std::string referer_header_value = origin_header_value;
-      referer_header_value += ACE_TEXT_ALWAYS_CHAR ("/");
-      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_REFERER_STRING),
-                                                                         referer_header_value));
+      //std::string origin_header_value =
+      //  (use_SSL_2 ? ACE_TEXT_ALWAYS_CHAR ("https") :
+      //               ACE_TEXT_ALWAYS_CHAR ("http"));
+      //origin_header_value += ACE_TEXT_ALWAYS_CHAR ("://");
+      //origin_header_value += hostname_string_2;
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ORIGIN_STRING),
+      //                                                                   origin_header_value));
+      //std::string referer_header_value = origin_header_value;
+      //referer_header_value += ACE_TEXT_ALWAYS_CHAR ("/");
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_REFERER_STRING),
+      //                                                                   referer_header_value));
     } // end ELSE
 
     if (!data_p->AudioStream->initialize (data_p->configuration->streamConfiguration_3))
