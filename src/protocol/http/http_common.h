@@ -23,6 +23,7 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "ace/OS.h"
 
@@ -79,7 +80,20 @@ typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticReportingHandl
 //    return strcasecmp (lhs.c_str (), rhs.c_str ()) < 0 ;
 //  }
 //};
-struct ci_less
+//struct ci_less
+//// : public std::binary_function<std::string, std::string, bool>
+//{
+//  typedef std::string first_argument_type;
+//  typedef std::string second_argument_type;
+//  typedef bool        result_type;
+//
+//  bool operator() (const std::string& s1, const std::string& s2) const
+//  {
+//    return ACE_OS::strcasecmp (s1.c_str (), s2.c_str ()) < 0;
+//  }
+//};
+//typedef std::map<std::string, std::string, ci_less> HTTP_Headers_t;
+struct ci_equal
 // : public std::binary_function<std::string, std::string, bool>
 {
   typedef std::string first_argument_type;
@@ -88,10 +102,11 @@ struct ci_less
 
   bool operator() (const std::string& s1, const std::string& s2) const
   {
-    return ACE_OS::strcasecmp (s1.c_str (), s2.c_str ()) < 0;
+    return ACE_OS::strcasecmp (s1.c_str (), s2.c_str ()) == 0;
   }
 };
-typedef std::map<std::string, std::string, ci_less> HTTP_Headers_t;
+typedef std::unordered_map<std::string, std::string, std::hash<std::string>, ci_equal> HTTP_Headers_t;
+//typedef std::list<std::pair<std::string, std::string> > HTTP_Headers_t;
 typedef HTTP_Headers_t::const_iterator HTTP_HeadersConstIterator_t;
 typedef HTTP_Headers_t::iterator HTTP_HeadersIterator_t;
 typedef std::map<std::string, std::string> HTTP_Form_t;

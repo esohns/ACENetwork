@@ -277,10 +277,43 @@ Net_Client_SSL_Connector_T<HandlerType,
                 configuration_->socketConfiguration.maximalVersion));
   } // end IF
 
-  result = SSL_set_cipher_list (context_p,
-                                ACE_TEXT_ALWAYS_CHAR ("ALL:!COMPLEMENTOFDEFAULT:!eNULL"));
+  //result = SSL_set_cipher_list (context_p,
+  //                              ACE_TEXT_ALWAYS_CHAR ("ALL:!COMPLEMENTOFDEFAULT:!eNULL"));
+  // set modern TLS 1.3 Ciphers
+  result = SSL_set_ciphersuites (context_p,
+                                 ACE_TEXT_ALWAYS_CHAR ("TLS_AES_256_GCM_SHA384:")
+                                 ACE_TEXT_ALWAYS_CHAR ("TLS_CHACHA20_POLY1305_SHA256:")
+                                 ACE_TEXT_ALWAYS_CHAR ("TLS_AES_128_GCM_SHA256"));
   ACE_UNUSED_ARG (result);
 
+  // set modern TLS 1.2 ciphers
+  result = SSL_set_cipher_list (context_p,
+                                ACE_TEXT_ALWAYS_CHAR ("ECDHE-ECDSA-AES128-GCM-SHA256:")
+                                ACE_TEXT_ALWAYS_CHAR ("ECDHE-RSA-AES128-GCM-SHA256:")
+                                ACE_TEXT_ALWAYS_CHAR ("ECDHE-ECDSA-AES256-GCM-SHA384:")
+                                ACE_TEXT_ALWAYS_CHAR ("ECDHE-RSA-AES256-GCM-SHA384:")
+                                ACE_TEXT_ALWAYS_CHAR ("ECDHE-ECDSA-CHACHA20-POLY1305:")
+                                ACE_TEXT_ALWAYS_CHAR ("ECDHE-RSA-CHACHA20-POLY1305"));
+  ACE_UNUSED_ARG (result);
+
+  // define the wire-format ALPN string for http/1.1
+  static const unsigned char alpn_protos_a[] = {
+    0x08, 'h', 't', 't', 'p', '/', '1', '.', '1'
+  };
+  // Note: SSL_set_alpn_protos returns 0 on success, unlike most OpenSSL functions
+  result = SSL_set_alpn_protos (context_p,
+                                alpn_protos_a, sizeof (alpn_protos_a));
+  if (unlikely (result != 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to SSL_set_alpn_protos(): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::SSLErrorToString (context_p, result).c_str ())));
+    delete handler_out; handler_out = NULL;
+    return -1;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("set ALPN protocol to 'http/1.1'\n")));
+  
   result = SSL_set_session (context_p, NULL);
   ACE_UNUSED_ARG (result);
 
@@ -291,6 +324,14 @@ Net_Client_SSL_Connector_T<HandlerType,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("set SSL_OP_IGNORE_UNEXPECTED_EOF option\n")));
   options_i = new_options_i;
+
+  new_options_i = SSL_set_options (context_p,
+                                   SSL_OP_NO_TICKET);
+  if (likely (new_options_i != options_i))
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("set SSL_OP_NO_TICKET option\n")));
+  options_i = new_options_i;
+
   new_options_i =
     SSL_set_options (context_p,
                      SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1); // force >= TLS 1.2

@@ -638,6 +638,9 @@ do_work (bool debugParser_in,
 
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
+  //connection_configuration.socketConfiguration.method = TLS_client_method ();
+  //connection_configuration.socketConfiguration.minimalVersion = TLS1_3_VERSION;
+  //connection_configuration.socketConfiguration.maximalVersion = TLS1_3_VERSION;
   connection_configuration.socketConfiguration.address = remoteHost_in;
   connection_configuration.allocatorConfiguration = &allocator_configuration;
   connection_configuration.socketConfiguration.useLoopBackDevice =
@@ -654,6 +657,9 @@ do_work (bool debugParser_in,
                                                                     &connection_configuration));
 
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1b;
+  //connection_configuration_1b.socketConfiguration.method = TLS_client_method ();
+  //connection_configuration_1b.socketConfiguration.minimalVersion = TLS1_3_VERSION;
+  //connection_configuration_1b.socketConfiguration.maximalVersion = TLS1_3_VERSION;
   connection_configuration_1b.socketConfiguration.address = remoteHost_in;
   connection_configuration_1b.allocatorConfiguration = &allocator_configuration;
   connection_configuration_1b.socketConfiguration.useLoopBackDevice =
@@ -669,6 +675,9 @@ do_work (bool debugParser_in,
                                                                     &connection_configuration_1b));
 
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1c;
+  //connection_configuration_1c.socketConfiguration.method = TLS_client_method ();
+  //connection_configuration_1c.socketConfiguration.minimalVersion = TLS1_3_VERSION;
+  //connection_configuration_1c.socketConfiguration.maximalVersion = TLS1_3_VERSION;
   connection_configuration_1c.socketConfiguration.address = remoteHost_in;
   connection_configuration_1c.allocatorConfiguration = &allocator_configuration;
   connection_configuration_1c.socketConfiguration.useLoopBackDevice =

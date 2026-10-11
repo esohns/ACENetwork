@@ -29,6 +29,7 @@
 
 #include "common_parser_common.h"
 
+#undef YY_EXTRA_TYPE
 #include "common_parser_m3u_parser_driver.h"
 
 #include "common_time_common.h"
@@ -43,7 +44,7 @@
 #include "test_i_url_stream_load_stream_common.h"
 
 class Test_I_M3U_Parser
- : public Stream_Module_Parser_T <ACE_MT_SYNCH,
+ : public Stream_Module_Parser_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
                                  Stream_ControlMessage_t,
@@ -52,14 +53,14 @@ class Test_I_M3U_Parser
                                  Common_Parser_M3U_ParserDriver,
                                  struct Stream_UserData>
 {
-  typedef Stream_Module_Parser_T <ACE_MT_SYNCH,
-                                  Common_TimePolicy_t,
-                                  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                                  Stream_ControlMessage_t,
-                                  Test_I_Message,
-                                  Test_I_SessionMessage,
-                                  Common_Parser_M3U_ParserDriver,
-                                  struct Stream_UserData> inherited;
+  typedef Stream_Module_Parser_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                 Stream_ControlMessage_t,
+                                 Test_I_Message,
+                                 Test_I_SessionMessage,
+                                 Common_Parser_M3U_ParserDriver,
+                                 struct Stream_UserData> inherited;
 
  public:
   Test_I_M3U_Parser (ISTREAM_T*); // stream handle

@@ -330,7 +330,7 @@ idle_handle_redirect_cb (gpointer userData_in)
   } // end IF
   else
   {
-    ACE_ASSERT (data_p->videoHandle != ACE_INVALID_HANDLE);
+    //ACE_ASSERT (data_p->videoHandle != ACE_INVALID_HANDLE);
     iconnection_1b =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->videoHandle));
@@ -1024,6 +1024,8 @@ idle_received_video_preamble_cb (gpointer userData_in)
     TEST_I_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   //ACE_ASSERT (data_p->videoHandle != ACE_INVALID_HANDLE);
+
+  data_p->loadNextSegment = true;
 
   Test_I_ConnectionManager_t::ICONNECTION_T* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -2322,16 +2324,30 @@ continue_:
         HTTP_headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING));
       if (headers_iterator != HTTP_headers.end ())
         (*iterator_1b_).second.second->HTTPHeaders.insert (*headers_iterator);
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("curl/8.21.0")));
       (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
                                                                          ACE_TEXT_ALWAYS_CHAR ("*/*")));
-      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_RANGE_STRING),
-      //                                                                   ACE_TEXT_ALWAYS_CHAR ("bytes=0-")));
-      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
-                                                                         ACE_TEXT_ALWAYS_CHAR ("identity;q=1, *;q=0")));
-      (*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONNECTION_STRING),
-                                                                         ACE_TEXT_ALWAYS_CHAR ("keep-alive")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONNECTION_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("close")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("identity;q=1, *;q=0")));
       //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_LANGUAGE_STRING),
       //                                                                   ACE_TEXT_ALWAYS_CHAR ("en-US,en;q=0.9,de;q=0.8")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_PRIORITY_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("u=0, i")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Sec-Fetch-Dest"),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("document")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Sec-Fetch-Mode"),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("navigate")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Sec-Fetch-Site"),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("none")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Sec-Fetch-User"),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("?1")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Upgrade-Insecure-Requests"),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("1")));
+      //(*iterator_1b_).second.second->HTTPHeaders.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_RANGE_STRING),
+      //                                                                   ACE_TEXT_ALWAYS_CHAR ("bytes=0-")));
       //std::string origin_header_value =
       //  (use_SSL_2 ? ACE_TEXT_ALWAYS_CHAR ("https") :
       //               ACE_TEXT_ALWAYS_CHAR ("http"));

@@ -69,35 +69,47 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
       inherited::receivedBytes_ += message_inout->total_length ();
 
       // got all data ? --> close connection ?
+      ACE_UINT64 content_length = 0;
+      bool is_chunked_b = false;
+
       iterator =
         data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
       if (iterator != data_r.headers.end ())
       {
         std::istringstream converter ((*iterator).second);
-        ACE_UINT64 content_length = 0;
         converter >> content_length;
-        ACE_ASSERT (session_data_r.lock);
-        { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
-          if (inherited::configuration_->closeAfterReception         &&
-              (content_length && (content_length == receivedBytes_)) &&
-              session_data_r.connection)
-          {
-            ACE_DEBUG ((LM_DEBUG,
-                       ACE_TEXT ("%s: received all content, aborting connection\n"),
-                       inherited::mod_->name ()));
-            ACE_ASSERT (session_data_r.connection);
-            session_data_r.connection->abort ();
-          } // end IF
-        } // end lock scope
       } // end IF
-      //else // most likely: chunked transfer
-      //  ACE_DEBUG ((LM_WARNING,
-      //             ACE_TEXT ("%s: missing \"%s\" HTTP header, continuing\n"),
-      //             inherited::mod_->name (),
-      //             ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING)));
-      
+      else // most likely: chunked transfer
+      {
+        iterator =
+          data_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING));
+        if (iterator != data_r.headers.end ())
+          is_chunked_b = !ACE_OS::strcmp ((*iterator).second.c_str (),
+                                          ACE_TEXT_ALWAYS_CHAR ("chunked"));
+        else
+          ACE_DEBUG ((LM_WARNING,
+                      ACE_TEXT ("%s: missing both \"%s\" and \"%s\" HTTP header, continuing\n"),
+                      inherited::mod_->name (),
+                      ACE_TEXT (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
+                      ACE_TEXT (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING)));
+      } // end ELSE
+      ACE_ASSERT (session_data_r.lock);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
+        if (inherited::configuration_->closeAfterReception                           &&
+            ((content_length && (content_length == receivedBytes_)) || is_chunked_b) &&
+            session_data_r.connection)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("%s: received all content, aborting connection\n"),
+                      inherited::mod_->name ()));
+          ACE_ASSERT (session_data_r.connection);
+          session_data_r.connection->abort ();
+        } // end IF
+      } // end lock scope
+
       ACE_ASSERT (inherited::configuration_->CBData);
-      inherited::configuration_->CBData->loadNextSegment = true;
+      inherited::configuration_->CBData->loadNextSegment =
+        ((content_length && (content_length == receivedBytes_)) || is_chunked_b);
 
       break; // done
     }
@@ -171,7 +183,7 @@ Test_I_Module_HTTPGet::handleDataMessage (Test_I_Message*& message_inout,
           connection_close_b)
       {
         ACE_DEBUG ((LM_WARNING,
-                   ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, continuing\n"),
+                   ACE_TEXT ("%s: \"%s\" redirects to a different host (was: \"%s\"), and/or requires a HTTP(S) connection, and/or connection will close instantly, continuing\n"),
                    inherited::mod_->name (),
                    ACE_TEXT (inherited::configuration_->URL.c_str ()),
                    ACE_TEXT (host_name_string.c_str ())));
