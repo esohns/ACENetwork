@@ -108,9 +108,9 @@
 #include "test_i_url_stream_load_common.h"
 #include "test_i_url_stream_load_defines.h"
 
-const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadAudioStream");
-const char stream_name_string_1b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadVideoStream");
-const char stream_name_string_1c[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadM3UStream");
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("ConnectionStream");
+//const char stream_name_string_1b[] = ACE_TEXT_ALWAYS_CHAR ("VideoConnectionStream");
+const char stream_name_string_1c[] = ACE_TEXT_ALWAYS_CHAR ("M3UStream");
 
 void
 do_print_usage (const std::string& programName_in)
@@ -597,12 +597,15 @@ do_work (bool debugParser_in,
   Test_I_EventHandler message_handler (&CBData_in); // audio connection-
   Test_I_EventHandler_1b message_handler_1b (&CBData_in); // video connection-
   Test_I_EventHandler_1c message_handler_1c (&CBData_in); // m3u connection-
+  Test_I_EventHandler_1d message_handler_1d (&CBData_in); // A/V connection-
   Test_I_EventHandler_2 message_handler_2 (&CBData_in); // A/V processing-
   Test_I_MessageHandler_Module event_handler_module (NULL,
                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_1b (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_1c (NULL,
+                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  Test_I_MessageHandler_Module event_handler_module_1d (NULL,
                                                         ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_2 (NULL,
                                                        ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
@@ -625,16 +628,20 @@ do_work (bool debugParser_in,
                                                    NULL);
   Test_I_URLStreamLoad_MessageQueue_t video_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                                    NULL);
-  Test_I_URLStreamLoad_MessageQueue_t av_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
-                                                      NULL);
+  Test_I_URLStreamLoad_MessageQueue_t av_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                NULL);
+  Test_I_URLStreamLoad_MessageQueue_t av_output_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
+                                                       NULL);
   Test_I_URLStreamLoad_MessageQueue_t audio_input_queue (NET_STREAM_MAX_MESSAGES, // --> unlimited
                                                          NULL);
   Test_I_AudioStream audio_stream;
   Test_I_VideoStream video_stream;
   Test_I_AVStream av_stream;
+  Test_I_AV_Output_Stream av_output_stream;
   CBData_in.AudioStream = &audio_stream;
   CBData_in.VideoStream = &video_stream;
   CBData_in.AVStream = &av_stream;
+  CBData_in.AVOutputStream = &av_output_stream;
 
   // *********************** socket configuration data ************************
   Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration;
@@ -656,41 +663,26 @@ do_work (bool debugParser_in,
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     &connection_configuration));
 
-  Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1b;
-  //connection_configuration_1b.socketConfiguration.method = TLS_client_method ();
-  //connection_configuration_1b.socketConfiguration.minimalVersion = TLS1_3_VERSION;
-  //connection_configuration_1b.socketConfiguration.maximalVersion = TLS1_3_VERSION;
-  connection_configuration_1b.socketConfiguration.address = remoteHost_in;
-  connection_configuration_1b.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_1b.socketConfiguration.useLoopBackDevice =
-    connection_configuration_1b.socketConfiguration.address.is_loopback ();
-//  connection_configuration_1b.statisticReportingInterval =
-//    statisticReportingInterval_in;
-  connection_configuration_1b.messageAllocator = &message_allocator;
-  //connection_configuration_1b.PDUSize = bufferSize_in;
-  //connection_configuration_1b.userData = &CBData_in.configuration->userData;
+  Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1b =
+    connection_configuration;
   connection_configuration_1b.streamConfiguration =
     &configuration_in.streamConfiguration_1b;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("1b"),
                                                                     &connection_configuration_1b));
 
-  Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1c;
-  //connection_configuration_1c.socketConfiguration.method = TLS_client_method ();
-  //connection_configuration_1c.socketConfiguration.minimalVersion = TLS1_3_VERSION;
-  //connection_configuration_1c.socketConfiguration.maximalVersion = TLS1_3_VERSION;
-  connection_configuration_1c.socketConfiguration.address = remoteHost_in;
-  connection_configuration_1c.allocatorConfiguration = &allocator_configuration;
-  connection_configuration_1c.socketConfiguration.useLoopBackDevice =
-    connection_configuration_1c.socketConfiguration.address.is_loopback ();
-//  connection_configuration_1c.statisticReportingInterval =
-//    statisticReportingInterval_in;
-  connection_configuration_1c.messageAllocator = &message_allocator;
-  //connection_configuration_1c.PDUSize = bufferSize_in;
-  //connection_configuration_1c.userData = &CBData_in.configuration->userData;
+  Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1c =
+    connection_configuration;
   connection_configuration_1c.streamConfiguration =
     &configuration_in.streamConfiguration_1c;
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("1c"),
                                                                     &connection_configuration_1c));
+
+  Test_I_URLStreamLoad_ConnectionConfiguration_t connection_configuration_1d =
+    connection_configuration;
+  connection_configuration_1d.streamConfiguration =
+    &configuration_in.streamConfiguration_1d;
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("1d"),
+                                                                    &connection_configuration_1d));
 
   // ********************** stream configuration data **************************
   // ********************** parser configuration data **************************
@@ -713,6 +705,13 @@ do_work (bool debugParser_in,
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (FFMPEG_SUPPORT)
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
+  codec_configuration_2.codecId = AV_CODEC_ID_H264;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  codec_configuration_2.codecName = ACE_TEXT_ALWAYS_CHAR ("h264_mf");
+#endif // ACE_WIN32 || ACE_WIN64
+  // codec_configuration_2.profile = AV_PROFILE_H264_HIGH;
+  codec_configuration_2.profile = AV_PROFILE_H264_BASELINE;
   struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_3; // audio (decoder)
   codec_configuration_3.codecId = AV_CODEC_ID_OPUS;
   codec_configuration_3.delayOpen = true;
@@ -723,13 +722,10 @@ do_work (bool debugParser_in,
   codec_configuration_4.deviceType = AV_HWDEVICE_TYPE_D3D11VA;
   codec_configuration_4.format.videoFormat = AV_PIX_FMT_YUV420P;
   codec_configuration_4.useParser = false; // *NOTE*: a setting of "true" does not work with "mp4" (i.e. vp09-) streams
-  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_2; // A/V (encoder)
-  codec_configuration_2.codecId = AV_CODEC_ID_H264;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  codec_configuration_2.codecName = ACE_TEXT_ALWAYS_CHAR ("h264_mf");
-#endif // ACE_WIN32 || ACE_WIN64
-  // codec_configuration_2.profile = AV_PROFILE_H264_HIGH;
-  codec_configuration_2.profile = AV_PROFILE_H264_BASELINE;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_5a = // A/V (audio decoder)
+    codec_configuration_3;
+  struct Stream_MediaFramework_FFMPEG_CodecConfiguration codec_configuration_5b = // A/V (video decoder)
+    codec_configuration_4;
 #endif // FFMPEG_SUPPORT
 
   struct Stream_ModuleConfiguration module_configuration;
@@ -737,7 +733,8 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1b; // video connection-
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1c; // m3u connection-
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1c_b; // m3u parser
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2; // A/V processing-
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_1d; // A/V connection-
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2; // A/V output processing-
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2a_video_resize;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b; // save video converter
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_2b_audio_injector;
@@ -746,13 +743,18 @@ do_work (bool debugParser_in,
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_3_queuetarget_2;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_4; // video processing-
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_4_queuetarget;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_5; // A/V processing-
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_5_video_decoder;
+  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration_5_queuetarget;
 
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1b;
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1c;
-  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_2; // A/V processing-
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_1d;
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_2; // A/V output processing-
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_3; // audio processing-
   struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_4; // video processing-
+  struct Test_I_URLStreamLoad_StreamConfiguration stream_configuration_5; // A/V processing-
 
   modulehandler_configuration.allocatorConfiguration = &allocator_configuration;
   modulehandler_configuration.CBData = &CBData_in;
@@ -812,6 +814,20 @@ do_work (bool debugParser_in,
 
   //--------------------------------------
 
+  modulehandler_configuration_1d = modulehandler_configuration;
+  modulehandler_configuration_1d.parserConfiguration =
+    &configuration_in.parserConfiguration_1d;
+  modulehandler_configuration_1d.queue = &av_queue;
+  modulehandler_configuration_1d.subscriber = &message_handler_1d;
+
+  stream_configuration_1d = stream_configuration;
+  stream_configuration_1d.module = &event_handler_module_1d;
+  configuration_in.streamConfiguration_1d.initialize (module_configuration,
+                                                      modulehandler_configuration_1d,
+                                                      stream_configuration_1d);
+
+  //--------------------------------------
+
   modulehandler_configuration_3.allocatorConfiguration =
     &allocator_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -856,7 +872,7 @@ do_work (bool debugParser_in,
                                                      stream_configuration_3);
 
   modulehandler_configuration_3_queuetarget = modulehandler_configuration_3;
-  modulehandler_configuration_3_queuetarget.queue = &av_input_queue;
+  modulehandler_configuration_3_queuetarget.queue = &av_output_queue;
   configuration_in.streamConfiguration_3.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_3_queuetarget)));
@@ -894,10 +910,56 @@ do_work (bool debugParser_in,
                                                      stream_configuration_4);
 
   modulehandler_configuration_4_queuetarget = modulehandler_configuration_4;
-  modulehandler_configuration_4_queuetarget.queue = &av_input_queue;
+  modulehandler_configuration_4_queuetarget.queue = &av_output_queue;
   configuration_in.streamConfiguration_4.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING),
                                                                  std::make_pair (&module_configuration,
                                                                                  &modulehandler_configuration_4_queuetarget)));
+
+  //--------------------------------------
+
+  modulehandler_configuration_5 = modulehandler_configuration_3;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_5.codecConfiguration = &codec_configuration_5a;
+#endif // FFMPEG_SUPPORT
+  modulehandler_configuration_5.inputFormat = ACE_TEXT_ALWAYS_CHAR ("mp4");
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_5.outputFormat.audio.channels = 2;
+  modulehandler_configuration_5.outputFormat.audio.format = AV_SAMPLE_FMT_FLT;
+  modulehandler_configuration_5.outputFormat.audio.sampleRate = 48000;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  modulehandler_configuration_5.outputFormat.video.format = AV_PIX_FMT_RGB24;
+#else
+  modulehandler_configuration_5.outputFormat.video.format = AV_PIX_FMT_BGRA;
+#endif // ACE_WIN32 || ACE_WIN64
+#endif // FFMPEG_SUPPORT
+  modulehandler_configuration_5.queue = &av_queue;
+
+  stream_configuration_5 = stream_configuration_3;
+#if defined (FFMPEG_SUPPORT)
+  stream_configuration_5.mediaType.audio.codecId = AV_CODEC_ID_OPUS;
+  stream_configuration_5.mediaType.audio.format = AV_SAMPLE_FMT_FLTP;
+  stream_configuration_5.mediaType.video.codecId = AV_CODEC_ID_AV1;
+  stream_configuration_5.mediaType.video.frameRate = { 25, 1 };
+  stream_configuration_5.mediaType.video.resolution = { 640, 360 };
+#endif // FFMPEG_SUPPORT
+  configuration_in.streamConfiguration_5.initialize (module_configuration,
+                                                     modulehandler_configuration_5,
+                                                     stream_configuration_5);
+
+  modulehandler_configuration_5_video_decoder = modulehandler_configuration_5;
+#if defined (FFMPEG_SUPPORT)
+  modulehandler_configuration_5_video_decoder.codecConfiguration =
+    &codec_configuration_5b;
+#endif // FFMPEG_SUPPORT
+  configuration_in.streamConfiguration_5.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_5_video_decoder)));
+
+  modulehandler_configuration_5_queuetarget = modulehandler_configuration_5;
+  modulehandler_configuration_5_queuetarget.queue = &av_output_queue;
+  configuration_in.streamConfiguration_5.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING),
+                                                                 std::make_pair (&module_configuration,
+                                                                                 &modulehandler_configuration_5_queuetarget)));
 
   //--------------------------------------
 
@@ -914,7 +976,7 @@ do_work (bool debugParser_in,
 //  modulehandler_configuration_2.statisticReportingInterval =
 //    statisticReportingInterval_in;
   modulehandler_configuration_2.handleResize = false;
-  modulehandler_configuration_2.queue = &av_input_queue;
+  modulehandler_configuration_2.queue = &av_output_queue;
   modulehandler_configuration_2.subscriber = &message_handler_2;
   modulehandler_configuration_2.targetFileName = fileName_in;
 
@@ -1016,7 +1078,8 @@ do_work (bool debugParser_in,
     //                                                                                  : COMMON_TIMER_DISPATCH_PROACTOR);
   Common_Timer_Tools::configuration_.publishSeconds = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Common_Timer_Tools::configuration_.taskType = ACE_TEXT_ALWAYS_CHAR ("Playback");
+  Common_Timer_Tools::configuration_.taskType =
+    ACE_TEXT_ALWAYS_CHAR ("Playback");
   Common_Timer_Tools::configuration_.taskPriority = AVRT_PRIORITY_HIGH;
 #endif // ACE_WIN32 || ACE_WIN64
   Common_Timer_Tools::initialize ();

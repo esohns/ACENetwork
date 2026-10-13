@@ -122,6 +122,35 @@ class Test_I_EventHandler_1c
 
 //////////////////////////////////////////
 
+class Test_I_EventHandler_1d
+ : public Test_I_ISessionNotify_t
+{
+ public:
+  Test_I_EventHandler_1d (struct Test_I_URLStreamLoad_UI_CBData*); // UI state
+  inline virtual ~Test_I_EventHandler_1d () {}
+
+  // implement Stream_ISessionDataNotify_T
+  virtual void start (Stream_SessionId_t,                              // session id
+                      const struct Test_I_URLStreamLoad_SessionData&); // session data
+  virtual void notify (Stream_SessionId_t,
+                       const enum Stream_SessionMessageType&,
+                       bool = false);
+  virtual void end (Stream_SessionId_t); // session id
+  virtual void notify (Stream_SessionId_t,     // session id
+                       const Test_I_Message&); // data message
+  virtual void notify (Stream_SessionId_t,            // session id
+                       const Test_I_SessionMessage&); // session message
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1d ())
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1d (const Test_I_EventHandler_1d&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler_1d& operator= (const Test_I_EventHandler_1d&))
+
+  struct Test_I_URLStreamLoad_UI_CBData* CBData_;
+};
+
+//////////////////////////////////////////
+
 class Test_I_EventHandler_2
  : public Test_I_ISessionNotify_t
 {

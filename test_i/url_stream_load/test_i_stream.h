@@ -46,7 +46,8 @@ typedef Stream_Session_Manager_T<ACE_MT_SYNCH,
 
 extern const char stream_name_string_2a[]; // audio processing
 extern const char stream_name_string_2b[]; // video processing
-extern const char stream_name_string_3[];  // a/v processing
+extern const char stream_name_string_2c[]; // a/v processing
+extern const char stream_name_string_3[];  // a/v output processing
 
 //////////////////////////////////////////
 
@@ -155,6 +156,57 @@ class Test_I_VideoStream
 class Test_I_AVStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_2c,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_URLStreamLoad_StreamState,
+                        struct Test_I_URLStreamLoad_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                        Test_I_SessionManager_t,
+                        Stream_ControlMessage_t,
+                        Test_I_Message,
+                        Test_I_SessionMessage,
+                        struct Stream_UserData>
+{
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_2c,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_URLStreamLoad_StreamState,
+                        struct Test_I_URLStreamLoad_StreamConfiguration,
+                        struct Stream_Statistic,
+                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                        Test_I_SessionManager_t,
+                        Stream_ControlMessage_t,
+                        Test_I_Message,
+                        Test_I_SessionMessage,
+                        struct Stream_UserData> inherited;
+
+ public:
+  Test_I_AVStream ();
+  inline virtual ~Test_I_AVStream () { inherited::shutdown (); }
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ILayout*, // i/o value: layout
+                     bool&);          // return value: delete modules ?
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream (const Test_I_AVStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream& operator= (const Test_I_AVStream&))
+};
+
+//////////////////////////////////////////
+
+class Test_I_AV_Output_Stream
+ : public Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
                         stream_name_string_3,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
@@ -187,8 +239,8 @@ class Test_I_AVStream
                         struct Stream_UserData> inherited;
 
  public:
-  Test_I_AVStream ();
-  inline virtual ~Test_I_AVStream () { inherited::shutdown (); }
+  Test_I_AV_Output_Stream ();
+  inline virtual ~Test_I_AV_Output_Stream () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ILayout*, // i/o value: layout
@@ -202,8 +254,8 @@ class Test_I_AVStream
   inline virtual void resizing () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream (const Test_I_AVStream&))
-  ACE_UNIMPLEMENTED_FUNC (Test_I_AVStream& operator= (const Test_I_AVStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AV_Output_Stream (const Test_I_AV_Output_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_AV_Output_Stream& operator= (const Test_I_AV_Output_Stream&))
 };
 
 #endif

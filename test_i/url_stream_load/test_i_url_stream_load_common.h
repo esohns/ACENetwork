@@ -55,6 +55,7 @@ class Test_I_SessionMessage;
 class Test_I_AudioStream;
 class Test_I_VideoStream;
 class Test_I_AVStream;
+class Test_I_AV_Output_Stream;
 
 struct Test_I_URLStreamLoad_SignalHandlerConfiguration
  : Test_I_SignalHandlerConfiguration
@@ -84,19 +85,24 @@ struct Test_I_URLStreamLoad_Configuration
    , parserConfiguration_1b ()
    , parserConfiguration_1c ()
    , parserConfiguration_1c_2 ()
+   , parserConfiguration_1d ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , streamConfiguration ()
    , streamConfiguration_1b ()
    , streamConfiguration_1c ()
+   , streamConfiguration_1d ()
    , streamConfiguration_2 ()
    , streamConfiguration_3 ()
    , streamConfiguration_4 ()
+   , streamConfiguration_5 ()
   {
     parserConfiguration.notifyProgress = true;
     parserConfiguration.multiBody = true;
     parserConfiguration_1b.notifyProgress = true;
     parserConfiguration_1b.multiBody = true;
+    parserConfiguration_1d.notifyProgress = true;
+    parserConfiguration_1d.multiBody = true;
   }
 
   // **************************** parser data **********************************
@@ -104,6 +110,7 @@ struct Test_I_URLStreamLoad_Configuration
   struct HTTP_ParserConfiguration                        parserConfiguration_1b; // video connection-
   struct HTTP_ParserConfiguration                        parserConfiguration_1c; // M3U connection-
   struct HTTP_ParserConfiguration                        parserConfiguration_1c_2; // M3U parser-
+  struct HTTP_ParserConfiguration                        parserConfiguration_1d; // A/V connection-
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
@@ -111,10 +118,12 @@ struct Test_I_URLStreamLoad_Configuration
   // **************************** stream data **********************************
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration; // audio connection-
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1b; // video connection-
-  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1c; // m3u connection-
-  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_2; // A/V processing-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1c; // M3U connection-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_1d; // A/V connection-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_2; // A/V output processing-
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_3; // Audio processing-
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_4; // Video processing-
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration_5; // A/V processing-
 };
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -185,13 +194,15 @@ struct Test_I_URLStreamLoad_UI_CBData
    , AudioStream (NULL)
    , VideoStream (NULL)
    , AVStream (NULL)
+   , AVOutputStream (NULL)
    , dispatch (NULL)
 #if defined (RAPIDJSON_SUPPORT)
    , formats ()
 #endif // RAPIDJSON_SUPPORT
    , audioHandle (ACE_INVALID_HANDLE)
    , videoHandle (ACE_INVALID_HANDLE)
-#if defined (GTK_USE)
+   , AVHandle (ACE_INVALID_HANDLE)
+#if defined(GTK_USE)
    , videoUpdateEventSourceId (0)
 #endif // GTK_USE
 #if defined (LIBPIPEWIRE_SUPPORT)
@@ -206,6 +217,7 @@ struct Test_I_URLStreamLoad_UI_CBData
    , volumeControl (NULL)
    , maxVolumeLevel (0)
 #endif // ACE_WIN32 || ACE_WIN64
+   , isCombinedAVStream (false)
    , closeAfterVideoPreamble (false)
    , loadNextSegment (true)
    , videoSegmentIterator ()
@@ -218,12 +230,14 @@ struct Test_I_URLStreamLoad_UI_CBData
   Test_I_AudioStream*                                  AudioStream;
   Test_I_VideoStream*                                  VideoStream;
   Test_I_AVStream*                                     AVStream;
+  Test_I_AV_Output_Stream*                             AVOutputStream;
   Common_IDispatch*                                    dispatch; // display module
 #if defined (RAPIDJSON_SUPPORT)
   rapidjson::Document                                  formats;
 #endif // RAPIDJSON_SUPPORT
   ACE_HANDLE                                           audioHandle;
   ACE_HANDLE                                           videoHandle;
+  ACE_HANDLE                                           AVHandle;
 #if defined (GTK_USE)
   guint                                                videoUpdateEventSourceId;
 #endif // GTK_USE
@@ -240,6 +254,7 @@ struct Test_I_URLStreamLoad_UI_CBData
   snd_mixer_elem_t*                                    volumeControl;
   long                                                 maxVolumeLevel;
 #endif // ACE_WIN32 || ACE_WIN64
+  bool                                                 isCombinedAVStream;
   bool                                                 closeAfterVideoPreamble;
   bool                                                 loadNextSegment;
   Test_I_URLStreamLoad_AVSegmentsConstIterator_t       videoSegmentIterator;

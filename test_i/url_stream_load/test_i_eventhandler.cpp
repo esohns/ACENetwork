@@ -95,7 +95,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                              const enum Stream_SessionMessageType& sessionEvent_in,
                              bool expedite_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -316,7 +316,7 @@ Test_I_EventHandler_1b::notify (Stream_SessionId_t sessionId_in,
                                 const enum Stream_SessionMessageType& sessionEvent_in,
                                 bool expedite_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_1b::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1b::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -562,7 +562,7 @@ Test_I_EventHandler_1c::notify (Stream_SessionId_t sessionId_in,
                                 const enum Stream_SessionMessageType& sessionEvent_in,
                                 bool expedite_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_1c::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1c::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -783,6 +783,227 @@ Test_I_EventHandler_1c::notify (Stream_SessionId_t sessionId_in,
 
 //////////////////////////////////////////
 
+Test_I_EventHandler_1d::Test_I_EventHandler_1d (struct Test_I_URLStreamLoad_UI_CBData* CBData_in)
+ : CBData_ (CBData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1d::Test_I_EventHandler_1d"));
+
+}
+
+void
+Test_I_EventHandler_1d::start (Stream_SessionId_t sessionId_in,
+                               const struct Test_I_URLStreamLoad_SessionData& sessionData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1d::start"));
+
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+#endif // GTK_USE
+
+#if defined (GTK_USE)
+//  CBData_->progressData.transferred = 0;
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+  state_r.eventStack.push (COMMON_UI_EVENT_STARTED);
+
+  guint event_source_id = g_idle_add (idle_start_session_cb,
+                                      CBData_);
+  if (event_source_id == 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_start_session_cb): \"%m\", returning\n")));
+    return;
+  } // end IF
+  state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+}
+
+void
+Test_I_EventHandler_1d::notify (Stream_SessionId_t sessionId_in,
+                                const enum Stream_SessionMessageType& sessionEvent_in,
+                                bool expedite_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1d::notify"));
+
+  ACE_UNUSED_ARG (sessionId_in);
+  ACE_UNUSED_ARG (sessionEvent_in);
+  ACE_UNUSED_ARG (expedite_in);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+
+  ACE_NOTREACHED (return;)
+}
+
+void
+Test_I_EventHandler_1d::end (Stream_SessionId_t sessionId_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1d::end"));
+
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+#endif // GTK_USE
+
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+  state_r.eventStack.push (COMMON_UI_EVENT_FINISHED);
+
+  //guint event_source_id = g_idle_add (idle_end_session_cb,
+  //                                    CBData_);
+  //if (event_source_id == 0)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+  //  return;
+  //} // end IF
+  //state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+}
+
+void
+Test_I_EventHandler_1d::notify (Stream_SessionId_t sessionId_in,
+                                const Test_I_Message& message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1d::notify"));
+
+  ACE_UNUSED_ARG (sessionId_in);
+
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+#endif // GTK_USE
+
+  CBData_->progressData.transferred += message_in.total_length ();
+  //CBData_->progressData.statistic.bytes += message_in.total_length ();
+
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+  state_r.eventStack.push (COMMON_UI_EVENT_DATA);
+#endif // GTK_USE
+}
+
+void
+Test_I_EventHandler_1d::notify (Stream_SessionId_t sessionId_in,
+                                const Test_I_SessionMessage& sessionMessage_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_1d::notify"));
+
+  int result = -1;
+
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+#endif // GTK_USE
+
+  enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
+  switch (sessionMessage_in.type ())
+  {
+    case STREAM_SESSION_MESSAGE_ABORT:
+    {
+#if defined (GTK_USE)
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+
+      guint event_source_id = g_idle_add (idle_end_session_cb,
+                                          CBData_);
+      if (event_source_id == 0)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to g_idle_add(idle_end_session_cb): \"%m\", returning\n")));
+        return;
+      } // end IF
+      state_r.eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
+
+      event_e = COMMON_UI_EVENT_ABORT;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_CONNECT:
+    {
+      event_e = COMMON_UI_EVENT_CONNECT;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_DISCONNECT:
+    {
+      event_e = COMMON_UI_EVENT_DISCONNECT;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_STEP:
+    case STREAM_SESSION_MESSAGE_STEP_DATA:
+    {
+      event_e = COMMON_UI_EVENT_STEP;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_STATISTIC:
+    {
+      const Test_I_URLStreamLoad_SessionData_t& session_data_container_r =
+        sessionMessage_in.getR ();
+      struct Test_I_URLStreamLoad_SessionData& session_data_r =
+        const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_data_container_r.getR ());
+
+      if (session_data_r.lock)
+      {
+        result = session_data_r.lock->acquire ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
+      } // end IF
+
+#if defined (GTK_USE) || defined (WXWIDGETS_USE)
+      CBData_->progressData.statistic = session_data_r.statistic;
+#endif // GTK_USE || WXWIDGETS_USE
+
+      if (session_data_r.lock)
+      {
+        result = session_data_r.lock->release ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+      } // end IF
+
+      event_e = COMMON_UI_EVENT_STATISTIC;
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown session message type (was: %d), returning\n"),
+                  sessionMessage_in.type ()));
+      return;
+    }
+  } // end SWITCH
+#if defined (GTK_USE)
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
+  state_r.eventStack.push (event_e);
+#endif // GTK_USE
+}
+
+//////////////////////////////////////////
+
 Test_I_EventHandler_2::Test_I_EventHandler_2 (struct Test_I_URLStreamLoad_UI_CBData* CBData_in)
  : CBData_ (CBData_in)
 {
@@ -829,7 +1050,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
                                const enum Stream_SessionMessageType& sessionEvent_in,
                                bool expedite_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);

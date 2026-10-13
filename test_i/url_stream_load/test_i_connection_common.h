@@ -62,7 +62,7 @@
 // forward declarations
 struct Test_I_ConnectionConfiguration;
 class Test_I_ConnectionStream;
-class Test_I_ConnectionStream_1b;
+//class Test_I_ConnectionStream_1b;
 class Test_I_ConnectionStream_1c;
 
 //extern const char stream_name_string_[];
@@ -90,17 +90,17 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 
 //----------------------------------------
 
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          //Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                          struct HTTP_ConnectionState,
-                          HTTP_Statistic_t> Test_I_IConnection_1b_t;
-typedef Net_IStreamConnection_T<ACE_INET_Addr,
-                                Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                struct HTTP_ConnectionState,
-                                HTTP_Statistic_t,
-                                Net_TCPSocketConfiguration_t,
-                                Test_I_ConnectionStream_1b,
-                                enum Stream_StateMachine_ControlState> Test_I_IStreamConnection_1b_t;
+//typedef Net_IConnection_T<ACE_INET_Addr,
+//                          //Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                          struct HTTP_ConnectionState,
+//                          HTTP_Statistic_t> Test_I_IConnection_1b_t;
+//typedef Net_IStreamConnection_T<ACE_INET_Addr,
+//                                Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                struct HTTP_ConnectionState,
+//                                HTTP_Statistic_t,
+//                                Net_TCPSocketConfiguration_t,
+//                                Test_I_ConnectionStream_1b,
+//                                enum Stream_StateMachine_ControlState> Test_I_IStreamConnection_1b_t;
 
 //----------------------------------------
 
@@ -143,28 +143,28 @@ typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
 
 //----------------------------------------
 
-typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
-                                Net_TCPSocketHandler_t,
-                                Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                struct HTTP_ConnectionState,
-                                HTTP_Statistic_t,
-                                Test_I_ConnectionStream_1b,
-                                struct Net_UserData> Test_I_TCPConnection_1b_t;
-#if defined (SSL_SUPPORT)
-typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
-                                Net_SSLSocketHandler_t,
-                                Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                struct HTTP_ConnectionState,
-                                HTTP_Statistic_t,
-                                Test_I_ConnectionStream_1b,
-                                struct Net_UserData> Test_I_SSLConnection_1b_t;
-#endif // SSL_SUPPORT
-typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
-                                      Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                      struct HTTP_ConnectionState,
-                                      HTTP_Statistic_t,
-                                      Test_I_ConnectionStream_1b,
-                                      struct Net_UserData> Test_I_AsynchTCPConnection_1b_t;
+//typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+//                                Net_TCPSocketHandler_t,
+//                                Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                struct HTTP_ConnectionState,
+//                                HTTP_Statistic_t,
+//                                Test_I_ConnectionStream_1b,
+//                                struct Net_UserData> Test_I_TCPConnection_1b_t;
+//#if defined (SSL_SUPPORT)
+//typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+//                                Net_SSLSocketHandler_t,
+//                                Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                struct HTTP_ConnectionState,
+//                                HTTP_Statistic_t,
+//                                Test_I_ConnectionStream_1b,
+//                                struct Net_UserData> Test_I_SSLConnection_1b_t;
+//#endif // SSL_SUPPORT
+//typedef Net_AsynchTCPConnectionBase_T<Net_AsynchTCPSocketHandler_t,
+//                                      Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                      struct HTTP_ConnectionState,
+//                                      HTTP_Statistic_t,
+//                                      Test_I_ConnectionStream_1b,
+//                                      struct Net_UserData> Test_I_AsynchTCPConnection_1b_t;
 
 //----------------------------------------
 
@@ -226,36 +226,36 @@ typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_t,
 
 //----------------------------------------
 
-typedef Net_IConnector_T<ACE_INET_Addr,
-                         Test_I_URLStreamLoad_ConnectionConfiguration_t> Test_I_IConnector_1b_t;
-
-typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               Test_I_TCPConnection_1b_t,
-                               Net_SOCK_Connector,
-                               ACE_INET_Addr,
-                               Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                               struct HTTP_ConnectionState,
-                               HTTP_Statistic_t,
-                               Net_TCPSocketConfiguration_t,
-                               Test_I_ConnectionStream_1b,
-                               struct Net_UserData> Test_I_TCPConnector_1b_t;
-#if defined (SSL_SUPPORT)
-typedef Net_Client_SSL_Connector_T<Test_I_SSLConnection_1b_t,
-                                   ACE_SSL_SOCK_Connector,
-                                   Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                   struct HTTP_ConnectionState,
-                                   HTTP_Statistic_t,
-                                   Test_I_ConnectionStream_1b,
-                                   struct Net_UserData> Test_I_SSLConnector_1b_t;
-#endif // SSL_SUPPORT
-typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_1b_t,
-                                     ACE_INET_Addr,
-                                     Test_I_URLStreamLoad_ConnectionConfiguration_t,
-                                     struct HTTP_ConnectionState,
-                                     HTTP_Statistic_t,
-                                     Net_TCPSocketConfiguration_t,
-                                     Test_I_ConnectionStream_1b,
-                                     struct Net_UserData> Test_I_AsynchTCPConnector_1b_t;
+//typedef Net_IConnector_T<ACE_INET_Addr,
+//                         Test_I_URLStreamLoad_ConnectionConfiguration_t> Test_I_IConnector_1b_t;
+//
+//typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+//                               Test_I_TCPConnection_1b_t,
+//                               Net_SOCK_Connector,
+//                               ACE_INET_Addr,
+//                               Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                               struct HTTP_ConnectionState,
+//                               HTTP_Statistic_t,
+//                               Net_TCPSocketConfiguration_t,
+//                               Test_I_ConnectionStream_1b,
+//                               struct Net_UserData> Test_I_TCPConnector_1b_t;
+//#if defined (SSL_SUPPORT)
+//typedef Net_Client_SSL_Connector_T<Test_I_SSLConnection_1b_t,
+//                                   ACE_SSL_SOCK_Connector,
+//                                   Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                   struct HTTP_ConnectionState,
+//                                   HTTP_Statistic_t,
+//                                   Test_I_ConnectionStream_1b,
+//                                   struct Net_UserData> Test_I_SSLConnector_1b_t;
+//#endif // SSL_SUPPORT
+//typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_1b_t,
+//                                     ACE_INET_Addr,
+//                                     Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                     struct HTTP_ConnectionState,
+//                                     HTTP_Statistic_t,
+//                                     Net_TCPSocketConfiguration_t,
+//                                     Test_I_ConnectionStream_1b,
+//                                     struct Net_UserData> Test_I_AsynchTCPConnector_1b_t;
 
 //----------------------------------------
 

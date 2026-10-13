@@ -35,9 +35,10 @@
 #include "test_i_common_modules.h"
 #include "test_i_module_encoder.h"
 
-const char stream_name_string_2a[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadAudioStream");
-const char stream_name_string_2b[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadVideoStream");
-const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadAVStream");
+const char stream_name_string_2a[] = ACE_TEXT_ALWAYS_CHAR ("AudioStream");
+const char stream_name_string_2b[] = ACE_TEXT_ALWAYS_CHAR ("VideoStream");
+const char stream_name_string_2c[] = ACE_TEXT_ALWAYS_CHAR ("AVStream");
+const char stream_name_string_3[] = ACE_TEXT_ALWAYS_CHAR ("AV_Output_Stream");
 
 //////////////////////////////////////////
 
@@ -360,6 +361,201 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 
   deleteModules_out = true;
 
+  //inherited::CONFIGURATION_T::ITERATOR_T iterator =
+  //  inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  //ACE_ASSERT (iterator != inherited::configuration_->end ());
+  //bool use_demuxer_b = !(*iterator).second.second->inputFormat.empty ();
+
+  Stream_Branches_t branches_a;
+  typename inherited::MODULE_T* branch_p = NULL; // NULL: 'main' branch
+  unsigned int index_i = 0;
+
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueSource_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SOURCE_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+
+//ACE_NEW_RETURN (module_p,
+//                Test_I_StatisticReport_Module (this,
+//                                               ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+//                false);
+//layout_in->append (module_p, NULL, 0);
+//module_p = NULL;
+
+#if defined (FFMPEG_SUPPORT)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Demuxer_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DEMUXER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Splitter_Module (this,
+                                          ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MEDIASPLITTER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, NULL, 0);
+  branch_p = module_p;
+  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_PLAYBACK_NAME));
+  branches_a.push_back (ACE_TEXT_ALWAYS_CHAR (STREAM_SUBSTREAM_DISPLAY_NAME));
+  Stream_IDistributorModule* idistributor_p =
+    dynamic_cast<Stream_IDistributorModule*> (module_p->writer ());
+  ACE_ASSERT (idistributor_p);
+  idistributor_p->initialize (branches_a);
+  module_p = NULL;
+
+#if defined (FFMPEG_SUPPORT)
+  ACE_NEW_RETURN (module_p,
+                  Test_I_AudioDecoder_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_AUDIO_DECODER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+#endif // FFMPEG_SUPPORT
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Audio_Tagger_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueTarget_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
+  ++index_i;
+
+#if defined (FFMPEG_SUPPORT)
+  if (inherited::configuration_->configuration_->useHardwareDecoder)
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoHWDecoder_Module (this,
+                                                  ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+  else
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoDecoder_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_LIBAV_DECODER_DEFAULT_NAME_STRING)),
+                    false);
+#else
+#error "no supported video decoder, aborting"
+#endif // FFMPEG_SUPPORT
+  ACE_ASSERT (module_p);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_Video_Tagger_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_LIB_TAGGER_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
+  ACE_NEW_RETURN (module_p,
+                  Test_I_QueueTarget_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_QUEUE_SINK_DEFAULT_NAME_STRING)),
+                  false);
+  layout_in->append (module_p, branch_p, index_i);
+  module_p = NULL;
+
+  return true;
+}
+
+bool
+Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream::initialize"));
+
+  bool setup_pipeline = configuration_in.configuration_->setupPipeline;
+  bool reset_setup_pipeline = false;
+  struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  Test_I_SessionManager_t* session_manager_p =
+    Test_I_SessionManager_t::SINGLETON_T::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (iterator != configuration_in.end ());
+  ACE_ASSERT (session_manager_p);
+
+  // allocate a new session state, reset stream
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+               ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
+               ACE_TEXT (stream_name_string_2c)));
+    goto failed;
+  } // end IF
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
+
+  session_data_p =
+    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (session_manager_p->getR (inherited::id_));
+  // *TODO*: remove type inferences
+  ACE_ASSERT (session_data_p->formats.empty ());
+  session_data_p->formats.push_front (configuration_in.configuration_->mediaType);
+  //session_data_p->stream = this;
+  session_data_p->targetFileName = (*iterator).second.second->targetFileName;
+
+  // ---------------------------------------------------------------------------
+
+  if (configuration_in.configuration_->setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_->notificationStrategy))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                 ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                 ACE_TEXT (stream_name_string_2c)));
+      goto failed;
+    } // end IF
+
+  // ---------------------------------------------------------------------------
+
+  // set (session) message allocator
+  //inherited::allocator_ = configuration_in.messageAllocator;
+
+  inherited::isInitialized_ = true;
+
+  return true;
+
+failed:
+  if (reset_setup_pipeline)
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_->setupPipeline = setup_pipeline;
+  if (!inherited::reset ())
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
+                ACE_TEXT (stream_name_string_2c)));
+
+  return false;
+}
+
+//////////////////////////////////////////
+
+Test_I_AV_Output_Stream::Test_I_AV_Output_Stream ()
+ : inherited ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AV_Output_Stream::Test_I_AV_Output_Stream"));
+
+}
+
+bool
+Test_I_AV_Output_Stream::load (Stream_ILayout* layout_in,
+                               bool& deleteModules_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AV_Output_Stream::load"));
+
+  deleteModules_out = true;
+
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->end ());
@@ -617,9 +813,9 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 }
 
 bool
-Test_I_AVStream::initialize (const inherited::CONFIGURATION_T& configuration_in)
+Test_I_AV_Output_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AV_Output_Stream::initialize"));
 
   bool setup_pipeline = configuration_in.configuration_->setupPipeline;
   bool reset_setup_pipeline = false;
@@ -700,9 +896,9 @@ failed:
 }
 
 void
-Test_I_AVStream::resize (const Common_Image_Resolution_t& resolution_in)
+Test_I_AV_Output_Stream::resize (const Common_Image_Resolution_t& resolution_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_AVStream::resize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_AV_Output_Stream::resize"));
 
   inherited::CONFIGURATION_T::ITERATOR_T iterator =
     inherited::configuration_->find (ACE_TEXT_ALWAYS_CHAR (STREAM_VIS_LIBAV_RESIZE_DEFAULT_NAME_STRING));
