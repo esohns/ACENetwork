@@ -12,7 +12,7 @@ endif (UNIX)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -22,7 +22,7 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -166,6 +166,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_HTML)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)

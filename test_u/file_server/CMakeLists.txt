@@ -112,7 +112,8 @@ if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
-#add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
+#add_dependencies (${EXECUTABLE} ACE)
+
 add_dependencies (${EXECUTABLE} Common)
 add_dependencies (${EXECUTABLE} CommonLog)
 add_dependencies (${EXECUTABLE} CommonSignal)
@@ -129,9 +130,6 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Server)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
-#if (UNIX)
-# target_link_libraries (${EXECUTABLE} PUBLIC X11)
-#endif (UNIX)
 
 target_link_libraries (${EXECUTABLE} PUBLIC ${ACE_LIBRARY})
 
@@ -144,6 +142,7 @@ target_link_libraries (${EXECUTABLE} PUBLIC CommonTimer)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Decoder)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_File)
+target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_MediaFramework)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Miscellaneous)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Network)
 target_link_libraries (${EXECUTABLE} PUBLIC ACEStream_Statistic)
