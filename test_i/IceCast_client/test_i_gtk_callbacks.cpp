@@ -916,7 +916,7 @@ continue_2:
 
     // schedule asynchronous updates of the display views
     data_p->eventSourceId =
-      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_CAIRO_MS,
+      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_OPENGL_MS, // ~ 60 fps
                      idle_update_display_1_cb,
                      userData_in);
     if (data_p->eventSourceId > 0)
@@ -926,7 +926,7 @@ continue_2:
                   ACE_TEXT ("failed to g_timeout_add(idle_update_display_1_cb): \"%m\", continuing\n")));
 
     data_p->eventSourceId =
-      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_OPENGL_MS,
+      g_timeout_add (COMMON_UI_GTK_REFRESH_DEFAULT_OPENGL_MS, // ~ 60 fps
                      idle_update_display_2_cb,
                      userData_in);
     if (data_p->eventSourceId > 0)

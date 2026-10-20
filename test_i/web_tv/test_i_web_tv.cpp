@@ -1483,9 +1483,9 @@ ACE_TMAIN (int argc_in,
   configuration.GTKConfiguration.argv = argv_in;
   configuration.GTKConfiguration.CBData = &ui_cb_data;
   configuration.GTKConfiguration.eventHooks.finiHook =
-      idle_finalize_UI_cb;
+    idle_finalize_UI_cb;
   configuration.GTKConfiguration.eventHooks.initHook =
-      idle_initialize_UI_cb;
+    idle_initialize_UI_cb;
   configuration.GTKConfiguration.definition = &gtk_ui_definition;
 #endif // GTK_SUPPORT
   ACE_High_Res_Timer timer;

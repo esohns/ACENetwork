@@ -98,7 +98,9 @@ do_printUsage (const std::string& programName_in)
   std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -123,16 +125,12 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [FILENAME]   : .torrent file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g [FILENAME]   : GTK rc file [\"")
@@ -156,8 +154,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [DIRECTORY]  : UI file directory [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -186,10 +182,9 @@ do_processArguments (int argc_in,
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // initialize results
   requestCompactPeerAddresses_out =
@@ -766,14 +761,14 @@ ACE_TMAIN (int argc_in,
   // --> ACE::init is not called automatically (see OS_main.cpp:74),
   //     which would call WSAStartup(); do it manually (doesn't hurt anyway)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HWND window_p = GetConsoleWindow ();
-  if (!window_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-  BOOL was_visible_b = ShowWindow (window_p, SW_HIDE);
+  //HWND window_p = GetConsoleWindow ();
+  //if (!window_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
+  //  return EXIT_FAILURE;
+  //} // end IF
+  //BOOL was_visible_b = ShowWindow (window_p, SW_HIDE);
 
   result = ACE::init ();
   if (result == -1)
@@ -790,13 +785,23 @@ ACE_TMAIN (int argc_in,
   process_profile.start ();
 
   // step2 initialize/validate configuration
+  Common_Log_Tools::packageName = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Tools::initialize (true,   // COM ?
+                            false); // RNG ?
+//#if defined (_DEBUG)
+//  Common_Error_Tools::initialize (true); // debug heap ?
+//#endif // _DEBUG
+#else
+  Common_Tools::initialize (false); // RNG ?
+#endif // ACE_WIN32 || ACE_WIN64
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR ("bittorrent_client"));
 
   // step2a: process commandline arguments
-  std::string configuration_path             =
-    Common_File_Tools::getWorkingDirectory ();
-  configuration_path                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path                   +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   bool request_compact_peer_addresses_b =
     BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES;
@@ -814,9 +819,6 @@ ACE_TMAIN (int argc_in,
   std::string rc_file_name                 = configuration_path;
   rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   rc_file_name                            +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  rc_file_name                            +=
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_RC_FILE);
 
   bool log_to_file                           = false;
@@ -830,9 +832,6 @@ ACE_TMAIN (int argc_in,
   bool trace_information                     = false;
 
   std::string UIDefinitionFile_directory     = configuration_path;
-  UIDefinitionFile_directory                += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIDefinitionFile_directory                +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads = 3;
