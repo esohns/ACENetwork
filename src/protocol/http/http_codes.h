@@ -28,7 +28,7 @@ class HTTP_Codes
  public:
   enum MethodType
   {
-    HTTP_METHOD_GET   = 0,
+    HTTP_METHOD_GET     = 0,
     HTTP_METHOD_POST,
     HTTP_METHOD_HEAD,
     HTTP_METHOD_M_SEARCH,
@@ -40,7 +40,7 @@ class HTTP_Codes
 
   enum VersionType
   {
-    HTTP_VERSION_0_9  = 0,
+    HTTP_VERSION_0_9    = 0,
     HTTP_VERSION_1_0,
     HTTP_VERSION_1_1,
     HTTP_VERSION_2,

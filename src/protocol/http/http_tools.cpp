@@ -33,6 +33,7 @@
 
 #include "common_defines.h"
 #include "common_tools.h"
+#include "common_string_tools.h"
 
 #include "stream_dec_common.h"
 
@@ -383,13 +384,7 @@ HTTP_Tools::EncodingToCompressionFormat (const std::string& encoding_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::EncodingToCompressionFormat"));
 
-  std::locale locale;
-  std::string lowercase_string;
-  for (std::string::size_type i = 0; i < encoding_in.length (); ++i)
-    lowercase_string += std::tolower (encoding_in[i], locale);
-  //std::transform (encoding_in.begin (), encoding_in.end (),
-  //                lowercase_string.begin (), ::tolower);
-
+  std::string lowercase_string = Common_String_Tools::tolower (encoding_in);
   if ((lowercase_string == ACE_TEXT_ALWAYS_CHAR ("deflate")) ||
       (lowercase_string == ACE_TEXT_ALWAYS_CHAR ("gzip")))
     return STREAM_COMPRESSION_FORMAT_GZIP;

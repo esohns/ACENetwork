@@ -103,7 +103,9 @@ do_printUsage (const std::string& programName_in)
   std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -112,8 +114,6 @@ do_printUsage (const std::string& programName_in)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILENAME]   : configuration file [\"")
@@ -127,8 +127,6 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g [FILENAME]   : GTK rc file [\"")
             << path
@@ -139,8 +137,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-p [FILENAME]   : phonebook file [\"")
@@ -160,8 +156,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   //path = configuration_path;
-  //path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  //path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   //std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [DIRECTORY]  : UI file directory [\"")
   //          << path
   //          << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -193,13 +187,12 @@ do_processArguments (int argc_in,
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   // initialize results
   configurationFile_out          = configuration_path;
-  configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
@@ -211,17 +204,11 @@ do_processArguments (int argc_in,
   UIRCFile_out                   = configuration_path;
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIRCFile_out                  +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
 
   logToFile_out                  = false;
 
   phonebookFile_out              = configuration_path;
-  phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
@@ -1139,15 +1126,16 @@ ACE_TMAIN (int argc_in,
   process_profile.start ();
 
   // step2 initialize/validate configuration
+  Common_Log_Tools::packageName = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
+  Common_File_Tools::initialize (ACE_TEXT_ALWAYS_CHAR ("IRC_client"));
 
   // step2a: process commandline arguments
-  std::string configuration_path             =
-    Common_File_Tools::getWorkingDirectory ();
+  std::string configuration_path =
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::string configuration_file_name        = configuration_path;
-  configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
@@ -1159,17 +1147,11 @@ ACE_TMAIN (int argc_in,
   std::string UIRC_file_name                 = configuration_path;
   UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRC_file_name                            +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIRC_file_name                            +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
 
   bool log_to_file                           = false;
 
   std::string phonebook_file_name            = configuration_path;
-  phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebook_file_name                       +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file_name                       +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
@@ -1183,9 +1165,6 @@ ACE_TMAIN (int argc_in,
   bool trace_information                     = false;
 
   std::string UIDefinitionFile_directory     = configuration_path;
-  UIDefinitionFile_directory                += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIDefinitionFile_directory                +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
@@ -1204,7 +1183,7 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_thread_pool_threads))
   {
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_printUsage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
 
     // *PORTABILITY*: on Windows, fini ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1228,7 +1207,7 @@ ACE_TMAIN (int argc_in,
       !Common_File_Tools::isReadable (phonebook_file_name)     ||
       !Common_File_Tools::isReadable (ui_definition_file_name))
   {
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_printUsage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
 
     // *PORTABILITY*: on Windows, fini ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1244,10 +1223,9 @@ ACE_TMAIN (int argc_in,
   // step3: initialize logging and/or tracing
   std::string log_file_name;
   if (log_to_file)
-    log_file_name =
-      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                        ACE::basename (argv_in[0]));
-  if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]), // program name
+    log_file_name = Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
+  if (!Common_Log_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
                                      log_file_name,              // log file name
                                      false,                      // log to syslog ?
                                      false,                      // trace messages ?
