@@ -16,7 +16,7 @@ include (ACE)
 
 string (REPLACE ${CMAKE_SOURCE_DIR} "" BUILD_PATH_SUFFIX ${CMAKE_BINARY_DIR})
 string (SUBSTRING ${BUILD_PATH_SUFFIX} 1 -1 BUILD_PATH_SUFFIX)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -26,7 +26,7 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -379,15 +379,6 @@ install (TARGETS ${PROJECT_NAME}
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT lib)
-if (UNIX)
- install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
-          DESTINATION "${INSTALL_SHARE_DIR}/${PROJECT_NAME}"
-          COMPONENT config)
-elseif (WIN32)
- install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
-          DESTINATION "share"
-          COMPONENT config)
-endif ()
 
 # ////////////////////////////////////////
 

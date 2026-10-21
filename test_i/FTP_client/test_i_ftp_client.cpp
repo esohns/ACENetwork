@@ -1127,7 +1127,7 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   { // make 'em learn
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_printUsage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
 
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1170,7 +1170,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
 
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_printUsage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
 
     Common_Tools::finalize ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1204,7 +1204,7 @@ ACE_TMAIN (int argc_in,
   {
     log_file_name =
       Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                        ACE::basename (argv_in[0]));
+                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
     if (log_file_name.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1221,11 +1221,11 @@ ACE_TMAIN (int argc_in,
       return EXIT_FAILURE;
     } // end IF
   } // end IF
-  if (!Common_Log_Tools::initialize (ACE::basename (argv_in[0]),               // program name
-                                     log_file_name,                            // log file name
-                                     false,                                    // log to syslog ?
-                                     false,                                    // trace messages ?
-                                     trace_information,                        // debug messages ?
+  if (!Common_Log_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
+                                     log_file_name,                                            // log file name
+                                     false,                                                    // log to syslog ?
+                                     false,                                                    // trace messages ?
+                                     trace_information,                                        // debug messages ?
 #if defined (GTK_USE)
                                      (ui_definition_file.empty () ? NULL
                                                                   : &logger))) // (ui) logger ?
@@ -1252,7 +1252,7 @@ ACE_TMAIN (int argc_in,
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
-    do_printVersion (ACE::basename (argv_in[0]));
+    do_printVersion (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
 
     Common_Log_Tools::finalize ();
     Common_Tools::finalize ();

@@ -209,19 +209,46 @@ add_subdirectory (src)
 ################################################################################
 
 # Install the ACENetworkConfig.cmake and ACENetworkConfigVersion.cmake
-install (FILES
-         "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
-         "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+install (FILES "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
+               "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
 #         "${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
 #         "${PROJECT_NAME}ConfigVersion.cmake"
-         DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+         DESTINATION ${INSTALL_CMAKE_DIR}
+         COMPONENT dev)
 # Install the export set for use with the install-tree
 install (EXPORT ${PROJECT_NAME}Targets
-         DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-
-install (FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h"
-         DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
+         DESTINATION ${INSTALL_CMAKE_DIR}
          COMPONENT dev)
+
+if (UNIX)
+ install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h
+          DESTINATION ${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}
+          COMPONENT include)
+elseif (WIN32)
+ install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h
+          DESTINATION ${INSTALL_INCLUDE_DIR}
+          COMPONENT include)
+endif ()
+
+if (UNIX)
+ install (FILES ${PROJECT_SOURCE_DIR}/share/ACENetwork_icon.ico
+          DESTINATION ${INSTALL_SHARE_DIR}/${PROJECT_NAME}
+          COMPONENT config)
+elseif (WIN32)
+ install (FILES ${PROJECT_SOURCE_DIR}/share/ACENetwork_icon.ico
+          DESTINATION ${INSTALL_SHARE_DIR}
+          COMPONENT config)
+endif ()
+
+if (UNIX)
+ install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
+          DESTINATION ${INSTALL_SHARE_DIR}/${PROJECT_NAME}
+          COMPONENT config)
+elseif (WIN32)
+ install (FILES ${PROJECT_SOURCE_DIR}/share/cacert.pem
+          DESTINATION ${INSTALL_SHARE_DIR}
+          COMPONENT config)
+endif ()
 
 ################################################################################
 if (DEFINED ENV{LIB_ROOT})

@@ -111,7 +111,9 @@ do_printUsage (const std::string& programName_in)
   std::cout.setf (std::ios::boolalpha);
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -134,9 +136,6 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::string path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [FILE] : meta-info file")
@@ -206,10 +205,9 @@ do_processArguments (int argc_in,
   NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   requestCompactPeerAddresses_out =
     BITTORRENT_DEFAULT_REQUEST_COMPACT_PEER_ADDRESSES;
@@ -234,9 +232,9 @@ do_processArguments (int argc_in,
 #endif // CURSES_SUPPORT
 
   useReactor_out                 =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
-      TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
 
@@ -1015,10 +1013,23 @@ ACE_TMAIN (int argc_in,
   process_profile.start ();
 
   // step2: initialize/validate configuration
+  Common_Log_Tools::packageName = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Tools::initialize (true,   // COM ?
+                            false); // RNG ?
+//#if defined (_DEBUG)
+//  Common_Error_Tools::initialize (true); // debug heap ?
+//#endif // _DEBUG
+#else
+  Common_Tools::initialize (false); // RNG ?
+#endif // ACE_WIN32 || ACE_WIN64
+  Common_File_Tools::initialize (Common_File_Tools::basename (ACE_TEXT_ALWAYS_CHAR (argv_in[0])));
 
   // step2a: process commandline arguments
   std::string configuration_path =
-    Common_File_Tools::getWorkingDirectory ();
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_TEST_I_SUBDIRECTORY),
+                                                      true); // configuration-
 
   bool allow_multiple_connections_per_peer_b =
     BITTORRENT_DEFAULT_ALLOW_MULTIPLE_CONNECTIONS_PER_PEER;
@@ -1030,10 +1041,7 @@ ACE_TMAIN (int argc_in,
   std::string meta_info_file_name            = configuration_path;
   meta_info_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   meta_info_file_name                       +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
-  meta_info_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  meta_info_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
+    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   bool log_to_file                           = TEST_I_DEFAULT_SESSION_LOG;
 #if defined (CURSES_SUPPORT)
@@ -1043,9 +1051,9 @@ ACE_TMAIN (int argc_in,
 #endif // CURSES_USE
 #endif // CURSES_SUPPORT
   bool use_reactor                           =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
-      TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
@@ -1066,8 +1074,9 @@ ACE_TMAIN (int argc_in,
                             trace_information,
                             print_version_and_exit))
   {
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_printUsage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
 
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     // *PORTABILITY*: on Windows, fini ACE...
     result = ACE::fini ();
@@ -1081,8 +1090,9 @@ ACE_TMAIN (int argc_in,
   // step2b: validate argument(s)
   if (!Common_File_Tools::isReadable (meta_info_file_name))
   {
-    do_printUsage (ACE::basename (argv_in[0]));
+    do_printUsage (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
 
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     // *PORTABILITY*: on Windows, fini ACE...
     result = ACE::fini ();
@@ -1096,9 +1106,8 @@ ACE_TMAIN (int argc_in,
   // step3: initialize logging and/or tracing
   std::string log_file_name;
   if (log_to_file)
-    log_file_name =
-      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
-                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
+    log_file_name = Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)));
   if (!Common_Log_Tools::initialize (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0], ACE_DIRECTORY_SEPARATOR_CHAR)), // program name
                                      log_file_name,                                     // log file name
                                      false,                                             // log to syslog ?
@@ -1109,6 +1118,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initialize(), aborting\n")));
 
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     // *PORTABILITY*: on Windows, fini ACE...
     result = ACE::fini ();
@@ -1140,6 +1150,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Log_Tools::finalize ();
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     // *PORTABILITY*: on Windows, fini ACE...
     result = ACE::fini ();
@@ -1162,6 +1173,7 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalize ();
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     // *PORTABILITY*: on Windows, fini ACE...
     result = ACE::fini ();
@@ -1224,6 +1236,7 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Log_Tools::finalize ();
+    Common_Tools::finalize ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     // *PORTABILITY*: on Windows, fini ACE...
     result = ACE::fini ();
@@ -1281,6 +1294,7 @@ ACE_TMAIN (int argc_in,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Log_Tools::finalize ();
+  Common_Tools::finalize ();
 
   // step10: finalize libraries
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -353,11 +353,11 @@ if (WIN32)
                  ${LIB_ROOT}/gtk3/bin/libwinpthread-1.dll
                  ${LIB_ROOT}/assimp/cmake/bin/Release/assimp-vc143-mt.dll
                  ${LIB_ROOT}/libpng/build/Release/libpng16.dll
-                 ${LIB_ROOT}/ffmpeg/libswresample/swresample-5.dll
-                 ${LIB_ROOT}/ffmpeg/libswscale/swscale-8.dll
-                 ${LIB_ROOT}/ffmpeg/libavformat/avformat-61.dll
-                 ${LIB_ROOT}/ffmpeg/libavcodec/avcodec-61.dll
-                 ${LIB_ROOT}/ffmpeg/libavutil/avutil-59.dll
+                 ${LIB_ROOT}/ffmpeg/libswresample/swresample-7.dll
+                 ${LIB_ROOT}/ffmpeg/libswscale/swscale-10.dll
+                 ${LIB_ROOT}/ffmpeg/libavformat/avformat-63.dll
+                 ${LIB_ROOT}/ffmpeg/libavcodec/avcodec-63.dll
+                 ${LIB_ROOT}/ffmpeg/libavutil/avutil-61.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_MagickCore_.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_MagickWand_.dll
                  ${LIB_ROOT}/ImageMagick/CORE_RL_bzlib_.dll
