@@ -85,7 +85,7 @@ class Net_AsynchSSLTCPSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchSSLTCPSocketHandler_T& operator= (const Net_AsynchSSLTCPSocketHandler_T&))
 
   // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  virtual ACE_Message_Block* allocateMessage (size_t); // requested size
 };
 
 // include template implementation

@@ -100,7 +100,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                              const enum Stream_SessionMessageType& sessionEvent_in,
                              bool expedite_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -485,7 +485,7 @@ Test_I_EventHandler_2::notify (Stream_SessionId_t sessionId_in,
                                const enum Stream_SessionMessageType& sessionEvent_in,
                                bool expedite_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_2::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -833,7 +833,7 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
                                const enum Stream_SessionMessageType& sessionEvent_in,
                                bool expedite_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_EventHandler_3::notify"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_3::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);

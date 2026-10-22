@@ -39,6 +39,8 @@ void is_entry_sensitive (GtkCellLayout*,
 //------------------------------------------------------------------------------
 
 // idle routines
+gboolean idle_list_channel_cb (gpointer);
+
 gboolean idle_add_channel_cb (gpointer);
 gboolean idle_add_connection_cb (gpointer);
 gboolean idle_finalize_UI_cb (gpointer);

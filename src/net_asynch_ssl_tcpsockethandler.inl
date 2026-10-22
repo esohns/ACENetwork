@@ -355,7 +355,7 @@ Net_AsynchSSLTCPSocketHandler_T<ConfigurationType>::notify (ACE_Event_Handler* h
 
 template <typename ConfigurationType>
 ACE_Message_Block*
-Net_AsynchSSLTCPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int requestedSize_in)
+Net_AsynchSSLTCPSocketHandler_T<ConfigurationType>::allocateMessage (size_t requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchSSLTCPSocketHandler_T::allocateMessage"));
 
@@ -368,13 +368,9 @@ Net_AsynchSSLTCPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned in
   if (inherited::configuration_->messageAllocator)
   {
 allocate:
-    try
-    {
-      message_block_p =
-        static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+    try {
+      message_block_p = static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
       return NULL;

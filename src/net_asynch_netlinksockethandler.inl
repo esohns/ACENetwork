@@ -46,13 +46,6 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::Net_AsynchNetlinkSocketHand
 }
 
 template <typename ConfigurationType>
-Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::~Net_AsynchNetlinkSocketHandler_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler_T::~Net_AsynchNetlinkSocketHandler_T"));
-
-}
-
-template <typename ConfigurationType>
 void
 Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                                            ACE_Message_Block& messageBlock_in)
@@ -260,7 +253,7 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::notify (ACE_Event_Handler* 
 
 template <typename ConfigurationType>
 ACE_Message_Block*
-Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int requestedSize_in)
+Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::allocateMessage (size_t requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchNetlinkSocketHandler_T::allocateMessage"));
 
@@ -268,8 +261,7 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::allocateMessage (unsigned i
   ACE_Message_Block* message_out = NULL;
 
   if (inherited::configuration_.messageAllocator)
-    message_out =
-        static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
+    message_out = static_cast<ACE_Message_Block*> (inherited::configuration_.messageAllocator->malloc (requestedSize_in));
   else
     ACE_NEW_NORETURN (message_out,
                       ACE_Message_Block (requestedSize_in,

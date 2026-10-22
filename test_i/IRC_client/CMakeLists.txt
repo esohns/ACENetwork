@@ -88,12 +88,12 @@ set (${EXECUTABLE}_EXE_SRCS
      IRC_client_configuration.h
      IRC_client_defines.h
      IRC_client_gui_common.h
-     IRC_client_gui_connection.cpp
-     IRC_client_gui_connection.h
-     IRC_client_gui_connection.inl
-     IRC_client_gui_messagehandler.cpp
-     IRC_client_gui_messagehandler.h
-     IRC_client_gui_messagehandler.inl
+#     IRC_client_gui_connection.cpp
+#     IRC_client_gui_connection.h
+#     IRC_client_gui_connection.inl
+#     IRC_client_gui_messagehandler.cpp
+#     IRC_client_gui_messagehandler.h
+#     IRC_client_gui_messagehandler.inl
      IRC_client_inputhandler.cpp
      IRC_client_inputhandler.h
      IRC_client_module_IRChandler.cpp
@@ -127,10 +127,10 @@ if (CURSES_SUPPORT)
       IRC_client_curses.h)
 endif (CURSES_SUPPORT)
 if (GTK_SUPPORT)
- set (${EXECUTABLE}_EXE_SRCS
-      ${${EXECUTABLE}_EXE_SRCS}
-      IRC_client_gui_callbacks.cpp
-      IRC_client_gui_callbacks.h)
+# set (${EXECUTABLE}_EXE_SRCS
+#      ${${EXECUTABLE}_EXE_SRCS}
+#      IRC_client_gui_callbacks.cpp
+#      IRC_client_gui_callbacks.h)
 endif (GTK_SUPPORT)
 if (WXWIDGETS_SUPPORT)
   #  set (${EXECUTABLE}_EXE_SRCS
@@ -213,6 +213,8 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      IRC_client_common_modules.h
      IRC_client_configuration.h
      IRC_client_defines.h
+     IRC_client_eventhandler.cpp
+     IRC_client_eventhandler.h
      IRC_client_gui.cpp
      IRC_client_gui_common.h
      IRC_client_gui_connection.cpp
@@ -227,10 +229,10 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
      IRC_client_module_IRChandler.cpp
      IRC_client_module_IRChandler.h
      IRC_client_network.h
-     IRC_client_session.cpp
-     IRC_client_session.h
-     IRC_client_session.inl
-     IRC_client_session_common.h
+#     IRC_client_session.cpp
+#     IRC_client_session.h
+#     IRC_client_session.inl
+#     IRC_client_session_common.h
      IRC_client_sessionmessage.cpp
      IRC_client_sessionmessage.h
      IRC_client_signalhandler.cpp

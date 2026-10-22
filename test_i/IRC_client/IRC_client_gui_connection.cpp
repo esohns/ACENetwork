@@ -707,7 +707,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
 
 //  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
   Common_UI_GTK_BuildersIterator_t iterator =
-      state_r.builders.find (CBData_.timeStamp);
+    state_r.builders.find (CBData_.timeStamp);
   // sanity check(s)
   if (iterator == state_r.builders.end ())
   {
@@ -986,7 +986,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
 
           // convert <# visible>
           IRC_ParametersIterator_t param_iterator =
-              record_r.parameters_.begin ();
+            record_r.parameters_.begin ();
           ACE_ASSERT (record_r.parameters_.size () >= 3);
           std::advance (param_iterator, 2);
           std::stringstream converter;

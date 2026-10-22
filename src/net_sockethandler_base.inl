@@ -50,7 +50,7 @@ Net_SocketHandlerBase_T<ConfigurationType>::initialize (const ConfigurationType&
 
 template <typename ConfigurationType>
 ACE_Message_Block*
-Net_SocketHandlerBase_T<ConfigurationType>::allocateMessage (unsigned int size_in)
+Net_SocketHandlerBase_T<ConfigurationType>::allocateMessage (size_t size_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase_T::allocateMessage"));
 

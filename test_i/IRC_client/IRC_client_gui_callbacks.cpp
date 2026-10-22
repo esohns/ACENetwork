@@ -207,11 +207,9 @@ connection_setup_function (void* arg_in)
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  IRC_Client_Connector_t connector;
-  IRC_Client_AsynchConnector_t asynch_connector;
-  IRC_Client_IConnector_t* connector_p = &connector;
+  IRC_Client_IConnector_t* connector_p = &data_p->CBData->connector;
   if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
-    connector_p = &asynch_connector;
+    connector_p = &data_p->CBData->asynchConnector;
 
   // step2b: set up configuration passed to processing stream
   IRC_Client_ConnectionConfiguration* configuration_p = NULL;
@@ -364,7 +362,7 @@ connection_failed:
   if (!connection_2)
     goto connection_failed;
   istream_connection_p =
-      dynamic_cast<IRC_Client_IStreamConnection_t*> (connection_2);
+    dynamic_cast<IRC_Client_IStreamConnection_t*> (connection_2);
   if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -481,6 +479,14 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
 }
 
 //////////////////////////////////////////
+
+gboolean
+idle_list_channel_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_list_channel_cb"));
+
+  return G_SOURCE_REMOVE;
+}
 
 gboolean
 idle_add_channel_cb (gpointer userData_in)
@@ -1110,7 +1116,7 @@ done:
   if ((number_of_pages == 1) && data_p->connection->isClosing ())
   {
     struct IRC_Client_UI_ConnectionCBData* cb_data_p =
-        &const_cast<struct IRC_Client_UI_ConnectionCBData&> (data_p->connection->getR ());
+      &const_cast<struct IRC_Client_UI_ConnectionCBData&> (data_p->connection->getR ());
     cb_data_p->eventSourceId =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_remove_connection_cb,

@@ -45,6 +45,8 @@ IRC_Client_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_in,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::load"));
 
+  delete_out = true;
+
   if (!inherited::load (layout_in,
                         delete_out))
   {
@@ -83,8 +85,6 @@ IRC_Client_Stream_T<TimerManagerType>::load (Stream_ILayout* layout_in,
   ACE_ASSERT (module_p);
   layout_in->append (module_p, NULL, 0);
   module_p = NULL;
-
-  delete_out = true;
 
   return true;
 }

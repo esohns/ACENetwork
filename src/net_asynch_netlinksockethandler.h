@@ -40,7 +40,7 @@ class Net_AsynchNetlinkSocketHandler_T
  , public ACE_Notification_Strategy
 {
  public:
-  virtual ~Net_AsynchNetlinkSocketHandler_T ();
+  inline virtual ~Net_AsynchNetlinkSocketHandler_T () {}
 
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
@@ -82,7 +82,7 @@ class Net_AsynchNetlinkSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkSocketHandler_T& operator= (const Net_AsynchNetlinkSocketHandler_T&))
 
   // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  ACE_Message_Block* allocateMessage (size_t); // requested size
 };
 
 // include template definition

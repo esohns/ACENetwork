@@ -45,7 +45,7 @@ class Net_SocketHandlerBase_T
   Net_SocketHandlerBase_T ();
 
   // implement (part of) Net_ISocketHandler
-  virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  virtual ACE_Message_Block* allocateMessage (size_t); // requested size
 
   // *TODO*: remove this ASAP
   ConfigurationType* configuration_;

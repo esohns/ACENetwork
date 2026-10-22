@@ -51,8 +51,8 @@
 #endif // CURSES_SUPPORT
 
 template <typename ConnectionType>
-IRC_Client_Session_T<ConnectionType>::IRC_Client_Session_T (bool managed_in)
- : inherited (managed_in)
+IRC_Client_Session_T<ConnectionType>::IRC_Client_Session_T ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Session_T::IRC_Client_Session_T"));
 
@@ -72,9 +72,9 @@ IRC_Client_Session_T<ConnectionType>::start (Stream_SessionId_t sessionId_in,
 
   // step0a: retrieve controller handle
   const typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T& stream_r =
-      inherited::stream ();
+    inherited::stream ();
   const typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::MODULE_T* module_p =
-      NULL;
+    NULL;
   for (typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::ITERATOR_T iterator (stream_r);
        (iterator.next (module_p) != 0);
        iterator.advance ())

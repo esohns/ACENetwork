@@ -94,6 +94,8 @@ struct IRC_Client_UI_CBData
   IRC_Client_UI_CBData ()
 #if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+   , connector ()
+   , asynchConnector ()
    , configuration (NULL)
 #elif defined (WXWIDGETS_USE)
    : Test_I_wxWidgets_CBData ()
@@ -113,6 +115,9 @@ struct IRC_Client_UI_CBData
     progressData.state = UIState;
 #endif // GTK_USE || WXWIDGETS_USE
   }
+
+  IRC_Client_Connector_t            connector;
+  IRC_Client_AsynchConnector_t      asynchConnector;
 
   struct IRC_Client_Configuration*  configuration;
   IRC_Client_GUI_Connections_t      connections;

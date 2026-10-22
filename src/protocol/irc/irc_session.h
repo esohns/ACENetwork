@@ -86,9 +86,7 @@ class IRC_Session_T
  typedef NotificationType inherited2;
 
  public:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline IRC_Session_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  IRC_Session_T (bool); // managed ?
+  IRC_Session_T ();
   virtual ~IRC_Session_T ();
 
   // implement Stream_ISessionDataNotify_T

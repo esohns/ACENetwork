@@ -67,8 +67,8 @@ IRC_Session_T<ConnectionType,
               ConnectionConfigurationType,
               ConnectionManagerType,
               InputHandlerType,
-              InputHandlerConfigurationType>::IRC_Session_T (bool managed_in)
- : inherited (managed_in)
+              InputHandlerConfigurationType>::IRC_Session_T ()
+ : inherited ()
  , close_ (false)
  , output_ ()
  , inputHandler_ (NULL)

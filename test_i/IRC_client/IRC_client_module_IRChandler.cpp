@@ -38,6 +38,9 @@
 #include "IRC_client_defines.h"
 #include "IRC_client_common.h"
 #include "IRC_client_stream_common.h"
+#if defined (GTK_USE)
+#include "IRC_client_gui_callbacks.h"
+#endif // GTK_USE
 
 IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler (ISTREAM_T* stream_in)
  : inherited (stream_in)
@@ -143,7 +146,11 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         case IRC_Codes::RPL_NOWAWAY:              // 306
         case IRC_Codes::RPL_ENDOFWHO:             // 315
         case IRC_Codes::RPL_LISTSTART:            // 321
+          break;
         case IRC_Codes::RPL_LIST:                 // 322
+        {
+          // *WARNING*: falls through !
+        }
         case IRC_Codes::RPL_LISTEND:              // 323
         case IRC_Codes::RPL_NOTOPIC:              // 331
         case IRC_Codes::RPL_TOPIC:                // 332
@@ -652,46 +659,6 @@ IRC_Client_Module_IRCHandler::wait (const ACE_Time_Value* timeout_in)
 
   return true;
 }
-
-//void
-//IRC_Client_Module_IRCHandler::subscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::subscribe"));
-
-//  // sanity check(s)
-//  ACE_ASSERT (interfaceHandle_in);
-
-//  // synch access to subscribers
-//  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
-
-//  subscribers_.push_back (interfaceHandle_in);
-//}
-
-//void
-//IRC_Client_Module_IRCHandler::unsubscribe (IRC_Client_IStreamNotify_t* interfaceHandle_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::unsubscribe"));
-
-//  // sanity check(s)
-//  ACE_ASSERT (interfaceHandle_in);
-
-//  // synch access to subscribers
-//  ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
-
-//  SubscribersIterator_t iterator = subscribers_.begin ();
-//  for (;
-//       iterator != subscribers_.end ();
-//       iterator++)
-//    if ((*iterator) == interfaceHandle_in)
-//      break;
-
-//  if (iterator != subscribers_.end ())
-//    subscribers_.erase (iterator);
-//  else
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("invalid argument (was: %@), aborting\n"),
-//                interfaceHandle_in));
-//}
 
 void
 IRC_Client_Module_IRCHandler::pass (const std::string& password_in)

@@ -23,7 +23,6 @@
 
 #include <string>
 
-#include "ace/config-macros.h"
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
@@ -77,9 +76,7 @@ class IRC_Client_Session_T
                        struct IRC_Client_InputHandlerConfiguration> inherited;
 
  public:
-  // *NOTE*: if there is no default ctor, this will not compile
-  inline IRC_Client_Session_T () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-  IRC_Client_Session_T (bool); // managed ?
+  IRC_Client_Session_T ();
   inline virtual ~IRC_Client_Session_T () {}
 
   // override Stream_ISessionDataNotify_T

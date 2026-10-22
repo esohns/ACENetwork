@@ -273,7 +273,7 @@ IRC_Client_InputHandler::handle_close (ACE_HANDLE handle_in,
 }
 
 ACE_Message_Block*
-IRC_Client_InputHandler::allocateMessage (unsigned int requestedSize_in)
+IRC_Client_InputHandler::allocateMessage (size_t requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_InputHandler::allocateMessage"));
 

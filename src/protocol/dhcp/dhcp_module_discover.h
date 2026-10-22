@@ -84,7 +84,6 @@ class DHCP_Module_Discover_T
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T& operator= (const DHCP_Module_Discover_T&))
 
   // helper methods
-  DataMessageType* allocateMessage (unsigned int); // (requested) size
   ACE_HANDLE connect (const ACE_INET_Addr&, // peer (i.e. server) address
                       bool&);               // return value: use reactor ?
 
