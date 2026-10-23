@@ -483,7 +483,37 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
 gboolean
 idle_list_channel_cb (gpointer userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::idle_list_channel_cb"));
+  //NETWORK_TRACE (ACE_TEXT ("::idle_list_channel_cb"));
+
+  // sanity check(s)
+  struct IRC_Client_UI_AddChannelCBData* data_p =
+    static_cast<IRC_Client_UI_AddChannelCBData*> (userData_in);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->CBData);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersIterator_t iterator =
+    state_r.builders.find (data_p->CBData->timeStamp);
+  ACE_ASSERT (iterator != state_r.builders.end ());
+
+  GtkListStore* list_store_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
+  ACE_ASSERT (list_store_p);
+
+  GtkTreeIter tree_iter;
+  gtk_list_store_append (list_store_p,
+                         &tree_iter);
+  gtk_list_store_set (list_store_p, &tree_iter,
+                      0, data_p->channel.c_str (), // channel name
+                      1, data_p->numberOfMembers,  // # visible members
+                      2, data_p->topic.c_str (),   // topic
+                      -1);
+
+  // clean up
+  delete data_p;
 
   return G_SOURCE_REMOVE;
 }
@@ -1222,8 +1252,8 @@ clean_up:
   iterator_3 = data_p->connections->find (data_p->timeStamp);
   if (iterator_3 != data_p->connections->end ())
   {
-    delete (*iterator_3).second;
     data_p->connections->erase (iterator_3);
+    delete (*iterator_3).second;
   } // end IF
 
   return G_SOURCE_REMOVE;
@@ -2757,6 +2787,20 @@ refresh_channels_clicked_cb (GtkWidget* widget_in,
     static_cast<IRC_Client_UI_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
+  Common_UI_GTK_BuildersIterator_t iterator =
+    state_r.builders.find (data_p->timeStamp);
+  ACE_ASSERT (iterator != state_r.builders.end ());
+  GtkListStore* liststore_p =
+    GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
+  ACE_ASSERT (liststore_p);
+
+  // clear the store
+  gtk_list_store_clear (liststore_p);
 
   // *NOTE*: empty list --> list them all !
   string_list_t channel_list;

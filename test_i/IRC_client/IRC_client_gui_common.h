@@ -207,4 +207,19 @@ struct IRC_Client_UI_HandlerCBData
   std::string                     timeStamp;
 };
 
+struct IRC_Client_UI_AddChannelCBData
+{
+  IRC_Client_UI_AddChannelCBData ()
+   : CBData (NULL)
+   , channel ()
+   , numberOfMembers (0)
+   , topic ()
+  {}
+
+  struct IRC_Client_UI_ConnectionCBData* CBData;
+  std::string                            channel;
+  unsigned int                           numberOfMembers;
+  std::string                            topic;
+};
+
 #endif // IRC_CLIENT_GUI_COMMON_H

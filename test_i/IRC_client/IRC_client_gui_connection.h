@@ -23,6 +23,7 @@
 
 #include <map>
 #include <string>
+#include <utility>
 
 #if defined (GTK_SUPPORT)
 #include "gtk/gtk.h"
@@ -143,8 +144,28 @@ class IRC_Client_GUI_Connection_T
  private:
   typedef IRC_Client_GUI_MessageHandler_T<GUIType> MESSAGE_HANDLER_T;
   typedef IRC_Client_GUI_IMessageHandler IMESSAGE_HANDLER_T;
+  struct ci_less// : std::binary_function<std::string, std::string, bool>
+  {
+    // case-independent (ci) compare_less binary function
+    struct nocase_compare
+    // : public std::binary_function<unsigned char, unsigned char, bool>
+    {
+      bool operator() (const unsigned char& c1, const unsigned char& c2) const
+      {
+        return tolower (c1) < tolower (c2);
+      }
+    };
+
+    bool operator() (const std::string& s1, const std::string& s2) const
+    {
+      return std::lexicographical_compare (s1.begin (), s1.end (), // source range
+                                           s2.begin (), s2.end (), // dest range
+                                           nocase_compare ());     // comparison
+    }
+  };
   typedef std::map<std::string,
-                   IMESSAGE_HANDLER_T*> MESSAGE_HANDLERS_T;
+                   IMESSAGE_HANDLER_T*,
+                   struct ci_less> MESSAGE_HANDLERS_T;
   typedef typename MESSAGE_HANDLERS_T::const_iterator MESSAGE_HANDLERSCONSTITERATOR_T;
   typedef typename MESSAGE_HANDLERS_T::iterator MESSAGE_HANDLERSITERATOR_T;
 
@@ -237,8 +258,29 @@ class IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>
 
  private:
   typedef IRC_Client_GUI_MessageHandler_T<COMMON_UI_FRAMEWORK_GTK> MESSAGE_HANDLER_T;
+
+  struct ci_less// : std::binary_function<std::string, std::string, bool>
+  {
+    // case-independent (ci) compare_less binary function
+    struct nocase_compare
+    // : public std::binary_function<unsigned char, unsigned char, bool>
+    {
+      bool operator() (const unsigned char& c1, const unsigned char& c2) const
+      {
+        return tolower (c1) < tolower (c2);
+      }
+    };
+
+    bool operator() (const std::string& s1, const std::string& s2) const
+    {
+      return std::lexicographical_compare (s1.begin (), s1.end (), // source range
+                                           s2.begin (), s2.end (), // dest range
+                                           nocase_compare ());     // comparison
+    }
+  };
   typedef std::map<std::string,
-                   MESSAGE_HANDLER_T*> MESSAGE_HANDLERS_T;
+                   MESSAGE_HANDLER_T*,
+                   struct ci_less> MESSAGE_HANDLERS_T;
   typedef MESSAGE_HANDLERS_T::const_iterator MESSAGE_HANDLERSCONSTITERATOR_T;
   typedef MESSAGE_HANDLERS_T::iterator MESSAGE_HANDLERSITERATOR_T;
 

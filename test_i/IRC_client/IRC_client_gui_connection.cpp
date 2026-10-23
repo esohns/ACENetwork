@@ -27,6 +27,10 @@
 
 #include "net_macros.h"
 
+#if defined (GTK_SUPPORT)
+#include "IRC_client_gui_callbacks.h"
+#endif // GTK_SUPPORT
+
 //////////////////////////////////////////
 
 #if defined (GTK_SUPPORT)
@@ -668,7 +672,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
 void
 IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::end (Stream_SessionId_t sessionId_in)
 {
-  NETWORK_TRACE(ACE_TEXT("IRC_Client_GUI_Connection_T::end"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection_T::end"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_DEBUG ((LM_DEBUG,
@@ -973,17 +977,6 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         }
         case IRC_Codes::RPL_LIST:             // 322
         {
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-          gdk_threads_enter ();
-#endif // GTK_CHECK_VERSION (3,6,0)
-
-          // retrieve server tab channels store
-          GtkListStore* list_store_p =
-            GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                                    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
-          ACE_ASSERT (list_store_p);
-
           // convert <# visible>
           IRC_ParametersIterator_t param_iterator =
             record_r.parameters_.begin ();
@@ -1002,15 +995,9 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
                         ACE_TEXT ((*param_iterator).c_str ())));
-
-            // clean up
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-            gdk_threads_leave ();
-#endif // GTK_CHECK_VERSION (3,6,0)
-
             break;
           } // end IF
+
           gchar* string_2 = NULL;
           if (record_r.parameters_.size () > 3)
           {
@@ -1024,34 +1011,32 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
 
               // clean up
               g_free (string_p);
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-              gdk_threads_leave ();
-#endif // GTK_CHECK_VERSION (3,6,0)
 
               break;
             } // end IF
-          } // end IFs
+          } // end IF
 
-          GtkTreeIter tree_iter;
-          gtk_list_store_append (list_store_p,
-                                 &tree_iter);
-          gtk_list_store_set (list_store_p, &tree_iter,
-                              0, string_p,    // channel name
-                              1, num_members, // # visible members
-                              2, string_2,    // topic
-                              -1);
+          struct IRC_Client_UI_AddChannelCBData* cb_data_p = NULL;
+          ACE_NEW_NORETURN (cb_data_p,
+                            struct IRC_Client_UI_AddChannelCBData ());
+          ACE_ASSERT (cb_data_p);
+          cb_data_p->CBData = &CBData_;
+          cb_data_p->channel = string_p;
+          cb_data_p->numberOfMembers = num_members;
+          if (string_2)
+            cb_data_p->topic = string_2;
+
+          g_idle_add (idle_list_channel_cb,
+                      cb_data_p);
 
           // clean up
           g_free (string_p);
           g_free (string_2);
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-          gdk_threads_leave ();
-#endif // GTK_CHECK_VERSION (3,6,0)
 
           break;
         }
+        case IRC_Codes::RPL_CHANNEL_URL:      // 328
+          break;
         case IRC_Codes::RPL_NOTOPIC:          // 331
         case IRC_Codes::RPL_TOPIC:            // 332
         case IRC_Codes::RPL_TOPICWHOTIME:     // 333
@@ -1211,7 +1196,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
 
           // *NOTE*: UnrealIRCd 3.2.10.4 has trailing whitespace...
           std::string& back =
-              const_cast<IRC_Record&> (record_r).parameters_.back ();
+            const_cast<IRC_Record&> (record_r).parameters_.back ();
 
           //ACE_DEBUG ((LM_DEBUG,
           //            ACE_TEXT ("bisecting nicknames: \"%s\"...\n"),
@@ -1416,7 +1401,8 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           if (record_r.prefix_.origin == sessionState_->nickName)
           {
             createMessageHandler (record_r.parameters_.front (),
-                                  false);
+                                  false,
+                                  true);
 
 //            // query channel members
 //            string_list_t channels;
@@ -1614,7 +1600,8 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
             // retrieve message handler
             if (messageHandlers_.find (record_r.prefix_.origin) == messageHandlers_.end ())
               createMessageHandler (record_r.prefix_.origin,
-                                    false);
+                                    false,
+                                    true);
           } // end IF
 
           // channel/nick message ?
@@ -1847,7 +1834,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::close ()
          iterator++)
     {
       cb_data_p =
-          &const_cast<struct IRC_Client_UI_HandlerCBData&> ((*iterator).second->getR ());
+        &const_cast<struct IRC_Client_UI_HandlerCBData&> ((*iterator).second->getR ());
       ACE_ASSERT (cb_data_p);
       cb_data_p->eventSourceId =
         g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)

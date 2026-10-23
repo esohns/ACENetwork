@@ -146,12 +146,9 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         case IRC_Codes::RPL_NOWAWAY:              // 306
         case IRC_Codes::RPL_ENDOFWHO:             // 315
         case IRC_Codes::RPL_LISTSTART:            // 321
-          break;
         case IRC_Codes::RPL_LIST:                 // 322
-        {
-          // *WARNING*: falls through !
-        }
         case IRC_Codes::RPL_LISTEND:              // 323
+        case IRC_Codes::RPL_CHANNEL_URL:          // 328
         case IRC_Codes::RPL_NOTOPIC:              // 331
         case IRC_Codes::RPL_TOPIC:                // 332
         case IRC_Codes::RPL_TOPICWHOTIME:         // 333

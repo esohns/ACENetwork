@@ -340,9 +340,9 @@ IRC_Client_GUI_Connection_T<GUIType>::notify (Stream_SessionId_t sessionId_in,
           break;
         }
         case IRC_Codes::RPL_LIST:             // 322
-        {
           break;
-        }
+        case IRC_Codes::RPL_CHANNEL_URL:      // 328
+          break;
         case IRC_Codes::RPL_NOTOPIC:          // 331
         case IRC_Codes::RPL_TOPIC:            // 332
         case IRC_Codes::RPL_TOPICWHOTIME:     // 333
@@ -853,20 +853,6 @@ IRC_Client_GUI_Connection_T<GUIType>::getHandler (const std::string& id_in)
 
   return NULL;
 }
-
-//void
-//IRC_Client_GUI_Connection_T::current (std::string& nickname_out,
-//                                    std::string& channel_out) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection_T::current"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (sessionState_);
-//
-//  nickname_out = sessionState_->nickName;
-//  // *TODO*: keep this information synchronized
-//  channel_out = sessionState_->channel;
-//}
 
 template <enum Common_UI_FrameworkType GUIType>
 IRC_Client_GUI_IMessageHandler*

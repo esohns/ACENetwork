@@ -438,6 +438,8 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
 
           break;
         }
+        case IRC_Codes::RPL_CHANNEL_URL:      // 328
+          break;
         case IRC_Codes::RPL_TOPICWHOTIME:     // 333
           break;
         case IRC_Codes::RPL_WHOREPLY:         // 352

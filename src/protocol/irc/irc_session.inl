@@ -569,6 +569,7 @@ IRC_Session_T<ConnectionType,
 
           break;
         }
+        case IRC_Codes::RPL_CHANNEL_URL:      // 328
         case IRC_Codes::RPL_NOTOPIC:          // 331
         case IRC_Codes::RPL_TOPIC:            // 332
         case IRC_Codes::RPL_TOPICWHOTIME:     // 333
