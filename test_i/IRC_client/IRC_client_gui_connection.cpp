@@ -937,41 +937,17 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         }
         case IRC_Codes::RPL_LISTSTART:        // 321
         {
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-          gdk_threads_enter ();
-#endif // GTK_CHECK_VERSION (3,6,0)
+          sessionState_->channels.clear ();
+          sessionState_->channelModes.clear ();
+          sessionState_->channelToNumberOfUsers.clear ();
+          sessionState_->channelToTopic.clear ();
 
-          // retrieve server tab channels store
-          GtkListStore* liststore_p =
-            GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                                    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
-          ACE_ASSERT (liststore_p);
-
-          // clear the store
-          gtk_list_store_clear (liststore_p);
-
-#if GTK_CHECK_VERSION (3,6,0)
-#else
-          gdk_threads_leave ();
-#endif // GTK_CHECK_VERSION (3,6,0)
-
-          // *WARNING*: falls through !
+          break;
         }
         case IRC_Codes::RPL_LISTEND:          // 323
         {
-          log (record_r);
-
-          //gdk_threads_enter();
-
-          //// retrieve server tab channels store
-          //GtkComboBox* combobox_p =
-          //  GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-          //                                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_COMBOBOX_CHANNELS)));
-          //ACE_ASSERT (combobox_p);
-          //gtk_widget_set_sensitive (GTK_WIDGET (combobox_p), TRUE);
-
-          //gdk_threads_leave ();
+          g_idle_add (idle_list_channels_cb,
+                      &CBData_);
 
           break;
         }
@@ -1001,7 +977,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           gchar* string_2 = NULL;
           if (record_r.parameters_.size () > 3)
           {
-            param_iterator++;
+            std::advance (param_iterator, 2);
             string_2 = Common_UI_GTK_Tools::localeToUTF8 (*param_iterator);
             if (!string_2)
             {
@@ -1016,18 +992,9 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
             } // end IF
           } // end IF
 
-          struct IRC_Client_UI_AddChannelCBData* cb_data_p = NULL;
-          ACE_NEW_NORETURN (cb_data_p,
-                            struct IRC_Client_UI_AddChannelCBData ());
-          ACE_ASSERT (cb_data_p);
-          cb_data_p->CBData = &CBData_;
-          cb_data_p->channel = string_p;
-          cb_data_p->numberOfMembers = num_members;
-          if (string_2)
-            cb_data_p->topic = string_2;
-
-          g_idle_add (idle_list_channel_cb,
-                      cb_data_p);
+          sessionState_->channels.push_back (string_p);
+          sessionState_->channelToNumberOfUsers.insert (std::make_pair (string_p, num_members));
+          sessionState_->channelToTopic.insert (std::make_pair (string_p, (string_2 ? string_2 : ACE_TEXT_ALWAYS_CHAR (""))));
 
           // clean up
           g_free (string_p);

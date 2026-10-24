@@ -481,21 +481,20 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
 //////////////////////////////////////////
 
 gboolean
-idle_list_channel_cb (gpointer userData_in)
+idle_list_channels_cb (gpointer userData_in)
 {
-  //NETWORK_TRACE (ACE_TEXT ("::idle_list_channel_cb"));
+  //NETWORK_TRACE (ACE_TEXT ("::idle_list_channels_cb"));
 
   // sanity check(s)
-  struct IRC_Client_UI_AddChannelCBData* data_p =
-    static_cast<IRC_Client_UI_AddChannelCBData*> (userData_in);
+  struct IRC_Client_UI_ConnectionCBData* data_p =
+    static_cast<IRC_Client_UI_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->CBData);
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   Common_UI_GTK_State_t& state_r =
     const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR ());
   Common_UI_GTK_BuildersIterator_t iterator =
-    state_r.builders.find (data_p->CBData->timeStamp);
+    state_r.builders.find (data_p->timeStamp);
   ACE_ASSERT (iterator != state_r.builders.end ());
 
   GtkListStore* list_store_p =
@@ -503,17 +502,47 @@ idle_list_channel_cb (gpointer userData_in)
                                             ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
   ACE_ASSERT (list_store_p);
 
+  IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 =
+    data_p->connections->find (data_p->timeStamp);
+  // sanity check(s)
+  if (iterator_2 == data_p->connections->end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") not found, returning\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return G_SOURCE_REMOVE;
+  } // end IF
+  ACE_ASSERT ((*iterator_2).second);
+  const IRC_SessionState& session_state_r =
+    (*iterator_2).second->state ();
+ 
   GtkTreeIter tree_iter;
-  gtk_list_store_append (list_store_p,
-                         &tree_iter);
-  gtk_list_store_set (list_store_p, &tree_iter,
-                      0, data_p->channel.c_str (), // channel name
-                      1, data_p->numberOfMembers,  // # visible members
-                      2, data_p->topic.c_str (),   // topic
-                      -1);
+  channel_to_number_of_users_const_iterator_t num_users_iterator;
+  channel_to_topic_const_iterator_t topic_iterator;
 
-  // clean up
-  delete data_p;
+  gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
+                                        GTK_TREE_SORTABLE_UNSORTED_SORT_COLUMN_ID,
+                                        GTK_SORT_ASCENDING);
+  for (channels_const_iterator_t iterator_3 = session_state_r.channels.begin ();
+       iterator_3 != session_state_r.channels.end ();
+       ++iterator_3)
+  {
+    gtk_list_store_append (list_store_p,
+                           &tree_iter);
+
+    num_users_iterator =
+      session_state_r.channelToNumberOfUsers.find (*iterator_3);
+    topic_iterator = session_state_r.channelToTopic.find (*iterator_3);
+
+    gtk_list_store_set (list_store_p, &tree_iter,
+                        0, (*iterator_3).c_str (),                                                                                                    // channel name
+                        1, (num_users_iterator != session_state_r.channelToNumberOfUsers.end () ? (*num_users_iterator).second : 0),                  // # visible members
+                        2, (topic_iterator != session_state_r.channelToTopic.end () ? (*topic_iterator).second.c_str () : ACE_TEXT_ALWAYS_CHAR ("")), // topic
+                        -1);
+  } // end FOR
+  gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
+                                        0,
+                                        GTK_SORT_ASCENDING);
 
   return G_SOURCE_REMOVE;
 }
@@ -1252,8 +1281,9 @@ clean_up:
   iterator_3 = data_p->connections->find (data_p->timeStamp);
   if (iterator_3 != data_p->connections->end ())
   {
+    IRC_Client_GUI_IConnection* iconnection_p = (*iterator_3).second;
     data_p->connections->erase (iterator_3);
-    delete (*iterator_3).second;
+    delete iconnection_p;
   } // end IF
 
   return G_SOURCE_REMOVE;
@@ -2801,6 +2831,24 @@ refresh_channels_clicked_cb (GtkWidget* widget_in,
 
   // clear the store
   gtk_list_store_clear (liststore_p);
+
+  IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 =
+    data_p->connections->find (data_p->timeStamp);
+  // sanity check(s)
+  if (iterator_2 == data_p->connections->end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("connection (was: \"%s\") not found, returning\n"),
+                ACE_TEXT (data_p->label.c_str ())));
+    return;
+  } // end IF
+  ACE_ASSERT ((*iterator_2).second);
+  IRC_SessionState& session_state_r =
+    const_cast<IRC_SessionState&> ((*iterator_2).second->state ());
+  session_state_r.channels.clear ();
+  session_state_r.channelModes.clear ();
+  session_state_r.channelToNumberOfUsers.clear ();
+  session_state_r.channelToTopic.clear ();
 
   // *NOTE*: empty list --> list them all !
   string_list_t channel_list;

@@ -67,11 +67,35 @@ struct IRC_ConnectionState
 typedef string_list_t channels_t;
 typedef channels_t::iterator channels_iterator_t;
 typedef channels_t::const_iterator channels_const_iterator_t;
-typedef std::map<std::string, IRC_ChannelModes_t> channel_modes_t;
+
+struct ci_less// : std::binary_function<std::string, std::string, bool>
+{
+  // case-independent (ci) compare_less binary function
+  struct nocase_compare
+  // : public std::binary_function<unsigned char, unsigned char, bool>
+  {
+    bool operator() (const unsigned char& c1, const unsigned char& c2) const
+    {
+      return tolower (c1) < tolower (c2);
+    }
+  };
+
+  bool operator() (const std::string& s1, const std::string& s2) const
+  {
+    return std::lexicographical_compare (s1.begin (), s1.end (), // source range
+                                         s2.begin (), s2.end (), // dest range
+                                         nocase_compare ());     // comparison
+  }
+};
+typedef std::map<std::string, IRC_ChannelModes_t, struct ci_less> channel_modes_t;
 typedef channel_modes_t::iterator channel_modes_iterator_t;
-typedef std::map<std::string, ACE_UINT16> channel_to_number_of_users_t;
+typedef std::map<std::string, ACE_UINT16, struct ci_less> channel_to_number_of_users_t;
 typedef channel_to_number_of_users_t::iterator channel_to_number_of_users_iterator_t;
-typedef std::map<std::string, string_list_t> channel_to_names_t;
+typedef channel_to_number_of_users_t::const_iterator channel_to_number_of_users_const_iterator_t;
+typedef std::map<std::string, std::string, struct ci_less> channel_to_topic_t;
+typedef channel_to_topic_t::iterator channel_to_topic_iterator_t;
+typedef channel_to_topic_t::const_iterator channel_to_topic_const_iterator_t;
+typedef std::map<std::string, string_list_t, struct ci_less> channel_to_names_t;
 typedef channel_to_names_t::iterator channel_to_names_iterator_t;
 struct IRC_SessionState
  : IRC_ConnectionState
@@ -85,6 +109,9 @@ struct IRC_SessionState
    , isFirstMessage (false)
    , nickName ()
    , userModes ()
+   , channelToNames ()
+   , channelToNumberOfUsers ()
+   , channelToTopic ()
    , serverExtensions ()
   {}
 
@@ -98,6 +125,7 @@ struct IRC_SessionState
 
   channel_to_names_t           channelToNames;
   channel_to_number_of_users_t channelToNumberOfUsers;
+  channel_to_topic_t           channelToTopic;
 
   server_extensions_t          serverExtensions;
 };
