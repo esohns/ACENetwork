@@ -1400,9 +1400,9 @@ curses_mode (const std::string& channel_in,
       mode_string = IRC_Tools::UserModeToString (state_in.sessionState->userModes);
     else
     {
-      channel_modes_iterator_t iterator_2 =
-        state_in.sessionState->channelModes.find (channel_in);
-      ACE_ASSERT (iterator_2 != state_in.sessionState->channelModes.end ());
+      channel_to_modes_iterator_t iterator_2 =
+        state_in.sessionState->channelToModes.find (channel_in);
+      ACE_ASSERT (iterator_2 != state_in.sessionState->channelToModes.end ());
       mode_string = IRC_Tools::ChannelModeToString ((*iterator_2).second);
     } // end ELSE
   } // end lock scope

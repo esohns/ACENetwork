@@ -67,7 +67,7 @@ class IRC_Client_GUI_IConnection
   virtual gint exists (const std::string&,     // channel/nick
                        bool = true) const = 0; // locked access (GDK) ?
 #endif // GTK_SUPPORT
-  virtual void channels (string_list_t&) = 0; // return value: list of active channels
+  virtual void channels (channels_t&) = 0; // return value: list of active channels
 
   virtual void createMessageHandler (const std::string&, // channel/nickname
                                      bool = true,        // locked access ?
@@ -121,7 +121,7 @@ class IRC_Client_GUI_Connection_T
 
   inline virtual bool isClosing () const { return closing_; };
 
-  virtual void channels (string_list_t&); // return value: list of active channels
+  virtual void channels (channels_t&); // return value: list of active channels
 #if defined (GTK_SUPPORT)  
   inline virtual gint exists (const std::string&, // channel/nick
                               bool = true) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }; // locked access (GDK) ?
@@ -240,7 +240,7 @@ class IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>
   // *NOTE*: a return value of -1 indicates non-existence
   virtual gint exists (const std::string&, // channel/nick
                        bool = true) const; // locked access (GDK) ?
-  virtual void channels (string_list_t&); // return value: list of active channels
+  virtual void channels (channels_t&); // return value: list of active channels
 
   // *WARNING*: callers may need protection from:
   //            - the thread(s) servicing the UI (GTK) event loop

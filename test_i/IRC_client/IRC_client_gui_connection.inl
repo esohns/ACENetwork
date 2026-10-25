@@ -500,6 +500,7 @@ IRC_Client_GUI_Connection_T<GUIType>::notify (Stream_SessionId_t sessionId_in,
         case IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
         case IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
+        case IRC_Codes::ERR_NOCHANMODES:      // 477
         case IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
@@ -987,7 +988,7 @@ IRC_Client_GUI_Connection_T<GUIType>::error (const IRC_Record& message_in,
 
 template <enum Common_UI_FrameworkType GUIType>
 void
-IRC_Client_GUI_Connection_T<GUIType>::channels (string_list_t& channels_out)
+IRC_Client_GUI_Connection_T<GUIType>::channels (channels_t& channels_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection_T::channels"));
 

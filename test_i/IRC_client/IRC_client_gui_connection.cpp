@@ -938,8 +938,9 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         case IRC_Codes::RPL_LISTSTART:        // 321
         {
           sessionState_->channels.clear ();
-          sessionState_->channelModes.clear ();
+          sessionState_->channelToNames.clear ();
           sessionState_->channelToNumberOfUsers.clear ();
+          sessionState_->channelToModes.clear ();
           sessionState_->channelToTopic.clear ();
 
           break;
@@ -1210,8 +1211,8 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
                         ACE_TEXT ((*param_iterator).c_str ())));
             break;
           } // end IF
-
-          (*handler_iterator).second->members (list, false);
+          (*handler_iterator).second->members (list,
+                                               false);
 
           // user is operator ? --> set channel mode accordingly
           if (is_operator)
@@ -1219,7 +1220,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
             // *NOTE*: ops always have a voice...
             std::string op_mode = ACE_TEXT_ALWAYS_CHAR ("+ov");
             (*handler_iterator).second->setModes (op_mode,
-                                                  std::string (), // none
+                                                  ACE_TEXT_ALWAYS_CHAR (""), // none
                                                   false);
           } // end IF
 
@@ -1242,7 +1243,6 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
                         ACE_TEXT ((*param_iterator).c_str ())));
             break;
           } // end IF
-
           (*handler_iterator).second->endMembers (false);
 
           break;
@@ -1261,6 +1261,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
         case IRC_Codes::ERR_NEEDMOREPARAMS:   // 461
         case IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
+        case IRC_Codes::ERR_NOCHANMODES:      // 477
         case IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
@@ -1435,7 +1436,6 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
                         ACE_TEXT (record_r.parameters_.back ().c_str ())));
             break;
           } // end IF
-
           (*handler_iterator).second->remove (record_r.prefix_.origin,
                                               false);
 
@@ -2025,7 +2025,7 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::exists (const std::string&
 }
 
 void
-IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::channels (string_list_t& channels_out)
+IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::channels (channels_t& channels_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection_T::channels"));
 

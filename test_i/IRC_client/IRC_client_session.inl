@@ -524,6 +524,7 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
         case IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Codes::ERR_BANNEDFROMCHAN:   // 474
+        case IRC_Codes::ERR_NOCHANMODES:      // 477
         case IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
@@ -607,7 +608,10 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
           if (record_r.prefix_.origin == inherited::state_.nickName)
           { ACE_ASSERT (std::find (inherited::state_.channels.begin (), inherited::state_.channels.end (), channel_string) == inherited::state_.channels.end ());
             inherited::state_.channels.push_back (channel_string);
-            inherited::state_.channelModes.insert (std::make_pair (channel_string, 0));
+            inherited::state_.channelToNames.insert (std::make_pair (channel_string, string_list_t ()));
+            inherited::state_.channelToNumberOfUsers.insert (std::make_pair (channel_string, 0));
+            inherited::state_.channelToModes.insert (std::make_pair (channel_string, 0));
+            inherited::state_.channelToTopic.insert (std::make_pair (channel_string, ACE_TEXT_ALWAYS_CHAR ("")));
             inherited::state_.channel = channel_string;
 
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
@@ -671,10 +675,10 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
                 !inherited::state_.channels.empty ())
               inherited::state_.channel =
                 inherited::state_.channels.front ();
-            channel_modes_iterator_t iterator_2 =
-              inherited::state_.channelModes.find (channel);
-            ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
-            inherited::state_.channelModes.erase (iterator_2);
+            //channel_to_modes_iterator_t iterator_2 =
+            //  inherited::state_.channelToModes.find (channel);
+            //ACE_ASSERT (iterator_2 != inherited::state_.channelToModes.end ());
+            //inherited::state_.channelToModes.erase (iterator_2);
 
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
@@ -723,9 +727,9 @@ IRC_Client_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionId_in,
 
             if (nickname_string == inherited::state_.nickName)
             {
-              channel_modes_iterator_t iterator_3 =
-                inherited::state_.channelModes.find (channel_string);
-              ACE_ASSERT (iterator_3 != inherited::state_.channelModes.end ());
+              channel_to_modes_iterator_t iterator_3 =
+                inherited::state_.channelToModes.find (channel_string);
+              ACE_ASSERT (iterator_3 != inherited::state_.channelToModes.end ());
               IRC_Tools::merge (*iterator,
                                 (*iterator_3).second);
             } // end IF

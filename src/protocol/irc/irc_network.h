@@ -87,16 +87,22 @@ struct ci_less// : std::binary_function<std::string, std::string, bool>
                                          nocase_compare ());     // comparison
   }
 };
-typedef std::map<std::string, IRC_ChannelModes_t, struct ci_less> channel_modes_t;
-typedef channel_modes_t::iterator channel_modes_iterator_t;
+typedef std::map<std::string, IRC_ChannelModes_t, struct ci_less> channel_to_modes_t;
+typedef channel_to_modes_t::iterator channel_to_modes_iterator_t;
+typedef channel_to_modes_t::const_iterator channel_to_modes_const_iterator_t;
+
 typedef std::map<std::string, ACE_UINT16, struct ci_less> channel_to_number_of_users_t;
 typedef channel_to_number_of_users_t::iterator channel_to_number_of_users_iterator_t;
 typedef channel_to_number_of_users_t::const_iterator channel_to_number_of_users_const_iterator_t;
+
 typedef std::map<std::string, std::string, struct ci_less> channel_to_topic_t;
 typedef channel_to_topic_t::iterator channel_to_topic_iterator_t;
 typedef channel_to_topic_t::const_iterator channel_to_topic_const_iterator_t;
+
 typedef std::map<std::string, string_list_t, struct ci_less> channel_to_names_t;
 typedef channel_to_names_t::iterator channel_to_names_iterator_t;
+typedef channel_to_names_t::const_iterator channel_to_names_const_iterator_t;
+
 struct IRC_SessionState
  : IRC_ConnectionState
 {
@@ -104,27 +110,27 @@ struct IRC_SessionState
    : IRC_ConnectionState ()
    , channel ()
    , away (false)
-   , channels ()
-   , channelModes ()
    , isFirstMessage (false)
    , nickName ()
    , userModes ()
+   , channels ()
    , channelToNames ()
    , channelToNumberOfUsers ()
+   , channelToModes ()
    , channelToTopic ()
    , serverExtensions ()
   {}
 
   std::string                  channel;
   bool                         away;
-  channels_t                   channels;
-  channel_modes_t              channelModes;
   bool                         isFirstMessage;
   std::string                  nickName;
   IRC_UserModes_t              userModes;
 
+  channels_t                   channels;
   channel_to_names_t           channelToNames;
   channel_to_number_of_users_t channelToNumberOfUsers;
+  channel_to_modes_t           channelToModes;
   channel_to_topic_t           channelToTopic;
 
   server_extensions_t          serverExtensions;

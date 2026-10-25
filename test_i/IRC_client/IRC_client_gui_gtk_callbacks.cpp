@@ -2682,8 +2682,8 @@ join_clicked_cb (GtkWidget* widget_in,
   std::string channel_string =
     gtk_entry_buffer_get_text (entry_buffer_p);
   ACE_ASSERT (!channel_string.empty ());
-  //  Common_UI_GTK_Tools::UTF82Locale (gtk_entry_buffer_get_text (entrybuffer_p), // text
-  //                                text_length);                              // number of bytes
+  //  Common_UI_GTK_Tools::UTF8ToLocale (gtk_entry_buffer_get_text (entrybuffer_p), // text
+  //                                     text_length);                              // number of bytes
   //if (channel_string.empty ())
   //{
   //  ACE_DEBUG ((LM_ERROR,
@@ -2843,8 +2843,9 @@ refresh_channels_clicked_cb (GtkWidget* widget_in,
   IRC_SessionState& session_state_r =
     const_cast<IRC_SessionState&> ((*iterator_2).second->state ());
   session_state_r.channels.clear ();
-  session_state_r.channelModes.clear ();
+  session_state_r.channelToNames.clear ();
   session_state_r.channelToNumberOfUsers.clear ();
+  session_state_r.channelToModes.clear ();
   session_state_r.channelToTopic.clear ();
 
   // *NOTE*: empty list --> list them all !

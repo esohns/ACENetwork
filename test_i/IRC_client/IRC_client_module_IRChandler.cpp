@@ -173,6 +173,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
         case IRC_Codes::ERR_ALREADYREGISTRED:     // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP:     // 465
         case IRC_Codes::ERR_BANNEDFROMCHAN:       // 474
+        case IRC_Codes::ERR_NOCHANMODES:          // 477
         case IRC_Codes::ERR_BADCHANNAME:          // 479
         case IRC_Codes::ERR_CHANOPRIVSNEEDED:     // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG:     // 501

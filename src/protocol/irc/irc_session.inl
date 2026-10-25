@@ -656,6 +656,7 @@ IRC_Session_T<ConnectionType,
         case IRC_Codes::ERR_ALREADYREGISTRED: // 462
         case IRC_Codes::ERR_YOUREBANNEDCREEP: // 465
         case IRC_Codes::ERR_BANNEDFROMCHAN:   // 474
+        case IRC_Codes::ERR_NOCHANMODES:      // 477
         case IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Codes::ERR_CHANOPRIVSNEEDED: // 482
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
@@ -728,7 +729,10 @@ IRC_Session_T<ConnectionType,
           {
             std::string channel = record_r.parameters_.front ();
             inherited::state_.channels.push_back (channel);
-            inherited::state_.channelModes.insert (std::make_pair (channel, 0));
+            inherited::state_.channelToNames.insert (std::make_pair (channel, string_list_t ()));
+            inherited::state_.channelToNumberOfUsers.insert (std::make_pair (channel, 0));
+            inherited::state_.channelToModes.insert (std::make_pair (channel, 0));
+            inherited::state_.channelToTopic.insert (std::make_pair (channel, ACE_TEXT_ALWAYS_CHAR ("")));
             inherited::state_.channel = channel;
 
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
@@ -772,12 +776,11 @@ IRC_Session_T<ConnectionType,
               inherited::state_.channel.clear ();
             if (inherited::state_.channel.empty () &&
                 !inherited::state_.channels.empty ())
-              inherited::state_.channel =
-                inherited::state_.channels.front ();
-            channel_modes_iterator_t iterator_2 =
-              inherited::state_.channelModes.find (channel);
-            ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
-            inherited::state_.channelModes.erase (iterator_2);
+              inherited::state_.channel = inherited::state_.channels.front ();
+            //channel_to_modes_iterator_t iterator_2 =
+            //  inherited::state_.channelToModes.find (channel);
+            //ACE_ASSERT (iterator_2 != inherited::state_.channelToModes.end ());
+            //inherited::state_.channelToModes.erase (iterator_2);
 
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
             ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
@@ -821,12 +824,13 @@ IRC_Session_T<ConnectionType,
           else
           {
             // --> channel mode
-            channel_modes_iterator_t iterator_2 =
-              inherited::state_.channelModes.find (record_r.parameters_.front ());
-            ACE_ASSERT (iterator_2 != inherited::state_.channelModes.end ());
+            channel_to_modes_iterator_t iterator_2 =
+              inherited::state_.channelToModes.find (record_r.parameters_.front ());
+            ACE_ASSERT (iterator_2 != inherited::state_.channelToModes.end ());
             IRC_Tools::merge (*iterator,
                               (*iterator_2).second);
           } // end ELSE
+
           ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
           ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->UIState);
           switch (inherited::CONNECTION_BASE_T::configuration_->UIState->type)
