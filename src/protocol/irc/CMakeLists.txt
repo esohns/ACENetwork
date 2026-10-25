@@ -2,7 +2,7 @@ add_library (${PROJECT_NAME}_Protocol_IRC STATIC "")
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (Common
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../modules
@@ -12,7 +12,7 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 
-find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (ACEStream
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../modules
@@ -140,13 +140,14 @@ unset (absolute_script_files)
 foreach (script_file ${script_files})
   get_filename_component (abs_script_file ${script_file} ABSOLUTE)
   list (APPEND absolute_script_files
-    ${absolute_script_file})
+        ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_IRC
 #                PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 PRIVATE ${absolute_source_files}
-                INTERFACE ${absolute_script_files})
+                        ${script_files})
+
 target_precompile_headers (${PROJECT_NAME}_Protocol_IRC
                            PUBLIC stdafx.h)
 
@@ -159,9 +160,9 @@ target_precompile_headers (${PROJECT_NAME}_Protocol_IRC
 
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
- set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
- source_group (scripts FILES ${PROJECT_NAME}_Protocol_IRC_SCRIPTS)
- source_group (exports FILES etc/exports.def)
+# set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+# source_group (scripts FILES ${PROJECT_NAME}_Protocol_IRC_SCRIPTS)
+# source_group (exports FILES etc/exports.def)
 endif (WIN32)
 
 set_property (TARGET ${PROJECT_NAME}_Protocol_IRC PROPERTY FOLDER "protocols")
@@ -170,19 +171,12 @@ set_property (TARGET ${PROJECT_NAME}_Protocol_IRC PROPERTY FOLDER "protocols")
 add_dependencies (${PROJECT_NAME}_Protocol_IRC Common)
 add_dependencies (${PROJECT_NAME}_Protocol_IRC ACEStream)
 
-#set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES DEFINE_SYMBOL IRC_BUILD_DLL)
-#set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
-
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ${ACE_LIBRARY})
 endif (WIN32)
 target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC Common)
 
 target_link_libraries (${PROJECT_NAME}_Protocol_IRC PUBLIC ACEStream)
-
-# add PCH
-target_precompile_headers (${PROJECT_NAME}_Protocol_IRC
-                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_IRC

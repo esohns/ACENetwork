@@ -23,7 +23,7 @@
 #include "ace/ace_wchar.h"
 #include "ace/OS_Memory.h"
 
-#include "ace/Synch.h"
+//#include "ace/Synch.h"
 #include "irc_module_parser.h"
 #include "irc_parser_driver.h"
 
@@ -78,7 +78,8 @@ And so on...
 
 CHAR           [\x00-\xFF]
 SPACE          [ ]
-HOST           ([[:alpha:][:digit:].\-])+
+NOSPACE        [^ ]
+HOST           ([[:alpha:][:digit:].:\-])+
 SERVERNAME     {HOST}
 /* LETTER         [[:alpha:]] */
 /*LETTER    ==     [a-zA-Z]*/

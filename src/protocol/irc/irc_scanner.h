@@ -11,7 +11,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 1
+#define YY_FLEX_SUBMINOR_VERSION 4
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -20,8 +20,217 @@
 /* %endif */
 
 /* %if-c-only */
-    
+#ifdef yy_create_buffer
+#define IRC_Scanner__create_buffer_ALREADY_DEFINED
+#else
+#define yy_create_buffer IRC_Scanner__create_buffer
+#endif
+
+#ifdef yy_delete_buffer
+#define IRC_Scanner__delete_buffer_ALREADY_DEFINED
+#else
+#define yy_delete_buffer IRC_Scanner__delete_buffer
+#endif
+
+#ifdef yy_scan_buffer
+#define IRC_Scanner__scan_buffer_ALREADY_DEFINED
+#else
+#define yy_scan_buffer IRC_Scanner__scan_buffer
+#endif
+
+#ifdef yy_scan_string
+#define IRC_Scanner__scan_string_ALREADY_DEFINED
+#else
+#define yy_scan_string IRC_Scanner__scan_string
+#endif
+
+#ifdef yy_scan_bytes
+#define IRC_Scanner__scan_bytes_ALREADY_DEFINED
+#else
+#define yy_scan_bytes IRC_Scanner__scan_bytes
+#endif
+
+#ifdef yy_init_buffer
+#define IRC_Scanner__init_buffer_ALREADY_DEFINED
+#else
+#define yy_init_buffer IRC_Scanner__init_buffer
+#endif
+
+#ifdef yy_flush_buffer
+#define IRC_Scanner__flush_buffer_ALREADY_DEFINED
+#else
+#define yy_flush_buffer IRC_Scanner__flush_buffer
+#endif
+
+#ifdef yy_load_buffer_state
+#define IRC_Scanner__load_buffer_state_ALREADY_DEFINED
+#else
+#define yy_load_buffer_state IRC_Scanner__load_buffer_state
+#endif
+
+#ifdef yy_switch_to_buffer
+#define IRC_Scanner__switch_to_buffer_ALREADY_DEFINED
+#else
+#define yy_switch_to_buffer IRC_Scanner__switch_to_buffer
+#endif
+
+#ifdef yypush_buffer_state
+#define IRC_Scanner_push_buffer_state_ALREADY_DEFINED
+#else
+#define yypush_buffer_state IRC_Scanner_push_buffer_state
+#endif
+
+#ifdef yypop_buffer_state
+#define IRC_Scanner_pop_buffer_state_ALREADY_DEFINED
+#else
+#define yypop_buffer_state IRC_Scanner_pop_buffer_state
+#endif
+
+#ifdef yyensure_buffer_stack
+#define IRC_Scanner_ensure_buffer_stack_ALREADY_DEFINED
+#else
+#define yyensure_buffer_stack IRC_Scanner_ensure_buffer_stack
+#endif
+
+#ifdef yylex
+#define IRC_Scanner_lex_ALREADY_DEFINED
+#else
+#define yylex IRC_Scanner_lex
+#endif
+
+#ifdef yyrestart
+#define IRC_Scanner_restart_ALREADY_DEFINED
+#else
+#define yyrestart IRC_Scanner_restart
+#endif
+
+#ifdef yylex_init
+#define IRC_Scanner_lex_init_ALREADY_DEFINED
+#else
+#define yylex_init IRC_Scanner_lex_init
+#endif
+
+#ifdef yylex_init_extra
+#define IRC_Scanner_lex_init_extra_ALREADY_DEFINED
+#else
+#define yylex_init_extra IRC_Scanner_lex_init_extra
+#endif
+
+#ifdef yylex_destroy
+#define IRC_Scanner_lex_destroy_ALREADY_DEFINED
+#else
+#define yylex_destroy IRC_Scanner_lex_destroy
+#endif
+
+#ifdef yyget_debug
+#define IRC_Scanner_get_debug_ALREADY_DEFINED
+#else
+#define yyget_debug IRC_Scanner_get_debug
+#endif
+
+#ifdef yyset_debug
+#define IRC_Scanner_set_debug_ALREADY_DEFINED
+#else
+#define yyset_debug IRC_Scanner_set_debug
+#endif
+
+#ifdef yyget_extra
+#define IRC_Scanner_get_extra_ALREADY_DEFINED
+#else
+#define yyget_extra IRC_Scanner_get_extra
+#endif
+
+#ifdef yyset_extra
+#define IRC_Scanner_set_extra_ALREADY_DEFINED
+#else
+#define yyset_extra IRC_Scanner_set_extra
+#endif
+
+#ifdef yyget_in
+#define IRC_Scanner_get_in_ALREADY_DEFINED
+#else
+#define yyget_in IRC_Scanner_get_in
+#endif
+
+#ifdef yyset_in
+#define IRC_Scanner_set_in_ALREADY_DEFINED
+#else
+#define yyset_in IRC_Scanner_set_in
+#endif
+
+#ifdef yyget_out
+#define IRC_Scanner_get_out_ALREADY_DEFINED
+#else
+#define yyget_out IRC_Scanner_get_out
+#endif
+
+#ifdef yyset_out
+#define IRC_Scanner_set_out_ALREADY_DEFINED
+#else
+#define yyset_out IRC_Scanner_set_out
+#endif
+
+#ifdef yyget_leng
+#define IRC_Scanner_get_leng_ALREADY_DEFINED
+#else
+#define yyget_leng IRC_Scanner_get_leng
+#endif
+
+#ifdef yyget_text
+#define IRC_Scanner_get_text_ALREADY_DEFINED
+#else
+#define yyget_text IRC_Scanner_get_text
+#endif
+
+#ifdef yyget_lineno
+#define IRC_Scanner_get_lineno_ALREADY_DEFINED
+#else
+#define yyget_lineno IRC_Scanner_get_lineno
+#endif
+
+#ifdef yyset_lineno
+#define IRC_Scanner_set_lineno_ALREADY_DEFINED
+#else
+#define yyset_lineno IRC_Scanner_set_lineno
+#endif
+
+#ifdef yyget_column
+#define IRC_Scanner_get_column_ALREADY_DEFINED
+#else
+#define yyget_column IRC_Scanner_get_column
+#endif
+
+#ifdef yyset_column
+#define IRC_Scanner_set_column_ALREADY_DEFINED
+#else
+#define yyset_column IRC_Scanner_set_column
+#endif
+
+#ifdef yywrap
+#define IRC_Scanner_wrap_ALREADY_DEFINED
+#else
+#define yywrap IRC_Scanner_wrap
+#endif
+
 /* %endif */
+
+#ifdef yyalloc
+#define IRC_Scanner_alloc_ALREADY_DEFINED
+#else
+#define yyalloc IRC_Scanner_alloc
+#endif
+
+#ifdef yyrealloc
+#define IRC_Scanner_realloc_ALREADY_DEFINED
+#else
+#define yyrealloc IRC_Scanner_realloc
+#endif
+
+#ifdef yyfree
+#define IRC_Scanner_free_ALREADY_DEFINED
+#else
+#define yyfree IRC_Scanner_free
+#endif
 
 /* %if-c-only */
 
@@ -102,12 +311,17 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#ifndef SIZE_MAX
+#define SIZE_MAX               (~(size_t)0)
+#endif
+
 #endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
 /* %endif */
 
+/* begin standard C++ headers. */
 /* %if-c++-only */
 /* %endif */
 
@@ -224,7 +438,7 @@ struct yy_buffer_state
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
-    
+
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
@@ -247,23 +461,23 @@ struct yy_buffer_state
 
 /* %endif */
 
-void IRC_Scanner_restart (FILE *input_file ,yyscan_t yyscanner );
-void IRC_Scanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Scanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void IRC_Scanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Scanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
-void IRC_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
-void IRC_Scanner_pop_buffer_state (yyscan_t yyscanner );
+void yyrestart ( FILE *input_file , yyscan_t yyscanner );
+void yy_switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_create_buffer ( FILE *file, int size , yyscan_t yyscanner );
+void yy_delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yy_flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
+void yypush_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
+void yypop_buffer_state ( yyscan_t yyscanner );
 
-YY_BUFFER_STATE IRC_Scanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Scanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Scanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_string ( const char *yy_str , yyscan_t yyscanner );
+YY_BUFFER_STATE yy_scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
 
 /* %endif */
 
-void *IRC_Scanner_alloc (yy_size_t ,yyscan_t yyscanner );
-void *IRC_Scanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
-void IRC_Scanner_free (void * ,yyscan_t yyscanner );
+void *yyalloc ( yy_size_t , yyscan_t yyscanner );
+void *yyrealloc ( void *, yy_size_t , yyscan_t yyscanner );
+void yyfree ( void * , yyscan_t yyscanner );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
@@ -314,9 +528,9 @@ void IRC_Scanner_free (void * ,yyscan_t yyscanner );
 
 /* %if-reentrant */
 
-int IRC_Scanner_lex_init (yyscan_t* scanner);
+int yylex_init (yyscan_t* scanner);
 
-int IRC_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
+int yylex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
 
 /* %endif */
 
@@ -325,35 +539,35 @@ int IRC_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int IRC_Scanner_lex_destroy (yyscan_t yyscanner );
+int yylex_destroy ( yyscan_t yyscanner );
 
-int IRC_Scanner_get_debug (yyscan_t yyscanner );
+int yyget_debug ( yyscan_t yyscanner );
 
-void IRC_Scanner_set_debug (int debug_flag ,yyscan_t yyscanner );
+void yyset_debug ( int debug_flag , yyscan_t yyscanner );
 
-YY_EXTRA_TYPE IRC_Scanner_get_extra (yyscan_t yyscanner );
+YY_EXTRA_TYPE yyget_extra ( yyscan_t yyscanner );
 
-void IRC_Scanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
+void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
 
-FILE *IRC_Scanner_get_in (yyscan_t yyscanner );
+FILE *yyget_in ( yyscan_t yyscanner );
 
-void IRC_Scanner_set_in  (FILE * _in_str ,yyscan_t yyscanner );
+void yyset_in  ( FILE * _in_str , yyscan_t yyscanner );
 
-FILE *IRC_Scanner_get_out (yyscan_t yyscanner );
+FILE *yyget_out ( yyscan_t yyscanner );
 
-void IRC_Scanner_set_out  (FILE * _out_str ,yyscan_t yyscanner );
+void yyset_out  ( FILE * _out_str , yyscan_t yyscanner );
 
-			int IRC_Scanner_get_leng (yyscan_t yyscanner );
+			int yyget_leng ( yyscan_t yyscanner );
 
-char *IRC_Scanner_get_text (yyscan_t yyscanner );
+char *yyget_text ( yyscan_t yyscanner );
 
-int IRC_Scanner_get_lineno (yyscan_t yyscanner );
+int yyget_lineno ( yyscan_t yyscanner );
 
-void IRC_Scanner_set_lineno (int _line_number ,yyscan_t yyscanner );
+void yyset_lineno ( int _line_number , yyscan_t yyscanner );
 
-int IRC_Scanner_get_column  (yyscan_t yyscanner );
+int yyget_column  ( yyscan_t yyscanner );
 
-void IRC_Scanner_set_column (int _column_no ,yyscan_t yyscanner );
+void yyset_column ( int _column_no , yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -364,9 +578,9 @@ void IRC_Scanner_set_column (int _column_no ,yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int IRC_Scanner_wrap (yyscan_t yyscanner );
+extern "C" int yywrap ( yyscan_t yyscanner );
 #else
-extern int IRC_Scanner_wrap (yyscan_t yyscanner );
+extern int yywrap ( yyscan_t yyscanner );
 #endif
 #endif
 
@@ -375,11 +589,11 @@ extern int IRC_Scanner_wrap (yyscan_t yyscanner );
 /* %endif */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
+static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
+static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
@@ -420,9 +634,9 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int IRC_Scanner_lex (yyscan_t yyscanner);
+extern int yylex (yyscan_t yyscanner);
 
-#define YY_DECL int IRC_Scanner_lex (yyscan_t yyscanner)
+#define YY_DECL int yylex (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only C++ definition */
 /* %endif */
@@ -452,6 +666,150 @@ extern int IRC_Scanner_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-#line 456 "irc_scanner.h"
+#ifndef IRC_Scanner__create_buffer_ALREADY_DEFINED
+#undef yy_create_buffer
+#endif
+#ifndef IRC_Scanner__delete_buffer_ALREADY_DEFINED
+#undef yy_delete_buffer
+#endif
+#ifndef IRC_Scanner__scan_buffer_ALREADY_DEFINED
+#undef yy_scan_buffer
+#endif
+#ifndef IRC_Scanner__scan_string_ALREADY_DEFINED
+#undef yy_scan_string
+#endif
+#ifndef IRC_Scanner__scan_bytes_ALREADY_DEFINED
+#undef yy_scan_bytes
+#endif
+#ifndef IRC_Scanner__init_buffer_ALREADY_DEFINED
+#undef yy_init_buffer
+#endif
+#ifndef IRC_Scanner__flush_buffer_ALREADY_DEFINED
+#undef yy_flush_buffer
+#endif
+#ifndef IRC_Scanner__load_buffer_state_ALREADY_DEFINED
+#undef yy_load_buffer_state
+#endif
+#ifndef IRC_Scanner__switch_to_buffer_ALREADY_DEFINED
+#undef yy_switch_to_buffer
+#endif
+#ifndef IRC_Scanner_push_buffer_state_ALREADY_DEFINED
+#undef yypush_buffer_state
+#endif
+#ifndef IRC_Scanner_pop_buffer_state_ALREADY_DEFINED
+#undef yypop_buffer_state
+#endif
+#ifndef IRC_Scanner_ensure_buffer_stack_ALREADY_DEFINED
+#undef yyensure_buffer_stack
+#endif
+#ifndef IRC_Scanner_lex_ALREADY_DEFINED
+#undef yylex
+#endif
+#ifndef IRC_Scanner_restart_ALREADY_DEFINED
+#undef yyrestart
+#endif
+#ifndef IRC_Scanner_lex_init_ALREADY_DEFINED
+#undef yylex_init
+#endif
+#ifndef IRC_Scanner_lex_init_extra_ALREADY_DEFINED
+#undef yylex_init_extra
+#endif
+#ifndef IRC_Scanner_lex_destroy_ALREADY_DEFINED
+#undef yylex_destroy
+#endif
+#ifndef IRC_Scanner_get_debug_ALREADY_DEFINED
+#undef yyget_debug
+#endif
+#ifndef IRC_Scanner_set_debug_ALREADY_DEFINED
+#undef yyset_debug
+#endif
+#ifndef IRC_Scanner_get_extra_ALREADY_DEFINED
+#undef yyget_extra
+#endif
+#ifndef IRC_Scanner_set_extra_ALREADY_DEFINED
+#undef yyset_extra
+#endif
+#ifndef IRC_Scanner_get_in_ALREADY_DEFINED
+#undef yyget_in
+#endif
+#ifndef IRC_Scanner_set_in_ALREADY_DEFINED
+#undef yyset_in
+#endif
+#ifndef IRC_Scanner_get_out_ALREADY_DEFINED
+#undef yyget_out
+#endif
+#ifndef IRC_Scanner_set_out_ALREADY_DEFINED
+#undef yyset_out
+#endif
+#ifndef IRC_Scanner_get_leng_ALREADY_DEFINED
+#undef yyget_leng
+#endif
+#ifndef IRC_Scanner_get_text_ALREADY_DEFINED
+#undef yyget_text
+#endif
+#ifndef IRC_Scanner_get_lineno_ALREADY_DEFINED
+#undef yyget_lineno
+#endif
+#ifndef IRC_Scanner_set_lineno_ALREADY_DEFINED
+#undef yyset_lineno
+#endif
+#ifndef IRC_Scanner_get_column_ALREADY_DEFINED
+#undef yyget_column
+#endif
+#ifndef IRC_Scanner_set_column_ALREADY_DEFINED
+#undef yyset_column
+#endif
+#ifndef IRC_Scanner_wrap_ALREADY_DEFINED
+#undef yywrap
+#endif
+#ifndef IRC_Scanner_get_lval_ALREADY_DEFINED
+#undef yyget_lval
+#endif
+#ifndef IRC_Scanner_set_lval_ALREADY_DEFINED
+#undef yyset_lval
+#endif
+#ifndef IRC_Scanner_get_lloc_ALREADY_DEFINED
+#undef yyget_lloc
+#endif
+#ifndef IRC_Scanner_set_lloc_ALREADY_DEFINED
+#undef yyset_lloc
+#endif
+#ifndef IRC_Scanner_alloc_ALREADY_DEFINED
+#undef yyalloc
+#endif
+#ifndef IRC_Scanner_realloc_ALREADY_DEFINED
+#undef yyrealloc
+#endif
+#ifndef IRC_Scanner_free_ALREADY_DEFINED
+#undef yyfree
+#endif
+#ifndef IRC_Scanner_text_ALREADY_DEFINED
+#undef yytext
+#endif
+#ifndef IRC_Scanner_leng_ALREADY_DEFINED
+#undef yyleng
+#endif
+#ifndef IRC_Scanner_in_ALREADY_DEFINED
+#undef yyin
+#endif
+#ifndef IRC_Scanner_out_ALREADY_DEFINED
+#undef yyout
+#endif
+#ifndef IRC_Scanner__flex_debug_ALREADY_DEFINED
+#undef yy_flex_debug
+#endif
+#ifndef IRC_Scanner_lineno_ALREADY_DEFINED
+#undef yylineno
+#endif
+#ifndef IRC_Scanner_tables_fload_ALREADY_DEFINED
+#undef yytables_fload
+#endif
+#ifndef IRC_Scanner_tables_destroy_ALREADY_DEFINED
+#undef yytables_destroy
+#endif
+#ifndef IRC_Scanner_TABLES_NAME_ALREADY_DEFINED
+#undef yyTABLES_NAME
+#endif
+
 #undef IRC_Scanner_IN_HEADER
 #endif /* IRC_Scanner_HEADER_H */
