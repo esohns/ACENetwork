@@ -28,7 +28,7 @@
 #include "net_macros.h"
 
 #if defined (GTK_SUPPORT)
-#include "IRC_client_gui_callbacks.h"
+#include "IRC_client_gui_gtk_callbacks.h"
 #endif // GTK_SUPPORT
 
 //////////////////////////////////////////
@@ -962,43 +962,46 @@ IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>::notify (Stream_SessionId_t
           guint num_members = 0;
           converter << *param_iterator;
           converter >> num_members;
+
           param_iterator--;
 
-          // convert text
-          gchar* string_p = Common_UI_GTK_Tools::localeToUTF8 (*param_iterator);
-          if (!string_p)
-          {
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
-                        ACE_TEXT ((*param_iterator).c_str ())));
-            break;
-          } // end IF
+          sessionState_->channelToNumberOfUsers.insert (std::make_pair (*param_iterator, num_members));
+          sessionState_->channels.push_back (*param_iterator);
 
-          gchar* string_2 = NULL;
+          // convert text
+          // bool free_string_b = true;
+          // gchar* string_p = Common_UI_GTK_Tools::localeToUTF8 (*param_iterator);
+          // if (!string_p)
+          // { free_string_b = false;
+          //   ACE_DEBUG ((LM_WARNING,
+          //               ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), continuing\n"),
+          //               ACE_TEXT ((*param_iterator).c_str ())));
+          //   string_p = const_cast<gchar*> ((*param_iterator).c_str ());
+          // } // end IF
+
+          // gchar* string_2 = NULL;
+          // bool free_string_2 = true;
           if (record_r.parameters_.size () > 3)
           {
             std::advance (param_iterator, 2);
-            string_2 = Common_UI_GTK_Tools::localeToUTF8 (*param_iterator);
-            if (!string_2)
-            {
-              ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
-                          ACE_TEXT ((*param_iterator).c_str ())));
-
-              // clean up
-              g_free (string_p);
-
-              break;
-            } // end IF
+            // string_2 = Common_UI_GTK_Tools::localeToUTF8 (*param_iterator);
+            // if (!string_2)
+            // { free_string_2 = false;
+            //   ACE_DEBUG ((LM_WARNING,
+            //               ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), continuing\n"),
+            //               ACE_TEXT ((*param_iterator).c_str ())));
+            //   string_2 = const_cast<gchar*> ((*param_iterator).c_str ());
+            // } // end IF
+            sessionState_->channelToTopic.insert (std::make_pair (sessionState_->channels.back (), *param_iterator));
           } // end IF
-
-          sessionState_->channels.push_back (string_p);
-          sessionState_->channelToNumberOfUsers.insert (std::make_pair (string_p, num_members));
-          sessionState_->channelToTopic.insert (std::make_pair (string_p, (string_2 ? string_2 : ACE_TEXT_ALWAYS_CHAR (""))));
+          else
+            sessionState_->channelToTopic.insert (std::make_pair (sessionState_->channels.back (), ACE_TEXT_ALWAYS_CHAR ("")));
 
           // clean up
-          g_free (string_p);
-          g_free (string_2);
+          // if (free_string_b)
+          //   g_free (string_p);
+          // if (free_string_2)
+          //   g_free (string_2);
 
           break;
         }

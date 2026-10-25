@@ -21,7 +21,7 @@
 #ifndef TEST_I_M3U_MODULE_PARSER_H
 #define TEST_I_M3U_MODULE_PARSER_H
 
-#include <string>
+// #include <string>
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -70,8 +70,8 @@ class Test_I_M3U_Module_Parser
                                   bool&);           // return value: pass message downstream ?
 
   // implement Common_IClone_T
-  virtual ACE_Task<ACE_MT_SYNCH,
-                   Common_TimePolicy_t>* clone ();
+  // virtual ACE_Task<ACE_MT_SYNCH,
+  //                  Common_TimePolicy_t>* clone ();
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_M3U_Module_Parser ())

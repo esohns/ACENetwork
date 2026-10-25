@@ -40,11 +40,11 @@
 #include "IRC_client_stream_common.h"
 #include "IRC_client_tools.h"
 
-#if defined (GTK_SUPPORT)
-#include "IRC_client_gui_callbacks.h"
-#endif // GTK_SUPPORT
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_gui_messagehandler.h"
+#if defined (GTK_SUPPORT)
+#include "IRC_client_gui_gtk_callbacks.h"
+#endif // GTK_SUPPORT
 
 template <enum Common_UI_FrameworkType GUIType>
 IRC_Client_GUI_Connection_T<GUIType>::IRC_Client_GUI_Connection_T (IRC_Client_GUI_Connections_t* connections_in,

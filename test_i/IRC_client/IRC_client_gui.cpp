@@ -79,11 +79,11 @@
 #include "test_i_defines.h"
 
 #include "IRC_client_defines.h"
-#if defined (GTK_SUPPORT)
-#include "IRC_client_gui_callbacks.h"
-#endif // GTK_SUPPORT
 #include "IRC_client_gui_common.h"
 #include "IRC_client_gui_defines.h"
+#if defined (GTK_SUPPORT)
+#include "IRC_client_gui_gtk_callbacks.h"
+#endif // GTK_SUPPORT
 #include "IRC_client_messageallocator.h"
 #include "IRC_client_sessionmessage.h"
 #include "IRC_client_module_IRChandler.h"

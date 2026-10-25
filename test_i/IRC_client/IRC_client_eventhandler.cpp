@@ -44,7 +44,7 @@
 #include "test_i_defines.h"
 
 #if defined (GTK_SUPPORT)
-#include "IRC_client_gui_callbacks.h"
+#include "IRC_client_gui_gtk_callbacks.h"
 #endif // GTK_SUPPORT
 
 IRC_Client_EventHandler::IRC_Client_EventHandler (struct IRC_Client_UI_ConnectionCBData* CBData_in)

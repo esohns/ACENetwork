@@ -38,9 +38,9 @@
 #include "IRC_client_defines.h"
 #include "IRC_client_common.h"
 #include "IRC_client_stream_common.h"
-#if defined (GTK_USE)
-#include "IRC_client_gui_callbacks.h"
-#endif // GTK_USE
+#if defined (GTK_SUPPORT)
+#include "IRC_client_gui_gtk_callbacks.h"
+#endif // GTK_SUPPORT
 
 IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler (ISTREAM_T* stream_in)
  : inherited (stream_in)

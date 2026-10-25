@@ -129,8 +129,8 @@ endif (CURSES_SUPPORT)
 if (GTK_SUPPORT)
 # set (${EXECUTABLE}_EXE_SRCS
 #      ${${EXECUTABLE}_EXE_SRCS}
-#      IRC_client_gui_callbacks.cpp
-#      IRC_client_gui_callbacks.h)
+#      IRC_client_gui_gtk_callbacks.cpp
+#      IRC_client_gui_gtk_callbacks.h)
 endif (GTK_SUPPORT)
 if (WXWIDGETS_SUPPORT)
   #  set (${EXECUTABLE}_EXE_SRCS
@@ -246,8 +246,8 @@ set (${EXECUTABLE_GUI}_EXE_SRCS
 if (GTK_SUPPORT)
  set (${EXECUTABLE_GUI}_EXE_SRCS
       ${${EXECUTABLE_GUI}_EXE_SRCS}
-      IRC_client_gui_callbacks.cpp
-      IRC_client_gui_callbacks.h)
+      IRC_client_gui_gtk_callbacks.cpp
+      IRC_client_gui_gtk_callbacks.h)
 endif (GTK_SUPPORT)
 if (WXWIDGETS_SUPPORT)
   #  set (${EXECUTABLE}_EXE_SRCS

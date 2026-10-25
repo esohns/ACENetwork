@@ -21,8 +21,10 @@
 #ifndef TEST_I_MODULE_HTTPGET_H
 #define TEST_I_MODULE_HTTPGET_H
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <cstdio>
 #define EOF (-1)
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"

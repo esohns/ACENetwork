@@ -45,12 +45,6 @@ IRC_StateMachine_Registration::change (enum IRC_RegistrationStateType newState_i
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::change"));
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::stateLock_);
-
-  // synchronize access to state machine
-  ACE_Guard<ACE_Thread_Mutex> aGuard (*inherited::stateLock_);
-
   switch (inherited::state_)
   {
     case IRC_REGISTRATION_STATE_PASS:

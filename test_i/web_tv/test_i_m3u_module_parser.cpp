@@ -36,48 +36,48 @@ Test_I_M3U_Module_Parser::Test_I_M3U_Module_Parser (ISTREAM_T* stream_in)
 
 }
 
-ACE_Task<ACE_MT_SYNCH,
-         Common_TimePolicy_t>*
-Test_I_M3U_Module_Parser:: clone ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::clone"));
+// ACE_Task<ACE_MT_SYNCH,
+//          Common_TimePolicy_t>*
+// Test_I_M3U_Module_Parser:: clone ()
+// {
+//   NETWORK_TRACE (ACE_TEXT ("Test_I_M3U_Module_Parser::clone"));
 
-  // initialize return value(s)
-  Stream_Task_t* task_p = NULL;
+//   // initialize return value(s)
+//   Stream_Task_t* task_p = NULL;
 
-  Stream_Module_t* module_p = NULL;
-  ACE_NEW_NORETURN (module_p,
-                    Test_I_M3U_Module_Parser_Module (const_cast<ISTREAM_T*> (inherited::getP ()),
-                                                     ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ())));
-  if (!module_p)
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("%s: failed to allocate memory(%u): %m, aborting\n"),
-                inherited::mod_->name (),
-                sizeof (Test_I_M3U_Module_Parser_Module)));
-  else
-  {
-    task_p = module_p->writer ();
-    ACE_ASSERT (task_p);
+//   Stream_Module_t* module_p = NULL;
+//   ACE_NEW_NORETURN (module_p,
+//                     Test_I_M3U_Module_Parser_Module (const_cast<ISTREAM_T*> (inherited::getP ()),
+//                                                      ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ())));
+//   if (!module_p)
+//     ACE_DEBUG ((LM_CRITICAL,
+//                 ACE_TEXT ("%s: failed to allocate memory(%u): %m, aborting\n"),
+//                 inherited::mod_->name (),
+//                 sizeof (Test_I_M3U_Module_Parser_Module)));
+//   else
+//   {
+//     task_p = module_p->writer ();
+//     ACE_ASSERT (task_p);
 
-    Test_I_M3U_Module_Parser* eventHandler_impl =
-        dynamic_cast<Test_I_M3U_Module_Parser*> (task_p);
-    if (!eventHandler_impl)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Test_I_M3U_Module_Parser> failed, aborting\n"),
-                  inherited::mod_->name ()));
+//     Test_I_M3U_Module_Parser* eventHandler_impl =
+//         dynamic_cast<Test_I_M3U_Module_Parser*> (task_p);
+//     if (!eventHandler_impl)
+//     {
+//       ACE_DEBUG ((LM_ERROR,
+//                   ACE_TEXT ("%s: dynamic_cast<Test_I_M3U_Module_Parser> failed, aborting\n"),
+//                   inherited::mod_->name ()));
 
-      // clean up
-      delete module_p;
+//       // clean up
+//       delete module_p;
 
-      return NULL;
-    } // end IF
-    eventHandler_impl->initialize (*inherited::STREAM_TASK_BASE_T::configuration_,
-                                   inherited::allocator_);
-  } // end ELSE
+//       return NULL;
+//     } // end IF
+//     eventHandler_impl->initialize (*inherited::STREAM_TASK_BASE_T::configuration_,
+//                                    inherited::allocator_);
+//   } // end ELSE
 
-  return task_p;
-}
+//   return task_p;
+// }
 
 void
 Test_I_M3U_Module_Parser::handleDataMessage (Test_I_Message*& message_inout,
