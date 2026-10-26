@@ -30,12 +30,20 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_WS_PARSER_H_INCLUDED
-# define YY_YY_WS_PARSER_H_INCLUDED
+#ifndef YY_ZZ_WS_PARSER_H_INCLUDED
+# define YY_ZZ_WS_PARSER_H_INCLUDED
 /* Debug traces.  */
 #ifndef ZZDEBUG
-# define ZZDEBUG 1
-#endif
+# if defined YYDEBUG
+#if YYDEBUG
+#   define ZZDEBUG 1
+#  else
+#   define ZZDEBUG 0
+#  endif
+# else /* ! defined YYDEBUG */
+#  define ZZDEBUG 1
+# endif /* ! defined YYDEBUG */
+#endif  /* ! defined ZZDEBUG */
 #if ZZDEBUG
 extern int zzdebug;
 #endif
@@ -69,8 +77,8 @@ typedef union YYSTYPE
 {
   ACE_INT64 ival;
 } YYSTYPE; */
-#undef YYSTYPE
-//union YYSTYPE;
+#undef ZZSTYPE
+//union ZZSTYPE;
 
 typedef void* yyscan_t;
 
@@ -78,59 +86,62 @@ typedef void* yyscan_t;
 //         header manually, as there is no way to add the export symbol to
 //         the declaration
 #define ZZDEBUG 1
-//extern int zzdebug;
+extern int zzdebug;
 #define ZZERROR_VERBOSE 1
 //#define YYLTYPE_IS_DECLARED 1
 
+//#undef YYTOKENTYPE
+
+
 /* Token kinds.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
+#ifndef ZZTOKENTYPE
+# define ZZTOKENTYPE
+  enum zztokentype
   {
-    YYEMPTY = -2,
-    END = 0,                       /* "end"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
+    ZZEMPTY = -2,
+    END_ = 0,                      /* "end"  */
+    ZZerror = 256,                 /* error  */
+    ZZUNDEF = 257,                 /* "invalid token"  */
     FRAME = 258                    /* "frame"  */
   };
-  typedef enum yytokentype yytoken_kind_t;
+  typedef enum zztokentype zztoken_kind_t;
 #endif
 
 /* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
+#if ! defined ZZSTYPE && ! defined ZZSTYPE_IS_DECLARED
+union ZZSTYPE
 {
 
   ACE_INT64 ival;
 
 
 };
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
+typedef union ZZSTYPE ZZSTYPE;
+# define ZZSTYPE_IS_TRIVIAL 1
+# define ZZSTYPE_IS_DECLARED 1
 #endif
 
 /* Location type.  */
-#if ! defined YYLTYPE && ! defined YYLTYPE_IS_DECLARED
-typedef struct YYLTYPE YYLTYPE;
-struct YYLTYPE
+#if ! defined ZZLTYPE && ! defined ZZLTYPE_IS_DECLARED
+typedef struct ZZLTYPE ZZLTYPE;
+struct ZZLTYPE
 {
   int first_line;
   int first_column;
   int last_line;
   int last_column;
 };
-# define YYLTYPE_IS_DECLARED 1
-# define YYLTYPE_IS_TRIVIAL 1
+# define ZZLTYPE_IS_DECLARED 1
+# define ZZLTYPE_IS_TRIVIAL 1
 #endif
 
 
 
-int yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner);
+int zzparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner);
 /* "%code provides" blocks.  */
 
 /*void yysetdebug (int);*/
-void yyerror (YYLTYPE*, WebSocket_IParser*, yyscan_t, const char*);
+void zzerror (ZZLTYPE*, WebSocket_IParser*, yyscan_t, const char*);
 //void yyerror (WebSocket_IParser*, yyscan_t, const char*);
 /*int yyparse (WebSocket_IParser*, yyscan_t);*/
 /*void yyprint (FILE*, enum yytokentype, YYSTYPE);*/
@@ -140,4 +151,4 @@ void yyerror (YYLTYPE*, WebSocket_IParser*, yyscan_t, const char*);
 //#endif // WebSocket_PARSER_H
 
 
-#endif /* !YY_YY_WS_PARSER_H_INCLUDED  */
+#endif /* !YY_ZZ_WS_PARSER_H_INCLUDED  */

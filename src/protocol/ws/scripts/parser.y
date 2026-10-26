@@ -22,7 +22,7 @@
 /*%define api.namespace                {zz}*/
 /* *IMPORTANT NOTE*: do NOT mess with this (it's broken)
 /*%name-prefix                         "ws_"*/
-/*%define api.prefix                   {ws_}*/
+%define api.prefix                   {zz}
 /*%pure-parser*/
 %define api.pure                     true
 /* *TODO*: implement a push parser */
@@ -79,8 +79,8 @@ typedef union YYSTYPE
 {
   ACE_INT64 ival;
 } YYSTYPE; */
-#undef YYSTYPE
-//union YYSTYPE;
+#undef ZZSTYPE
+//union ZZSTYPE;
 
 typedef void* yyscan_t;
 
@@ -158,7 +158,7 @@ using namespace std;
 #include "ws_tools.h"
 
 // *TODO*: this shouldn't be necessary
-#define yylex WebSocket_Scanner_lex
+#define zzlex WebSocket_Scanner_lex
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
@@ -170,11 +170,11 @@ using namespace std;
 %type <ival> frames
 
 %code provides {
-/*void yysetdebug (int);*/
-void yyerror (YYLTYPE*, WebSocket_IParser*, yyscan_t, const char*);
-//void yyerror (WebSocket_IParser*, yyscan_t, const char*);
-/*int yyparse (WebSocket_IParser*, yyscan_t);*/
-/*void yyprint (FILE*, enum yytokentype, YYSTYPE);*/
+/*void zzsetdebug (int);*/
+void zzerror (ZZLTYPE*, WebSocket_IParser*, yyscan_t, const char*);
+//void zzerror (WebSocket_IParser*, yyscan_t, const char*);
+/*int zzparse (WebSocket_IParser*, yyscan_t);*/
+/*void zzprint (FILE*, enum zztokentype, ZZSTYPE);*/
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
@@ -240,20 +240,20 @@ yy::WebSocket_Parser::set (yyscan_t context_in)
 }*/
 
 /*void
-yysetdebug (int debug_in)
+zzsetdebug (int debug_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::yysetdebug"));
+  NETWORK_TRACE (ACE_TEXT ("::zzsetdebug"));
 
-  yydebug = debug_in;
+  zzdebug = debug_in;
 }*/
 
 void
-yyerror (YYLTYPE* location_in,
+zzerror (YYLTYPE* location_in,
          WebSocket_IParser* iparser_in,
          yyscan_t context_in,
          const char* message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::yyerror"));
+  NETWORK_TRACE (ACE_TEXT ("::zzerror"));
 
   ACE_UNUSED_ARG (context_in);
 
@@ -271,11 +271,11 @@ yyerror (YYLTYPE* location_in,
 }
 
 /*void
-yyprint (FILE* file_in,
-         yytokentype type_in,
-         YYSTYPE value_in)
+zzprint (FILE* file_in,
+         zztokentype type_in,
+         ZZSTYPE value_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::yyprint"));
+  NETWORK_TRACE (ACE_TEXT ("::zzprint"));
 
   int result = -1;
 

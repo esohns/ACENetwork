@@ -54,8 +54,14 @@
 #include "stdafx.h"
 
 
-
-
+/* Substitute the type names.  */
+#define YYSTYPE ZZSTYPE
+#define YYLTYPE ZZLTYPE
+/* Substitute the variable and function names.  */
+#define yyparse zzparse
+#define yylex   zzlex
+#define yyerror zzerror
+#define yydebug zzdebug
 
 
 # ifndef YY_CAST
@@ -79,7 +85,6 @@
 #  endif
 # endif
 
-#undef YYTOKENTYPE
 #include "ws_parser.h"
 
 /* Symbol kind.  */
@@ -102,7 +107,7 @@ typedef enum yysymbol_kind_t yysymbol_kind_t;
    value is undefined, this behavior is technically correct.  */
 static YYSTYPE yyval_default;
 static YYLTYPE yyloc_default
-# if defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+# if defined ZZLTYPE_IS_TRIVIAL && ZZLTYPE_IS_TRIVIAL
   = { 1, 1, 1, 1 }
 # endif
 ;
@@ -111,7 +116,7 @@ static YYLTYPE yyloc_default
 /* Unqualified %code blocks.  */
 
 // *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
-#if defined (ZZDEBUG)
+#if defined (YYDEBUG)
 #include <iostream>
 #endif
 #include <regex>
@@ -143,7 +148,7 @@ using namespace std;
 #include "ws_tools.h"
 
 // *TODO*: this shouldn't be necessary
-#define yylex WebSocket_Scanner_lex
+#define zzlex WebSocket_Scanner_lex
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 
@@ -460,7 +465,7 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   195,   195,   210
+       0,   195,   195,   218
 };
 #endif
 
@@ -599,7 +604,10 @@ static const short yyconfl[] =
 #define yylval (yystackp->yyval)
 #undef yylloc
 #define yylloc (yystackp->yyloc)
-
+#define zznerrs yynerrs
+#define zzchar yychar
+#define zzlval yylval
+#define zzlloc yylloc
 
 enum { YYENOMEM = -2 };
 
@@ -699,7 +707,7 @@ struct yyGLRStateSet
   /** During nondeterministic operation, yylookaheadNeeds tracks which
    *  stacks have actually needed the current lookahead.  During deterministic
    *  operation, yylookaheadNeeds[0] is not maintained since it would merely
-   *  duplicate yychar != YYEMPTY.  */
+   *  duplicate yychar != ZZEMPTY.  */
   yybool* yylookaheadNeeds;
   YYPTRDIFF_T yysize;
   YYPTRDIFF_T yycapacity;
@@ -820,7 +828,7 @@ yylhsNonterm (yyRuleNum yyrule)
 
 # define YY_DPRINTF_(Args)                      \
   do {                                          \
-    if (zzdebug)                                \
+    if (yydebug)                                \
       YYFPRINTF Args;                           \
     YY_IGNORE_USELESS_CAST_END                  \
   } while (0)
@@ -838,7 +846,7 @@ yylhsNonterm (yyRuleNum yyrule)
       undocumented and private YY_LOCATION_PRINT macros.  */
 #   define YYLOCATION_PRINT(File, Loc)  YY_LOCATION_PRINT(File, *(Loc))
 
-#  elif defined YYLTYPE_IS_TRIVIAL && YYLTYPE_IS_TRIVIAL
+#  elif defined ZZLTYPE_IS_TRIVIAL && ZZLTYPE_IS_TRIVIAL
 
 /* Print *YYLOCP on YYO.  Private, do not rely on its existence. */
 
@@ -942,7 +950,7 @@ yy_symbol_print (FILE *yyo,
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                  \
   do {                                                                  \
-    if (zzdebug)                                                        \
+    if (yydebug)                                                        \
       {                                                                 \
         YY_FPRINTF ((stderr, "%s ", Title));                            \
         yy_symbol_print (stderr, Kind, Value, Location, iparser_p, yyscanner);        \
@@ -956,13 +964,13 @@ yy_reduce_print (yybool yynormal, yyGLRStackItem* yyvsp, YYPTRDIFF_T yyk,
 
 # define YY_REDUCE_PRINT(Args)          \
   do {                                  \
-    if (zzdebug)                        \
+    if (yydebug)                        \
       yy_reduce_print Args;             \
   } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
-int zzdebug;
+int yydebug;
 
 static void yypstack (yyGLRStack* yystackp, YYPTRDIFF_T yyk)
   YY_ATTRIBUTE_UNUSED;
@@ -1087,14 +1095,14 @@ yygetToken (int *yycharp, yyGLRStack* yystackp, WebSocket_IParser* iparser_p, yy
   yysymbol_kind_t yytoken;
   YY_USE (iparser_p);
   YY_USE (yyscanner);
-  if (*yycharp == YYEMPTY)
+  if (*yycharp == ZZEMPTY)
     {
       YY_DPRINTF ((stderr, "Reading a token\n"));
       *yycharp = yylex (&yylval, &yylloc, iparser_p, yyscanner);
     }
-  if (*yycharp <= END)
+  if (*yycharp <= END_)
     {
-      *yycharp = END;
+      *yycharp = END_;
       yytoken = YYSYMBOL_YYEOF;
       YY_DPRINTF ((stderr, "Now at end of input.\n"));
     }
@@ -1153,7 +1161,7 @@ yyuserAction (yyRuleNum yyrule, int yyrhslen, yyGLRStackItem* yyvsp,
 # undef YYRECOVERING
 # define YYRECOVERING() (yystackp->yyerrState != 0)
 # undef yyclearin
-# define yyclearin (yychar = YYEMPTY)
+# define yyclearin (yychar = ZZEMPTY)
 # undef YYFILL
 # define YYFILL(N) yyfill (yyvsp, &yylow, (N), yynormal)
 # undef YYBACKUP
@@ -1290,7 +1298,7 @@ yydestroyGLRState (char const *yymsg, yyGLRState *yys, WebSocket_IParser* iparse
   else
     {
 #if ZZDEBUG
-      if (zzdebug)
+      if (yydebug)
         {
           if (yys->yysemantics.yyfirstVal)
             YY_FPRINTF ((stderr, "%s unresolved", yymsg));
@@ -1433,7 +1441,7 @@ yyaddDeferredAction (yyGLRStack* yystackp, YYPTRDIFF_T yyk, yyGLRState* yystate,
       yynewOption->yyloc = yylloc;
     }
   else
-    yynewOption->yyrawchar = YYEMPTY;
+    yynewOption->yyrawchar = ZZEMPTY;
   yynewOption->yynext = yystate->yysemantics.yyfirstVal;
   yystate->yysemantics.yyfirstVal = yynewOption;
 
@@ -2438,7 +2446,7 @@ static int
 yy_syntax_error_arguments (const yyGLRStack* yystackp,
                            yysymbol_kind_t yyarg[], int yyargn)
 {
-  yysymbol_kind_t yytoken = yychar == YYEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
+  yysymbol_kind_t yytoken = yychar == ZZEMPTY ? YYSYMBOL_YYEMPTY : YYTRANSLATE (yychar);
   /* Actual size of YYARG. */
   int yycount = 0;
   /* There are many possibilities here to consider:
@@ -2582,9 +2590,9 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, WebSocket_IParser* iparser_p, yyscan
       {
         yysymbol_kind_t yytoken;
         int yyj;
-        if (yychar == END)
+        if (yychar == END_)
           yyFail (yystackp, &yylloc, iparser_p, yyscanner, YY_NULLPTR);
-        if (yychar != YYEMPTY)
+        if (yychar != ZZEMPTY)
           {
             /* We throw away the lookahead, but the error range
                of the shifted error token must take it into account.  */
@@ -2596,7 +2604,7 @@ yyrecoverSyntaxError (yyGLRStack* yystackp, WebSocket_IParser* iparser_p, yyscan
             yytoken = YYTRANSLATE (yychar);
             yydestruct ("Error: discarding",
                         yytoken, &yylval, &yylloc, iparser_p, yyscanner);
-            yychar = YYEMPTY;
+            yychar = ZZEMPTY;
           }
         yytoken = yygetToken (&yychar, yystackp, iparser_p, yyscanner);
         yyj = yypact[yystackp->yytops.yystates[0]->yylrState];
@@ -2689,7 +2697,7 @@ yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner)
 
   YY_DPRINTF ((stderr, "Starting parse\n"));
 
-  yychar = YYEMPTY;
+  yychar = ZZEMPTY;
   yylval = yyval_default;
   yylloc = yyloc_default;
 
@@ -2752,7 +2760,7 @@ yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner)
               if (yyisShiftAction (yyaction))
                 {
                   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
-                  yychar = YYEMPTY;
+                  yychar = ZZEMPTY;
                   yyposn += 1;
                   yyglrShift (&yystack, 0, yyaction, yyposn, &yylval, &yylloc);
                   if (0 < yystack.yyerrState)
@@ -2763,7 +2771,7 @@ yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner)
                   yystack.yyerror_range[1].yystate.yyloc = yylloc;
                   /* Issue an error message unless the scanner already
                      did. */
-                  if (yychar != YYerror)
+                  if (yychar != ZZerror)
                     yyreportSyntaxError (&yystack, iparser_p, yyscanner);
                   goto yyuser_error;
                 }
@@ -2779,7 +2787,7 @@ yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner)
           YYPTRDIFF_T yys;
 
           for (yys = 0; yys < yystack.yytops.yysize; yys += 1)
-            yystackp->yytops.yylookaheadNeeds[yys] = yychar != YYEMPTY;
+            yystackp->yytops.yylookaheadNeeds[yys] = yychar != ZZEMPTY;
 
           /* yyprocessOneStack returns one of three things:
 
@@ -2817,11 +2825,11 @@ yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner)
 
           /* If any yyglrShift call fails, it will fail after shifting.  Thus,
              a copy of yylval will already be on stack 0 in the event of a
-             failure in the following loop.  Thus, yychar is set to YYEMPTY
+             failure in the following loop.  Thus, yychar is set to ZZEMPTY
              before the loop to make sure the user destructor for yylval isn't
              called twice.  */
           yytoken_to_shift = YYTRANSLATE (yychar);
-          yychar = YYEMPTY;
+          yychar = ZZEMPTY;
           yyposn += 1;
           for (yys = 0; yys < yystack.yytops.yysize; yys += 1)
             {
@@ -2871,7 +2879,7 @@ yyparse (WebSocket_IParser* iparser_p, yyscan_t yyscanner)
   goto yyreturnlab;
 
  yyreturnlab:
-  if (yychar != YYEMPTY)
+  if (yychar != ZZEMPTY)
     yydestruct ("Cleanup: discarding lookahead",
                 YYTRANSLATE (yychar), &yylval, &yylloc, iparser_p, yyscanner);
 
@@ -2995,7 +3003,15 @@ yypdumpstack (yyGLRStack* yystackp)
 #undef yynerrs
 #undef yylloc
 
-
+/* Substitute the variable and function names.  */
+#define yyparse zzparse
+#define yylex   zzlex
+#define yyerror zzerror
+#define yylval  zzlval
+#define yychar  zzchar
+#define yydebug zzdebug
+#define yynerrs zznerrs
+#define yylloc  zzlloc
 
 
 
@@ -3026,7 +3042,7 @@ yysetdebug (int debug_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::yysetdebug"));
 
-  zzdebug = debug_in;
+  yydebug = debug_in;
 }*/
 
 void

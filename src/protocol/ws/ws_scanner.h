@@ -16,9 +16,9 @@ WebSocket_Scanner_lex (yy::WebSocket_Parser::semantic_type* yylval, \
                        WebSocket_IParser* iparser_p,                \
                        yyscan_t yyscanner)*/
 #define YY_DECL                                      \
-enum yytokentype                                     \
-WebSocket_Scanner_lex (YYSTYPE* yylval,              \
-                       YYLTYPE* yylloc,              \
+enum zztokentype                                     \
+WebSocket_Scanner_lex (ZZSTYPE* yylval,              \
+                       ZZLTYPE* yylloc,              \
                        WebSocket_IParser* iparser_p, \
                        yyscan_t yyscanner)
 YY_DECL;

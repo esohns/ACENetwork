@@ -12,9 +12,9 @@ WebSocket_Scanner_lex (yy::WebSocket_Parser::semantic_type* yylval, \
                        WebSocket_IParser* iparser_p,                \
                        yyscan_t yyscanner)*/
 #define YY_DECL                                      \
-enum yytokentype                                     \
-WebSocket_Scanner_lex (YYSTYPE* yylval,              \
-                       YYLTYPE* yylloc,              \
+enum zztokentype                                     \
+WebSocket_Scanner_lex (ZZSTYPE* yylval,              \
+                       ZZLTYPE* yylloc,              \
                        WebSocket_IParser* iparser_p, \
                        yyscan_t yyscanner)
 YY_DECL;
@@ -1616,7 +1616,7 @@ static const flex_int32_t yy_rule_linenum[8] =
            Unfortunately, yyterminate by default returns 0, which is not of
            token_type. This %define solves that issue. */
 //#define yyterminate() return yy::WebSocket_Parser::token::END
-#define yyterminate() return yytokentype::END
+#define yyterminate() return zztokentype::END_
 
 /* *NOTE*: YY_DECL is defined elsewhere (needed so the scanner can support
            extra arguments) */
@@ -2180,7 +2180,7 @@ YY_RULE_SETUP
                                {
                                  yylval->ival = 0;
 //                               return yy::WebSocket_Parser::token::FRAME;
-                                 return yytokentype::FRAME;
+                                 return zztokentype::FRAME;
                                } // end IF
                              } // end IF
                              else if (record_r.payloadSize == 126)
@@ -2237,7 +2237,7 @@ YY_RULE_SETUP
                              {
                                yylval->ival = 1;
                                BEGIN (INITIAL);
-                               return yytokentype::FRAME;
+                               return zztokentype::FRAME;
                              }
                              --missing_bytes;
                              iparser_p->dataBytesSkipped (1);
@@ -2272,7 +2272,7 @@ YY_RULE_SETUP
                                BEGIN (INITIAL);
                                yylval->ival = iparser_p->dataSize ();
 //                               return yy::WebSocket_Parser::token::FRAME;
-                               return yytokentype::FRAME;
+                               return zztokentype::FRAME;
                              } // end IF
                            }
 	YY_BREAK
@@ -2293,7 +2293,6 @@ YY_RULE_SETUP
                              { // *IMPORTANT NOTE*: put the data back
                                *yy_cp = yyg->yy_hold_char;
                                yyterminate (); // not enough data, cannot proceed
-//                               return yy::WebSocket_Parser::token::END_OF_FRAGMENT;
                              } // end IF
 
                              // wait for more data fragment(s)

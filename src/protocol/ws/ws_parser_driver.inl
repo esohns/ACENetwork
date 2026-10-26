@@ -389,7 +389,7 @@ WebSocket_ParserDriver_T<ACE_SYNCH_USE,
   // parse data fragment
   try {
     //result = parser_.parse ();
-    result = yyparse (this, scannerState_);
+    result = zzparse (this, scannerState_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in yy::WebSocket_Parser::parse(), continuing\n")));

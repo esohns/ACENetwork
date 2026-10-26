@@ -31,9 +31,6 @@
 #include "stream_session_manager.h"
 #include "stream_streammodule_base.h"
 
-//#include "stream_module_xmlparser.h"
-//#include "stream_module_xpathquery.h"
-
 #include "stream_misc_messagehandler.h"
 
 #include "stream_stat_statistic_report.h"
@@ -232,20 +229,6 @@ DATASTREAM_MODULE_DUPLEX (struct WebSocket_Client_SessionData,                 /
                           WebSocket_StatisticReport_ReaderTask_t,              // reader type
                           WebSocket_StatisticReport_WriterTask_t,              // writer type
                           WebSocket_StatisticReport);                          // name
-
-//DATASTREAM_MODULE_INPUT_ONLY (struct WebSocket_Client_SessionData,                  // session data type
-//                              enum Stream_SessionMessageType,                  // session event type
-//                              struct WebSocket_Client_ModuleHandlerConfiguration,   // module handler configuration type
-//                              libacestream_default_xml_parser_module_name_string,
-//                              Stream_INotify_t,                                // stream notification interface type
-//                              WebSocket_Client_XMLParser);                          // writer type
-//
-//DATASTREAM_MODULE_INPUT_ONLY (struct WebSocket_Client_SessionData,                  // session data type
-//                              enum Stream_SessionMessageType,                  // session event type
-//                              struct WebSocket_Client_ModuleHandlerConfiguration,   // module handler configuration type
-//                              libacestream_default_xpath_query_module_name_string,
-//                              Stream_INotify_t,                                // stream notification interface type
-//                              WebSocket_Client_XPathQuery);                         // writer type
 
 DATASTREAM_MODULE_INPUT_ONLY (struct WebSocket_Client_SessionData,                         // session data type
                               enum Stream_SessionMessageType,                              // session event type

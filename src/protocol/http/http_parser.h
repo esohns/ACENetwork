@@ -91,9 +91,6 @@ extern int yydebug;
 #define YYERROR_VERBOSE 1
 //#define YYLTYPE_IS_DECLARED 1
 
-#undef YYTOKENTYPE
-
-
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
