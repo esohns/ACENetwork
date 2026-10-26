@@ -27,6 +27,8 @@
 #include "stream_common.h"
 #include "stream_session_message_base.h"
 
+#include "stream_dec_common.h"
+
 // forward declaration(s)
 class ACE_Allocator;
 class Test_U_Message;

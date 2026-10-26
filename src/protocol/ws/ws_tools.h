@@ -26,8 +26,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-#include "stream_dec_common.h"
-
 #include "ws_codes.h"
 #include "ws_common.h"
 

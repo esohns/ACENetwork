@@ -79,6 +79,7 @@
 #  endif
 # endif
 
+#undef YYTOKENTYPE
 #include "ws_parser.h"
 
 /* Symbol kind.  */

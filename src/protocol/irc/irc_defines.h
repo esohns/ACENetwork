@@ -89,8 +89,8 @@
 #define IRC_DEFAULT_LEAVE_REASON                "quitting..."
 #define IRC_DEFAULT_KICK_REASON                 "come back later..."
 
-// *NOTE*: these conform to RFC1459, but servers may allow use different sizes
-// e.g. NICKLEN option, ...
+// *NOTE*: these conform to RFC1459, but servers may allow use of a different
+//         size, e.g. NICKLEN option, ...
 #define IRC_PRT_MAXIMUM_NICKNAME_LENGTH         9
 #define IRC_PRT_MAXIMUM_CHANNEL_LENGTH          200
 

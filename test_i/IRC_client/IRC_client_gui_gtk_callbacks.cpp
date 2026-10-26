@@ -207,9 +207,9 @@ connection_setup_function (void* arg_in)
   IRC_Client_Connection_Manager_t* connection_manager_p =
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  IRC_Client_IConnector_t* connector_p = &data_p->CBData->connector;
-  if (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
-    connector_p = &data_p->CBData->asynchConnector;
+  IRC_Client_IConnector_t* connector_p =
+    (data_p->configuration->dispatchConfiguration.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? static_cast<IRC_Client_IConnector_t*> (&data_p->CBData->asynchConnector)
+                                                                                              : static_cast<IRC_Client_IConnector_t*> (&data_p->CBData->connector);
 
   // step2b: set up configuration passed to processing stream
   IRC_Client_ConnectionConfiguration* configuration_p = NULL;
@@ -228,6 +228,7 @@ connection_setup_function (void* arg_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
+    delete connection_p;
     goto remove_page;
   } // end IF
 
@@ -259,6 +260,7 @@ connection_setup_function (void* arg_in)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"): \"%m\", returning\n"),
                     ACE_TEXT (converter.str ().c_str ())));
+        delete connection_p;
         goto remove_page;
       } // end IF
 #if GTK_CHECK_VERSION (3,6,0)
@@ -282,6 +284,7 @@ connection_setup_function (void* arg_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+        delete connection_p;
         goto remove_page;
       } // end IF
 
@@ -289,9 +292,11 @@ connection_setup_function (void* arg_in)
       handle =
         connector_p->connect (configuration_p->socketConfiguration.address);
       if (handle == ACE_INVALID_HANDLE)
-        ACE_DEBUG ((LM_DEBUG,
+      {
+        ACE_DEBUG ((LM_WARNING,
                     ACE_TEXT ("failed to connect(%s): \"%m\", continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->socketConfiguration.address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->socketConfiguration.address, false, false).c_str ())));
+      } // end IF
       else
       {
         done = true;
@@ -329,6 +334,7 @@ connection_failed:
     gdk_threads_leave ();
 #endif // GTK_CHECK_VERSION (3,6,0)
     g_free (string_p); string_p = NULL;
+    delete connection_p;
 
     goto remove_page;
   } // end IF
@@ -370,6 +376,7 @@ connection_failed:
                 connection_2));
     connection_2->abort ();
     connection_2->decrease (); connection_2 = NULL;
+    delete connection_p;
 
     goto remove_page;
   } // end IF
@@ -386,6 +393,7 @@ connection_failed:
                 const_cast<Stream_Module_t*> (module_p)->writer ()));
     connection_2->abort ();
     connection_2->decrease (); connection_2 = NULL;
+    delete connection_p;
 
     goto remove_page;
   } // end IF
@@ -399,7 +407,6 @@ connection_failed:
 #else
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
 #endif // ACE_WIN32 || ACE_WIN64
-    // *TODO*: who deletes the module ? (the stream won't do it !)
     data_p->CBData->connections.insert (std::make_pair (connection_p->getR ().timeStamp,
                                                         connection_p));
   } // end lock scope
@@ -427,6 +434,7 @@ connection_failed:
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
 #endif // ACE_WIN32 || ACE_WIN64
     data_p->CBData->connections.erase (connection_p->getR ().timeStamp);
+    delete connection_p;
 
     goto remove_page;
   } // end IF
@@ -446,6 +454,7 @@ connection_failed:
 remove_page:
   ACE_ASSERT (connection_p);
   connection_p->close ();
+  delete connection_p;
 
 done:
   { // synch access
@@ -483,7 +492,7 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
 gboolean
 idle_list_channels_cb (gpointer userData_in)
 {
-  //NETWORK_TRACE (ACE_TEXT ("::idle_list_channels_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::idle_list_channels_cb"));
 
   // sanity check(s)
   struct IRC_Client_UI_ConnectionCBData* data_p =
@@ -513,8 +522,7 @@ idle_list_channels_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   ACE_ASSERT ((*iterator_2).second);
-  const IRC_SessionState& session_state_r =
-    (*iterator_2).second->state ();
+  const IRC_SessionState& session_state_r = (*iterator_2).second->state ();
  
   GtkTreeIter tree_iter;
   channel_to_number_of_users_const_iterator_t num_users_iterator;
@@ -1259,7 +1267,7 @@ idle_remove_connection_cb (gpointer userData_in)
     ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
 
     gtk_notebook_prev_page (notebook_p);
-  } // end IF
+  } // end IF | lock scope
   gtk_notebook_remove_page (notebook_p,
                             page_number);
 
@@ -2340,7 +2348,7 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   // *NOTE*: the server should close the connection after this...
   //         --> the connection notebook page cleans itself (see end ())
   IRC_Client_GUI_ConnectionsConstIterator_t iterator =
-      data_p->connections->find (data_p->timeStamp);
+    data_p->connections->find (data_p->timeStamp);
   // sanity check(s)
   if (iterator == data_p->connections->end ())
   {
@@ -2351,7 +2359,9 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   } // end IF
   ACE_ASSERT ((*iterator).second);
   (*iterator).second->finalize (false); // don't lock
-  gtk_widget_set_sensitive (widget_in, FALSE);
+
+  gtk_widget_set_sensitive (widget_in,
+                            FALSE);
 }
 
 gboolean
@@ -2530,7 +2540,7 @@ usersbox_changed_cb (GtkWidget* widget_in,
 
     return;
   } // end IF
-  g_free (string_p);
+  g_free (string_p); string_p = NULL;
   // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH characters ?
   // *TODO*: support the NICKLEN=xxx "feature" of the server...
   if (username.size () > IRC_PRT_MAXIMUM_NICKNAME_LENGTH)
