@@ -267,7 +267,7 @@ class IRC_Client_GUI_Connection_T<COMMON_UI_FRAMEWORK_GTK>
     {
       bool operator() (const unsigned char& c1, const unsigned char& c2) const
       {
-        return tolower (c1) < tolower (c2);
+        return std::tolower (c1) < std::tolower (c2);
       }
     };
 

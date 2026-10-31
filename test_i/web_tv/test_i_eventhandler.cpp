@@ -929,7 +929,7 @@ Test_I_EventHandler_3::notify (Stream_SessionId_t sessionId_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler_3::notify"));
 
-  int result = -1;
+  // int result = -1;
 
   // sanity check(s)
   ACE_ASSERT (CBData_);

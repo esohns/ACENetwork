@@ -30,7 +30,7 @@ if (GTK_SUPPORT)
 endif (GTK_SUPPORT)
 
 if (UNIX)
- add_link_options ("LINKER:--as-needed")
+# add_link_options ("LINKER:--as-needed")
 endif (UNIX)
 
 add_library (${PROJECT_NAME}_Test_U

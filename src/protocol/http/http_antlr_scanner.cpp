@@ -14,7 +14,7 @@
 #include "http_antlr_iparser.h"
 
 
-// Generated from /mnt/d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_scanner.g4 by ANTLR 4.13.2
+// Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_scanner.g4 by ANTLR 4.13.2
 
 
 #include "http_antlr_scanner.h"
@@ -875,14 +875,13 @@ void http_antlr_scanner::CRLF_HEADAction(antlr4::RuleContext *context, size_t ac
 
 void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionIndex) {
   switch (actionIndex) {
-    case 11:
+    case 11: 
                                        if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
-                                       {
-                                         std::ostringstream converter;
-                                         converter << content_length;
-                                         setText (converter.str ());
+                                       { ACE_ASSERT (content_length == 0);
+                                         setText (ACE_TEXT_ALWAYS_CHAR ("0"));
                                          setType (BODY);
                                          setMode (DEFAULT_MODE);
+                                         // hitEOF = true;
                                          break;
                                        } // end IF
                                        ++scanned_content_length;
@@ -896,6 +895,7 @@ void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionI
                                          setText (converter.str ());
                                          setType (BODY);
                                          setMode (DEFAULT_MODE);
+                                         // hitEOF = true;
                                          break;
                                        } // end IF
                                        skip ();

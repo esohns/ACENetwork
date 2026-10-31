@@ -355,7 +355,7 @@ class HTTP_ANTLRParserDriver_T
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void waitBuffer ();
 
-  inline virtual void finished () { finished_ = true; }
+  inline virtual void finished () { lexer_.hitEOF = true; finished_ = true; }
   virtual bool hasFinished ();
   inline virtual bool headerOnly () { ACE_ASSERT (configuration_); return configuration_->headerOnly; } // returns: parse HTTP header only ?
   //inline virtual bool isMultiBody () { ACE_ASSERT (configuration_); return configuration_->multiBody; } // returns: pass body pieces downstream directly ?

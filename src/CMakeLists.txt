@@ -37,7 +37,7 @@ if (NOT EXISTS ${ACEStream_DIR})
 endif ()
 
 if (UNIX)
- add_link_options ("LINKER:--as-needed")
+# add_link_options ("LINKER:--as-needed")
 endif (UNIX)
 
 # ........................................

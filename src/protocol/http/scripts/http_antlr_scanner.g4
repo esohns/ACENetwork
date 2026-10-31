@@ -371,15 +371,13 @@ VALUE_HEAD                     : FIELD_VALUE {
 mode HEAD_END;
 CRLF_HEAD                      : CRLF {
                                    offset += 2;
-                                 }-> type(CRLF), popMode;
+                                 } -> type(CRLF), popMode;
 
 mode REGULAR_BODY;
 BODY                           : OCTET {
                                    if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
-                                   {
-                                     std::ostringstream converter;
-                                     converter << content_length;
-                                     setText (converter.str ());
+                                   { ACE_ASSERT (content_length == 0);
+                                     setText (ACE_TEXT_ALWAYS_CHAR ("0"));
                                      setType (BODY);
                                      setMode (DEFAULT_MODE);
                                      break;

@@ -14,7 +14,7 @@
 #include "http_antlr_scanner.h"
 
 
-// Generated from /mnt/d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_parser.g4 by ANTLR 4.13.2
+// Generated from /mnt/win_d/projects/ACENetwork/src/protocol/http/scripts/http_antlr_parser.g4 by ANTLR 4.13.2
 
 
 #include "http_antlr_parserListener.h"
@@ -802,11 +802,11 @@ http_antlr_parser::BodyContext* http_antlr_parser::body() {
         setState(62);
         antlrcpp::downCast<BodyContext *>(_localctx)->bodyToken = match(http_antlr_parser::BODY);
 
-                            {
-                              std::istringstream converter;
-                              converter.str (antlrcpp::downCast<BodyContext *>(_localctx)->bodyToken->getText ());
+        //                    {
+                              //std::istringstream converter;
+                              //converter.str (antlrcpp::downCast<BodyContext *>(_localctx)->bodyToken->getText ());
                               //converter >> content_length_;
-                            }
+        //                    }
                             
         break;
       }
@@ -816,13 +816,13 @@ http_antlr_parser::BodyContext* http_antlr_parser::body() {
         setState(64);
         antlrcpp::downCast<BodyContext *>(_localctx)->chunkToken = match(http_antlr_parser::CHUNK);
 
-                            {
-                              std::istringstream converter;
-                              converter.str (antlrcpp::downCast<BodyContext *>(_localctx)->chunkToken->getText ());
-                              ACE_UINT32 chunk_size_i;
-                              converter >> chunk_size_i;
+        //                    {
+                              //std::istringstream converter;
+                              //converter.str (antlrcpp::downCast<BodyContext *>(_localctx)->chunkToken->getText ());
+                              //ACE_UINT32 chunk_size_i;
+                              //converter >> chunk_size_i;
                               //content_length_ += chunk_size_i;
-                            }
+        //                    }
                             
         setState(66);
         chunked_body();
@@ -988,14 +988,14 @@ http_antlr_parser::ChunksContext* http_antlr_parser::chunks(int precedence) {
         setState(76);
         antlrcpp::downCast<ChunksContext *>(_localctx)->chunkToken = match(http_antlr_parser::CHUNK);
 
-                                      {
-                                        std::istringstream converter;
-                                        converter.str (antlrcpp::downCast<ChunksContext *>(_localctx)->chunkToken->getText ());
-                                        ACE_UINT32 chunk_size_i;
-                                        converter >> chunk_size_i;
-                                        //content_length_ += chunk_size_i;
-                                      }
-                                       
+                                      // {
+                                      //   std::istringstream converter;
+                                      //   converter.str (antlrcpp::downCast<ChunksContext *>(_localctx)->chunkToken->getText ());
+                                      //   ACE_UINT32 chunk_size_i;
+                                      //   converter >> chunk_size_i;
+                                      //   //content_length_ += chunk_size_i;
+                                      // }
+
       }
       setState(82);
       _errHandler->sync(this);

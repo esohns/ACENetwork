@@ -41,8 +41,6 @@ if (ANTLR_SUPPORT)
                              $<BUILD_INTERFACE:${ANTLR_INCLUDE_DIRS}>)
 endif (ANTLR_SUPPORT)
 if (UNIX)
-# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
-
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/${BUILD_PATH_SUFFIX}>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
@@ -172,8 +170,8 @@ set (script_files
      scripts/scanner.l
      scripts/reflex_scanner.l
      scripts/parser.y
-     scripts/antlr_http_scanner.g4
-     scripts/antlr_http_parser.g4)
+     scripts/http_antlr_scanner.g4
+     scripts/http_antlr_parser.g4)
 set (table_files)
 #     etc/http_scanner.tab)
 
@@ -181,42 +179,30 @@ unset (absolute_source_files)
 foreach (source_file ${source_files})
  get_filename_component (abs_source_file ${source_file} ABSOLUTE)
  list (APPEND absolute_source_files
-   ${abs_source_file})
+       ${abs_source_file})
  #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
 endforeach ()
 unset (absolute_script_files)
 foreach (script_file ${script_files})
  get_filename_component (abs_script_file ${script_file} ABSOLUTE)
  list (APPEND absolute_script_files
-   ${absolute_script_file})
+       ${abs_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_HTTP
 #  PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 PRIVATE ${absolute_source_files}
-#                INTERFACE ${absolute_script_files})
-                scripts/scanner.l
-                scripts/parser.y)
+                PRIVATE ${absolute_script_files})
 target_precompile_headers (${PROJECT_NAME}_Protocol_HTTP
                            PUBLIC stdafx.h)
-
-#set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
-#set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DHTTP_BUILD_DLL)
 
 if (WIN32)
 ## *NOTE*: generate .def file and export all symbols on Windows
 # set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
- source_group (scripts FILES ${PROJECT_NAME}_Protocol_HTTP_SCRIPTS)
+ source_group (scripts FILES ${absolute_script_files})
 # source_group (lex_tables FILES ${PROJECT_NAME}_Protocol_HTTP_TABLES)
 # source_group (exports FILES etc/exports.def)
-endif ()
-
-# *NOTE*: this is needed to export yydebug, so it can be imported from template
-#         instances. Note that there is no way to #define YYDEBUG in the .y
-#         parser definition file, as the generated '%code requires' sections are
-#         inserted after the first '#define YYDEBUG' statements.
-# *TODO*: this holds for GNU Bison > 2.4.2
-#add_definitions (-DYYDEBUG)
+endif (WIN32)
 
 set_property (TARGET ${PROJECT_NAME}_Protocol_HTTP PROPERTY FOLDER "protocols")
 
@@ -224,8 +210,6 @@ set_property (TARGET ${PROJECT_NAME}_Protocol_HTTP PROPERTY FOLDER "protocols")
 add_dependencies (${PROJECT_NAME}_Protocol_HTTP Common)
 add_dependencies (${PROJECT_NAME}_Protocol_HTTP ACEStream)
 
-#set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES DEFINE_SYMBOL HTTP_BUILD_DLL)
-#set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
 endif (WIN32 AND MSVC)
@@ -241,10 +225,6 @@ if (WIN32)
 endif (WIN32)
 target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC Common)
 target_link_libraries (${PROJECT_NAME}_Protocol_HTTP PUBLIC ACEStream)
-
-# add PCH
-target_precompile_headers (${PROJECT_NAME}_Protocol_HTTP
-                           PUBLIC stdafx.h)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_HTTP

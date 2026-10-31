@@ -131,30 +131,30 @@ header:             FIELD_KEY COLON FIELD_VALUE CRLF {
                       record_.headers[$FIELD_KEY->getText ()] = $FIELD_VALUE->getText ();
                     };
 body:               BODY {
-                    {
-                      std::istringstream converter;
-                      converter.str ($BODY->getText ());
+//                    {
+                      //std::istringstream converter;
+                      //converter.str ($BODY->getText ());
                       //converter >> content_length_;
-                    }
+//                    }
                     }
                     | CHUNK {
-                    {
-                      std::istringstream converter;
-                      converter.str ($CHUNK->getText ());
-                      ACE_UINT32 chunk_size_i;
-                      converter >> chunk_size_i;
+//                    {
+                      //std::istringstream converter;
+                      //converter.str ($CHUNK->getText ());
+                      //ACE_UINT32 chunk_size_i;
+                      //converter >> chunk_size_i;
                       //content_length_ += chunk_size_i;
-                    }
+//                    }
                     } chunked_body
                     |;
 chunked_body:       chunks headers CRLF;
 chunks:             chunks CHUNK {
-                    {
-                      std::istringstream converter;
-                      converter.str ($CHUNK->getText ());
-                      ACE_UINT32 chunk_size_i;
-                      converter >> chunk_size_i;
-                      //content_length_ += chunk_size_i;
-                    }
+                    // {
+                      // std::istringstream converter;
+                      // converter.str ($CHUNK->getText ());
+                      // ACE_UINT32 chunk_size_i;
+                      // converter >> chunk_size_i;
+                      // //content_length_ += chunk_size_i;
+                    // }
                     }
                     |;
