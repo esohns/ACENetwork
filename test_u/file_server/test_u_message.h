@@ -27,8 +27,10 @@
 
 #include "stream_common.h"
 #include "stream_data_base.h"
-#include "stream_message_base.h"
+#include "stream_data_message_base.h"
 #include "stream_messageallocatorheap_base.h"
+
+#include "stream_dec_mpeg_ts_common.h"
 
 #include "stream_lib_imediatype.h"
 
@@ -40,15 +42,28 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_U_SessionMessage;
 
+struct Test_U_FileServer_MessageData
+{
+  Test_U_FileServer_MessageData ()
+   : timeStamps ()
+  {}
+
+  inline void operator+= (const Test_U_FileServer_MessageData& rhs_in) { timeStamps = rhs_in.timeStamps; }
+
+  struct Stream_Decoder_MPEG_TS_Timestamps timeStamps;
+};
+
+// ---------------------------------------
+
 class Test_U_Message
- : public Stream_MessageBase_T<Stream_DataBase_T<Stream_CommandType_t>,
-                               enum Stream_MessageType,
-                               int>
+ : public Stream_DataMessageBase_T<Stream_DataBase_T<struct Test_U_FileServer_MessageData>,
+                                   enum Stream_MessageType,
+                                   Stream_CommandType_t>
  , public Stream_IMediaType
 {
-  typedef Stream_MessageBase_T<Stream_DataBase_T<Stream_CommandType_t>,
-                               enum Stream_MessageType,
-                               int> inherited;
+  typedef Stream_DataMessageBase_T<Stream_DataBase_T<struct Test_U_FileServer_MessageData>,
+                                   enum Stream_MessageType,
+                                   Stream_CommandType_t> inherited;
 
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -66,8 +81,8 @@ class Test_U_Message
   inline virtual enum Stream_MediaType_Type getMediaType () const { return mediaType_; }
   inline virtual void setMediaType (enum Stream_MediaType_Type mediaType_in) { mediaType_ = mediaType_in; }
 
-  inline virtual int command () const { return ACE_Message_Block::MB_DATA; }
-  inline static std::string CommandTypeToString (int) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); }
+  inline virtual Stream_CommandType_t command () const { return ACE_Message_Block::MB_DATA; }
+  inline static std::string CommandTypeToString (Stream_CommandType_t) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); }
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet

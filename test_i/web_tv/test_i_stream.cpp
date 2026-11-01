@@ -249,6 +249,13 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
     idistributor_2->initialize (branches_a);
     module_p = NULL;
 
+    ACE_NEW_RETURN (module_p,
+                    Test_I_VideoDelay_Module (this,
+                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
+                    false);
+    layout_in->append (module_p, branch_2, index_2);
+    module_p = NULL;
+
 #if defined (FFMPEG_SUPPORT)
     ACE_NEW_RETURN (module_p,
                     Test_I_VideoResize_Module (this,
@@ -257,13 +264,6 @@ Test_I_AVStream::load (Stream_ILayout* layout_in,
 #else
 #error "no supported video resizer, aborting"
 #endif // FFMPEG_SUPPORT
-    layout_in->append (module_p, branch_2, index_2);
-    module_p = NULL;
-
-    ACE_NEW_RETURN (module_p,
-                    Test_I_VideoDelay_Module (this,
-                                              ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_DELAY_DEFAULT_NAME_STRING)),
-                    false);
     layout_in->append (module_p, branch_2, index_2);
     module_p = NULL;
 

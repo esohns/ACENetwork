@@ -53,10 +53,10 @@ class Test_I_MessageDataContainer
    Test_I_MessageDataContainer ();
   // *IMPORTANT NOTE*: fire-and-forget API
   Test_I_MessageDataContainer (struct Test_I_WebTV_MessageData*&, // data handle
-                               bool = true);                              // delete in dtor ?
+                               bool = true);                      // delete in dtor ?
   inline virtual ~Test_I_MessageDataContainer () {}
 
-  // implement Common_ISetPP_T
+  // implement Common_ISetPR_T
   virtual void setPR (struct HTTP_Record*&);
 
  private:

@@ -56,6 +56,7 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#include "stream_dec_mpeg_ts_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (LIBPIPEWIRE_SUPPORT)
@@ -98,6 +99,7 @@ struct Test_I_WebTV_MessageData
 {
   Test_I_WebTV_MessageData ()
    : HTTP_Record ()
+   , timeStamps ()
    , M3UPlaylist (NULL)
   {}
 
@@ -108,10 +110,11 @@ struct Test_I_WebTV_MessageData
   }
 
   inline void operator= (const struct HTTP_Record& rhs_in) { HTTP_Record::operator= (rhs_in); }
-  inline void operator= (const Test_I_WebTV_MessageData& rhs_in) { HTTP_Record::operator= (rhs_in); }
+  inline void operator= (const Test_I_WebTV_MessageData& rhs_in) { HTTP_Record::operator= (rhs_in); timeStamps = rhs_in.timeStamps; }
   inline void operator+= (const Test_I_WebTV_MessageData& rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
-  struct M3U_Playlist* M3UPlaylist;
+  struct Stream_Decoder_MPEG_TS_Timestamps timeStamps;
+  struct M3U_Playlist*                     M3UPlaylist;
 };
 
 typedef Stream_ISessionDataNotify_T<struct Test_I_WebTV_SessionData,

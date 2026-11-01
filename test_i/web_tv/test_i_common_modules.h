@@ -60,13 +60,14 @@
 #include "stream_lib_tagger.h"
 
 #include "stream_misc_defragment.h"
-#include "stream_misc_delay.h"
+//#include "stream_misc_delay.h"
 #include "stream_misc_distributor.h"
 #include "stream_misc_injector.h"
 #include "stream_misc_messagehandler.h"
 #include "stream_misc_media_splitter.h"
 #include "stream_misc_queue_source.h"
 #include "stream_misc_queue_target.h"
+#include "stream_misc_scheduler.h"
 
 #include "stream_stat_statistic_report.h"
 
@@ -432,18 +433,26 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                // sess
                               Test_I_VideoResize);                                       // writer type
 #endif // FFMPEG_SUPPORT
 
-typedef Stream_Module_Delay_T<ACE_MT_SYNCH,
-                              Common_TimePolicy_t,
-                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                              Stream_ControlMessage_t,
-                              Test_I_Message,
-                              Test_I_SessionMessage_3,
-                              struct Stream_MediaFramework_FFMPEG_MediaType,
-                              struct Stream_UserData> Test_I_VideoDelay;
+//typedef Stream_Module_Delay_T<ACE_MT_SYNCH,
+//                              Common_TimePolicy_t,
+//                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+//                              Stream_ControlMessage_t,
+//                              Test_I_Message,
+//                              Test_I_SessionMessage_3,
+//                              struct Stream_MediaFramework_FFMPEG_MediaType,
+//                              struct Stream_UserData> Test_I_VideoDelay;
+typedef Stream_Module_Scheduler_T<ACE_MT_SYNCH,
+                                  Common_TimePolicy_t,
+                                  struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                                  Stream_ControlMessage_t,
+                                  Test_I_Message,
+                                  Test_I_SessionMessage_3,
+                                  struct Stream_MediaFramework_FFMPEG_MediaType,
+                                  struct Stream_UserData> Test_I_VideoDelay;
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                         // session data type
                               enum Stream_SessionMessageType,                     // session event type
                               struct Test_I_WebTV_ModuleHandlerConfiguration_3,   // module handler configuration type
-                              libacestream_default_misc_delay_module_name_string,
+                              libacestream_default_misc_scheduler_module_name_string,
                               Stream_INotify_t,                                   // stream notification interface type
                               Test_I_VideoDelay);                                 // writer type
 

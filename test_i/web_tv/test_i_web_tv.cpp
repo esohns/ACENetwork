@@ -1070,8 +1070,8 @@ do_work (const std::string& configurationFile_in,
   //delay_configuration.catchUp = true; // *TODO*: why does this introduce stuttering ?
   delay_configuration.interval = ACE_Time_Value (1, 0); // frames per second
   delay_configuration.isMultimediaTask = true;
-    //  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_MESSAGES;
-  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
+  //delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER;
+  delay_configuration.mode = STREAM_MISCELLANEOUS_DELAY_MODE_SCHEDULER_PTS;
   modulehandler_configuration_4b.delayConfiguration = &delay_configuration;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   modulehandler_configuration_4b.deviceIdentifier.identifierDiscriminator =
