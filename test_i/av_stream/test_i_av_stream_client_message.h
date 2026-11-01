@@ -46,7 +46,7 @@ class Stream_MessageAllocatorHeapBase_T;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 class Test_I_AVStream_Client_DirectShow_Message
- : public Stream_DataMessageBase_T<struct Test_I_DirectShow_MessageData,
+ : public Stream_DataMessageBase_T<Test_I_DirectShow_MessageData_t,
                                    enum Stream_MessageType,
                                    enum Stream_MediaType_Type>
 {
@@ -57,7 +57,7 @@ class Test_I_AVStream_Client_DirectShow_Message
                                                  Test_I_AVStream_Client_DirectShow_Message,
                                                  Test_I_AVStream_Client_DirectShow_SessionMessage>;
 
-  typedef Stream_DataMessageBase_T<struct Test_I_DirectShow_MessageData,
+  typedef Stream_DataMessageBase_T<Test_I_DirectShow_MessageData_t,
                                    enum Stream_MessageType,
                                    enum Stream_MediaType_Type> inherited;
 
@@ -101,7 +101,7 @@ class Test_I_AVStream_Client_DirectShow_Message
 //////////////////////////////////////////
 
 class Test_I_AVStream_Client_MediaFoundation_Message
- : public Stream_DataMessageBase_T<struct Test_I_MediaFoundation_MessageData,
+ : public Stream_DataMessageBase_T<Test_I_MediaFoundation_MessageData_t,
                                    enum Stream_MessageType,
                                    enum Stream_MediaType_Type>
 {
@@ -112,7 +112,7 @@ class Test_I_AVStream_Client_MediaFoundation_Message
                                                  Test_I_AVStream_Client_MediaFoundation_Message,
                                                  Test_I_AVStream_Client_MediaFoundation_SessionMessage>;
 
-  typedef Stream_DataMessageBase_T<struct Test_I_MediaFoundation_MessageData,
+  typedef Stream_DataMessageBase_T<Test_I_MediaFoundation_MessageData_t,
                                    enum Stream_MessageType,
                                    enum Stream_MediaType_Type> inherited;
   
@@ -156,12 +156,12 @@ class Test_I_AVStream_Client_MediaFoundation_Message
 class Test_I_AVStream_Client_ALSA_V4L_SessionMessage;
 
 class Test_I_AVStream_Client_ALSA_V4L_Message
- : public Stream_DataMessageBase_T<struct Test_I_V4L_MessageData,
+ : public Stream_DataMessageBase_T<Test_I_V4L_MessageData_t,
                                    enum Stream_MessageType,
                                    enum Stream_MediaType_Type>
  , public Common_ReferenceCounter_T<ACE_MT_SYNCH>
 {
-  typedef Stream_DataMessageBase_T<struct Test_I_V4L_MessageData,
+  typedef Stream_DataMessageBase_T<Test_I_V4L_MessageData_t,
                                    enum Stream_MessageType,
                                    enum Stream_MediaType_Type> inherited;
   typedef Common_ReferenceCounter_T<ACE_MT_SYNCH> inherited2;
@@ -175,7 +175,7 @@ class Test_I_AVStream_Client_ALSA_V4L_Message
 
  public:
   Test_I_AVStream_Client_ALSA_V4L_Message (Stream_SessionId_t, // session id
-                                      unsigned int);      // size
+                                           unsigned int);      // size
   inline virtual ~Test_I_AVStream_Client_ALSA_V4L_Message () {}
 
   // overrides from ACE_Message_Block
