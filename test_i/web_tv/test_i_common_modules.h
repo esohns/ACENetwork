@@ -142,9 +142,9 @@ typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Test_I_Message,
                              Test_I_SessionMessage,
                              HTTP_ParserDriver_t> Test_I_HTTPParser;
-DATASTREAM_MODULE_DUPLEX (struct Test_I_WebTV_SessionData,                // session data type
+DATASTREAM_MODULE_DUPLEX (struct Test_I_WebTV_SessionData,                        // session data type
                           enum Stream_SessionMessageType,                         // session event type
-                          struct Test_I_WebTV_ModuleHandlerConfiguration, // module handler configuration type
+                          struct Test_I_WebTV_ModuleHandlerConfiguration,         // module handler configuration type
                           libacenetwork_protocol_default_http_parser_module_name_string,
                           Stream_INotify_t,                                       // stream notification interface type
                           Test_I_HTTPStreamer,                                    // reader type
@@ -157,9 +157,9 @@ typedef Stream_Module_Defragment_T<ACE_MT_SYNCH,
                                    Stream_ControlMessage_t,
                                    Test_I_Message,
                                    Test_I_SessionMessage> Test_I_Defragment;
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData,                 // session data type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_WebTV_SessionData,                         // session data type
                               enum Stream_SessionMessageType,                          // session event type
-                              struct Test_I_WebTV_ModuleHandlerConfiguration,  // module handler configuration type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration,          // module handler configuration type
                               libacestream_default_misc_defragment_module_name_string,
                               Stream_INotify_t,                                        // stream notification interface type
                               Test_I_Defragment);                                      // writer type
@@ -448,13 +448,13 @@ typedef Stream_Module_Scheduler_T<ACE_MT_SYNCH,
                                   Test_I_Message,
                                   Test_I_SessionMessage_3,
                                   struct Stream_MediaFramework_FFMPEG_MediaType,
-                                  struct Stream_UserData> Test_I_VideoDelay;
-DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                         // session data type
-                              enum Stream_SessionMessageType,                     // session event type
-                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,   // module handler configuration type
+                                  struct Stream_UserData> Test_I_Delay;
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                             // session data type
+                              enum Stream_SessionMessageType,                         // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,       // module handler configuration type
                               libacestream_default_misc_scheduler_module_name_string,
-                              Stream_INotify_t,                                   // stream notification interface type
-                              Test_I_VideoDelay);                                 // writer type
+                              Stream_INotify_t,                                       // stream notification interface type
+                              Test_I_Delay);                                          // writer type
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_Dev_Target_WASAPI_T<ACE_MT_SYNCH,
