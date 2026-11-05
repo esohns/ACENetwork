@@ -108,6 +108,7 @@ extern "C"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_misc_defines.h"
+#include "stream_misc_scheduler.h"
 
 #include "stream_file_sink.h"
 
@@ -725,6 +726,8 @@ do_work (const std::string& configurationFile_in,
   } // end IF
 #endif // SSL_SUPPORT
 
+  Stream_MasterClock master_clock;
+
   Test_I_MessageHandler_Module event_handler_module (NULL,
                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_I_MessageHandler_Module event_handler_module_2 (NULL,
@@ -1107,6 +1110,7 @@ do_work (const std::string& configurationFile_in,
   modulehandler_configuration_4b.outputFormat.video.format = AV_PIX_FMT_BGRA;
 #endif // ACE_WIN32 || ACE_WIN64
 #endif // FFMPEG_SUPPORT
+  modulehandler_configuration_4b.masterClock = &master_clock;
   modulehandler_configuration_4b.queue = &av_input_queue;
   modulehandler_configuration_4b.display = Common_UI_Tools::getDefaultDisplay ();
   // struct HTTP_ParserConfiguration parserConfiguration_4;

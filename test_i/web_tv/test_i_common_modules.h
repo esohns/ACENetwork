@@ -441,20 +441,34 @@ DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                // sess
 //                              Test_I_SessionMessage_3,
 //                              struct Stream_MediaFramework_FFMPEG_MediaType,
 //                              struct Stream_UserData> Test_I_VideoDelay;
-typedef Stream_Module_Scheduler_T<ACE_MT_SYNCH,
-                                  Common_TimePolicy_t,
-                                  struct Test_I_WebTV_ModuleHandlerConfiguration_3,
-                                  Stream_ControlMessage_t,
-                                  Test_I_Message,
-                                  Test_I_SessionMessage_3,
-                                  struct Stream_MediaFramework_FFMPEG_MediaType,
-                                  struct Stream_UserData> Test_I_Delay;
+typedef Stream_Module_VideoScheduler_T<ACE_MT_SYNCH,
+                                       Common_TimePolicy_t,
+                                       struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                                       Stream_ControlMessage_t,
+                                       Test_I_Message,
+                                       Test_I_SessionMessage_3,
+                                       struct Stream_MediaFramework_FFMPEG_MediaType,
+                                       struct Stream_UserData> Test_I_VideoDelay;
 DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                             // session data type
                               enum Stream_SessionMessageType,                         // session event type
                               struct Test_I_WebTV_ModuleHandlerConfiguration_3,       // module handler configuration type
                               libacestream_default_misc_scheduler_module_name_string,
                               Stream_INotify_t,                                       // stream notification interface type
-                              Test_I_Delay);                                          // writer type
+                              Test_I_VideoDelay);                                     // writer type
+typedef Stream_Module_AudioScheduler_T<ACE_MT_SYNCH,
+                                       Common_TimePolicy_t,
+                                       struct Test_I_WebTV_ModuleHandlerConfiguration_3,
+                                       Stream_ControlMessage_t,
+                                       Test_I_Message,
+                                       Test_I_SessionMessage_3,
+                                       struct Stream_MediaFramework_FFMPEG_MediaType,
+                                       struct Stream_UserData> Test_I_AudioDelay;
+DATASTREAM_MODULE_INPUT_ONLY (Test_I_WebTV_SessionData_3,                             // session data type
+                              enum Stream_SessionMessageType,                         // session event type
+                              struct Test_I_WebTV_ModuleHandlerConfiguration_3,       // module handler configuration type
+                              libacestream_default_misc_scheduler_module_name_string,
+                              Stream_INotify_t,                                       // stream notification interface type
+                              Test_I_AudioDelay);                                     // writer type
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Stream_Dev_Target_WASAPI_T<ACE_MT_SYNCH,

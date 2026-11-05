@@ -66,6 +66,7 @@
 #if defined (FFMPEG_SUPPORT)
 #include "stream_lib_ffmpeg_common.h"
 #endif // FFMPEG_SUPPORT
+#include "stream_misc_scheduler.h"
 
 #include "net_defines.h"
 #include "net_iconnection.h"
@@ -193,6 +194,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
    , outputFormat ()
 #endif // FFMPEG_SUPPORT
+   , masterClock (NULL)
 #if defined (LIBPIPEWIRE_SUPPORT)
    , pipewireConfiguration (NULL)
 #endif // LIBPIPEWIRE_SUPPORT
@@ -216,6 +218,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
 #endif // FFMPEG_SUPPORT
+  Stream_MasterClock*                              masterClock;
 #if defined (LIBPIPEWIRE_SUPPORT)
   struct Stream_MediaFramework_Pipewire_Configuration* pipewireConfiguration;
 #endif // LIBPIPEWIRE_SUPPORT
