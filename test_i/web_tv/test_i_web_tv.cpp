@@ -726,7 +726,7 @@ do_work (const std::string& configurationFile_in,
   } // end IF
 #endif // SSL_SUPPORT
 
-  Stream_MasterClock master_clock;
+  Stream_Clock master_clock;
 
   Test_I_MessageHandler_Module event_handler_module (NULL,
                                                      ACE_TEXT_ALWAYS_CHAR (STREAM_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));

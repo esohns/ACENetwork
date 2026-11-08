@@ -218,7 +218,7 @@ struct Test_I_WebTV_ModuleHandlerConfiguration_3
 #if defined (FFMPEG_SUPPORT)
   struct Stream_MediaFramework_FFMPEG_MediaType    outputFormat;
 #endif // FFMPEG_SUPPORT
-  Stream_MasterClock*                              masterClock;
+  Stream_Clock*                                    masterClock;
 #if defined (LIBPIPEWIRE_SUPPORT)
   struct Stream_MediaFramework_Pipewire_Configuration* pipewireConfiguration;
 #endif // LIBPIPEWIRE_SUPPORT

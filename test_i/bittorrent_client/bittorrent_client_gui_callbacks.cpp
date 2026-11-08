@@ -163,7 +163,8 @@ is_entry_sensitive (GtkCellLayout*   layout_in,
   ACE_UNUSED_ARG (layout_in);
   ACE_UNUSED_ARG (data_in);
 
-  gboolean sensitive = !gtk_tree_model_iter_has_child (model_in, iter_in);
+  gboolean sensitive =
+    (gtk_tree_model_iter_has_child (model_in, iter_in) == FALSE);
   // set corresponding property
   g_object_set (renderer_in,
                 ACE_TEXT_ALWAYS_CHAR ("sensitive"), sensitive,
