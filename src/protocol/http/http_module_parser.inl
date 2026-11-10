@@ -314,7 +314,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
 
   DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
-  DataMessageType* message_p = NULL;
+  // DataMessageType* message_p = NULL;
   DATA_T* data_p = NULL;
   ACE_Message_Block* message_block_p = headFragment_;
   size_t bytes_to_skip = 0;
