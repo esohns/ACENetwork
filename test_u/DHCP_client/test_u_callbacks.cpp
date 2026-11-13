@@ -1187,6 +1187,8 @@ allocate:
                 ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
     return;
   } // end IF
+  DHCP_Message_DataBase_t& message_data_container_r =
+    const_cast<DHCP_Message_DataBase_t&> (message_p->getR ());
   struct DHCP_Record DHCP_record;
   DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
   DHCP_record.htype = DHCP_FRAME_HTYPE;
@@ -1221,9 +1223,7 @@ allocate:
   //         - 'maximum message size'    (57)
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
-  message_p->initialize (DHCP_record,
-                         1,//message_p->sessionId (),
-                         NULL);
+  message_data_container_r.setR (DHCP_record);
 
   DHCPClient_IConnectionManager_t* iconnection_manager_p =
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -1356,6 +1356,8 @@ allocate:
                 ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
     return;
   } // end IF
+  DHCP_Message_DataBase_t& message_data_container_r =
+    const_cast<DHCP_Message_DataBase_t&> (message_p->getR ());
   struct DHCP_Record DHCP_record;
   DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
   DHCP_record.htype = DHCP_FRAME_HTYPE;
@@ -1424,9 +1426,7 @@ allocate:
   //         - 'maximum message size'    (57)
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
-  message_p->initialize (DHCP_record,
-                         message_p->id (),
-                         NULL);
+  message_data_container_r.setR (DHCP_record);
 
   ACE_Message_Block* message_block_p = message_p;
   istream_connection_p->send (message_block_p);
@@ -1514,6 +1514,8 @@ allocate:
                 ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
     return;
   } // end IF
+  DHCP_Message_DataBase_t& message_data_container_r =
+    const_cast<DHCP_Message_DataBase_t&> (message_p->getR ());
   struct DHCP_Record DHCP_record;
   DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
   DHCP_record.htype = DHCP_FRAME_HTYPE;
@@ -1553,9 +1555,7 @@ allocate:
   //         - 'maximum message size'    (57)
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
-  message_p->initialize (DHCP_record,
-                         message_p->id (),
-                         NULL);
+  message_data_container_r.setR (DHCP_record);
 
   ACE_Message_Block* message_block_p = message_p;
   istream_connection_p->send (message_block_p);
@@ -1642,6 +1642,8 @@ allocate:
                 ACE_TEXT ("failed to allocate Test_U_Message: \"%m\", returning\n")));
     return;
   } // end IF
+  DHCP_Message_DataBase_t& message_data_container_r =
+    const_cast<DHCP_Message_DataBase_t&> (message_p->getR ());
   struct DHCP_Record DHCP_record;
   DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
   DHCP_record.htype = DHCP_FRAME_HTYPE;
@@ -1716,9 +1718,7 @@ allocate:
                                               buffer));
   //         - 'message'                 (56)
   //         - 'client identifier'       (61)
-  message_p->initialize (DHCP_record,
-                         1,
-                         NULL);
+  message_data_container_r.setR (DHCP_record);
 
   ACE_Message_Block* message_block_p = message_p;
   istream_connection_p->send (message_block_p);

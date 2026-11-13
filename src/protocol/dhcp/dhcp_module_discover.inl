@@ -165,7 +165,11 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (message_inout->isInitialized ());
   ACE_ASSERT (connection_);
 
-  const typename DataMessageType::DATA_T& data_r = message_inout->getR ();
+  const typename DataMessageType::DATA_T& message_data_container_r =
+    message_inout->getR ();
+  typename DataMessageType::DATA_T* message_data_container_2 = NULL;
+  const typename DataMessageType::DATA_T::DATA_T& message_data_r =
+    message_data_container_r.getR ();
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
     const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
@@ -204,8 +208,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     goto continue_;
 
   iterator =
-    data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER);
-  if (iterator == data_r.options.end ())
+    message_data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER);
+  if (iterator == message_data_r.options.end ())
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s: no server address specified, continuing\n"),
@@ -333,9 +337,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 continue_:
   // sanity check(s)
   if  (!sendRequestOnOffer_ ||
-       (DHCP_Tools::type (data_r) != DHCP_Codes::DHCP_MESSAGE_OFFER))
+       (DHCP_Tools::type (message_data_r) != DHCP_Codes::DHCP_MESSAGE_OFFER))
     goto reply;
-  if (data_r.xid != session_data_r.xid)
+  if (message_data_r.xid != session_data_r.xid)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("%s: xids do not match, returning\n"),
@@ -344,7 +348,8 @@ continue_:
   } // end IF
 
   ACE_ASSERT ((*iterator_2).second->allocatorConfiguration);
-  message_p = inherited::allocateMessage ((*iterator_2).second->allocatorConfiguration->defaultBufferSize);
+  message_p =
+    inherited::allocateMessage ((*iterator_2).second->allocatorConfiguration->defaultBufferSize);
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -353,11 +358,14 @@ continue_:
                 (*iterator_2).second->allocatorConfiguration->defaultBufferSize));
     return;
   } // end IF
+  message_data_container_2 =
+    &const_cast<typename DataMessageType::DATA_T&> (message_p->getR ());
+
   DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
   DHCP_record.htype = DHCP_FRAME_HTYPE;
   DHCP_record.hlen = DHCP_FRAME_HLEN;
-  DHCP_record.xid = data_r.xid;
-  DHCP_record.secs = data_r.secs;
+  DHCP_record.xid = message_data_r.xid;
+  DHCP_record.secs = message_data_r.secs;
   if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   ether_addrs_s =
@@ -374,22 +382,22 @@ continue_:
   ACE_OS::memcpy (&(DHCP_record.chaddr),
                   &(ether_addrs_s.ether_addr_octet),
                   ETH_ALEN);
-  buffer_2.append (reinterpret_cast<const char*> (&data_r.yiaddr), 4);
+  buffer_2.append (reinterpret_cast<const char*> (&message_data_r.yiaddr), 4);
   DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_REQUESTEDIPADDRESS,
                                               buffer_2));
   // *TODO*: support optional options:
   //         - 'overload'                (52)
   iterator =
-      data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME);
-  ACE_ASSERT (iterator != data_r.options.end ());
+    message_data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME);
+  ACE_ASSERT (iterator != message_data_r.options.end ());
   DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_IPADDRESSLEASETIME,
                                               (*iterator).second));
   DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE,
                                               std::string (1,
                                                            static_cast<char> (DHCP_Codes::DHCP_MESSAGE_REQUEST))));
   iterator =
-      data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER);
-  ACE_ASSERT (iterator != data_r.options.end ());
+    message_data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER);
+  ACE_ASSERT (iterator != message_data_r.options.end ());
   DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_SERVERIDENTIFIER,
                                               (*iterator).second));
   //         - 'parameter request list'  (55) [include in all subsequent messages]
@@ -397,11 +405,11 @@ continue_:
   //         - 'maximum message size'    (57)
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
-  // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-  //  message_p->initialize (message_data_container_p,
-  message_p->initialize (DHCP_record,
-                         message_p->id (),
-                         NULL);
+
+  message_data_container_2->setR (DHCP_record);
+  //message_p->initialize (DHCP_record,
+  //                       message_p->sessionId (),
+  //                       NULL);
 
   message_block_p = message_p;
   connection_->send (message_block_p);
@@ -410,13 +418,13 @@ continue_:
 
 reply:
   // sanity check(s)
-  if ((data_r.op != DHCP_Codes::DHCP_OP_REPLY))
+  if ((message_data_r.op != DHCP_Codes::DHCP_OP_REPLY))
     return; // done
 
   // *TODO*
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s"),
-              ACE_TEXT (DHCP_Tools::dump (data_r).c_str ())));
+              ACE_TEXT (DHCP_Tools::dump (message_data_r).c_str ())));
 }
 
 template <ACE_SYNCH_DECL,

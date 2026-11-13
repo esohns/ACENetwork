@@ -81,8 +81,10 @@ PCP_Module_Streamer_T<ACE_SYNCH_USE,
 
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
-  const typename DataMessageType::DATA_T& data_r =
-      message_inout->getR ();
+  const typename DataMessageType::DATA_T& data_container_r =
+    message_inout->getR ();
+  const typename DataMessageType::DATA_T::DATA_T& data_r =
+    data_container_r.getR ();
   result =
     message_inout->copy (reinterpret_cast<const char*> (&data_r.version),
                          sizeof (ACE_UINT8));

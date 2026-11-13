@@ -88,6 +88,12 @@ struct DHCP_Record
 //    ACE_OS::memset (options, 0, 312);
   }
 
+  struct DHCP_Record& operator+= (const struct DHCP_Record& rhs_in)
+  {
+    ACE_ASSERT (false);
+    return *this;
+  }
+
   DHCP_Codes::OpType op;
   ACE_UINT8          htype;
   ACE_UINT8          hlen;
@@ -106,20 +112,21 @@ struct DHCP_Record
   DHCP_Options_t     options; // max. 312 bytes (negotiable)
 //  unsigned char      options[DHCP_OPTIONS_SIZE];
 };
-struct DHCP_MessageData
-{
-  DHCP_MessageData ()
-   : DHCPRecord (NULL)
-  {}
-  ~DHCP_MessageData ()
-  {
-    if (DHCPRecord)
-      delete DHCPRecord;
-  }
 
-  DHCP_Record* DHCPRecord;
-};
-typedef Stream_DataBase_T<DHCP_MessageData> DHCP_MessageData_t;
+//struct DHCP_MessageData
+//{
+//  DHCP_MessageData ()
+//   : DHCPRecord (NULL)
+//  {}
+//  ~DHCP_MessageData ()
+//  {
+//    if (DHCPRecord)
+//      delete DHCPRecord;
+//  }
+//
+//  DHCP_Record* DHCPRecord;
+//};
+//typedef Stream_DataBase_T<DHCP_MessageData> DHCP_MessageData_t;
 
 struct DHCP_ConnectionState
  : Net_StreamConnectionState

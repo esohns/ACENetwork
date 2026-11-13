@@ -48,16 +48,15 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
 
-template <//typename AllocatorConfigurationType,
-          typename MessageType>
+typedef Stream_DataBase_T<struct PCP_Record> PCP_Message_DataBase_t;
+
+template <typename MessageType>
 class PCP_Message_T
- : public Stream_DataMessageBase_T<struct PCP_Record,
-                                   //AllocatorConfigurationType,
+ : public Stream_DataMessageBase_T<PCP_Message_DataBase_t,
                                    MessageType,
                                    PCP_Opcode_t>
 {
-  typedef Stream_DataMessageBase_T<struct PCP_Record,
-//                                   AllocatorConfigurationType,
+  typedef Stream_DataMessageBase_T<PCP_Message_DataBase_t,
                                    MessageType,
                                    PCP_Opcode_t> inherited;
 
@@ -77,12 +76,11 @@ class PCP_Message_T
 
  public:
   // convenient types
-  typedef PCP_Message_T<//AllocatorConfigurationType,
-                         MessageType> OWN_TYPE_T;
+  typedef PCP_Message_T<MessageType> OWN_TYPE_T;
 
   PCP_Message_T (Stream_SessionId_t, // session id
-                 unsigned int);      // size
-  inline virtual ~PCP_Message_T () { PCP_Tools::free (inherited::data_);  }
+                 size_t);            // size
+  virtual ~PCP_Message_T ();
 
   virtual PCP_Opcode_t command () const; // return value: message type
   inline static std::string CommandToString (PCP_Opcode_t opcode_in) { return PCP_Tools::OpcodeToString (opcode_in); }

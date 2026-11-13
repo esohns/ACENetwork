@@ -158,8 +158,10 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
     const_cast<Common_UI_GTK_State_t&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR ());
 #endif // GTK_USE
 
+  PCP_Message_DataBase_t& data_container_r =
+    const_cast<PCP_Message_DataBase_t&> (message_in.getR ());
   struct PCP_Record& record_r =
-      const_cast<struct PCP_Record&> (message_in.getR ());
+    const_cast<struct PCP_Record&> (data_container_r.getR ());
 
   struct PCP_Record* record_p = NULL;
   ACE_NEW_NORETURN (record_p,

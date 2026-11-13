@@ -33,7 +33,6 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-//class DHCP_SessionMessage;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -47,16 +46,15 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
 
-template <//typename AllocatorConfigurationType,
-          typename MessageType>
+typedef Stream_DataBase_T<struct DHCP_Record> DHCP_Message_DataBase_t;
+
+template <typename MessageType>
 class DHCP_Message_T
- : public Stream_DataMessageBase_T<struct DHCP_Record,
-                                   //AllocatorConfigurationType,
+ : public Stream_DataMessageBase_T<DHCP_Message_DataBase_t,
                                    MessageType,
                                    DHCP_MessageType_t>
 {
-  typedef Stream_DataMessageBase_T<struct DHCP_Record,
-//                                   AllocatorConfigurationType,
+  typedef Stream_DataMessageBase_T<DHCP_Message_DataBase_t,
                                    MessageType,
                                    DHCP_MessageType_t> inherited;
 
@@ -76,11 +74,10 @@ class DHCP_Message_T
 
  public:
   // convenient types
-  typedef DHCP_Message_T<//AllocatorConfigurationType,
-                         MessageType> OWN_TYPE_T;
+  typedef DHCP_Message_T<MessageType> OWN_TYPE_T;
 
   DHCP_Message_T (Stream_SessionId_t, // session id
-                  unsigned int);      // size
+                  size_t);            // size
   inline virtual ~DHCP_Message_T () {}
 
   virtual DHCP_MessageType_t command () const; // return value: message type

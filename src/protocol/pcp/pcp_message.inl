@@ -31,8 +31,8 @@
 template <//typename AllocatorConfigurationType,
           typename MessageType>
 PCP_Message_T<//AllocatorConfigurationType,
-               MessageType>::PCP_Message_T (Stream_SessionId_t sessionId_in,
-                                            unsigned int requestedSize_in)
+              MessageType>::PCP_Message_T (Stream_SessionId_t sessionId_in,
+                                           size_t requestedSize_in)
  : inherited (sessionId_in,
               requestedSize_in)
 {
@@ -43,8 +43,8 @@ PCP_Message_T<//AllocatorConfigurationType,
 template <//typename AllocatorConfigurationType,
           typename MessageType>
 PCP_Message_T<//AllocatorConfigurationType,
-               MessageType>::PCP_Message_T (const PCP_Message_T<//AllocatorConfigurationType,
-                                                                  MessageType>& message_in)
+              MessageType>::PCP_Message_T (const PCP_Message_T<//AllocatorConfigurationType,
+                                                               MessageType>& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("PCP_Message_T::PCP_Message_T"));
@@ -54,10 +54,10 @@ PCP_Message_T<//AllocatorConfigurationType,
 template <//typename AllocatorConfigurationType,
           typename MessageType>
 PCP_Message_T<//AllocatorConfigurationType,
-               MessageType>::PCP_Message_T (Stream_SessionId_t sessionId_in,
-                                             ACE_Data_Block* dataBlock_in,
-                                             ACE_Allocator* messageAllocator_in,
-                                             bool incrementMessageCounter_in)
+              MessageType>::PCP_Message_T (Stream_SessionId_t sessionId_in,
+                                           ACE_Data_Block* dataBlock_in,
+                                           ACE_Allocator* messageAllocator_in,
+                                           bool incrementMessageCounter_in)
  : inherited (sessionId_in,
               dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // message block allocator
@@ -67,14 +67,17 @@ PCP_Message_T<//AllocatorConfigurationType,
 
 }
 
-// PCP_Message_T::PCP_Message_T(ACE_Allocator* messageAllocator_in)
-//  : inherited(messageAllocator_in,
-//              true), // usually, we want to increment the running message counter
-//    myIsInitialized(false) // not initialized --> call init() !
-// {
-//   NETWORK_TRACE(ACE_TEXT("PCP_Message_T::PCP_Message_T"));
-//
-// }
+template <//typename AllocatorConfigurationType,
+          typename MessageType>
+PCP_Message_T<//AllocatorConfigurationType,
+              MessageType>::~PCP_Message_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("PCP_Message_T::~PCP_Message_T"));
+
+  struct PCP_Record& message_data_r = 
+    const_cast<struct PCP_Record&> (inherited::data_.getR ());
+  PCP_Tools::free (message_data_r);
+}
 
 template <//typename AllocatorConfigurationType,
           typename MessageType>
@@ -88,7 +91,9 @@ PCP_Message_T<//AllocatorConfigurationType,
   if (!inherited::isInitialized_)
     return PCP_Codes::PCP_OPCODE_INVALID;
 
-  return static_cast<PCP_Opcode_t> (inherited::data_.opcode & 0x7f);
+  struct PCP_Record& message_data_r =
+    const_cast<struct PCP_Record&> (inherited::data_.getR ());
+  return static_cast<PCP_Opcode_t> (message_data_r.opcode & 0x7f);
 }
 
 template <//typename AllocatorConfigurationType,
@@ -122,9 +127,11 @@ PCP_Message_T<//AllocatorConfigurationType,
               inherited::id (),
               inherited::total_length (),
               ACE_TEXT (info.c_str ())));
+  struct PCP_Record& message_data_r =
+    const_cast<struct PCP_Record&> (inherited::data_.getR ());
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("\n%s"),
-              ACE_TEXT (PCP_Tools::dump (inherited::data_).c_str ())));
+              ACE_TEXT (PCP_Tools::dump (message_data_r).c_str ())));
 }
 
 template <//typename AllocatorConfigurationType,

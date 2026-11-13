@@ -115,23 +115,11 @@ PCP_Module_Parser_T<ACE_SYNCH_USE,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-//  DATA_CONTAINER_T& data_container_r =
-//    const_cast<DATA_CONTAINER_T&> (message_inout->get ());
-//  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
-  DATA_T& data_r = const_cast<DATA_T&> (message_inout->getR ());
-//  if (!data_r.DHCPRecord)
-//  {
-//    ACE_NEW_NORETURN (data_r.DHCPRecord,
-//                      PCP_Record ());
-//    if (!data_r.DHCPRecord)
-//    {
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate memory, returning\n")));
-//      return;
-//    } // end IF
-//  } // end IF
-//  record_p = data_r.DHCPRecord;
-  record_p = &data_r;
+  typename DataMessageType::DATA_T& message_data_container_r =
+    const_cast<typename DataMessageType::DATA_T&> (message_inout->getR ());
+  typename DataMessageType::DATA_T::DATA_T& message_data_r =
+    const_cast<typename DataMessageType::DATA_T::DATA_T&> (message_data_container_r.getR ());
+  record_p = &message_data_r;
 
   // set target record
   driver_.record_ = record_p;
@@ -152,9 +140,10 @@ PCP_Module_Parser_T<ACE_SYNCH_USE,
     return;
   } // end IF
   message_inout->rd_ptr (message_inout->base ());
-  message_inout->initialize (*record_p,
-                             message_inout->id (),
-                             NULL);
+
+  //message_inout->initialize (*record_p,
+  //                           message_inout->sessionId (),
+  //                           NULL);
   //isDriverInitialized_ = false;
 }
 

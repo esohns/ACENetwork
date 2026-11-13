@@ -32,7 +32,7 @@ template <//typename AllocatorConfigurationType,
           typename MessageType>
 DHCP_Message_T<//AllocatorConfigurationType,
                MessageType>::DHCP_Message_T (Stream_SessionId_t sessionId_in,
-                                             unsigned int requestedSize_in)
+                                             size_t requestedSize_in)
  : inherited (sessionId_in,
               requestedSize_in)
 {
@@ -88,9 +88,11 @@ DHCP_Message_T<//AllocatorConfigurationType,
   if (!inherited::isInitialized_)
     return DHCP_Codes::DHCP_MESSAGE_INVALID;
 
+  struct DHCP_Record& message_data_r =
+    const_cast<struct DHCP_Record&> (inherited::data_.getR ());
   DHCP_OptionsIterator_t iterator =
-    inherited::data_.options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
-  ACE_ASSERT (iterator != inherited::data_.options.end ());
+    message_data_r.options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
+  ACE_ASSERT (iterator != message_data_r.options.end ());
 
   return DHCP_Tools::MessageTypeToType ((*iterator).second);
 }
@@ -137,9 +139,11 @@ DHCP_Message_T<//AllocatorConfigurationType,
               inherited::id (),
               inherited::total_length (),
               ACE_TEXT (info.c_str ())));
+  struct DHCP_Record& message_data_r =
+    const_cast<struct DHCP_Record&> (inherited::data_.getR ());
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("\n%s"),
-              ACE_TEXT (DHCP_Tools::dump (inherited::data_).c_str ())));
+              ACE_TEXT (DHCP_Tools::dump (message_data_r).c_str ())));
 }
 
 template <//typename AllocatorConfigurationType,

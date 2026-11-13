@@ -150,7 +150,13 @@ allocate:
   //option_s.third_party.address =
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (option_s);
-  message_p->initialize (PCP_record,
+
+  typename MessageType::DATA_T* message_data_container_p = NULL;
+  ACE_NEW_NORETURN (message_data_container_p,
+                    typename MessageType::DATA_T ());
+  ACE_ASSERT (message_data_container_p);
+  message_data_container_p->setR (PCP_record);
+  message_p->initialize (message_data_container_p,
                          1, //message_p->sessionId (),
                          NULL);
 
@@ -235,7 +241,13 @@ allocate:
   //filter_option_s.filter.remote_peer_address =
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (filter_option_s);
-  message_p->initialize (PCP_record,
+
+  typename MessageType::DATA_T* message_data_container_p = NULL;
+  ACE_NEW_NORETURN (message_data_container_p,
+                    typename MessageType::DATA_T ());
+  ACE_ASSERT (message_data_container_p);
+  message_data_container_p->setR (PCP_record);
+  message_p->initialize (message_data_container_p,
                          1, //message_p->sessionId (),
                          NULL);
 
@@ -323,7 +335,13 @@ allocate:
   //option_s.third_party.address =
   //  ACE_sap_any_cast (const ACE_INET_Addr&);
   //PCP_record.options.push_back (option_s);
-  message_p->initialize (PCP_record,
+
+  typename MessageType::DATA_T* message_data_container_p = NULL;
+  ACE_NEW_NORETURN (message_data_container_p,
+                    typename MessageType::DATA_T ());
+  ACE_ASSERT (message_data_container_p);
+  message_data_container_p->setR (PCP_record);
+  message_p->initialize (message_data_container_p,
                          1, //message_p->sessionId (),
                          NULL);
 
@@ -397,7 +415,13 @@ allocate:
   option_s.length = 4;
   option_s.nonce.nonce = static_cast<ACE_UINT32> (PCP_Tools::generateNonce ());
   PCP_record.options.push_back (option_s);
-  message_p->initialize (PCP_record,
+
+  typename MessageType::DATA_T* message_data_container_p = NULL;
+  ACE_NEW_NORETURN (message_data_container_p,
+                    typename MessageType::DATA_T ());
+  ACE_ASSERT (message_data_container_p);
+  message_data_container_p->setR (PCP_record);
+  message_p->initialize (message_data_container_p,
                          1, //message_p->sessionId (),
                          NULL);
 

@@ -292,6 +292,7 @@ struct PCP_Record
    , reserved_2 (0)
    , options ()
   {}
+
   PCP_Record (const struct PCP_Record& record_in)
    : version (record_in.version)
    , opcode (record_in.opcode)
@@ -321,7 +322,9 @@ struct PCP_Record
       }
     } // end SWITCH
   }
+
   ~PCP_Record () {}
+
   struct PCP_Record& operator= (const struct PCP_Record& rhs_in)
   {
     version = rhs_in.version;
@@ -352,6 +355,11 @@ struct PCP_Record
     } // end SWITCH
     options = rhs_in.options;
 
+    return *this;
+  }
+
+  struct PCP_Record& operator+= (const struct PCP_Record& rhs_in)
+  { ACE_ASSERT (false);
     return *this;
   }
 

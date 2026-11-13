@@ -88,36 +88,34 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
 
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
-//  const typename DataMessageType::DATA_T& data_container_r =
-//      message_inout->get ();
-//  const typename DataMessageType::DATA_T::DATA_T& data_r =
-//        data_container_r.get ();
-  const typename DataMessageType::DATA_T& data_r =
-      message_inout->getR ();
+  const typename DataMessageType::DATA_T& message_data_container_r =
+    message_inout->getR ();
+  const typename DataMessageType::DATA_T::DATA_T& message_data_r =
+    message_data_container_r.getR ();
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.op),
+    message_inout->copy (reinterpret_cast<const char*> (&message_data_r.op),
                          1);
   if (result == -1)
     goto error;
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.htype),
+    message_inout->copy (reinterpret_cast<const char*> (&message_data_r.htype),
                          1);
   if (result == -1)
     goto error;
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.hlen),
+    message_inout->copy (reinterpret_cast<const char*> (&message_data_r.hlen),
                          1);
   if (result == -1)
     goto error;
   result =
-    message_inout->copy (reinterpret_cast<const char*> (&data_r.hops),
+    message_inout->copy (reinterpret_cast<const char*> (&message_data_r.hops),
                          1);
   if (result == -1)
     goto error;
   //
   int_i =
-      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.xid)
-                                             : data_r.xid);
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (message_data_r.xid)
+                                             : message_data_r.xid);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
@@ -125,16 +123,16 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
     goto error;
   //
   short_s =
-      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_WORD (data_r.secs)
-                                             : data_r.secs);
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_WORD (message_data_r.secs)
+                                             : message_data_r.secs);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&short_s),
                          2);
   if (result == -1)
     goto error;
   short_s =
-      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_WORD (data_r.flags)
-                                             : data_r.flags);
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_WORD (message_data_r.flags)
+                                             : message_data_r.flags);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&short_s),
                          2);
@@ -142,8 +140,8 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
     goto error;
   //
   int_i =
-      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.ciaddr)
-                                             : data_r.ciaddr);
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (message_data_r.ciaddr)
+                                             : message_data_r.ciaddr);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
@@ -151,8 +149,8 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
     goto error;
   //
   int_i =
-      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.yiaddr)
-                                             : data_r.yiaddr);
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (message_data_r.yiaddr)
+                                             : message_data_r.yiaddr);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
@@ -160,8 +158,8 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
     goto error;
   //
   int_i =
-      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.siaddr)
-                                             : data_r.siaddr);
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (message_data_r.siaddr)
+                                             : message_data_r.siaddr);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
@@ -169,8 +167,8 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
     goto error;
   //
   int_i =
-      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (data_r.giaddr)
-                                             : data_r.giaddr);
+      ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (message_data_r.giaddr)
+                                             : message_data_r.giaddr);
   result =
     message_inout->copy (reinterpret_cast<const char*> (&int_i),
                          4);
@@ -178,21 +176,21 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
     goto error;
   ////////
   result =
-    message_inout->copy (reinterpret_cast<const char*> (data_r.chaddr),
+    message_inout->copy (reinterpret_cast<const char*> (message_data_r.chaddr),
                          16);
   if (result == -1)
     goto error;
   ////////////////////////////////
   ACE_OS::memset (buffer, 0, sizeof (buffer));
   ACE_OS::memcpy (buffer,
-                  data_r.sname.c_str (), data_r.sname.size ());
+                  message_data_r.sname.c_str (), message_data_r.sname.size ());
   result = message_inout->copy (buffer, DHCP_SNAME_SIZE);
   if (result == -1)
     goto error;
   ////////////////////////////////////////////////////////////////
   ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
   ACE_OS::memcpy (buffer_2,
-                  data_r.file.c_str (), data_r.file.size ());
+                  message_data_r.file.c_str (), message_data_r.file.size ());
   result = message_inout->copy (buffer_2, DHCP_FILE_SIZE);
   if (result == -1)
     goto error;
@@ -200,8 +198,8 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
   ACE_OS::memset (buffer_3, 0, sizeof (buffer_3));
   ACE_OS::memcpy (buffer_3, &magic_cookie, 4);
   offset += 4;
-  for (DHCP_OptionsIterator_t iterator = data_r.options.begin ();
-       iterator != data_r.options.end ();
+  for (DHCP_OptionsIterator_t iterator = message_data_r.options.begin ();
+       iterator != message_data_r.options.end ();
        ++iterator)
   {
     ACE_OS::memcpy (buffer_3 + offset, &(*iterator).first, 1);

@@ -1035,7 +1035,7 @@ do_work (bool requestBroadcastReplies_in,
       (*iterator).second->allocatorConfiguration->paddingBytes;
 allocate:
     message_p =
-        static_cast<Test_U_Message*> (message_allocator.malloc (pdu_size_i));
+      static_cast<Test_U_Message*> (message_allocator.malloc (pdu_size_i));
     // keep retrying ?
     if (!message_p && !message_allocator.block ())
       goto allocate;
@@ -1048,7 +1048,9 @@ allocate:
       connection_manager_p->abort ();
       return;
     } // end IF
-    DHCP_Record DHCP_record;
+    DHCP_Message_DataBase_t& message_data_container_r =
+      const_cast<DHCP_Message_DataBase_t&> (message_p->getR ());
+    struct DHCP_Record DHCP_record;
     DHCP_record.op = DHCP_Codes::DHCP_OP_REQUEST;
     DHCP_record.htype = DHCP_FRAME_HTYPE;
     DHCP_record.hlen = DHCP_FRAME_HLEN;
@@ -1081,11 +1083,7 @@ allocate:
     //         - 'maximum message size'    (57)
     //         - 'vendor class identifier' (60)
     //         - 'client identifier'       (61)
-    // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
-    //  message_p->initialize (message_data_container_p,
-    message_p->initialize (DHCP_record,
-                           message_p->sessionId (),
-                           NULL);
+    message_data_container_r.setR (DHCP_record);
 
     DHCPClient_IOutboundStreamConnection_t* istream_connection_p =
       dynamic_cast<DHCPClient_IOutboundStreamConnection_t*> ((*iterator_2).second.second->connection);
