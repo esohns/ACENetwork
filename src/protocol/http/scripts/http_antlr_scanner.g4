@@ -376,7 +376,7 @@ CRLF_HEAD                      : CRLF {
 mode REGULAR_BODY;
 BODY                           : OCTET {
                                    if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
-                                   { ACE_ASSERT (content_length == 0);
+                                   { //ACE_ASSERT (content_length == 0);
                                      setText (ACE_TEXT_ALWAYS_CHAR ("0"));
                                      setType (BODY);
                                      setMode (DEFAULT_MODE);

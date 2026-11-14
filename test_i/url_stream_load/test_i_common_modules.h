@@ -80,7 +80,10 @@
 #undef METHOD
 #include "http_antlr_parser_driver.h"
 #else
-#include "http_parser_driver.h"
+#undef emit
+#undef METHOD
+#include "http_antlr_parser_driver.h"
+// #include "http_parser_driver.h"
 #endif // REFLEX_USE || ANTLR_USE
 
 #include "test_i_common.h"
@@ -132,9 +135,12 @@ typedef HTTP_ANTLRParserDriver_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  Test_I_SessionMessage> HTTP_ParserDriver_t;
 #else
-typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
-                            Common_TimePolicy_t,
-                            Test_I_SessionMessage> HTTP_ParserDriver_t;
+// typedef HTTP_ParserDriver_T<ACE_MT_SYNCH,
+//                             Common_TimePolicy_t,
+//                             Test_I_SessionMessage> HTTP_ParserDriver_t;
+typedef HTTP_ANTLRParserDriver_T<ACE_MT_SYNCH,
+                                 Common_TimePolicy_t,
+                                 Test_I_SessionMessage> HTTP_ParserDriver_t;
 #endif // REFLEX_USE || ANTLR_USE
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,

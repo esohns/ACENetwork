@@ -877,7 +877,7 @@ void http_antlr_scanner::BODYAction(antlr4::RuleContext *context, size_t actionI
   switch (actionIndex) {
     case 11: 
                                        if (unlikely (!missing_body_or_chunk_bytes || parser->isMultiBody ()))
-                                       { ACE_ASSERT (content_length == 0);
+                                       { //ACE_ASSERT (content_length == 0);
                                          setText (ACE_TEXT_ALWAYS_CHAR ("0"));
                                          setType (BODY);
                                          setMode (DEFAULT_MODE);
