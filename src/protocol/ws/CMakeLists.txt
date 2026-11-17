@@ -279,24 +279,24 @@ install (FILES
          ws_tools.h
          DESTINATION include)
 if (REFLEX_SUPPORT)
- install (FILES
-          ws_reflex_iparser.h
-          ws_reflex_parser.h
-          ws_reflex_parser_driver.h
-          ws_reflex_parser_driver.inl
-          ws_reflex_scanner.h
-          DESTINATION include)
+# install (FILES
+#          ws_reflex_iparser.h
+#          ws_reflex_parser.h
+#          ws_reflex_parser_driver.h
+#          ws_reflex_parser_driver.inl
+#          ws_reflex_scanner.h
+#          DESTINATION include)
 endif (REFLEX_SUPPORT)
 if (ANTLR_SUPPORT)
- install (FILES
-          ws_antlr_iparser.h
-          ws_antlr_parser.h
-          ws_antlr_parserBaseListener.h
-          ws_antlr_parserListener.h
-          ws_antlr_parser_driver.h
-          ws_antlr_parser_driver.inl
-          ws_antlr_scanner.h
-          DESTINATION include)
+# install (FILES
+#          ws_antlr_iparser.h
+#          ws_antlr_parser.h
+#          ws_antlr_parserBaseListener.h
+#          ws_antlr_parserListener.h
+#          ws_antlr_parser_driver.h
+#          ws_antlr_parser_driver.inl
+#          ws_antlr_scanner.h
+#          DESTINATION include)
 endif (ANTLR_SUPPORT)
 install (TARGETS ${PROJECT_NAME}_Protocol_WebSocket
          EXPORT ${PROJECT_NAME}Targets
